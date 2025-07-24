@@ -1,5 +1,13 @@
-import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import {
+  Field,
+  HideField,
+  ID,
+  Int,
+  ObjectType,
+  registerEnumType,
+} from '@nestjs/graphql';
 import { ROLE, USER_ACCOUNT_STATUS } from 'generated/prisma';
+import { Profile } from 'src/modules/profiles/entities/profile.entity';
 
 registerEnumType(ROLE, { name: 'ROLE', description: 'User roles' });
 registerEnumType(USER_ACCOUNT_STATUS, {
@@ -7,14 +15,15 @@ registerEnumType(USER_ACCOUNT_STATUS, {
   description: 'User account status',
 });
 
-@ObjectType('User')
+@ObjectType()
 export class User {
-  @Field(() => Int)
+  @Field(() => ID)
   id: number;
 
   @Field()
   email: string;
 
+  @HideField()
   password: string;
 
   @Field(() => ROLE)
@@ -25,6 +34,9 @@ export class User {
 
   @Field(() => USER_ACCOUNT_STATUS)
   status: USER_ACCOUNT_STATUS;
+
+  @Field(() => Profile, { nullable: true })
+  profile: Profile;
 
   @Field(() => Int, { nullable: true })
   deletedBy: number;

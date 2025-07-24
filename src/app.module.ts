@@ -9,6 +9,7 @@ import configuration from './config/configuration';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { UsersModule } from './modules/users/users.module';
+import { ProfilesModule } from './modules/profiles/profiles.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UsersModule } from './modules/users/users.module';
     }),
     PrismaModule,
     UsersModule,
+    ProfilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

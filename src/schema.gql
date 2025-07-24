@@ -2,6 +2,19 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input CreateProfileInput {
+  address: String!
+  city: String!
+  country: String!
+  dateOfBirth: DateTime!
+  fullName: String!
+  gender: GENDER!
+  phone: String!
+  postcode: String!
+  profilePicture: String
+  userId: Int!
+}
+
 input CreateUserInput {
   deletedBy: Int
   email: String!
@@ -15,14 +28,40 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+"""Gender of the user"""
+enum GENDER {
+  FEMALE
+  MALE
+}
+
 type Mutation {
+  createProfile(createProfileInput: CreateProfileInput!): Profile!
   createUser(createUserInput: CreateUserInput!): User!
+  removeProfile(id: Int!): Profile!
   removeUser(id: Int!): User!
-  updateUser(updateUserInput: UpdateUserInput!): User!
+  updateProfile(updateProfileInput: UpdateProfileInput!): Profile!
+}
+
+type Profile {
+  address: String!
+  city: String!
+  country: String!
+  createdAt: DateTime!
+  dateOfBirth: DateTime!
+  full_name: String!
+  gender: GENDER!
+  id: ID!
+  phone: String!
+  postcode: String!
+  profilePicture: String
+  updatedAt: DateTime!
+  userId: Int!
 }
 
 type Query {
-  user(id: Int!): User!
+  profile(id: Int!): Profile!
+  profiles: [Profile!]!
+  userById(id: Int!): User!
   users: [User!]!
 }
 
@@ -49,21 +88,27 @@ enum USER_ACCOUNT_STATUS {
   VERIFIED
 }
 
-input UpdateUserInput {
-  deletedBy: Int
-  email: String
+input UpdateProfileInput {
+  address: String
+  city: String
+  country: String
+  dateOfBirth: DateTime
+  fullName: String
+  gender: GENDER
   id: Int!
-  password: String
-  role: ROLE
-  status: USER_ACCOUNT_STATUS
+  phone: String
+  postcode: String
+  profilePicture: String
+  userId: Int
 }
 
 type User {
   createdAt: DateTime!
   deletedBy: Int
   email: String!
-  id: Int!
+  id: ID!
   passwordResetRequired: Boolean!
+  profile: Profile
   role: ROLE!
   status: USER_ACCOUNT_STATUS!
   updatedAt: DateTime!

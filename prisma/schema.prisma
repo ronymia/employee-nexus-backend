@@ -52,9 +52,30 @@ model User {
   role      ROLE
   status    USER_ACCOUNT_STATUS @default(UNVERIFIED)
   deletedBy Int?
+  profile   Profile?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+model Profile {
+  id             Int      @id @default(autoincrement())
+  full_name      String
+  phone          String
+  profilePicture String?  @map("profile_picture")
+  dateOfBirth    DateTime @map("date_of_birth")
+  gender         GENDER
+  address        String
+  city           String
+  country        String
+  postcode       String
+  user           User     @relation(fields: [userId], references: [id])
+  userId         Int      @unique @map("user_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("profiles")
 }

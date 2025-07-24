@@ -1,26 +1,46 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserInput } from './dto/create-user.input';
-import { UpdateUserInput } from './dto/update-user.input';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
+  constructor(private prisma: PrismaService) {}
+
+  // CREATE
   create(createUserInput: CreateUserInput) {
-    return 'This action adds a new user';
+    return this.prisma.user.create({
+      data: createUserInput,
+    });
   }
 
+  // GET ALL
   findAll() {
-    return `This action returns all users`;
+    return this.prisma.user.findMany({
+      include: {
+        profile: true, // Include related profile data
+      },
+    });
   }
 
+  // GET ONE
   findOne(id: number) {
-    return `This action returns a #${id} user`;
+    return this.prisma.user.findUnique({
+      where: { id },
+    });
   }
 
-  update(id: number, updateUserInput: UpdateUserInput) {
-    return `This action updates a #${id} user`;
-  }
+  // UPDATE
+  // update(id: number, updateUserInput: UpdateUserInput) {
+  //   return this.prisma.user.update({
+  //     where: { id },
+  //     data: updateUserInput,
+  //   });
+  // }
 
+  // DELETE
   remove(id: number) {
-    return `This action removes a #${id} user`;
+    return this.prisma.user.delete({
+      where: { id },
+    });
   }
 }
