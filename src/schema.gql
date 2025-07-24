@@ -1,0 +1,70 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateUserInput {
+  deletedBy: Int
+  email: String!
+  password: String!
+  role: ROLE!
+  status: USER_ACCOUNT_STATUS!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  createUser(createUserInput: CreateUserInput!): User!
+  removeUser(id: Int!): User!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+}
+
+type Query {
+  user(id: Int!): User!
+  users: [User!]!
+}
+
+"""User roles"""
+enum ROLE {
+  ADMIN
+  BUSINESS_OWNER
+  EMPLOYEE
+  MANAGER
+  SUPER_ADMIN
+}
+
+"""User account status"""
+enum USER_ACCOUNT_STATUS {
+  ACTIVE
+  BLOCKED
+  DELETED
+  INACTIVE
+  RESIGNED
+  RETIRED
+  SUSPENDED
+  TERMINATED
+  UNVERIFIED
+  VERIFIED
+}
+
+input UpdateUserInput {
+  deletedBy: Int
+  email: String
+  id: Int!
+  password: String
+  role: ROLE
+  status: USER_ACCOUNT_STATUS
+}
+
+type User {
+  createdAt: DateTime!
+  deletedBy: Int
+  email: String!
+  id: Int!
+  passwordResetRequired: Boolean!
+  role: ROLE!
+  status: USER_ACCOUNT_STATUS!
+  updatedAt: DateTime!
+}

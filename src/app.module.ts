@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { PrismaModule } from './modules/prisma/prisma.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { PrismaModule } from './modules/prisma/prisma.module';
       sortSchema: true, // Sort the schema for better readability
     }),
     PrismaModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
