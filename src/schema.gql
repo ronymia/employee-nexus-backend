@@ -2,6 +2,14 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Auth {
+  """JWT access token"""
+  accessToken: String!
+
+  """User associated with the auth"""
+  user: User!
+}
+
 input CreateProfileInput {
   address: String!
   city: String!
@@ -34,9 +42,18 @@ enum GENDER {
   MALE
 }
 
+input LoginAuthInput {
+  """User email"""
+  email: String!
+
+  """User password"""
+  password: String!
+}
+
 type Mutation {
   createProfile(createProfileInput: CreateProfileInput!): Profile!
   createUser(createUserInput: CreateUserInput!): User!
+  login(loginInput: LoginAuthInput!): Auth!
   removeProfile(id: Int!): Profile!
   removeUser(id: Int!): User!
   updateProfile(updateProfileInput: UpdateProfileInput!): Profile!
@@ -107,7 +124,6 @@ type User {
   deletedBy: Int
   email: String!
   id: ID!
-  passwordResetRequired: Boolean!
   profile: Profile
   role: ROLE!
   status: USER_ACCOUNT_STATUS!

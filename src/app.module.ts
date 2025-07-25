@@ -10,6 +10,7 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { UsersModule } from './modules/users/users.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -22,10 +23,13 @@ import { ProfilesModule } from './modules/profiles/profiles.module';
       graphiql: true,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'), // Automatically generate schema file
       sortSchema: true, // Sort the schema for better readability
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      context: ({ req }) => ({ req }), // Important for GqlAuthGuard
     }),
     PrismaModule,
     UsersModule,
     ProfilesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

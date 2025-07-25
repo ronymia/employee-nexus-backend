@@ -29,17 +29,14 @@ export class User {
   @Field(() => ROLE)
   role: ROLE;
 
-  @Field()
-  passwordResetRequired: boolean;
-
   @Field(() => USER_ACCOUNT_STATUS)
   status: USER_ACCOUNT_STATUS;
 
   @Field(() => Profile, { nullable: true })
-  profile: Profile;
+  profile?: Profile | null;
 
   @Field(() => Int, { nullable: true })
-  deletedBy: number;
+  deletedBy?: number | null;
 
   @Field(() => Date)
   createdAt: Date;

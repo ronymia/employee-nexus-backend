@@ -26,6 +26,19 @@ export class UsersService {
   findOne(id: number) {
     return this.prisma.user.findUnique({
       where: { id },
+      include: {
+        profile: true, // Include related profile data
+      },
+    });
+  }
+
+  // USER BY EMAIL
+  findByEmail(email: string) {
+    return this.prisma.user.findUnique({
+      where: { email },
+      include: {
+        profile: true, // Include related profile data
+      },
     });
   }
 
