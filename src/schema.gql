@@ -10,6 +10,14 @@ type Auth {
   user: User!
 }
 
+input CreatePermissionInput {
+  """Action to be performed on the resource"""
+  action: String!
+
+  """Resource for the permission"""
+  resource: String!
+}
+
 input CreateProfileInput {
   address: String!
   city: String!
@@ -51,12 +59,25 @@ input LoginAuthInput {
 }
 
 type Mutation {
+  createPermission(createPermissionInput: CreatePermissionInput!): Permission!
   createProfile(createProfileInput: CreateProfileInput!): Profile!
   createUser(createUserInput: CreateUserInput!): User!
   login(loginInput: LoginAuthInput!): Auth!
+  removePermission(id: Int!): Permission!
   removeProfile(id: Int!): Profile!
   removeUser(id: Int!): User!
+  updatePermission(updatePermissionInput: UpdatePermissionInput!): Permission!
   updateProfile(updateProfileInput: UpdateProfileInput!): Profile!
+}
+
+type Permission {
+  action: String!
+  createdAt: DateTime!
+
+  """Unique identifier for the permission"""
+  id: ID!
+  resource: String!
+  updatedAt: DateTime!
 }
 
 type Profile {
@@ -76,6 +97,8 @@ type Profile {
 }
 
 type Query {
+  permission(id: Int!): Permission!
+  permissions: [Permission!]!
   profile(id: Int!): Profile!
   profiles: [Profile!]!
   userById(id: Int!): User!
@@ -94,6 +117,17 @@ enum USER_ACCOUNT_STATUS {
   TERMINATED
   UNVERIFIED
   VERIFIED
+}
+
+input UpdatePermissionInput {
+  """Action to be performed on the resource"""
+  action: String!
+
+  """Unique identifier for the permission"""
+  id: ID!
+
+  """Resource for the permission"""
+  resource: String!
 }
 
 input UpdateProfileInput {
