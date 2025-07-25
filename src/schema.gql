@@ -31,6 +31,11 @@ input CreateProfileInput {
   userId: Int!
 }
 
+input CreateRoleInput {
+  """Name of the role"""
+  name: String!
+}
+
 input CreateUserInput {
   deletedBy: Int
   email: String!
@@ -61,13 +66,16 @@ input LoginAuthInput {
 type Mutation {
   createPermission(createPermissionInput: CreatePermissionInput!): Permission!
   createProfile(createProfileInput: CreateProfileInput!): Profile!
+  createRole(createRoleInput: CreateRoleInput!): Role!
   createUser(createUserInput: CreateUserInput!): User!
   login(loginInput: LoginAuthInput!): Auth!
   removePermission(id: Int!): Permission!
   removeProfile(id: Int!): Profile!
+  removeRole(id: Int!): Role!
   removeUser(id: Int!): User!
   updatePermission(updatePermissionInput: UpdatePermissionInput!): Permission!
   updateProfile(updateProfileInput: UpdateProfileInput!): Profile!
+  updateRole(updateRoleInput: UpdateRoleInput!): Role!
 }
 
 type Permission {
@@ -101,8 +109,18 @@ type Query {
   permissions: [Permission!]!
   profile(id: Int!): Profile!
   profiles: [Profile!]!
+  role(id: Int!): Role!
+  roles: [Role!]!
   userById(id: Int!): User!
   users: [User!]!
+}
+
+type Role {
+  """Unique identifier for the role"""
+  id: ID!
+
+  """Name of the role"""
+  name: String!
 }
 
 """User account status"""
@@ -144,13 +162,32 @@ input UpdateProfileInput {
   userId: Int
 }
 
+input UpdateRoleInput {
+  id: Int!
+
+  """Name of the role"""
+  name: String!
+}
+
 type User {
+  """Date when the user was created"""
   createdAt: DateTime!
+
+  """ID of the user who deleted the user account"""
   deletedBy: Int
+
+  """Email of the user"""
   email: String!
   id: ID!
   profile: Profile
+
+  """Role of the user"""
+  role: Role
   roleId: Int!
+
+  """Status of the user account"""
   status: USER_ACCOUNT_STATUS!
+
+  """Date when the user was last updated"""
   updatedAt: DateTime!
 }

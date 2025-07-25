@@ -38,6 +38,9 @@ export class UsersService {
       where: { email },
       include: {
         profile: true, // Include related profile data
+        role: true, // Include related role data
+        business: true, // Include related business data
+        // UserPermissions: true, // Include related user permissions
       },
     });
   }
