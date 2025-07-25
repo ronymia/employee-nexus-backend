@@ -13,6 +13,8 @@ import { ProfilesModule } from './modules/profiles/profiles.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { PermissionsModule } from './modules/permissions/permissions.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { RolePermissionsModule } from './modules/role-permissions/role-permissions.module';
+import { UserPermissionsModule } from './modules/user-permissions/user-permissions.module';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { RolesModule } from './modules/roles/roles.module';
     AuthModule,
     PermissionsModule,
     RolesModule,
+    RolePermissionsModule,
+    UserPermissionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
