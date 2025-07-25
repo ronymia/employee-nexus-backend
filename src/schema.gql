@@ -27,7 +27,7 @@ input CreateUserInput {
   deletedBy: Int
   email: String!
   password: String!
-  role: ROLE!
+  roleId: Int!
   status: USER_ACCOUNT_STATUS!
 }
 
@@ -82,15 +82,6 @@ type Query {
   users: [User!]!
 }
 
-"""User roles"""
-enum ROLE {
-  ADMIN
-  BUSINESS_OWNER
-  EMPLOYEE
-  MANAGER
-  SUPER_ADMIN
-}
-
 """User account status"""
 enum USER_ACCOUNT_STATUS {
   ACTIVE
@@ -125,7 +116,7 @@ type User {
   email: String!
   id: ID!
   profile: Profile
-  role: ROLE!
+  roleId: Int!
   status: USER_ACCOUNT_STATUS!
   updatedAt: DateTime!
 }

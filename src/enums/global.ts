@@ -8,3 +8,11 @@ export enum BLOOD_GROUP {
   O_POSITIVE = 'O+',
   O_NEGATIVE = 'O-',
 }
+
+export enum ROLE {
+  SUPER_ADMIN = 'super_admin',
+  OWNER = 'owner',
+  ADMIN = 'admin',
+  MANAGER = 'manager',
+  EMPLOYEE = 'employee',
+}

@@ -6,10 +6,9 @@ import {
   ObjectType,
   registerEnumType,
 } from '@nestjs/graphql';
-import { ROLE, USER_ACCOUNT_STATUS } from 'generated/prisma';
+import { USER_ACCOUNT_STATUS } from 'generated/prisma';
 import { Profile } from 'src/modules/profiles/entities/profile.entity';
 
-registerEnumType(ROLE, { name: 'ROLE', description: 'User roles' });
 registerEnumType(USER_ACCOUNT_STATUS, {
   name: 'USER_ACCOUNT_STATUS',
   description: 'User account status',
@@ -26,8 +25,8 @@ export class User {
   @HideField()
   password: string;
 
-  @Field(() => ROLE)
-  role: ROLE;
+  @Field(() => Int)
+  roleId: number;
 
   @Field(() => USER_ACCOUNT_STATUS)
   status: USER_ACCOUNT_STATUS;

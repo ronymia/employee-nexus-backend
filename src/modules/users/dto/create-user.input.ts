@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { InputType, Field, Int } from '@nestjs/graphql';
-import { IsEmail, IsEnum, IsOptional } from 'class-validator';
-import { ROLE, USER_ACCOUNT_STATUS } from 'generated/prisma';
+import { IsEmail, IsEnum, IsInt, IsOptional } from 'class-validator';
+import { USER_ACCOUNT_STATUS } from 'generated/prisma';
 
 @InputType()
 export class CreateUserInput {
@@ -12,9 +12,9 @@ export class CreateUserInput {
   @Field()
   password: string;
 
-  @Field(() => ROLE)
-  @IsEnum(ROLE)
-  role: ROLE;
+  @Field(() => Int)
+  @IsInt()
+  roleId: number;
 
   @Field(() => USER_ACCOUNT_STATUS)
   @IsEnum(USER_ACCOUNT_STATUS)

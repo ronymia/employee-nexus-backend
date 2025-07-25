@@ -14,14 +14,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum ROLE {
-  SUPER_ADMIN
-  BUSINESS_OWNER
-  ADMIN
-  MANAGER
-  EMPLOYEE
-}
-
 enum USER_ACCOUNT_STATUS {
   ACTIVE
   INACTIVE
@@ -46,13 +38,16 @@ enum GENDER {
 }
 
 model User {
-  id        Int                 @id @default(autoincrement())
-  email     String              @unique
-  password  String
-  role      ROLE
-  status    USER_ACCOUNT_STATUS @default(UNVERIFIED)
-  deletedBy Int?
-  profile   Profile?
+  id             Int                 @id @default(autoincrement())
+  email          String              @unique
+  password       String
+  status         USER_ACCOUNT_STATUS @default(UNVERIFIED)
+  deletedBy      Int?                @map("deleted_by")
+  profile        Profile?
+  role           Role?               @relation(fields: [roleId], references: [id])
+  roleId         Int                 @map("role_id")
+  UserPermission UserPermission[]
+  business       Business?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -78,4 +73,73 @@ model Profile {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("profiles")
+}
+
+model Business {
+  id               Int      @id @default(autoincrement())
+  name             String
+  email            String   @unique
+  phone            String   @unique
+  address          String
+  country          String
+  city             String
+  postcode         String
+  registrationDate DateTime @map("registration_date")
+  website          String?
+  user             User     @relation(fields: [userId], references: [id])
+  userId           Int      @unique @map("user_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("businesses")
+}
+
+model Role {
+  id              Int              @id @default(autoincrement())
+  name            String           @unique // e.g., "super_admin", "admin", "manager"
+  User            User[]
+  rolePermissions RolePermission[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("roles")
+}
+
+model Permission {
+  id       Int    @id @default(autoincrement())
+  resource String // e.g., "User", "Post", "Order"
+  action   String // e.g., "create", "read", "update", "delete"
+
+  rolePermissions RolePermission[]
+  userPermissions UserPermission[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([resource, action])
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       Int @map("role_id")
+  permissionId Int @map("permission_id")
+
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserPermission {
+  userId       Int @map("user_id")
+  permissionId Int @map("permission_id")
+
+  user       User       @relation(fields: [userId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  @@unique([userId, permissionId])
+  @@map("user_permissions")
 }

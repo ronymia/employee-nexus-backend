@@ -2,10 +2,10 @@ import {
   GENDER,
   Prisma,
   PrismaClient,
-  ROLE,
   USER_ACCOUNT_STATUS,
 } from 'generated/prisma';
 import configuration from 'src/config/configuration';
+import { ROLE } from 'src/enums';
 import { PasswordHelpers } from 'src/helpers/passwordHelpers';
 
 const prisma = new PrismaClient();
@@ -14,7 +14,6 @@ const prisma = new PrismaClient();
 const superUser = {
   id: 1,
   email: 'mdronymia040@gmail.com',
-  role: ROLE.SUPER_ADMIN,
   status: USER_ACCOUNT_STATUS.VERIFIED,
 };
 
@@ -32,8 +31,22 @@ export const superAdminProfile = {
 // SEED SUPER ADMIN
 
 export const seedSuperAdmin = async () => {
+  // 1. Ensure SUPER_ADMIN role exists
+  let role = await prisma.role.findUnique({
+    where: { name: ROLE.SUPER_ADMIN },
+  });
+
+  if (!role) {
+    role = await prisma.role.create({
+      data: {
+        name: ROLE.SUPER_ADMIN,
+      },
+    });
+  }
+
+  // 2. Check if a super admin user already exists
   const isSuperAdminExist = await prisma.user.findFirst({
-    where: { role: ROLE.SUPER_ADMIN },
+    where: { roleId: role?.id },
   });
 
   if (!isSuperAdminExist) {
@@ -44,7 +57,7 @@ export const seedSuperAdmin = async () => {
     await prisma.$transaction(
       async (prismaClient: Prisma.TransactionClient) => {
         const res = await prismaClient.user.create({
-          data: { ...superUser, password },
+          data: { ...superUser, roleId: role?.id, password },
         });
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
