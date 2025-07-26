@@ -10,6 +10,13 @@ type Auth {
   user: User!
 }
 
+input BaseQueryInput {
+  limit: Int
+  page: Int
+  sortBy: String = "createdAt"
+  sortOrder: String = "desc"
+}
+
 input CreatePermissionInput {
   """Action to be performed on the resource"""
   action: String!
@@ -127,6 +134,20 @@ type Mutation {
   updateUserPermission(updateUserPermissionInput: UpdateUserPermissionInput!): UserPermission!
 }
 
+type PaginatedServicePlans {
+  data: [ServicePlan!]!
+  meta: PaginationMeta!
+}
+
+type PaginationMeta {
+  limit: Int!
+  page: Int!
+  paginationTotal: Int!
+  skip: Int!
+  total: Int!
+  totalPages: Int!
+}
+
 type Permission {
   action: String!
   createdAt: DateTime!
@@ -162,8 +183,8 @@ type Query {
   rolePermission(id: Int!): RolePermission!
   rolePermissions: [RolePermission!]!
   roles: [Role!]!
-  servicePlan(id: Int!): ServicePlan!
-  servicePlans: [ServicePlan!]!
+  servicePlanById(id: Int!): ServicePlan!
+  servicePlans(query: ServicePlanQueryInput): PaginatedServicePlans!
   userById(id: Int!): User!
   userPermission(id: Int!): UserPermission!
   userPermissions: [UserPermission!]!
@@ -220,6 +241,14 @@ type ServicePlan {
 
   """Timestamp when the service plan was last updated"""
   updatedAt: DateTime!
+}
+
+input ServicePlanQueryInput {
+  maxPrice: Int
+  minPrice: Int
+  pagination: BaseQueryInput
+  price: Int
+  status: String
 }
 
 """User account status"""

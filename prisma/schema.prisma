@@ -149,7 +149,7 @@ model UserPermission {
 
 model ServicePlan {
   id          Int        @id @default(autoincrement())
-  name        String
+  name        String     @unique
   description String
   setupFee    Int        @map("setup_fee")
   status      String     @default("ACTIVE")
