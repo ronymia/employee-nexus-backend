@@ -1,4 +1,8 @@
-import { ConsoleLogger, Injectable } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+import { ConsoleLogger, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateServicePlanInput } from './dto/create-service-plan.input';
 import { UpdateServicePlanInput } from './dto/update-service-plan.input';
 import { PrismaService } from '../prisma/prisma.service';
@@ -27,7 +31,7 @@ export class ServicePlansService {
 
   // FIND ALL SERVICE PLANS
   async findAll(query: ServicePlanQueryInput) {
-    const { pagination, ...filters } = query;
+    const { pagination, ...filters } = query ?? {};
 
     this.logger.log('Finding all service plans', pagination, filters);
 
@@ -61,6 +65,7 @@ export class ServicePlansService {
     if (Object.keys(typedFilters).length > 0) {
       const filterConditions = Object.entries(typedFilters)
         .filter(
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           ([_, value]) => value !== undefined && value !== null && value !== '',
         )
         .map(([field, value]) => ({
@@ -76,14 +81,21 @@ export class ServicePlansService {
       ? { AND: andCondition }
       : {};
 
-    const result = await this.prisma.servicePlan.findMany({
-      skip,
-      take: limit,
-      orderBy: {
-        [sortBy]: sortOrder,
-      },
-      where: whereCondition,
-    });
+    const result = limit
+      ? await this.prisma.servicePlan.findMany({
+          skip,
+          take: limit,
+          orderBy: {
+            [sortBy]: sortOrder,
+          },
+          where: whereCondition,
+        })
+      : await this.prisma.servicePlan.findMany({
+          orderBy: {
+            [sortBy]: sortOrder,
+          },
+          where: whereCondition,
+        });
 
     // GET TOTAL COUNT
     const totalCount = await this.prisma.servicePlan.count();
@@ -106,21 +118,31 @@ export class ServicePlansService {
     };
   }
 
-  async findOne(id: number) {
-    return await this.prisma.servicePlan.findUnique({
+  async findById(id: number) {
+    const existingServicePlan = await this.prisma.servicePlan.findUnique({
       where: { id },
     });
+
+    if (!existingServicePlan) {
+      throw new NotFoundException(`Service Plan with ID ${id} does not exist.`);
+    }
+
+    return existingServicePlan;
   }
 
   async update(id: number, updateServicePlanInput: UpdateServicePlanInput) {
+    await this.findById(id); // Ensure the service plan exists
+
     return await this.prisma.servicePlan.update({
       where: { id },
       data: updateServicePlanInput,
     });
   }
 
-  remove(id: number) {
-    return this.prisma.servicePlan.delete({
+  async remove(id: number) {
+    await this.findById(id); // Ensure the service plan exists
+
+    return await this.prisma.servicePlan.delete({
       where: { id },
     });
   }

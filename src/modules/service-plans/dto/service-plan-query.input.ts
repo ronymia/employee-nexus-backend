@@ -1,10 +1,10 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
-import { BaseQueryInput } from 'src/common/dto/base-query.input';
+import { BasePaginationInput } from 'src/common/dto/base-pagination.type';
 
 @InputType()
 export class ServicePlanQueryInput {
-  @Field(() => BaseQueryInput, { nullable: true })
-  pagination?: BaseQueryInput;
+  @Field(() => BasePaginationInput, { nullable: true })
+  pagination?: BasePaginationInput;
 
   @Field(() => Int, { nullable: true })
   price?: number;

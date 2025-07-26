@@ -6,9 +6,9 @@ import { InputType, Field, Int, PartialType, ID } from '@nestjs/graphql';
 export class UpdateServicePlanInput extends PartialType(
   CreateServicePlanInput,
 ) {
-  @Field(() => ID, { description: 'Unique identifier for the service plan' })
-  @IsInt()
-  id: number;
+  // @Field(() => ID, { description: 'Unique identifier for the service plan' })
+  // @IsInt()
+  // id: number;
 
   @Field({ description: 'Name of the service plan' })
   @IsString()

@@ -8,22 +8,24 @@ import { ServicePlan } from './entities/service-plan.entity';
 import { CreateServicePlanInput } from './dto/create-service-plan.input';
 import { UpdateServicePlanInput } from './dto/update-service-plan.input';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { ConsoleLogger, HttpStatus, UseGuards } from '@nestjs/common';
+import { HttpStatus, UseGuards } from '@nestjs/common';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { JwtPayload } from '../auth/jwt.strategy';
-import { CreateServicePlanResponse } from './entities/create-service-plan.response';
+import {
+  ServicePlanQueryResponse,
+  ServicePlanResponse,
+} from './entities/service-plan-response.entity';
 import { ServicePlanQueryInput } from './dto/service-plan-query.input';
-import { PaginatedServicePlans } from './dto/service-plan-paginated.input';
 
 @Resolver(() => ServicePlan)
 export class ServicePlansResolver {
-  private readonly logger = new ConsoleLogger(ServicePlansResolver.name);
+  // private readonly logger = new ConsoleLogger(ServicePlansResolver.name);
   constructor(private readonly servicePlansService: ServicePlansService) {}
 
   // CREATE SERVICE PLAN
-  @Mutation(() => CreateServicePlanResponse)
+  @Mutation(() => ServicePlanResponse)
   @UseGuards(PermissionsGuard) // 👈 Use the PermissionsGuard to check permissions
   @RequirePermissions('Service Plan:create') // 👈 Specify the required permission
   @UseGuards(GqlAuthGuard)
@@ -31,7 +33,7 @@ export class ServicePlansResolver {
     @Args('createServicePlanInput')
     createServicePlanInput: CreateServicePlanInput,
     @CurrentUser() user: JwtPayload, // 👈 current user from token
-  ) {
+  ): Promise<ServicePlanResponse> {
     const servicePlan = await this.servicePlansService.create(
       user,
       createServicePlanInput,
@@ -45,35 +47,74 @@ export class ServicePlansResolver {
     };
   }
 
-  // ALL SERVICE PLANS
+  // FIND ALL
   @UseGuards(GqlAuthGuard)
   @RequirePermissions('Service Plan:read') // 👈 Specify the required permission
-  @Query(() => PaginatedServicePlans, { name: 'servicePlans' })
-  async findAll(
+  @Query(() => ServicePlanQueryResponse, { name: 'servicePlans' })
+  async servicePlans(
     @Args('query', { nullable: true })
     query: ServicePlanQueryInput,
-  ): Promise<PaginatedServicePlans> {
-    return await this.servicePlansService.findAll(query);
+  ): Promise<ServicePlanQueryResponse> {
+    const result = await this.servicePlansService.findAll(query);
+
+    return {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Service Plans retrieved successfully',
+      meta: result.meta,
+      data: result.data,
+    };
   }
 
-  @Query(() => ServicePlan, { name: 'servicePlanById' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.servicePlansService.findOne(id);
+  // FIND BY ID
+  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Service Plan:read') // 👈 Specify the required permission
+  @Query(() => ServicePlanResponse, { name: 'servicePlanById' })
+  async servicePlanById(
+    @Args('id', { type: () => Int }) id: number,
+  ): Promise<ServicePlanResponse> {
+    return {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Service Plan retrieved successfully',
+      data: await this.servicePlansService.findById(id),
+    };
   }
 
-  @Mutation(() => ServicePlan)
-  updateServicePlan(
+  // UPDATE ONE
+  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Service Plan:update') // 👈 Specify the required permission
+  @Mutation(() => ServicePlanResponse)
+  async updateServicePlan(
+    @Args('id', { type: () => Int }) id: number,
     @Args('updateServicePlanInput')
     updateServicePlanInput: UpdateServicePlanInput,
-  ) {
-    return this.servicePlansService.update(
-      updateServicePlanInput.id,
+  ): Promise<ServicePlanResponse> {
+    const updatedServicePlan = await this.servicePlansService.update(
+      Number(id),
       updateServicePlanInput,
     );
+
+    return {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Service Plan updated successfully',
+      data: updatedServicePlan,
+    };
   }
 
-  @Mutation(() => ServicePlan)
-  removeServicePlan(@Args('id', { type: () => Int }) id: number) {
-    return this.servicePlansService.remove(id);
+  // DELETE ONE
+  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Service Plan:delete') // 👈 Specify the required permission
+  @Mutation(() => ServicePlanResponse)
+  async removeServicePlan(
+    @Args('id', { type: () => Int }) id: number,
+  ): Promise<ServicePlanResponse> {
+    return {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Service Plan deleted successfully',
+      data: await this.servicePlansService.remove(id),
+    };
   }
 }
