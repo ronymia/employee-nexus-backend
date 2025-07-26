@@ -3,7 +3,6 @@ import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UsersModule } from '../users/users.module';
-import { LocalStrategy } from './local.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import configuration from 'src/config/configuration';
@@ -19,7 +18,7 @@ import { JwtStrategy } from './jwt.strategy';
       signOptions: { expiresIn: configuration().jwt.access_expires_in },
     }),
   ],
-  providers: [AuthResolver, AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthResolver, AuthService, JwtStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

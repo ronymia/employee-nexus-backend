@@ -13,7 +13,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  // This method is used by the local strategy to validate the user
+  // This method is used to validate the user by email
   async validateUserByEmail(email: string): Promise<User | null> {
     const user = await this.userService.findByEmail(email);
     if (user) {
@@ -21,34 +21,9 @@ export class AuthService {
     }
     return null;
   }
-  // async validateUser(email: string, pass: string): Promise<any> {
-  //   const user = await this.userService.findByEmail(email);
-  //   console.log('from validateUser', user);
 
-  //   if (user) {
-  //     const { password, ...result } = user;
-  //     const isMatchPassword = await PasswordHelpers.passwordMatch(
-  //       password,
-  //       pass,
-  //     );
-
-  //     // Check if password is correct
-  //     if (!isMatchPassword) {
-  //       throw new UnauthorizedException();
-  //     }
-
-  //     // If password is correct, return the user without the password field
-  //     // This is important for security reasons, as we don't want to expose the password
-  //     // in the response.
-  //     // If you want to return the user with the password field, you can remove the line
-  //     // const { password, ...result } = user;
-  //     return result;
-  //   }
-  //   return null;
-  // }
-
+  // LOGIN METHOD
   async login(loginAuthInput: LoginAuthInput) {
-    // console.log({ user });
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const user = await this.validateUserByEmail(loginAuthInput.email);
 
@@ -63,37 +38,19 @@ export class AuthService {
     );
 
     // Check if password is correct
-    // If the user does not have a password, it means they are using a third-party
     if (!isMatchPassword) {
       throw new UnauthorizedException();
     }
 
+    // TOKEN PAYLOAD
     const payload = { userId: user?.id, roleId: user?.roleId };
 
+    // Generate JWT token
+    const accessToken = this.jwtService.sign(payload);
+
     return {
-      accessToken: this.jwtService.sign(payload),
-      user: user,
+      accessToken,
+      user,
     };
   }
-
-  // async login(loginAuthInput: LoginAuthInput) {
-  //   console.log(loginAuthInput);
-  //   return 'This action adds a new auth';
-  // }
-
-  // findAll() {
-  //   return `This action returns all auth`;
-  // }
-
-  // findOne(id: number) {
-  //   return `This action returns a #${id} auth`;
-  // }
-
-  // update(id: number, updateAuthInput: UpdateAuthInput) {
-  //   return `This action updates a #${id} auth`;
-  // }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} auth`;
-  // }
 }

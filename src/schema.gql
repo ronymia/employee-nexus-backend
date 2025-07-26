@@ -3,26 +3,18 @@
 # ------------------------------------------------------
 
 type Auth {
-  """
-  JWT access token
-  """
+  """JWT access token"""
   accessToken: String!
 
-  """
-  User associated with the auth
-  """
+  """User associated with the auth"""
   user: User!
 }
 
 input CreatePermissionInput {
-  """
-  Action to be performed on the resource
-  """
+  """Action to be performed on the resource"""
   action: String!
 
-  """
-  Resource for the permission
-  """
+  """Resource for the permission"""
   resource: String!
 }
 
@@ -40,22 +32,40 @@ input CreateProfileInput {
 }
 
 input CreateRoleInput {
-  """
-  Name of the role
-  """
+  """Name of the role"""
   name: String!
 }
 
 input CreateRolePermissionInput {
-  """
-  ID of the permission
-  """
+  """ID of the permission"""
   permissionId: Int!
 
-  """
-  ID of the role
-  """
+  """ID of the role"""
   roleId: Int!
+}
+
+input CreateServicePlanInput {
+  """Description of the service plan"""
+  description: String!
+
+  """Name of the service plan"""
+  name: String!
+
+  """Price of the service plan"""
+  price: Int!
+
+  """One-time setup fee for the service plan"""
+  setupFee: Int!
+
+  """Status of the service plan"""
+  status: String! = "ACTIVE"
+}
+
+type CreateServicePlanResponse {
+  data: ServicePlan!
+  message: String!
+  statusCode: Float!
+  success: Boolean!
 }
 
 input CreateUserInput {
@@ -67,14 +77,10 @@ input CreateUserInput {
 }
 
 input CreateUserPermissionInput {
-  """
-  ID of the permission
-  """
+  """ID of the permission"""
   permissionId: Int!
 
-  """
-  ID of the user
-  """
+  """ID of the user"""
   userId: Int!
 }
 
@@ -83,23 +89,17 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-"""
-Gender of the user
-"""
+"""Gender of the user"""
 enum GENDER {
   FEMALE
   MALE
 }
 
 input LoginAuthInput {
-  """
-  User email
-  """
+  """User email"""
   email: String!
 
-  """
-  User password
-  """
+  """User password"""
   password: String!
 }
 
@@ -107,38 +107,31 @@ type Mutation {
   createPermission(createPermissionInput: CreatePermissionInput!): Permission!
   createProfile(createProfileInput: CreateProfileInput!): Profile!
   createRole(createRoleInput: CreateRoleInput!): Role!
-  createRolePermission(
-    createRolePermissionInput: CreateRolePermissionInput!
-  ): RolePermission!
+  createRolePermission(createRolePermissionInput: CreateRolePermissionInput!): RolePermission!
+  createServicePlan(createServicePlanInput: CreateServicePlanInput!): CreateServicePlanResponse!
   createUser(createUserInput: CreateUserInput!): User!
-  createUserPermission(
-    createUserPermissionInput: CreateUserPermissionInput!
-  ): UserPermission!
+  createUserPermission(createUserPermissionInput: CreateUserPermissionInput!): UserPermission!
   login(loginInput: LoginAuthInput!): Auth!
   removePermission(id: Int!): Permission!
   removeProfile(id: Int!): Profile!
   removeRole(id: Int!): Role!
   removeRolePermission(id: Int!): RolePermission!
+  removeServicePlan(id: Int!): ServicePlan!
   removeUser(id: Int!): User!
   removeUserPermission(id: Int!): UserPermission!
   updatePermission(updatePermissionInput: UpdatePermissionInput!): Permission!
   updateProfile(updateProfileInput: UpdateProfileInput!): Profile!
   updateRole(updateRoleInput: UpdateRoleInput!): Role!
-  updateRolePermission(
-    updateRolePermissionInput: UpdateRolePermissionInput!
-  ): RolePermission!
-  updateUserPermission(
-    updateUserPermissionInput: UpdateUserPermissionInput!
-  ): UserPermission!
+  updateRolePermission(updateRolePermissionInput: UpdateRolePermissionInput!): RolePermission!
+  updateServicePlan(updateServicePlanInput: UpdateServicePlanInput!): ServicePlan!
+  updateUserPermission(updateUserPermissionInput: UpdateUserPermissionInput!): UserPermission!
 }
 
 type Permission {
   action: String!
   createdAt: DateTime!
 
-  """
-  Unique identifier for the permission
-  """
+  """Unique identifier for the permission"""
   id: ID!
   resource: String!
   updatedAt: DateTime!
@@ -169,6 +162,8 @@ type Query {
   rolePermission(id: Int!): RolePermission!
   rolePermissions: [RolePermission!]!
   roles: [Role!]!
+  servicePlan(id: Int!): ServicePlan!
+  servicePlans: [ServicePlan!]!
   userById(id: Int!): User!
   userPermission(id: Int!): UserPermission!
   userPermissions: [UserPermission!]!
@@ -176,38 +171,58 @@ type Query {
 }
 
 type Role {
-  """
-  Unique identifier for the role
-  """
+  """Unique identifier for the role"""
   id: ID!
 
-  """
-  Name of the role
-  """
+  """Name of the role"""
   name: String!
 }
 
 type RolePermission {
-  """
-  ID of the permission
-  """
+  """ID of the permission"""
   permission: Int!
 
-  """
-  ID of the permission
-  """
+  """ID of the permission"""
   permissionId: Int!
   role: Role
 
-  """
-  ID of the role
-  """
+  """ID of the role"""
   roleId: Int!
 }
 
-"""
-User account status
-"""
+type ServicePlan {
+  """Timestamp when the service plan was created"""
+  createdAt: DateTime!
+
+  """User who created the service plan"""
+  createdBy: Int!
+
+  """Creator of the service plan"""
+  creator: User
+
+  """Description of the service plan"""
+  description: String!
+
+  """Unique identifier for the service plan"""
+  id: ID!
+
+  """Name of the service plan"""
+  name: String!
+
+  """Price of the service plan"""
+  price: Int!
+
+  """One-time setup fee for the service plan"""
+  setupFee: Int!
+
+  """Status of the service plan"""
+  status: String!
+
+  """Timestamp when the service plan was last updated"""
+  updatedAt: DateTime!
+}
+
+"""User account status"""
 enum USER_ACCOUNT_STATUS {
   ACTIVE
   BLOCKED
@@ -222,19 +237,13 @@ enum USER_ACCOUNT_STATUS {
 }
 
 input UpdatePermissionInput {
-  """
-  Action to be performed on the resource
-  """
+  """Action to be performed on the resource"""
   action: String!
 
-  """
-  Unique identifier for the permission
-  """
+  """Unique identifier for the permission"""
   id: ID!
 
-  """
-  Resource for the permission
-  """
+  """Resource for the permission"""
   resource: String!
 }
 
@@ -255,87 +264,79 @@ input UpdateProfileInput {
 input UpdateRoleInput {
   id: Int!
 
-  """
-  Name of the role
-  """
+  """Name of the role"""
   name: String!
 }
 
 input UpdateRolePermissionInput {
-  """
-  ID of the permission
-  """
+  """ID of the permission"""
   permissionId: Int!
 
-  """
-  ID of the role
-  """
+  """ID of the role"""
   roleId: Int!
+}
+
+input UpdateServicePlanInput {
+  """Description of the service plan"""
+  description: String!
+
+  """Unique identifier for the service plan"""
+  id: ID!
+
+  """Name of the service plan"""
+  name: String!
+
+  """Price of the service plan"""
+  price: Int!
+
+  """One-time setup fee for the service plan"""
+  setupFee: Int!
+
+  """Status of the service plan"""
+  status: String! = "ACTIVE"
 }
 
 input UpdateUserPermissionInput {
   id: Int!
 
-  """
-  ID of the permission
-  """
+  """ID of the permission"""
   permissionId: Int!
 
-  """
-  ID of the user
-  """
+  """ID of the user"""
   userId: Int!
 }
 
 type User {
-  """
-  Date when the user was created
-  """
+  """Date when the user was created"""
   createdAt: DateTime!
 
-  """
-  ID of the user who deleted the user account
-  """
+  """ID of the user who deleted the user account"""
   deletedBy: Int
 
-  """
-  Email of the user
-  """
+  """Email of the user"""
   email: String!
   id: ID!
   profile: Profile
 
-  """
-  Role of the user
-  """
+  """Role of the user"""
   role: Role
   roleId: Int!
 
-  """
-  Status of the user account
-  """
+  """Status of the user account"""
   status: USER_ACCOUNT_STATUS!
 
-  """
-  Date when the user was last updated
-  """
+  """Date when the user was last updated"""
   updatedAt: DateTime!
 }
 
 type UserPermission {
-  """
-  Permission details
-  """
+  """Permission details"""
   permission: Permission!
 
-  """
-  ID of the permission
-  """
+  """ID of the permission"""
   permissionId: Int!
   user: User
 
-  """
-  ID of the user
-  """
+  """ID of the user"""
   userId: Int!
 }

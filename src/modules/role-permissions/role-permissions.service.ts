@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, PreconditionFailedException } from '@nestjs/common';
 import { CreateRolePermissionInput } from './dto/create-role-permission.input';
 import { UpdateRolePermissionInput } from './dto/update-role-permission.input';
 import { PrismaService } from '../prisma/prisma.service';
@@ -6,9 +6,32 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class RolePermissionsService {
   constructor(private readonly prisma: PrismaService) {}
-  create(createRolePermissionInput: CreateRolePermissionInput) {
+  async create(createRolePermissionInput: CreateRolePermissionInput) {
+    const role = await this.prisma.role.findUnique({
+      where: { id: createRolePermissionInput.roleId },
+    });
+
+    if (!role) {
+      throw new PreconditionFailedException('Invalid roleId: Role not found');
+    }
+
+    const permission = await this.prisma.permission.findUnique({
+      where: { id: createRolePermissionInput.permissionId },
+    });
+
+    if (!permission) {
+      throw new PreconditionFailedException(
+        'Invalid permissionId: Permission not found',
+      );
+    }
+
+    // RETURN
     return this.prisma.rolePermission.create({
       data: createRolePermissionInput,
+      include: {
+        role: true,
+        permission: true,
+      },
     });
   }
 

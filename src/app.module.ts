@@ -15,6 +15,8 @@ import { PermissionsModule } from './modules/permissions/permissions.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { RolePermissionsModule } from './modules/role-permissions/role-permissions.module';
 import { UserPermissionsModule } from './modules/user-permissions/user-permissions.module';
+import { ServicePlansModule } from './modules/service-plans/service-plans.module';
+import { JwtStrategy } from './modules/auth/jwt.strategy';
 
 @Module({
   imports: [
@@ -38,9 +40,10 @@ import { UserPermissionsModule } from './modules/user-permissions/user-permissio
     RolesModule,
     RolePermissionsModule,
     UserPermissionsModule,
+    ServicePlansModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, JwtStrategy],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

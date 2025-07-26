@@ -38,16 +38,17 @@ enum GENDER {
 }
 
 model User {
-  id             Int                 @id @default(autoincrement())
-  email          String              @unique
-  password       String
-  status         USER_ACCOUNT_STATUS @default(UNVERIFIED)
-  deletedBy      Int?                @map("deleted_by")
-  profile        Profile?
-  role           Role?               @relation(fields: [roleId], references: [id])
-  roleId         Int                 @map("role_id")
-  UserPermission UserPermission[]
-  business       Business?
+  id              Int                 @id @default(autoincrement())
+  email           String              @unique
+  password        String
+  status          USER_ACCOUNT_STATUS @default(UNVERIFIED)
+  deletedBy       Int?                @map("deleted_by")
+  profile         Profile?
+  role            Role?               @relation(fields: [roleId], references: [id])
+  roleId          Int                 @map("role_id")
+  userPermissions UserPermission[]
+  business        Business?
+  servicePlans    ServicePlan[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -76,18 +77,20 @@ model Profile {
 }
 
 model Business {
-  id               Int      @id @default(autoincrement())
+  id               Int         @id @default(autoincrement())
   name             String
-  email            String   @unique
-  phone            String   @unique
+  email            String      @unique
+  phone            String      @unique
   address          String
   country          String
   city             String
   postcode         String
-  registrationDate DateTime @map("registration_date")
+  registrationDate DateTime    @map("registration_date")
   website          String?
-  user             User     @relation(fields: [userId], references: [id])
-  userId           Int      @unique @map("user_id")
+  user             User        @relation(fields: [userId], references: [id])
+  userId           Int         @unique @map("user_id")
+  servicePlan      ServicePlan @relation(fields: [servicePlanId], references: [id])
+  servicePlanId    Int         @map("service_plan_id")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -142,4 +145,21 @@ model UserPermission {
 
   @@unique([userId, permissionId])
   @@map("user_permissions")
+}
+
+model ServicePlan {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String
+  setupFee    Int        @map("setup_fee")
+  status      String     @default("ACTIVE")
+  price       Int
+  businesses  Business[]
+  createdBy   Int        @map("created_by")
+  creator     User?      @relation(fields: [createdBy], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("service_plans")
 }

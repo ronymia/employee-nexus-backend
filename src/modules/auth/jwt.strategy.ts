@@ -2,7 +2,11 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-// import { jwtConstants } from './constants';
+
+export type JwtPayload = {
+  userId: number;
+  roleId: number;
+};
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -13,13 +17,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
       secretOrKey: jwtSecret,
     });
   }
 
-  validate(payload: any) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    return { userId: payload?.userId, roleId: payload?.roleId };
+  validate(payload: JwtPayload) {
+    return payload;
   }
 }
