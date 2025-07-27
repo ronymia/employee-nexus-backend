@@ -77,20 +77,21 @@ model Profile {
 }
 
 model Business {
-  id               Int         @id @default(autoincrement())
+  id               Int              @id @default(autoincrement())
   name             String
-  email            String      @unique
-  phone            String      @unique
+  email            String           @unique
+  phone            String           @unique
   address          String
   country          String
   city             String
   postcode         String
-  registrationDate DateTime    @map("registration_date")
+  registrationDate DateTime         @map("registration_date")
   website          String?
-  user             User        @relation(fields: [userId], references: [id])
-  userId           Int         @unique @map("user_id")
-  servicePlan      ServicePlan @relation(fields: [servicePlanId], references: [id])
-  servicePlanId    Int         @map("service_plan_id")
+  user             User             @relation(fields: [userId], references: [id])
+  userId           Int              @unique @map("user_id")
+  servicePlan      ServicePlan      @relation(fields: [servicePlanId], references: [id])
+  servicePlanId    Int              @map("service_plan_id")
+  modules          businessModule[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -148,18 +149,60 @@ model UserPermission {
 }
 
 model ServicePlan {
-  id          Int        @id @default(autoincrement())
-  name        String     @unique
+  id          Int                 @id @default(autoincrement())
+  name        String              @unique
   description String
-  setupFee    Int        @map("setup_fee")
-  status      String     @default("ACTIVE")
+  setupFee    Int                 @map("setup_fee")
+  status      String              @default("ACTIVE")
   price       Int
   businesses  Business[]
-  createdBy   Int        @map("created_by")
-  creator     User?      @relation(fields: [createdBy], references: [id])
+  modules     ServicePlanModule[]
+  createdBy   Int                 @map("created_by")
+  creator     User?               @relation(fields: [createdBy], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("service_plans")
+}
+
+model SystemModule {
+  id           Int                 @id @default(autoincrement())
+  name         String              @unique
+  isEnabled    Boolean             @default(true) @map("is_enabled")
+  servicePlans ServicePlanModule[]
+  businesses   businessModule[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("system_modules")
+}
+
+model ServicePlanModule {
+  servicePlanId  Int          @map("service_plan_id")
+  servicePlan    ServicePlan  @relation(fields: [servicePlanId], references: [id])
+  systemModuleId Int          @map("system_module_id")
+  systemModule   SystemModule @relation(fields: [systemModuleId], references: [id])
+  isEnabled      Boolean      @map("is_enabled")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([servicePlanId, systemModuleId])
+  @@map("service_plan_modules")
+}
+
+model businessModule {
+  businessId     Int          @map("service_plan_id")
+  business       Business     @relation(fields: [businessId], references: [id])
+  systemModuleId Int          @map("system_module_id")
+  systemModule   SystemModule @relation(fields: [systemModuleId], references: [id])
+  isEnabled      Boolean      @map("is_enabled")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([businessId, systemModuleId])
+  @@map("business_modules")
 }

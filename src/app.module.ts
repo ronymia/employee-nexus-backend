@@ -17,6 +17,7 @@ import { RolePermissionsModule } from './modules/role-permissions/role-permissio
 import { UserPermissionsModule } from './modules/user-permissions/user-permissions.module';
 import { ServicePlansModule } from './modules/service-plans/service-plans.module';
 import { JwtStrategy } from './modules/auth/jwt.strategy';
+import { SystemModulesModule } from './modules/system-modules/system-modules.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { JwtStrategy } from './modules/auth/jwt.strategy';
     RolePermissionsModule,
     UserPermissionsModule,
     ServicePlansModule,
+    SystemModulesModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

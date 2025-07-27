@@ -40,8 +40,8 @@ export class ServicePlansResolver {
     );
     // SEND RESPONSE
     return {
-      statusCode: HttpStatus.CREATED,
       success: true,
+      statusCode: HttpStatus.CREATED,
       message: 'Service Plan created successfully',
       data: servicePlan,
     };
@@ -74,8 +74,8 @@ export class ServicePlansResolver {
     @Args('id', { type: () => Int }) id: number,
   ): Promise<ServicePlanResponse> {
     return {
-      statusCode: HttpStatus.OK,
       success: true,
+      statusCode: HttpStatus.OK,
       message: 'Service Plan retrieved successfully',
       data: await this.servicePlansService.findById(id),
     };
@@ -96,8 +96,8 @@ export class ServicePlansResolver {
     );
 
     return {
-      statusCode: HttpStatus.OK,
       success: true,
+      statusCode: HttpStatus.OK,
       message: 'Service Plan updated successfully',
       data: updatedServicePlan,
     };
@@ -111,8 +111,8 @@ export class ServicePlansResolver {
     @Args('id', { type: () => Int }) id: number,
   ): Promise<ServicePlanResponse> {
     return {
-      statusCode: HttpStatus.OK,
       success: true,
+      statusCode: HttpStatus.OK,
       message: 'Service Plan deleted successfully',
       data: await this.servicePlansService.remove(id),
     };
