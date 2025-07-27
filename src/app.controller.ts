@@ -13,12 +13,14 @@ export class AppController {
   // ROLE REFRESH
   @Get('/role-refresh')
   async roleRefresh() {
-    return this.appService.roleRefresh();
+    await this.appService.roleRefresh();
+    return 'Roles refreshed';
   }
 
   // SETUP
   @Get('/setup')
   async setup() {
-    return this.appService.setup();
+    await this.appService.setup();
+    return 'Super admin created';
   }
 }
