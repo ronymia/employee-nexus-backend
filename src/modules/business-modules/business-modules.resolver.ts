@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { BusinessModulesService } from './business-modules.service';
 import { BusinessModule } from './entities/business-module.entity';
@@ -11,11 +12,11 @@ export class BusinessModulesResolver {
   ) {}
 
   @Mutation(() => BusinessModule)
-  createBusinessModule(
+  async createBusinessModule(
     @Args('createBusinessModuleInput')
     createBusinessModuleInput: CreateBusinessModuleInput,
   ) {
-    return this.businessModulesService.create(createBusinessModuleInput);
+    return await this.businessModulesService.create(createBusinessModuleInput);
   }
 
   @Query(() => [BusinessModule], { name: 'businessModules' })
@@ -23,9 +24,12 @@ export class BusinessModulesResolver {
     return this.businessModulesService.findAll();
   }
 
-  @Query(() => BusinessModule, { name: 'businessModule' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.businessModulesService.findOne(id);
+  @Query(() => BusinessModule, { name: 'businessModuleById' })
+  findOne(
+    @Args('businessId', { type: () => Int }) businessId: number,
+    @Args('systemModuleId', { type: () => Int }) systemModuleId: number,
+  ) {
+    return this.businessModulesService.findOne(businessId, systemModuleId);
   }
 
   @Mutation(() => BusinessModule)
@@ -34,13 +38,17 @@ export class BusinessModulesResolver {
     updateBusinessModuleInput: UpdateBusinessModuleInput,
   ) {
     return this.businessModulesService.update(
-      updateBusinessModuleInput.id,
+      updateBusinessModuleInput.businessId,
+      updateBusinessModuleInput.systemModuleId,
       updateBusinessModuleInput,
     );
   }
 
   @Mutation(() => BusinessModule)
-  removeBusinessModule(@Args('id', { type: () => Int }) id: number) {
-    return this.businessModulesService.remove(id);
+  removeBusinessModule(
+    @Args('businessId', { type: () => Int }) businessId: number,
+    @Args('systemModuleId', { type: () => Int }) systemModuleId: number,
+  ) {
+    return this.businessModulesService.remove(businessId, systemModuleId);
   }
 }

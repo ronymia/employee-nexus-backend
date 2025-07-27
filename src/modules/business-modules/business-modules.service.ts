@@ -1,26 +1,51 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Injectable } from '@nestjs/common';
 import { CreateBusinessModuleInput } from './dto/create-business-module.input';
 import { UpdateBusinessModuleInput } from './dto/update-business-module.input';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class BusinessModulesService {
-  create(createBusinessModuleInput: CreateBusinessModuleInput) {
-    return 'This action adds a new businessModule';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createBusinessModuleInput: CreateBusinessModuleInput) {
+    return await this.prisma.businessModule.create({
+      data: createBusinessModuleInput,
+    });
   }
 
-  findAll() {
-    return `This action returns all businessModules`;
+  async findAll() {
+    return await this.prisma.businessModule.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} businessModule`;
+  async findOne(businessId: number, systemModuleId: number) {
+    return await this.prisma.businessModule.findUnique({
+      where: {
+        businessId_systemModuleId: { businessId, systemModuleId },
+      },
+    });
   }
 
-  update(id: number, updateBusinessModuleInput: UpdateBusinessModuleInput) {
-    return `This action updates a #${id} businessModule`;
+  async update(
+    businessId: number,
+    systemModuleId: number,
+    updateBusinessModuleInput: UpdateBusinessModuleInput,
+  ) {
+    return await this.prisma.businessModule.update({
+      where: {
+        businessId_systemModuleId: { businessId, systemModuleId },
+      },
+      data: updateBusinessModuleInput,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} businessModule`;
+  async remove(businessId: number, systemModuleId: number) {
+    return await this.prisma.businessModule.delete({
+      where: {
+        businessId_systemModuleId: { businessId, systemModuleId },
+      },
+    });
   }
 }
