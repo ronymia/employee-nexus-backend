@@ -21,11 +21,45 @@ export class ServicePlansService {
     user: JwtPayload,
     createServicePlanInput: CreateServicePlanInput,
   ) {
-    return await this.prisma.servicePlan.create({
-      data: { ...createServicePlanInput, createdBy: user?.userId },
-      include: {
-        creator: true,
-      },
+    const { moduleIds, ...rest } = createServicePlanInput;
+
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Create service plan
+      const servicePlan = await tx.servicePlan.create({
+        data: {
+          ...rest,
+          createdBy: user?.userId,
+        },
+        include: { creator: true },
+      });
+
+      // 2. Connect modules if any
+      if (moduleIds?.length) {
+        await tx.servicePlanModule.createMany({
+          data: moduleIds.map(({ id, isEnabled }) => ({
+            servicePlanId: servicePlan.id,
+            systemModuleId: id,
+            isEnabled,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      // 3. Return the full service plan with modules included
+      const fullServicePlan = await tx.servicePlan.findUnique({
+        where: { id: servicePlan.id },
+        include: {
+          modules: { include: { systemModule: true } },
+          creator: true,
+        },
+      });
+
+      if (!fullServicePlan) {
+        throw new NotFoundException('Service Plan not found');
+      }
+
+      // 4. Return the full service plan
+      return fullServicePlan;
     });
   }
 

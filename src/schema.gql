@@ -83,6 +83,9 @@ input CreateServicePlanInput {
   """Description of the service plan"""
   description: String!
 
+  """Modules for the service plan"""
+  moduleIds: [ServicePlanModuleInput!]!
+
   """Name of the service plan"""
   name: String!
 
@@ -313,6 +316,11 @@ type ServicePlanModule {
   systemModuleId: Int!
 }
 
+input ServicePlanModuleInput {
+  id: Int!
+  isEnabled: Boolean!
+}
+
 input ServicePlanQueryInput {
   maxPrice: Int
   minPrice: Int
@@ -442,6 +450,9 @@ input UpdateRolePermissionInput {
 input UpdateServicePlanInput {
   """Description of the service plan"""
   description: String!
+
+  """Modules for the service plan"""
+  moduleIds: [ServicePlanModuleInput!]!
 
   """Name of the service plan"""
   name: String!

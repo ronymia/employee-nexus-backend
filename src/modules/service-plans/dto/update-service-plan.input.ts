@@ -1,6 +1,14 @@
-import { IsInt, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsInt,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { CreateServicePlanInput } from './create-service-plan.input';
 import { InputType, Field, Int, PartialType, ID } from '@nestjs/graphql';
+import { Type } from 'class-transformer';
+import { ServicePlanModuleInput } from './service-plan-module.input';
 
 @InputType()
 export class UpdateServicePlanInput extends PartialType(
@@ -32,4 +40,12 @@ export class UpdateServicePlanInput extends PartialType(
   @Field(() => Int, { description: 'Price of the service plan' })
   @IsInt()
   price: number;
+
+  @Field(() => [ServicePlanModuleInput], {
+    description: 'Modules for the service plan',
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ServicePlanModuleInput)
+  moduleIds: ServicePlanModuleInput[];
 }
