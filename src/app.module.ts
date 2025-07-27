@@ -18,6 +18,8 @@ import { UserPermissionsModule } from './modules/user-permissions/user-permissio
 import { ServicePlansModule } from './modules/service-plans/service-plans.module';
 import { JwtStrategy } from './modules/auth/jwt.strategy';
 import { SystemModulesModule } from './modules/system-modules/system-modules.module';
+import { ServicePlanModulesModule } from './modules/service-plan-modules/service-plan-modules.module';
+import { BusinessModulesModule } from './modules/business-modules/business-modules.module';
 
 @Module({
   imports: [
@@ -43,6 +45,8 @@ import { SystemModulesModule } from './modules/system-modules/system-modules.mod
     UserPermissionsModule,
     ServicePlansModule,
     SystemModulesModule,
+    ServicePlanModulesModule,
+    BusinessModulesModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],
