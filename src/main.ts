@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConsoleLogger } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
-import { seedSuperAdmin } from './Database';
 
 async function bootstrap() {
   // CREATE APP
@@ -20,8 +19,5 @@ async function bootstrap() {
 
   // START SERVER
   await app.listen(process.env.PORT ?? 3000);
-
-  // SEED DATABASE
-  await seedSuperAdmin();
 }
 bootstrap();

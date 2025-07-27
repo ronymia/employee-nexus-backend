@@ -1,17 +1,24 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import { AuthService } from './modules/auth/auth.service';
 
 @Controller()
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly appService: AppService) {}
 
   @Get()
   getHello(): string {
     return this.appService.getHello();
+  }
+
+  // ROLE REFRESH
+  @Get('/role-refresh')
+  async roleRefresh() {
+    return this.appService.roleRefresh();
+  }
+
+  // SETUP
+  @Get('/setup')
+  async setup() {
+    return this.appService.setup();
   }
 }

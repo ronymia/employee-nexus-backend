@@ -92,6 +92,7 @@ model Business {
   servicePlan      ServicePlan      @relation(fields: [servicePlanId], references: [id])
   servicePlanId    Int              @map("service_plan_id")
   modules          businessModule[]
+  roles            Role[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -102,7 +103,9 @@ model Business {
 model Role {
   id              Int              @id @default(autoincrement())
   name            String           @unique // e.g., "super_admin", "admin", "manager"
-  User            User[]
+  businessId      Int?             @map("business_id")
+  business        Business?        @relation(fields: [businessId], references: [id])
+  user            User[]
   rolePermissions RolePermission[]
 
   createdAt DateTime @default(now()) @map("created_at")

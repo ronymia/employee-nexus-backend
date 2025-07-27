@@ -11,8 +11,7 @@ import { PasswordHelpers } from 'src/helpers/passwordHelpers';
 const prisma = new PrismaClient();
 
 // SUPER ADMIN DATA
-const superUser = {
-  id: 1,
+export const superUser = {
   email: 'mdronymia040@gmail.com',
   status: USER_ACCOUNT_STATUS.VERIFIED,
 };
