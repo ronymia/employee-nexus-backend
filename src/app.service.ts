@@ -64,9 +64,7 @@ export class AppService {
 
     if (!isSuperAdminExist) {
       const password = await PasswordHelpers.passwordHash(
-        this.configService.get(
-          configuration().default_password.super_admin as string,
-        ),
+        configuration().default_password.super_admin as string,
       );
 
       await this.prisma.$transaction(

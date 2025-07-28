@@ -62,9 +62,9 @@ enum ScheduleBreakType {
 }
 
 enum DeleteReadNotifications {
-  seven_days   @map("7_days")
-  fifteen_days @map("15_days")
-  thirty_days  @map("30_days")
+  SEVEN_DAYS   @map("7_days")
+  FIFTEEN_DAYS @map("15_days")
+  THIRTY_DAYS  @map("30_days")
 }
 
 model User {
@@ -174,7 +174,7 @@ model BusinessSettings {
   currency                String                  @default("BDT") @map("currency")
   isSelfRegistered        Boolean                 @default(false) @map("is_self_registered")
   businessTimeZone        String?                 @default("Asia/Dhaka") @map("business_time_zone")
-  deleteReadNotifications DeleteReadNotifications @default(thirty_days) @map("delete_read_notifications")
+  deleteReadNotifications DeleteReadNotifications @default(THIRTY_DAYS) @map("delete_read_notifications")
   theme                   String?                 @map("theme")
 
   @@map("business_settings")
@@ -280,7 +280,7 @@ model ServicePlan {
   name        String              @unique
   description String
   setupFee    Int                 @map("setup_fee")
-  status      String              @default("ACTIVE")
+  status      String              @default("Active")
   price       Int
   businesses  Business[]          @relation(name: "businessServicePlan")
   modules     ServicePlanModule[] @relation(name: "servicePlanModules")
@@ -296,7 +296,6 @@ model ServicePlan {
 model SystemModule {
   id           Int                 @id @default(autoincrement())
   name         String              @unique
-  isEnabled    Boolean             @default(true) @map("is_enabled")
   servicePlans ServicePlanModule[] @relation(name: "servicePlanInModules")
   businesses   businessModule[]    @relation(name: "businessInModules")
 
@@ -511,16 +510,16 @@ model Shift {
 }
 
 enum LeaveRolloverType {
-  none
-  partial_roll_over
-  full_roll_over
+  NONE              @map("none")
+  PARTIAL_ROLL_OVER @map("partial_roll_over")
+  FULL_ROLLOVER     @map("full_roll_over")
 }
 
 model LeaveType {
   id                  Int               @id @default(autoincrement())
   leaveType           String            @map("leave_type")
   leaveHours          Int               @default(0) @map("leave_hours")
-  leaveRolloverType   LeaveRolloverType @default(none) @map("leave_rollover_type")
+  leaveRolloverType   LeaveRolloverType @default(NONE) @map("leave_rollover_type")
   carryOverLimit      Int?              @map("carry_over_limit")
   status              Status            @default(Active)
   employmentStatusIds Int[]             @default([]) @map("employment_status_ids")

@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { ConsoleLogger, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateServicePlanInput } from './dto/create-service-plan.input';
 import { UpdateServicePlanInput } from './dto/update-service-plan.input';
@@ -36,10 +32,10 @@ export class ServicePlansService {
       // 2. Connect modules if any
       if (moduleIds?.length) {
         await tx.servicePlanModule.createMany({
-          data: moduleIds.map(({ id, isEnabled }) => ({
+          data: moduleIds.map((id) => ({
             servicePlanId: servicePlan.id,
             systemModuleId: id,
-            isEnabled,
+            isEnabled: true,
           })),
           skipDuplicates: true,
         });
@@ -67,7 +63,7 @@ export class ServicePlansService {
   async findAll(query: ServicePlanQueryInput) {
     const { pagination, ...filters } = query ?? {};
 
-    this.logger.log('Finding all service plans', pagination, filters);
+    // this.logger.log('Finding all service plans', pagination, filters);
 
     // PAGINATION
     const { page, skip, limit, sortBy, sortOrder } =

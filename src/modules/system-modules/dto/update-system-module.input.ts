@@ -1,4 +1,4 @@
-import { IsBoolean, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 import { CreateSystemModuleInput } from './create-system-module.input';
 import { InputType, Field, PartialType } from '@nestjs/graphql';
 
@@ -9,8 +9,4 @@ export class UpdateSystemModuleInput extends PartialType(
   @Field(() => String, { description: 'Name of the system module' })
   @IsString()
   name: string;
-
-  @Field(() => Boolean, { description: 'Is the system module enabled?' })
-  @IsBoolean()
-  isEnabled: boolean;
 }

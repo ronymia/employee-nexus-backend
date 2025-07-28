@@ -8,9 +8,6 @@ export class SystemModule {
   @Field(() => String, { description: 'Name of the system module' })
   name: string;
 
-  @Field(() => Boolean, { description: 'Is the system module enabled?' })
-  isEnabled: boolean;
-
   @Field(() => Date, { description: 'Creation date of the system module' })
   createdAt: Date;
 

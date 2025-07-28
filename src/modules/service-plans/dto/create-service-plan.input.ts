@@ -1,13 +1,5 @@
 import { InputType, Int, Field } from '@nestjs/graphql';
-import { Type } from 'class-transformer';
-import {
-  IsArray,
-  IsBoolean,
-  IsInt,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
-import { ServicePlanModuleInput } from './service-plan-module.input';
+import { IsArray, IsInt, IsString } from 'class-validator';
 
 @InputType()
 export class CreateServicePlanInput {
@@ -34,11 +26,9 @@ export class CreateServicePlanInput {
   @IsInt()
   price: number;
 
-  @Field(() => [ServicePlanModuleInput], {
-    description: 'Modules for the service plan',
+  @Field(() => [Int], {
+    description: 'Module Ids for the service plan',
   })
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => ServicePlanModuleInput)
-  moduleIds: ServicePlanModuleInput[];
+  moduleIds: number[];
 }
