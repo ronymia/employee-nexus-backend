@@ -1,5 +1,6 @@
 import {
   GENDER,
+  MARITAL_STATUS,
   Prisma,
   PrismaClient,
   USER_ACCOUNT_STATUS,
@@ -13,18 +14,19 @@ const prisma = new PrismaClient();
 // SUPER ADMIN DATA
 export const superUser = {
   email: 'mdronymia040@gmail.com',
-  status: USER_ACCOUNT_STATUS.VERIFIED,
+  status: USER_ACCOUNT_STATUS.Verified,
 };
 
 export const superAdminProfile = {
   full_name: 'MD Rony Mia',
   phone: '01321185989',
   dateOfBirth: new Date('1998-12-10').toISOString(),
-  gender: GENDER.MALE,
+  gender: GENDER.Male,
   address: 'west khabaspur,Faridpur Sadar,Faridpur',
   city: 'Faridpur',
   country: 'Bangladesh',
   postcode: '7800',
+  maritalStatus: MARITAL_STATUS.Single,
 };
 
 // SEED SUPER ADMIN

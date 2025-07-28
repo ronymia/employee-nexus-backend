@@ -25,6 +25,7 @@ enum USER_ACCOUNT_STATUS {
   Terminated
   Resigned
   Retired
+  On_Leave
 }
 
 enum MARITAL_STATUS {

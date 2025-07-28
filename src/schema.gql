@@ -3,10 +3,14 @@
 # ------------------------------------------------------
 
 type Auth {
-  """JWT access token"""
+  """
+  JWT access token
+  """
   accessToken: String!
 
-  """User associated with the auth"""
+  """
+  User associated with the auth
+  """
   user: User!
 }
 
@@ -18,35 +22,53 @@ input BasePaginationInput {
 }
 
 type BusinessModule {
-  """Business ID"""
+  """
+  Business ID
+  """
   businessId: Int!
 
-  """Is Enabled"""
+  """
+  Is Enabled
+  """
   isEnabled: Boolean!
 
-  """System Module"""
+  """
+  System Module
+  """
   systemModule: SystemModule!
 
-  """System Module ID"""
+  """
+  System Module ID
+  """
   systemModuleId: Int!
 }
 
 input CreateBusinessModuleInput {
-  """Business ID"""
+  """
+  Business ID
+  """
   businessId: Int!
 
-  """Is Enabled"""
+  """
+  Is Enabled
+  """
   isEnabled: Boolean!
 
-  """System Module ID"""
+  """
+  System Module ID
+  """
   systemModuleId: Int!
 }
 
 input CreatePermissionInput {
-  """Action to be performed on the resource"""
+  """
+  Action to be performed on the resource
+  """
   action: String!
 
-  """Resource for the permission"""
+  """
+  Resource for the permission
+  """
   resource: String!
 }
 
@@ -64,57 +86,87 @@ input CreateProfileInput {
 }
 
 input CreateRoleInput {
-  """ID of the business"""
+  """
+  ID of the business
+  """
   businessId: Int
 
-  """Name of the role"""
+  """
+  Name of the role
+  """
   name: String!
 }
 
 input CreateRolePermissionInput {
-  """ID of the permission"""
+  """
+  ID of the permission
+  """
   permissionId: Int!
 
-  """ID of the role"""
+  """
+  ID of the role
+  """
   roleId: Int!
 }
 
 input CreateServicePlanInput {
-  """Description of the service plan"""
+  """
+  Description of the service plan
+  """
   description: String!
 
-  """Modules for the service plan"""
+  """
+  Modules for the service plan
+  """
   moduleIds: [ServicePlanModuleInput!]!
 
-  """Name of the service plan"""
+  """
+  Name of the service plan
+  """
   name: String!
 
-  """Price of the service plan"""
+  """
+  Price of the service plan
+  """
   price: Int!
 
-  """One-time setup fee for the service plan"""
+  """
+  One-time setup fee for the service plan
+  """
   setupFee: Int!
 
-  """Status of the service plan"""
+  """
+  Status of the service plan
+  """
   status: String! = "ACTIVE"
 }
 
 input CreateServicePlanModuleInput {
-  """Module Is Enabled"""
+  """
+  Module Is Enabled
+  """
   isEnabled: Boolean!
 
-  """Service Plan ID"""
+  """
+  Service Plan ID
+  """
   servicePlanId: Int!
 
-  """System Module ID"""
+  """
+  System Module ID
+  """
   systemModuleId: Int!
 }
 
 input CreateSystemModuleInput {
-  """Is the system module enabled?"""
+  """
+  Is the system module enabled?
+  """
   isEnabled: Boolean!
 
-  """Name of the system module"""
+  """
+  Name of the system module
+  """
   name: String!
 }
 
@@ -127,10 +179,14 @@ input CreateUserInput {
 }
 
 input CreateUserPermissionInput {
-  """ID of the permission"""
+  """
+  ID of the permission
+  """
   permissionId: Int!
 
-  """ID of the user"""
+  """
+  ID of the user
+  """
   userId: Int!
 }
 
@@ -139,31 +195,49 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-"""Gender of the user"""
+"""
+Gender of the user
+"""
 enum GENDER {
   FEMALE
   MALE
 }
 
 input LoginAuthInput {
-  """User email"""
+  """
+  User email
+  """
   email: String!
 
-  """User password"""
+  """
+  User password
+  """
   password: String!
 }
 
 type Mutation {
-  createBusinessModule(createBusinessModuleInput: CreateBusinessModuleInput!): BusinessModule!
+  createBusinessModule(
+    createBusinessModuleInput: CreateBusinessModuleInput!
+  ): BusinessModule!
   createPermission(createPermissionInput: CreatePermissionInput!): Permission!
   createProfile(createProfileInput: CreateProfileInput!): Profile!
   createRole(createRoleInput: CreateRoleInput!): Role!
-  createRolePermission(createRolePermissionInput: CreateRolePermissionInput!): RolePermission!
-  createServicePlan(createServicePlanInput: CreateServicePlanInput!): ServicePlanResponse!
-  createServicePlanModule(createServicePlanModuleInput: CreateServicePlanModuleInput!): ServicePlanModule!
-  createSystemModule(createSystemModuleInput: CreateSystemModuleInput!): SystemModuleResponse!
+  createRolePermission(
+    createRolePermissionInput: CreateRolePermissionInput!
+  ): RolePermission!
+  createServicePlan(
+    createServicePlanInput: CreateServicePlanInput!
+  ): ServicePlanResponse!
+  createServicePlanModule(
+    createServicePlanModuleInput: CreateServicePlanModuleInput!
+  ): ServicePlanModule!
+  createSystemModule(
+    createSystemModuleInput: CreateSystemModuleInput!
+  ): SystemModuleResponse!
   createUser(createUserInput: CreateUserInput!): User!
-  createUserPermission(createUserPermissionInput: CreateUserPermissionInput!): UserPermission!
+  createUserPermission(
+    createUserPermissionInput: CreateUserPermissionInput!
+  ): UserPermission!
   login(loginInput: LoginAuthInput!): Auth!
   removeBusinessModule(businessId: Int!, systemModuleId: Int!): BusinessModule!
   removePermission(id: Int!): Permission!
@@ -171,19 +245,36 @@ type Mutation {
   removeRole(id: Int!): Role!
   removeRolePermission(id: Int!): RolePermission!
   removeServicePlan(id: Int!): ServicePlanResponse!
-  removeServicePlanModule(servicePlanId: Int!, systemModuleId: Int!): ServicePlanModule!
+  removeServicePlanModule(
+    servicePlanId: Int!
+    systemModuleId: Int!
+  ): ServicePlanModule!
   removeSystemModule(id: Int!): SystemModuleResponse!
   removeUser(id: Int!): User!
   removeUserPermission(id: Int!): UserPermission!
-  updateBusinessModule(updateBusinessModuleInput: UpdateBusinessModuleInput!): BusinessModule!
+  updateBusinessModule(
+    updateBusinessModuleInput: UpdateBusinessModuleInput!
+  ): BusinessModule!
   updatePermission(updatePermissionInput: UpdatePermissionInput!): Permission!
   updateProfile(updateProfileInput: UpdateProfileInput!): Profile!
   updateRole(updateRoleInput: UpdateRoleInput!): Role!
-  updateRolePermission(updateRolePermissionInput: UpdateRolePermissionInput!): RolePermission!
-  updateServicePlan(id: Int!, updateServicePlanInput: UpdateServicePlanInput!): ServicePlanResponse!
-  updateServicePlanModule(updateServicePlanModuleInput: UpdateServicePlanModuleInput!): ServicePlanModule!
-  updateSystemModule(id: Int!, updateSystemModuleInput: UpdateSystemModuleInput!): SystemModuleResponse!
-  updateUserPermission(updateUserPermissionInput: UpdateUserPermissionInput!): UserPermission!
+  updateRolePermission(
+    updateRolePermissionInput: UpdateRolePermissionInput!
+  ): RolePermission!
+  updateServicePlan(
+    id: Int!
+    updateServicePlanInput: UpdateServicePlanInput!
+  ): ServicePlanResponse!
+  updateServicePlanModule(
+    updateServicePlanModuleInput: UpdateServicePlanModuleInput!
+  ): ServicePlanModule!
+  updateSystemModule(
+    id: Int!
+    updateSystemModuleInput: UpdateSystemModuleInput!
+  ): SystemModuleResponse!
+  updateUserPermission(
+    updateUserPermissionInput: UpdateUserPermissionInput!
+  ): UserPermission!
 }
 
 type PaginationMeta {
@@ -199,7 +290,9 @@ type Permission {
   action: String!
   createdAt: DateTime!
 
-  """Unique identifier for the permission"""
+  """
+  Unique identifier for the permission
+  """
   id: ID!
   resource: String!
   updatedAt: DateTime!
@@ -233,7 +326,10 @@ type Query {
   rolePermissions: [RolePermission!]!
   roles: [Role!]!
   servicePlanById(id: Int!): ServicePlanResponse!
-  servicePlanModuleById(servicePlanId: Int!, systemModuleId: Int!): ServicePlanModule!
+  servicePlanModuleById(
+    servicePlanId: Int!
+    systemModuleId: Int!
+  ): ServicePlanModule!
   servicePlanModules: [ServicePlanModule!]!
   servicePlans(query: ServicePlanQueryInput): ServicePlanQueryResponse!
   systemModuleById(id: Int!): SystemModuleResponse!
@@ -245,74 +341,116 @@ type Query {
 }
 
 type Role {
-  """ID of the business"""
+  """
+  ID of the business
+  """
   businessId: Int
 
-  """Unique identifier for the role"""
+  """
+  Unique identifier for the role
+  """
   id: ID!
 
-  """Name of the role"""
+  """
+  Name of the role
+  """
   name: String!
 }
 
 type RolePermission {
-  """ID of the permission"""
+  """
+  ID of the permission
+  """
   permission: Int!
 
-  """ID of the permission"""
+  """
+  ID of the permission
+  """
   permissionId: Int!
   role: Role
 
-  """ID of the role"""
+  """
+  ID of the role
+  """
   roleId: Int!
 }
 
 type ServicePlan {
-  """Timestamp when the service plan was created"""
+  """
+  Timestamp when the service plan was created
+  """
   createdAt: DateTime!
 
-  """User who created the service plan"""
+  """
+  User who created the service plan
+  """
   createdBy: Int!
 
-  """Creator of the service plan"""
+  """
+  Creator of the service plan
+  """
   creator: User
 
-  """Description of the service plan"""
+  """
+  Description of the service plan
+  """
   description: String!
 
-  """Unique identifier for the service plan"""
+  """
+  Unique identifier for the service plan
+  """
   id: ID!
 
-  """Name of the service plan"""
+  """
+  Name of the service plan
+  """
   name: String!
 
-  """Price of the service plan"""
+  """
+  Price of the service plan
+  """
   price: Int!
 
-  """One-time setup fee for the service plan"""
+  """
+  One-time setup fee for the service plan
+  """
   setupFee: Int!
 
-  """Status of the service plan"""
+  """
+  Status of the service plan
+  """
   status: String!
 
-  """Timestamp when the service plan was last updated"""
+  """
+  Timestamp when the service plan was last updated
+  """
   updatedAt: DateTime!
 }
 
 type ServicePlanModule {
-  """Module Is Enabled"""
+  """
+  Module Is Enabled
+  """
   isEnabled: Boolean!
 
-  """Service Plan Details"""
+  """
+  Service Plan Details
+  """
   servicePlan: ServicePlan!
 
-  """Service Plan ID"""
+  """
+  Service Plan ID
+  """
   servicePlanId: Int!
 
-  """System Module Details"""
+  """
+  System Module Details
+  """
   systemModule: SystemModule!
 
-  """System Module ID"""
+  """
+  System Module ID
+  """
   systemModuleId: Int!
 }
 
@@ -346,19 +484,29 @@ type ServicePlanResponse {
 }
 
 type SystemModule {
-  """Creation date of the system module"""
+  """
+  Creation date of the system module
+  """
   createdAt: DateTime!
 
-  """ID of the system module"""
+  """
+  ID of the system module
+  """
   id: ID!
 
-  """Is the system module enabled?"""
+  """
+  Is the system module enabled?
+  """
   isEnabled: Boolean!
 
-  """Name of the system module"""
+  """
+  Name of the system module
+  """
   name: String!
 
-  """Last update date of the system module"""
+  """
+  Last update date of the system module
+  """
   updatedAt: DateTime!
 }
 
@@ -378,7 +526,9 @@ type SystemModuleResponse {
   success: Boolean!
 }
 
-"""User account status"""
+"""
+User account status
+"""
 enum USER_ACCOUNT_STATUS {
   ACTIVE
   BLOCKED
@@ -393,24 +543,36 @@ enum USER_ACCOUNT_STATUS {
 }
 
 input UpdateBusinessModuleInput {
-  """Business ID"""
+  """
+  Business ID
+  """
   businessId: Int!
 
-  """Is Enabled"""
+  """
+  Is Enabled
+  """
   isEnabled: Boolean!
 
-  """System Module ID"""
+  """
+  System Module ID
+  """
   systemModuleId: Int!
 }
 
 input UpdatePermissionInput {
-  """Action to be performed on the resource"""
+  """
+  Action to be performed on the resource
+  """
   action: String!
 
-  """Unique identifier for the permission"""
+  """
+  Unique identifier for the permission
+  """
   id: ID!
 
-  """Resource for the permission"""
+  """
+  Resource for the permission
+  """
   resource: String!
 }
 
@@ -429,104 +591,158 @@ input UpdateProfileInput {
 }
 
 input UpdateRoleInput {
-  """ID of the business"""
+  """
+  ID of the business
+  """
   businessId: Int
 
-  """Unique identifier for the role"""
+  """
+  Unique identifier for the role
+  """
   id: ID!
 
-  """Name of the role"""
+  """
+  Name of the role
+  """
   name: String!
 }
 
 input UpdateRolePermissionInput {
-  """ID of the permission"""
+  """
+  ID of the permission
+  """
   permissionId: Int!
 
-  """ID of the role"""
+  """
+  ID of the role
+  """
   roleId: Int!
 }
 
 input UpdateServicePlanInput {
-  """Description of the service plan"""
+  """
+  Description of the service plan
+  """
   description: String!
 
-  """Modules for the service plan"""
+  """
+  Modules for the service plan
+  """
   moduleIds: [ServicePlanModuleInput!]!
 
-  """Name of the service plan"""
+  """
+  Name of the service plan
+  """
   name: String!
 
-  """Price of the service plan"""
+  """
+  Price of the service plan
+  """
   price: Int!
 
-  """One-time setup fee for the service plan"""
+  """
+  One-time setup fee for the service plan
+  """
   setupFee: Int!
 
-  """Status of the service plan"""
+  """
+  Status of the service plan
+  """
   status: String! = "ACTIVE"
 }
 
 input UpdateServicePlanModuleInput {
-  """Module Is Enabled"""
+  """
+  Module Is Enabled
+  """
   isEnabled: Boolean!
 
-  """Service Plan ID"""
+  """
+  Service Plan ID
+  """
   servicePlanId: Int!
 
-  """System Module ID"""
+  """
+  System Module ID
+  """
   systemModuleId: Int!
 }
 
 input UpdateSystemModuleInput {
-  """Is the system module enabled?"""
+  """
+  Is the system module enabled?
+  """
   isEnabled: Boolean!
 
-  """Name of the system module"""
+  """
+  Name of the system module
+  """
   name: String!
 }
 
 input UpdateUserPermissionInput {
   id: Int!
 
-  """ID of the permission"""
+  """
+  ID of the permission
+  """
   permissionId: Int!
 
-  """ID of the user"""
+  """
+  ID of the user
+  """
   userId: Int!
 }
 
 type User {
-  """Date when the user was created"""
+  """
+  Date when the user was created
+  """
   createdAt: DateTime!
 
-  """ID of the user who deleted the user account"""
+  """
+  ID of the user who deleted the user account
+  """
   deletedBy: Int
 
-  """Email of the user"""
+  """
+  Email of the user
+  """
   email: String!
   id: ID!
   profile: Profile
 
-  """Role of the user"""
+  """
+  Role of the user
+  """
   role: Role
   roleId: Int!
 
-  """Status of the user account"""
+  """
+  Status of the user account
+  """
   status: USER_ACCOUNT_STATUS!
 
-  """Date when the user was last updated"""
+  """
+  Date when the user was last updated
+  """
   updatedAt: DateTime!
 }
 
 type UserPermission {
-  """Permission details"""
+  """
+  Permission details
+  """
   permission: Permission!
 
-  """ID of the permission"""
+  """
+  ID of the permission
+  """
   permissionId: Int!
   user: User
 
-  """ID of the user"""
+  """
+  ID of the user
+  """
   userId: Int!
 }
