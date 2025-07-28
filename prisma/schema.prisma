@@ -142,6 +142,7 @@ model Business {
   modules                  businessModule[]     @relation(name: "businessModules")
   roles                    Role[]               @relation(name: "rolesInBusiness")
   businessSettings         BusinessSettings?    @relation(name: "businessSettings")
+  attendanceSettings       AttendanceSettings?  @relation(name: "attendanceSettings")
   employmentStatuses       EmploymentStatus[]   @relation(name: "employmentStatusesInBusiness")
   designations             Designation[]        @relation(name: "designationsInBusiness")
   jobTypes                 JobType[]            @relation(name: "jobTypesInBusiness")
@@ -170,6 +171,17 @@ model BusinessSettings {
   businessTimeZone        String?                 @default("Asia/Dhaka") @map("business_time_zone")
   deleteReadNotifications DeleteReadNotifications @default(thirty_days) @map("delete_read_notifications")
   theme                   String?                 @map("theme")
+}
+
+model AttendanceSettings {
+  id                   Int      @id @default(autoincrement())
+  businessId           Int      @unique @map("business_id")
+  business             Business @relation(name: "attendanceSettings", fields: [businessId], references: [id])
+  punchInTimeTolerance Int      @default(15) @map("punch_in_time_tolerance")
+  punchInOutAlert      Boolean  @default(true) @map("punch_in_out_alert")
+  punchInOutInterval   Int      @default(1) @map("punch_in_out_interval")
+  autoApproval         Boolean  @default(false) @map("auto_approval")
+  isGeoLocationEnabled Boolean  @default(false) @map("is_geo_location_enabled")
 }
 
 model BusinessSchedule {
