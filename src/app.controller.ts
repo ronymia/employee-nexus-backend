@@ -18,6 +18,13 @@ export class AppController {
   }
 
   // SETUP
+  @Get('/seed-super-admin')
+  async seedSuperAdmin() {
+    await this.appService.seedSuperAdmin();
+    return 'Super admin created';
+  }
+
+  // SETUP
   @Get('/setup')
   async setup() {
     await this.appService.setup();
