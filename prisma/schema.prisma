@@ -85,10 +85,11 @@ model User {
   jobPlatformCreated        JobPlatform[]        @relation(name: "jobPlatformCreated")
   recruitmentProcessCreated RecruitmentProcess[] @relation(name: "recruitmentProcessCreated")
   onboardingProcessCreated  OnboardingProcess[]  @relation(name: "onboardingProcessCreated")
-  workLoSiteCreated         WorkLoSite[]         @relation(name: "workLoSiteCreated")
+  workSiteCreated           WorkSite[]           @relation(name: "workSiteCreated")
   workScheduleCreated       WorkSchedule[]       @relation(name: "workScheduleCreated")
   managedDepartments        Department[]         @relation(name: "managedDepartments")
   departmentCreated         Department[]         @relation(name: "departmentCreated")
+  leaveTypeCreated          LeaveType[]          @relation(name: "leaveTypeCreated")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -152,10 +153,11 @@ model Business {
   jobPlatforms             JobPlatform[]        @relation(name: "jobPlatformsInBusiness")
   recruitmentProcesses     RecruitmentProcess[] @relation(name: "recruitmentProcessesInBusiness")
   onboardingProcesses      OnboardingProcess[]  @relation(name: "onboardingProcessesInBusiness")
-  workLoSites              WorkLoSite[]         @relation(name: "workLoSitesInBusiness")
+  workSites                WorkSite[]           @relation(name: "workSitesInBusiness")
   departments              Department[]         @relation(name: "departmentsInBusiness")
   workSchedules            WorkSchedule[]       @relation(name: "workSchedulesInBusiness")
   businessSchedule         BusinessSchedule[]   @relation(name: "businessSchedules")
+  leaveTypes               LeaveType[]          @relation(name: "leaveTypesInBusiness")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -430,7 +432,7 @@ model OnboardingProcess {
   @@map("onboarding_processes")
 }
 
-model WorkLoSite {
+model WorkSite {
   id                   Int       @id @default(autoincrement())
   name                 String    @unique
   description          String
@@ -442,9 +444,9 @@ model WorkLoSite {
   isIpEnabled          Boolean?  @map("is_ip_enabled")
   ipAddress            String?   @map("ip_address")
   businessId           Int?      @map("business_id")
-  business             Business? @relation(name: "workLoSitesInBusiness", fields: [businessId], references: [id])
+  business             Business? @relation(name: "workSitesInBusiness", fields: [businessId], references: [id])
   createdBy            Int?      @map("created_by")
-  creator              User?     @relation(name: "workLoSiteCreated", fields: [createdBy], references: [id])
+  creator              User?     @relation(name: "workSiteCreated", fields: [createdBy], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -506,4 +508,29 @@ model Shift {
   endTime    String   @map("end_time")
   scheduleId Int      @map("schedule_id")
   schedule   Schedule @relation(name: "shiftInSchedule", fields: [scheduleId], references: [id])
+}
+
+enum LeaveRolloverType {
+  none
+  partial_roll_over
+  full_roll_over
+}
+
+model LeaveType {
+  id                  Int               @id @default(autoincrement())
+  leaveType           String            @map("leave_type")
+  leaveHours          Int               @default(0) @map("leave_hours")
+  leaveRolloverType   LeaveRolloverType @default(none) @map("leave_rollover_type")
+  carryOverLimit      Int?              @map("carry_over_limit")
+  status              Status            @default(Active)
+  employmentStatusIds Int[]             @default([]) @map("employment_status_ids")
+  businessId          Int?              @map("business_id")
+  business            Business?         @relation(name: "leaveTypesInBusiness", fields: [businessId], references: [id])
+  createdBy           Int?              @map("created_by")
+  creator             User?             @relation(name: "leaveTypeCreated", fields: [createdBy], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("leave_types")
 }
