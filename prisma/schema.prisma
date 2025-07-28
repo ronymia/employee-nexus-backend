@@ -144,6 +144,7 @@ model Business {
   businessSettings         BusinessSettings?    @relation(name: "businessSettings")
   leaveSettings            LeaveSettings?       @relation(name: "leaveSettings")
   attendanceSettings       AttendanceSettings?  @relation(name: "attendanceSettings")
+  PaymentSettings          PaymentSettings?     @relation(name: "paymentSettings")
   employmentStatuses       EmploymentStatus[]   @relation(name: "employmentStatusesInBusiness")
   designations             Designation[]        @relation(name: "designationsInBusiness")
   jobTypes                 JobType[]            @relation(name: "jobTypesInBusiness")
@@ -197,6 +198,17 @@ model LeaveSettings {
   autoApproval Boolean  @default(false) @map("auto_approval")
 
   @@map("leave_settings")
+}
+
+model PaymentSettings {
+  id          Int      @id @default(autoincrement())
+  businessId  Int      @unique @map("business_id")
+  business    Business @relation(name: "paymentSettings", fields: [businessId], references: [id])
+  paymentType String   @map("payment_type")
+  dayOfWeek   Int?     @default(0) @map("day_of_week")
+  dayOfMonth  Int?     @default(5) @map("day_of_month")
+
+  @@map("payment_settings")
 }
 
 model BusinessSchedule {
