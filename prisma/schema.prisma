@@ -181,35 +181,35 @@ model BusinessSettings {
 }
 
 model AttendanceSettings {
-  id                   Int      @id @default(autoincrement())
-  businessId           Int      @unique @map("business_id")
-  business             Business @relation(name: "attendanceSettings", fields: [businessId], references: [id])
-  punchInTimeTolerance Int      @default(15) @map("punch_in_time_tolerance")
-  punchInOutAlert      Boolean  @default(true) @map("punch_in_out_alert")
-  punchInOutInterval   Int      @default(1) @map("punch_in_out_interval")
-  autoApproval         Boolean  @default(false) @map("auto_approval")
-  isGeoLocationEnabled Boolean  @default(false) @map("is_geo_location_enabled")
+  id                   Int       @id @default(autoincrement())
+  businessId           Int?      @unique @map("business_id")
+  business             Business? @relation(name: "attendanceSettings", fields: [businessId], references: [id])
+  punchInTimeTolerance Int       @default(15) @map("punch_in_time_tolerance")
+  punchInOutAlert      Boolean   @default(true) @map("punch_in_out_alert")
+  punchInOutInterval   Int       @default(1) @map("punch_in_out_interval")
+  autoApproval         Boolean   @default(false) @map("auto_approval")
+  isGeoLocationEnabled Boolean   @default(false) @map("is_geo_location_enabled")
 
   @@map("attendance_settings")
 }
 
 model LeaveSettings {
-  id           Int      @id @default(autoincrement())
-  businessId   Int      @unique @map("business_id")
-  business     Business @relation(name: "leaveSettings", fields: [businessId], references: [id])
-  startMonth   Int      @default(1) @map("start_month")
-  autoApproval Boolean  @default(false) @map("auto_approval")
+  id           Int       @id @default(autoincrement())
+  businessId   Int?      @unique @map("business_id")
+  business     Business? @relation(name: "leaveSettings", fields: [businessId], references: [id])
+  startMonth   Int       @default(1) @map("start_month")
+  autoApproval Boolean   @default(false) @map("auto_approval")
 
   @@map("leave_settings")
 }
 
 model PaymentSettings {
-  id          Int      @id @default(autoincrement())
-  businessId  Int      @unique @map("business_id")
-  business    Business @relation(name: "paymentSettings", fields: [businessId], references: [id])
-  paymentType String   @map("payment_type")
-  dayOfWeek   Int?     @default(0) @map("day_of_week")
-  dayOfMonth  Int?     @default(5) @map("day_of_month")
+  id          Int       @id @default(autoincrement())
+  businessId  Int?      @unique @map("business_id")
+  business    Business? @relation(name: "paymentSettings", fields: [businessId], references: [id])
+  paymentType String    @map("payment_type")
+  dayOfWeek   Int?      @default(0) @map("day_of_week")
+  dayOfMonth  Int?      @default(5) @map("day_of_month")
 
   @@map("payment_settings")
 }

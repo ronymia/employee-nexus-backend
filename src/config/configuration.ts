@@ -19,3 +19,25 @@ export default () => ({
     refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN,
   },
 });
+
+export const envKey = {
+  node_env: 'NODE_ENV',
+  port: 'PORT',
+  database_url: 'DATABASE_URL',
+  bcrypt_salt_rounds: 'BCRYPT_SALT_ROUNDS',
+  // DEFAULT PASSWORD
+  default_password: {
+    super_admin: 'DEFAULT_SUPER_ADMIN_PASS',
+    business_owner: 'DEFAULT_BUSINESS_OWNER_PASS',
+    admin: 'DEFAULT_ADMIN_PASS',
+    manager: 'DEFAULT_MANAGER_PASS',
+    employee: 'DEFAULT_EMPLOYEE_PASS',
+  },
+  // AUTH
+  jwt: {
+    access_token: 'JWT_ACCESS_TOKEN',
+    refresh_token: 'JWT_REFRESH_TOKEN',
+    access_expires_in: 'JWT_ACCESS_EXPIRES_IN',
+    refresh_expires_in: 'JWT_REFRESH_EXPIRES_IN',
+  },
+};

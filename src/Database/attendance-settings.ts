@@ -1,4 +1,4 @@
-export const attendanceSettings = {
+export const defaultAttendanceSettings = {
   business_id: null,
   punch_in_time_tolerance: 15,
   work_availability_definition: 80,

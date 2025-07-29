@@ -11,6 +11,15 @@ import {
   permissions,
   superAdminPermissions,
 } from './config';
+import { defaultDesignations } from './Database/designation';
+import { defaultEmploymentStatuses } from './Database/employment-status';
+import { defaultJobTypes } from './Database/job-type';
+import { defaultJobPlatforms } from './Database/job-platform';
+import { defaultLeaveTypes } from './Database/leave-type';
+import { defaultRecruitmentProcesses } from './Database/recruitment-process';
+import { defaultAttendanceSettings } from './Database/attendance-settings';
+import { leaveSettings } from './Database/leave-settings';
+import { paymentSettings } from './Database/payment-settings';
 
 @Injectable()
 export class AppService {
@@ -191,46 +200,108 @@ export class AppService {
       );
     }
   }
-  async setup() {
-    // 1. Ensure SUPER_ADMIN role exists
-    let role = await this.prisma.role.findUnique({
-      where: { name: ROLE.SUPER_ADMIN },
-    });
+  async setup(businessId?: number) {
+    // CREATE DEFAULT DATA
+    const setup = await this.prisma.$transaction(
+      async (prismaClient: Prisma.TransactionClient) => {
+        // CREATE DEFAULT DESIGNATIONS
+        await prismaClient.designation.createMany({
+          data: defaultDesignations.map((designation) => ({
+            ...designation,
+            businessId,
+          })),
+          skipDuplicates: true,
+        });
 
-    if (!role) {
-      role = await this.prisma.role.create({
-        data: {
-          name: ROLE.SUPER_ADMIN,
-        },
-      });
-    }
+        // CREATE DEFAULT EMPLOYMENT STATUS
+        await prismaClient.employmentStatus.createMany({
+          data: defaultEmploymentStatuses.map((status) => ({
+            ...status,
+            businessId,
+          })),
+          skipDuplicates: true,
+        });
 
-    // 2. Check if a super admin user already exists
-    const isSuperAdminExist = await this.prisma.user.findFirst({
-      where: { roleId: role?.id },
-    });
+        // CREATE DEFAULT JOB TYPE
+        await prismaClient.jobType.createMany({
+          data: defaultJobTypes.map((jobType) => ({ ...jobType, businessId })),
+          skipDuplicates: true,
+        });
 
-    if (!isSuperAdminExist) {
-      const password = await PasswordHelpers.passwordHash(
-        this.configService.get(
-          configuration().default_password.super_admin as string,
-        ),
-      );
+        // CREATE DEFAULT JOB PLATFORM
+        await prismaClient.jobPlatform.createMany({
+          data: defaultJobPlatforms.map((platform) => ({
+            ...platform,
+            businessId,
+          })),
+          skipDuplicates: true,
+        });
 
-      await this.prisma.$transaction(
-        async (prismaClient: Prisma.TransactionClient) => {
-          const res = await prismaClient.user.create({
-            data: { ...superUser, roleId: role?.id, password },
-          });
+        // CREATE DEFAULT LEAVE TYPE
+        await prismaClient.leaveType.createMany({
+          data: defaultLeaveTypes.map((leaveType) => ({
+            ...leaveType,
+            businessId,
+          })),
+          skipDuplicates: true,
+        });
 
-          await prismaClient.profile.create({
-            data: {
-              ...superAdminProfile,
-              userId: res.id,
-            },
-          });
-        },
-      );
-    }
+        // CREATE DEFAULT RECRUITMENT PROCESS
+        await prismaClient.recruitmentProcess.createMany({
+          data: defaultRecruitmentProcesses.map((process) => ({
+            ...process,
+            businessId,
+          })),
+          skipDuplicates: true,
+        });
+
+        // CREATE DEFAULT ONBOARDING PROCESS
+        await prismaClient.onboardingProcess.createMany({
+          data: defaultOnboardingProcesses.map((process) => ({
+            ...process,
+            businessId,
+          })),
+          skipDuplicates: true,
+        });
+
+        // CREATE DEFAULT ATTENDANCE SETTINGS
+        await prismaClient.attendanceSettings.create({
+          data: {
+            ...defaultAttendanceSettings,
+            businessId,
+          },
+        });
+
+        // CREATE DEFAULT LEAVE SETTINGS
+        await prismaClient.leaveSettings.create({
+          data: {
+            ...leaveSettings,
+            businessId,
+          },
+        });
+
+        // CREATE DEFAULT PAYMENT SETTINGS
+        await prismaClient.paymentSettings.create({
+          data: {
+            ...paymentSettings,
+            businessId,
+          },
+        });
+
+        // if (businessId) {
+        //   // CREATE DEFAULT BUSINESS SETTINGS
+        //   await prismaClient.businessSettings.create({
+        //     data: {
+        //       ...businessSettings,
+        //       businessId,
+        //     },
+        //   });
+        // }
+
+        return `Setup Complete`;
+      },
+    );
+
+    return setup;
   }
 }
