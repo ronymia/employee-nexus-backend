@@ -17,6 +17,29 @@ input BasePaginationInput {
   sortOrder: String = "desc"
 }
 
+type Business {
+  address: String!
+  city: String!
+  country: String!
+  createdAt: DateTime!
+  email: String!
+  id: Int!
+  isSubscribed: Boolean!
+  lat: Float
+  long: Float
+  name: String!
+  numberOfEmployeesAllowed: Int!
+  phone: String!
+  postcode: String!
+  registrationDate: DateTime!
+  servicePlanId: Int!
+  status: String!
+  trailEndDate: DateTime!
+  updatedAt: DateTime!
+  userId: Int!
+  website: String
+}
+
 type BusinessModule {
   """Business ID"""
   businessId: Int!
@@ -29,6 +52,24 @@ type BusinessModule {
 
   """System Module ID"""
   systemModuleId: Int!
+}
+
+input CreateBusinessInput {
+  address: String!
+  city: String!
+  country: String!
+  email: String!
+  isSubscribed: Boolean!
+  lat: Float
+  long: Float
+  name: String!
+  numberOfEmployeesAllowed: Int!
+  phone: String!
+  postcode: String!
+  registrationDate: DateTime!
+  servicePlanId: Int!
+  trailEndDate: DateTime!
+  website: String
 }
 
 input CreateBusinessModuleInput {
@@ -57,10 +98,10 @@ input CreateProfileInput {
   dateOfBirth: DateTime!
   fullName: String!
   gender: GENDER!
+  maritalStatus: MARITAL_STATUS!
   phone: String!
   postcode: String!
   profilePicture: String
-  userId: Int!
 }
 
 input CreateRoleInput {
@@ -116,11 +157,8 @@ input CreateSystemModuleInput {
 }
 
 input CreateUserInput {
-  deletedBy: Int
   email: String!
   password: String!
-  roleId: Int!
-  status: USER_ACCOUNT_STATUS!
 }
 
 input CreateUserPermissionInput {
@@ -150,7 +188,14 @@ input LoginAuthInput {
   password: String!
 }
 
+"""Marital status of the user"""
+enum MARITAL_STATUS {
+  Married
+  Single
+}
+
 type Mutation {
+  createBusiness(createBusinessInput: CreateBusinessInput!): Business!
   createBusinessModule(createBusinessModuleInput: CreateBusinessModuleInput!): BusinessModule!
   createPermission(createPermissionInput: CreatePermissionInput!): Permission!
   createProfile(createProfileInput: CreateProfileInput!): Profile!
@@ -161,7 +206,9 @@ type Mutation {
   createSystemModule(createSystemModuleInput: CreateSystemModuleInput!): SystemModuleResponse!
   createUser(createUserInput: CreateUserInput!): User!
   createUserPermission(createUserPermissionInput: CreateUserPermissionInput!): UserPermission!
+  createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
   login(loginInput: LoginAuthInput!): Auth!
+  removeBusiness(id: Int!): Business!
   removeBusinessModule(businessId: Int!, systemModuleId: Int!): BusinessModule!
   removePermission(id: Int!): Permission!
   removeProfile(id: Int!): Profile!
@@ -172,6 +219,7 @@ type Mutation {
   removeSystemModule(id: Int!): SystemModuleResponse!
   removeUser(id: Int!): User!
   removeUserPermission(id: Int!): UserPermission!
+  updateBusiness(updateBusinessInput: UpdateBusinessInput!): Business!
   updateBusinessModule(updateBusinessModuleInput: UpdateBusinessModuleInput!): BusinessModule!
   updatePermission(updatePermissionInput: UpdatePermissionInput!): Permission!
   updateProfile(updateProfileInput: UpdateProfileInput!): Profile!
@@ -208,9 +256,10 @@ type Profile {
   country: String!
   createdAt: DateTime!
   dateOfBirth: DateTime!
-  full_name: String!
+  fullName: String!
   gender: GENDER!
   id: ID!
+  maritalStatus: MARITAL_STATUS!
   phone: String!
   postcode: String!
   profilePicture: String
@@ -219,8 +268,10 @@ type Profile {
 }
 
 type Query {
+  business(id: Int!): Business!
   businessModuleById(businessId: Int!, systemModuleId: Int!): BusinessModule!
   businessModules: [BusinessModule!]!
+  businesses: [Business!]!
   permission(id: Int!): Permission!
   permissions: [Permission!]!
   profile(id: Int!): Profile!
@@ -382,6 +433,25 @@ enum USER_ACCOUNT_STATUS {
   Verified
 }
 
+input UpdateBusinessInput {
+  address: String
+  city: String
+  country: String
+  email: String
+  id: Int!
+  isSubscribed: Boolean
+  lat: Float
+  long: Float
+  name: String
+  numberOfEmployeesAllowed: Int
+  phone: String
+  postcode: String
+  registrationDate: DateTime
+  servicePlanId: Int
+  trailEndDate: DateTime
+  website: String
+}
+
 input UpdateBusinessModuleInput {
   """Business ID"""
   businessId: Int!
@@ -412,10 +482,10 @@ input UpdateProfileInput {
   fullName: String
   gender: GENDER
   id: Int!
+  maritalStatus: MARITAL_STATUS
   phone: String
   postcode: String
   profilePicture: String
-  userId: Int
 }
 
 input UpdateRoleInput {

@@ -20,6 +20,7 @@ import { defaultRecruitmentProcesses } from './Database/recruitment-process';
 import { defaultAttendanceSettings } from './Database/attendance-settings';
 import { leaveSettings } from './Database/leave-settings';
 import { paymentSettings } from './Database/payment-settings';
+import { defaultOnboardingProcesses } from './Database/onboarding-process';
 
 @Injectable()
 export class AppService {
@@ -174,6 +175,9 @@ export class AppService {
       where: { name: ROLE.SUPER_ADMIN },
     });
 
+    if (!role) {
+      throw new NotImplementedException('No Super Admin Role Found');
+    }
     // 2. Check if a super admin user already exists
     const isSuperAdminExist = await this.prisma.user.findFirst({
       where: { roleId: role?.id },

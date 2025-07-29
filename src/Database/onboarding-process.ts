@@ -1,4 +1,4 @@
-const defaultOnboardingProcesses = [
+export const defaultOnboardingProcesses = [
   {
     name: 'Pre-boarding',
     description:

@@ -18,7 +18,7 @@ export const superUser = {
 };
 
 export const superAdminProfile = {
-  full_name: 'MD Rony Mia',
+  fullName: 'MD Rony Mia',
   phone: '01321185989',
   dateOfBirth: new Date('1998-12-10').toISOString(),
   gender: GENDER.Male,

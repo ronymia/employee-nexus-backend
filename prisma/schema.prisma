@@ -74,7 +74,7 @@ model User {
   status                    USER_ACCOUNT_STATUS  @default(Verified)
   deletedBy                 Int?                 @map("deleted_by")
   profile                   Profile?             @relation(name: "userProfile")
-  role                      Role?                @relation(fields: [roleId], references: [id])
+  role                      Role                 @relation(fields: [roleId], references: [id])
   roleId                    Int                  @map("role_id")
   userPermissions           UserPermission[]
   business                  Business?            @relation(name: "businessOwner")
@@ -99,7 +99,7 @@ model User {
 
 model Profile {
   id             Int            @id @default(autoincrement())
-  full_name      String
+  fullName       String         @map("full_name")
   phone          String
   profilePicture String?        @map("profile_picture")
   dateOfBirth    DateTime       @map("date_of_birth")
@@ -181,14 +181,15 @@ model BusinessSettings {
 }
 
 model AttendanceSettings {
-  id                   Int       @id @default(autoincrement())
-  businessId           Int?      @unique @map("business_id")
-  business             Business? @relation(name: "attendanceSettings", fields: [businessId], references: [id])
-  punchInTimeTolerance Int       @default(15) @map("punch_in_time_tolerance")
-  punchInOutAlert      Boolean   @default(true) @map("punch_in_out_alert")
-  punchInOutInterval   Int       @default(1) @map("punch_in_out_interval")
-  autoApproval         Boolean   @default(false) @map("auto_approval")
-  isGeoLocationEnabled Boolean   @default(false) @map("is_geo_location_enabled")
+  id                         Int       @id @default(autoincrement())
+  businessId                 Int?      @unique @map("business_id")
+  business                   Business? @relation(name: "attendanceSettings", fields: [businessId], references: [id])
+  punchInTimeTolerance       Int       @default(15) @map("punch_in_time_tolerance")
+  workAvailabilityDefinition Int       @default(80) @map("work_availability_definition")
+  punchInOutAlert            Boolean   @default(true) @map("punch_in_out_alert")
+  punchInOutInterval         Int       @default(1) @map("punch_in_out_interval")
+  autoApproval               Boolean   @default(false) @map("auto_approval")
+  isGeoLocationEnabled       Boolean   @default(false) @map("is_geo_location_enabled")
 
   @@map("attendance_settings")
 }
@@ -517,6 +518,7 @@ enum LeaveRolloverType {
 
 model LeaveType {
   id                  Int               @id @default(autoincrement())
+  name                String            @unique
   leaveType           String            @map("leave_type")
   leaveHours          Int               @default(0) @map("leave_hours")
   leaveRolloverType   LeaveRolloverType @default(NONE) @map("leave_rollover_type")

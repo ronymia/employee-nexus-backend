@@ -6,12 +6,17 @@ import {
   IsDateString,
   IsInt,
 } from 'class-validator';
-import { GENDER } from 'generated/prisma';
+import { GENDER, MARITAL_STATUS } from 'generated/prisma';
 import { registerEnumType } from '@nestjs/graphql';
 
 registerEnumType(GENDER, {
   name: 'GENDER',
   description: 'Gender of the user',
+});
+
+registerEnumType(MARITAL_STATUS, {
+  name: 'MARITAL_STATUS',
+  description: 'Marital status of the user',
 });
 
 @InputType()
@@ -37,6 +42,10 @@ export class CreateProfileInput {
   @IsEnum(GENDER)
   gender: GENDER;
 
+  @Field(() => MARITAL_STATUS)
+  @IsEnum(MARITAL_STATUS)
+  maritalStatus: MARITAL_STATUS;
+
   @Field()
   @IsString()
   address: string;
@@ -52,8 +61,4 @@ export class CreateProfileInput {
   @Field()
   @IsString()
   postcode: string;
-
-  @Field(() => Int)
-  @IsInt()
-  userId: number;
 }

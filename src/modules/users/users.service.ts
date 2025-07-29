@@ -9,7 +9,10 @@ export class UsersService {
   // CREATE
   create(createUserInput: CreateUserInput) {
     return this.prisma.user.create({
-      data: createUserInput,
+      data: { ...createUserInput, role: { connect: { id: 1 } } },
+      include: {
+        role: true,
+      },
     });
   }
 

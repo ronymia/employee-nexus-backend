@@ -20,6 +20,7 @@ import { JwtStrategy } from './modules/auth/jwt.strategy';
 import { SystemModulesModule } from './modules/system-modules/system-modules.module';
 import { ServicePlanModulesModule } from './modules/service-plan-modules/service-plan-modules.module';
 import { BusinessModulesModule } from './modules/business-modules/business-modules.module';
+import { BusinessesModule } from './modules/businesses/businesses.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { BusinessModulesModule } from './modules/business-modules/business-modul
     SystemModulesModule,
     ServicePlanModulesModule,
     BusinessModulesModule,
+    BusinessesModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

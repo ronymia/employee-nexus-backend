@@ -1,9 +1,14 @@
 import { Field, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
-import { GENDER } from 'generated/prisma';
+import { GENDER, MARITAL_STATUS } from 'generated/prisma';
 
 registerEnumType(GENDER, {
   name: 'GENDER',
   description: 'Gender of the user',
+});
+
+registerEnumType(MARITAL_STATUS, {
+  name: 'MARITAL_STATUS',
+  description: 'Marital status of the user',
 });
 
 @ObjectType()
@@ -12,7 +17,7 @@ export class Profile {
   id: number;
 
   @Field()
-  full_name: string;
+  fullName: string;
 
   @Field()
   phone: string;
@@ -25,6 +30,9 @@ export class Profile {
 
   @Field(() => GENDER)
   gender: GENDER;
+
+  @Field(() => MARITAL_STATUS)
+  maritalStatus: MARITAL_STATUS;
 
   @Field()
   address: string;
