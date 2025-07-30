@@ -32,7 +32,7 @@ export class BusinessesService {
       async (prismaClient: Prisma.TransactionClient) => {
         // CREATE USER
         const createdUser = await prismaClient.user.create({
-          data: { ...createUserInput, roleId: 1 },
+          data: createUserInput,
         });
 
         if (!createdUser) {
@@ -76,7 +76,12 @@ export class BusinessesService {
 
         // GET OWNER ROLE
         const ownerRole = await prismaClient.role.findUnique({
-          where: { name: `${ROLE.OWNER}#${businessId}`, businessId },
+          where: {
+            name_businessId: {
+              name: `${ROLE.OWNER}#${businessId}`,
+              businessId,
+            },
+          },
         });
 
         const ownerRoleId = ownerRole?.id;
@@ -87,7 +92,13 @@ export class BusinessesService {
         // UPDATE USER ROLE
         await prismaClient.user.update({
           where: { id: createdUser.id },
-          data: { roleId: ownerRoleId },
+          data: {
+            role: {
+              connect: {
+                id: ownerRoleId,
+              },
+            },
+          },
         });
 
         // GET ALL BUSINESS OWNER PERMISSIONS

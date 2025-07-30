@@ -80,8 +80,8 @@ model User {
   status                    USER_ACCOUNT_STATUS  @default(Verified)
   deletedBy                 Int?                 @map("deleted_by")
   profile                   Profile?             @relation(name: "userProfile")
-  role                      Role                 @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  roleId                    Int                  @map("role_id")
+  role                      Role?                @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId                    Int?                 @map("role_id")
   userPermissions           UserPermission[]
   business                  Business?            @relation(name: "businessOwner")
   servicePlanCreated        ServicePlan[]        @relation(name: "servicePlanCreated")

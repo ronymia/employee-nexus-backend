@@ -168,7 +168,12 @@ export class AppService {
 
     // 1. Ensure SUPER_ADMIN role exists
     const role = await this.prisma.role.findUnique({
-      where: { name: ROLE.SUPER_ADMIN },
+      where: {
+        name_businessId: {
+          name: ROLE.SUPER_ADMIN,
+          businessId: null as any,
+        },
+      },
     });
 
     if (!role) {
@@ -207,8 +212,14 @@ export class AppService {
 
     const setup = await this.prisma.$transaction(
       async (prismaClient: Prisma.TransactionClient) => {
-        const superAdmin = await prismaClient.role.findFirst({
-          where: { name: ROLE.SUPER_ADMIN },
+        // GET SUPER ADMIN
+        const superAdmin = await prismaClient.role.findUnique({
+          where: {
+            name_businessId: {
+              name: ROLE.SUPER_ADMIN,
+              businessId: null as any,
+            },
+          },
         });
         if (!superAdmin) {
           throw new NotImplementedException('No Super Admin Role Found');
@@ -218,8 +229,15 @@ export class AppService {
         // CREATE DEFAULT DESIGNATIONS
         await Promise.all(
           defaultDesignations.map((element) =>
-            prismaClient.designation.create({
-              data: {
+            prismaClient.designation.upsert({
+              where: {
+                name_businessId: {
+                  name: element.name,
+                  businessId: null as any,
+                },
+              },
+              update: {},
+              create: {
                 ...element,
                 creator: {
                   connect: {
@@ -234,8 +252,15 @@ export class AppService {
         // CREATE DEFAULT EMPLOYMENT STATUS
         await Promise.all(
           defaultEmploymentStatuses.map(async (element) =>
-            prismaClient.employmentStatus.create({
-              data: {
+            prismaClient.employmentStatus.upsert({
+              where: {
+                name_businessId: {
+                  name: element.name,
+                  businessId: null as any,
+                },
+              },
+              update: {},
+              create: {
                 ...element,
                 creator: {
                   connect: {
@@ -250,8 +275,15 @@ export class AppService {
         // CREATE DEFAULT JOB TYPE
         await Promise.all(
           defaultJobTypes.map(async (element) =>
-            prismaClient.jobType.create({
-              data: {
+            prismaClient.jobType.upsert({
+              where: {
+                name_businessId: {
+                  name: element.name,
+                  businessId: null as any,
+                },
+              },
+              update: {},
+              create: {
                 ...element,
                 creator: {
                   connect: {
@@ -266,8 +298,15 @@ export class AppService {
         // CREATE DEFAULT JOB PLATFORM
         await Promise.all(
           defaultJobPlatforms.map(async (element) =>
-            prismaClient.jobPlatform.create({
-              data: {
+            prismaClient.jobPlatform.upsert({
+              where: {
+                name_businessId: {
+                  name: element.name,
+                  businessId: null as any,
+                },
+              },
+              update: {},
+              create: {
                 ...element,
                 creator: {
                   connect: {
@@ -282,8 +321,15 @@ export class AppService {
         // CREATE DEFAULT LEAVE TYPE
         await Promise.all(
           defaultLeaveTypes.map(async (element) =>
-            prismaClient.leaveType.create({
-              data: {
+            prismaClient.leaveType.upsert({
+              where: {
+                name_businessId: {
+                  name: element.name,
+                  businessId: null as any,
+                },
+              },
+              update: {},
+              create: {
                 ...element,
                 creator: {
                   connect: {
@@ -298,8 +344,15 @@ export class AppService {
         // CREATE DEFAULT RECRUITMENT PROCESS
         await Promise.all(
           defaultRecruitmentProcesses.map(async (element) =>
-            prismaClient.recruitmentProcess.create({
-              data: {
+            prismaClient.recruitmentProcess.upsert({
+              where: {
+                name_businessId: {
+                  name: element.name,
+                  businessId: null as any,
+                },
+              },
+              update: {},
+              create: {
                 ...element,
                 creator: {
                   connect: {
@@ -314,8 +367,15 @@ export class AppService {
         // CREATE DEFAULT ONBOARDING PROCESS
         await Promise.all(
           defaultOnboardingProcesses.map(async (element) =>
-            prismaClient.onboardingProcess.create({
-              data: {
+            prismaClient.onboardingProcess.upsert({
+              where: {
+                name_businessId: {
+                  name: element.name,
+                  businessId: null as any,
+                },
+              },
+              update: {},
+              create: {
                 ...element,
                 creator: {
                   connect: {
@@ -328,6 +388,10 @@ export class AppService {
         );
 
         return `Setup Complete`;
+      },
+      {
+        maxWait: 60000,
+        timeout: 60000,
       },
     );
 
