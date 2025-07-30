@@ -205,12 +205,12 @@ model LeaveSettings {
 }
 
 model PaymentSettings {
-  id          Int       @id @default(autoincrement())
-  businessId  Int?      @unique @map("business_id")
-  business    Business? @relation(name: "paymentSettings", fields: [businessId], references: [id])
-  paymentType String    @map("payment_type")
-  dayOfWeek   Int?      @default(0) @map("day_of_week")
-  dayOfMonth  Int?      @default(5) @map("day_of_month")
+  id          Int      @id @default(autoincrement())
+  businessId  Int      @unique @map("business_id")
+  business    Business @relation(name: "paymentSettings", fields: [businessId], references: [id])
+  paymentType String   @map("payment_type")
+  dayOfWeek   Int?     @default(0) @map("day_of_week")
+  dayOfMonth  Int?     @default(5) @map("day_of_month")
 
   @@map("payment_settings")
 }
