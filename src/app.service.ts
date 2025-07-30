@@ -17,9 +17,6 @@ import { defaultJobTypes } from './Database/job-type';
 import { defaultJobPlatforms } from './Database/job-platform';
 import { defaultLeaveTypes } from './Database/leave-type';
 import { defaultRecruitmentProcesses } from './Database/recruitment-process';
-import { defaultAttendanceSettings } from './Database/attendance-settings';
-import { leaveSettings } from './Database/leave-settings';
-import { paymentSettings } from './Database/payment-settings';
 import { defaultOnboardingProcesses } from './Database/onboarding-process';
 
 @Injectable()
@@ -145,8 +142,7 @@ export class AppService {
     return roleRefresh;
   }
 
-  // SETUP
-
+  // SEED SUPER ADMIN AND ROLE
   async seedSuperAdmin() {
     // 1. Ensure SUPER_ADMIN role exists
     await this.prisma.role.createMany({
@@ -204,103 +200,132 @@ export class AppService {
       );
     }
   }
-  async setup(businessId?: number) {
+
+  // DEFAULT SETUP
+  async setup() {
     // CREATE DEFAULT DATA
+
     const setup = await this.prisma.$transaction(
       async (prismaClient: Prisma.TransactionClient) => {
-        // CREATE DEFAULT DESIGNATIONS
-        await prismaClient.designation.createMany({
-          data: defaultDesignations.map((designation) => ({
-            ...designation,
-            businessId,
-          })),
-          skipDuplicates: true,
+        const superAdmin = await prismaClient.role.findFirst({
+          where: { name: ROLE.SUPER_ADMIN },
         });
+        if (!superAdmin) {
+          throw new NotImplementedException('No Super Admin Role Found');
+        }
+
+        const creatorId = superAdmin?.id;
+        // CREATE DEFAULT DESIGNATIONS
+        await Promise.all(
+          defaultDesignations.map((element) =>
+            prismaClient.designation.create({
+              data: {
+                ...element,
+                creator: {
+                  connect: {
+                    id: creatorId,
+                  },
+                },
+              },
+            }),
+          ),
+        );
 
         // CREATE DEFAULT EMPLOYMENT STATUS
-        await prismaClient.employmentStatus.createMany({
-          data: defaultEmploymentStatuses.map((status) => ({
-            ...status,
-            businessId,
-          })),
-          skipDuplicates: true,
-        });
+        await Promise.all(
+          defaultEmploymentStatuses.map(async (element) =>
+            prismaClient.employmentStatus.create({
+              data: {
+                ...element,
+                creator: {
+                  connect: {
+                    id: creatorId,
+                  },
+                },
+              },
+            }),
+          ),
+        );
 
         // CREATE DEFAULT JOB TYPE
-        await prismaClient.jobType.createMany({
-          data: defaultJobTypes.map((jobType) => ({ ...jobType, businessId })),
-          skipDuplicates: true,
-        });
+        await Promise.all(
+          defaultJobTypes.map(async (element) =>
+            prismaClient.jobType.create({
+              data: {
+                ...element,
+                creator: {
+                  connect: {
+                    id: creatorId,
+                  },
+                },
+              },
+            }),
+          ),
+        );
 
         // CREATE DEFAULT JOB PLATFORM
-        await prismaClient.jobPlatform.createMany({
-          data: defaultJobPlatforms.map((platform) => ({
-            ...platform,
-            businessId,
-          })),
-          skipDuplicates: true,
-        });
+        await Promise.all(
+          defaultJobPlatforms.map(async (element) =>
+            prismaClient.jobPlatform.create({
+              data: {
+                ...element,
+                creator: {
+                  connect: {
+                    id: creatorId,
+                  },
+                },
+              },
+            }),
+          ),
+        );
 
         // CREATE DEFAULT LEAVE TYPE
-        await prismaClient.leaveType.createMany({
-          data: defaultLeaveTypes.map((leaveType) => ({
-            ...leaveType,
-            businessId,
-          })),
-          skipDuplicates: true,
-        });
+        await Promise.all(
+          defaultLeaveTypes.map(async (element) =>
+            prismaClient.leaveType.create({
+              data: {
+                ...element,
+                creator: {
+                  connect: {
+                    id: creatorId,
+                  },
+                },
+              },
+            }),
+          ),
+        );
 
         // CREATE DEFAULT RECRUITMENT PROCESS
-        await prismaClient.recruitmentProcess.createMany({
-          data: defaultRecruitmentProcesses.map((process) => ({
-            ...process,
-            businessId,
-          })),
-          skipDuplicates: true,
-        });
+        await Promise.all(
+          defaultRecruitmentProcesses.map(async (element) =>
+            prismaClient.recruitmentProcess.create({
+              data: {
+                ...element,
+                creator: {
+                  connect: {
+                    id: creatorId,
+                  },
+                },
+              },
+            }),
+          ),
+        );
 
         // CREATE DEFAULT ONBOARDING PROCESS
-        await prismaClient.onboardingProcess.createMany({
-          data: defaultOnboardingProcesses.map((process) => ({
-            ...process,
-            businessId,
-          })),
-          skipDuplicates: true,
-        });
-
-        // CREATE DEFAULT ATTENDANCE SETTINGS
-        await prismaClient.attendanceSettings.create({
-          data: {
-            ...defaultAttendanceSettings,
-            businessId,
-          },
-        });
-
-        // CREATE DEFAULT LEAVE SETTINGS
-        await prismaClient.leaveSettings.create({
-          data: {
-            ...leaveSettings,
-            businessId,
-          },
-        });
-
-        // CREATE DEFAULT PAYMENT SETTINGS
-        await prismaClient.paymentSettings.create({
-          data: {
-            ...paymentSettings,
-            businessId,
-          },
-        });
-
-        // if (businessId) {
-        //   // CREATE DEFAULT BUSINESS SETTINGS
-        //   await prismaClient.businessSettings.create({
-        //     data: {
-        //       ...businessSettings,
-        //       businessId,
-        //     },
-        //   });
-        // }
+        await Promise.all(
+          defaultOnboardingProcesses.map(async (element) =>
+            prismaClient.onboardingProcess.create({
+              data: {
+                ...element,
+                creator: {
+                  connect: {
+                    id: creatorId,
+                  },
+                },
+              },
+            }),
+          ),
+        );
 
         return `Setup Complete`;
       },

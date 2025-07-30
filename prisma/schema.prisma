@@ -67,6 +67,12 @@ enum DeleteReadNotifications {
   THIRTY_DAYS  @map("30_days")
 }
 
+enum LeaveRolloverType {
+  NONE              @map("none")
+  PARTIAL_ROLL_OVER @map("partial_roll_over")
+  FULL_ROLLOVER     @map("full_roll_over")
+}
+
 model User {
   id                        Int                  @id @default(autoincrement())
   email                     String               @unique
@@ -74,7 +80,7 @@ model User {
   status                    USER_ACCOUNT_STATUS  @default(Verified)
   deletedBy                 Int?                 @map("deleted_by")
   profile                   Profile?             @relation(name: "userProfile")
-  role                      Role                 @relation(fields: [roleId], references: [id])
+  role                      Role                 @relation(fields: [roleId], references: [id], onDelete: Cascade)
   roleId                    Int                  @map("role_id")
   userPermissions           UserPermission[]
   business                  Business?            @relation(name: "businessOwner")
@@ -111,7 +117,7 @@ model Profile {
   postcode       String
   lat            Float?
   long           Float?
-  user           User           @relation(name: "userProfile", fields: [userId], references: [id])
+  user           User           @relation(name: "userProfile", fields: [userId], references: [id], onDelete: Cascade)
   userId         Int            @unique @map("user_id")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -123,8 +129,8 @@ model Profile {
 model Business {
   id                       Int                  @id @default(autoincrement())
   name                     String
-  email                    String               @unique
-  phone                    String               @unique
+  email                    String
+  phone                    String
   address                  String
   country                  String
   city                     String
@@ -137,7 +143,7 @@ model Business {
   isSubscribed             Boolean              @map("is_subscribed")
   trailEndDate             DateTime             @map("trail_end_date")
   status                   BusinessStatus       @default(Active)
-  user                     User                 @relation(name: "businessOwner", fields: [userId], references: [id])
+  user                     User                 @relation(name: "businessOwner", fields: [userId], references: [id], onDelete: Cascade)
   userId                   Int                  @unique @map("user_id")
   servicePlan              ServicePlan          @relation(name: "businessServicePlan", fields: [servicePlanId], references: [id])
   servicePlanId            Int                  @map("service_plan_id")
@@ -162,13 +168,14 @@ model Business {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([name, userId, email])
   @@map("businesses")
 }
 
 model BusinessSettings {
   id                      Int                     @id @default(autoincrement())
   businessId              Int                     @unique @map("business_id")
-  business                Business                @relation(name: "businessSettings", fields: [businessId], references: [id])
+  business                Business?               @relation(name: "businessSettings", fields: [businessId], references: [id], onDelete: Cascade)
   identifierPrefix        String                  @map("identifier_prefix")
   businessStartDay        Int                     @default(0) @map("business_start_day")
   currency                String                  @default("BDT") @map("currency")
@@ -182,8 +189,8 @@ model BusinessSettings {
 
 model AttendanceSettings {
   id                         Int       @id @default(autoincrement())
-  businessId                 Int?      @unique @map("business_id")
-  business                   Business? @relation(name: "attendanceSettings", fields: [businessId], references: [id])
+  businessId                 Int       @unique @map("business_id")
+  business                   Business? @relation(name: "attendanceSettings", fields: [businessId], references: [id], onDelete: Cascade)
   punchInTimeTolerance       Int       @default(15) @map("punch_in_time_tolerance")
   workAvailabilityDefinition Int       @default(80) @map("work_availability_definition")
   punchInOutAlert            Boolean   @default(true) @map("punch_in_out_alert")
@@ -196,46 +203,47 @@ model AttendanceSettings {
 
 model LeaveSettings {
   id           Int       @id @default(autoincrement())
-  businessId   Int?      @unique @map("business_id")
-  business     Business? @relation(name: "leaveSettings", fields: [businessId], references: [id])
-  startMonth   Int       @default(1) @map("start_month")
+  businessId   Int       @unique @map("business_id")
+  business     Business? @relation(name: "leaveSettings", fields: [businessId], references: [id], onDelete: Cascade)
+  startMonth   Int       @default(0) @map("start_month")
   autoApproval Boolean   @default(false) @map("auto_approval")
 
   @@map("leave_settings")
 }
 
 model PaymentSettings {
-  id          Int      @id @default(autoincrement())
-  businessId  Int      @unique @map("business_id")
-  business    Business @relation(name: "paymentSettings", fields: [businessId], references: [id])
-  paymentType String   @map("payment_type")
-  dayOfWeek   Int?     @default(0) @map("day_of_week")
-  dayOfMonth  Int?     @default(5) @map("day_of_month")
+  id          Int       @id @default(autoincrement())
+  businessId  Int       @unique @map("business_id")
+  business    Business? @relation(name: "paymentSettings", fields: [businessId], references: [id], onDelete: Cascade)
+  paymentType String    @map("payment_type")
+  dayOfWeek   Int?      @default(0) @map("day_of_week")
+  dayOfMonth  Int?      @default(5) @map("day_of_month")
 
   @@map("payment_settings")
 }
 
 model BusinessSchedule {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   day        Int
-  isWeekend  Boolean  @map("is_weekend")
-  startTime  String   @map("start_time")
-  endTime    String   @map("end_time")
-  businessId Int      @map("business_id")
-  business   Business @relation(name: "businessSchedules", fields: [businessId], references: [id])
+  isWeekend  Boolean   @map("is_weekend")
+  startTime  String    @map("start_time")
+  endTime    String    @map("end_time")
+  businessId Int       @unique @map("business_id")
+  business   Business? @relation(name: "businessSchedules", fields: [businessId], references: [id], onDelete: Cascade)
 }
 
 model Role {
   id              Int              @id @default(autoincrement())
-  name            String           @unique // e.g., "super_admin", "admin", "manager"
+  name            String // e.g., "super_admin", "admin", "manager"
   businessId      Int?             @map("business_id")
-  business        Business?        @relation(name: "rolesInBusiness", fields: [businessId], references: [id])
+  business        Business?        @relation(name: "rolesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   user            User[]
   rolePermissions RolePermission[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([name, businessId])
   @@map("roles")
 }
 
@@ -258,8 +266,8 @@ model RolePermission {
   roleId       Int @map("role_id")
   permissionId Int @map("permission_id")
 
-  role       Role       @relation(fields: [roleId], references: [id])
-  permission Permission @relation(fields: [permissionId], references: [id])
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@unique([roleId, permissionId])
   @@map("role_permissions")
@@ -269,8 +277,8 @@ model UserPermission {
   userId       Int @map("user_id")
   permissionId Int @map("permission_id")
 
-  user       User       @relation(fields: [userId], references: [id])
-  permission Permission @relation(fields: [permissionId], references: [id])
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, permissionId])
   @@map("user_permissions")
@@ -281,12 +289,12 @@ model ServicePlan {
   name        String              @unique
   description String
   setupFee    Int                 @map("setup_fee")
-  status      String              @default("Active")
+  status      Status              @default(Active)
   price       Int
   businesses  Business[]          @relation(name: "businessServicePlan")
   modules     ServicePlanModule[] @relation(name: "servicePlanModules")
   createdBy   Int                 @map("created_by")
-  creator     User?               @relation(name: "servicePlanCreated", fields: [createdBy], references: [id])
+  creator     User?               @relation(name: "servicePlanCreated", fields: [createdBy], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -308,9 +316,9 @@ model SystemModule {
 
 model ServicePlanModule {
   servicePlanId  Int          @map("service_plan_id")
-  servicePlan    ServicePlan  @relation(name: "servicePlanModules", fields: [servicePlanId], references: [id])
+  servicePlan    ServicePlan  @relation(name: "servicePlanModules", fields: [servicePlanId], references: [id], onDelete: Cascade)
   systemModuleId Int          @map("system_module_id")
-  systemModule   SystemModule @relation(name: "servicePlanInModules", fields: [systemModuleId], references: [id])
+  systemModule   SystemModule @relation(name: "servicePlanInModules", fields: [systemModuleId], references: [id], onDelete: Cascade)
   isEnabled      Boolean      @map("is_enabled")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -322,9 +330,9 @@ model ServicePlanModule {
 
 model businessModule {
   businessId     Int          @map("service_plan_id")
-  business       Business     @relation(name: "businessModules", fields: [businessId], references: [id])
+  business       Business     @relation(name: "businessModules", fields: [businessId], references: [id], onDelete: Cascade)
   systemModuleId Int          @map("system_module_id")
-  systemModule   SystemModule @relation(name: "businessInModules", fields: [systemModuleId], references: [id])
+  systemModule   SystemModule @relation(name: "businessInModules", fields: [systemModuleId], references: [id], onDelete: Cascade)
   isEnabled      Boolean      @map("is_enabled")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -334,107 +342,96 @@ model businessModule {
   @@map("business_modules")
 }
 
-model EmploymentStatus {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique
-  description String
-  status      Status    @default(Active)
-  businessId  Int?      @map("business_id")
-  business    Business? @relation(name: "employmentStatusesInBusiness", fields: [businessId], references: [id])
-  createdBy   Int?      @map("created_by")
-  creator     User?     @relation(name: "employmentStatusCreated", fields: [createdBy], references: [id])
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("employment_statuses")
-}
-
 model Designation {
   id          Int       @id @default(autoincrement())
   name        String    @unique
   description String
   status      Status    @default(Active)
   businessId  Int?      @map("business_id")
-  business    Business? @relation(name: "designationsInBusiness", fields: [businessId], references: [id])
+  business    Business? @relation(name: "designationsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy   Int?      @map("created_by")
-  creator     User?     @relation(name: "designationCreated", fields: [createdBy], references: [id])
+  creator     User?     @relation(name: "designationCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([name, businessId])
   @@map("designations")
 }
 
 model JobType {
   id          Int       @id @default(autoincrement())
-  name        String    @unique
+  name        String
   description String
   status      Status    @default(Active)
   businessId  Int?      @map("business_id")
-  business    Business? @relation(name: "jobTypesInBusiness", fields: [businessId], references: [id])
+  business    Business? @relation(name: "jobTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy   Int?      @map("created_by")
-  creator     User?     @relation(name: "jobTypeCreated", fields: [createdBy], references: [id])
+  creator     User?     @relation(name: "jobTypeCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([name, businessId])
   @@map("job_types")
 }
 
 model JobPlatform {
   id          Int       @id @default(autoincrement())
-  name        String    @unique
+  name        String
   description String
   status      Status    @default(Active)
   businessId  Int?      @map("business_id")
-  business    Business? @relation(name: "jobPlatformsInBusiness", fields: [businessId], references: [id])
+  business    Business? @relation(name: "jobPlatformsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy   Int?      @map("created_by")
-  creator     User?     @relation(name: "jobPlatformCreated", fields: [createdBy], references: [id])
+  creator     User?     @relation(name: "jobPlatformCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([name, businessId])
   @@map("job_platforms")
 }
 
 model RecruitmentProcess {
   id          Int       @id @default(autoincrement())
-  name        String    @unique
+  name        String
   description String
   status      Status    @default(Active)
   isRequired  Boolean   @map("is_required")
   businessId  Int?      @map("business_id")
-  business    Business? @relation(name: "recruitmentProcessesInBusiness", fields: [businessId], references: [id])
+  business    Business? @relation(name: "recruitmentProcessesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy   Int?      @map("created_by")
-  creator     User?     @relation(name: "recruitmentProcessCreated", fields: [createdBy], references: [id])
+  creator     User?     @relation(name: "recruitmentProcessCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([name, businessId])
   @@map("recruitment_processes")
 }
 
 model OnboardingProcess {
   id          Int       @id @default(autoincrement())
-  name        String    @unique
+  name        String
   description String
   status      Status    @default(Active)
   isRequired  Boolean   @map("is_required")
   businessId  Int?      @map("business_id")
-  business    Business? @relation(name: "onboardingProcessesInBusiness", fields: [businessId], references: [id])
+  business    Business? @relation(name: "onboardingProcessesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy   Int?      @map("created_by")
-  creator     User?     @relation(name: "onboardingProcessCreated", fields: [createdBy], references: [id])
+  creator     User?     @relation(name: "onboardingProcessCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([name, businessId])
   @@map("onboarding_processes")
 }
 
 model WorkSite {
   id                   Int       @id @default(autoincrement())
-  name                 String    @unique
+  name                 String
   description          String
   status               Status    @default(Active)
   address              String?
@@ -444,94 +441,129 @@ model WorkSite {
   isIpEnabled          Boolean?  @map("is_ip_enabled")
   ipAddress            String?   @map("ip_address")
   businessId           Int?      @map("business_id")
-  business             Business? @relation(name: "workSitesInBusiness", fields: [businessId], references: [id])
+  business             Business? @relation(name: "workSitesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy            Int?      @map("created_by")
-  creator              User?     @relation(name: "workSiteCreated", fields: [createdBy], references: [id])
+  creator              User?     @relation(name: "workSiteCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([name, businessId])
   @@map("work_sites")
 }
 
 model Department {
   id          Int       @id @default(autoincrement())
   parent_id   Int?
-  name        String    @unique
+  name        String
   description String
   status      Status    @default(Active)
   businessId  Int?      @map("business_id")
-  business    Business? @relation(name: "departmentsInBusiness", fields: [businessId], references: [id])
+  business    Business? @relation(name: "departmentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   managerId   Int?      @map("manager_id")
-  manager     User?     @relation(name: "managedDepartments", fields: [managerId], references: [id])
+  manager     User?     @relation(name: "managedDepartments", fields: [managerId], references: [id], onDelete: Restrict)
   createdBy   Int?      @map("created_by")
-  creator     User?     @relation(name: "departmentCreated", fields: [createdBy], references: [id])
+  creator     User?     @relation(name: "departmentCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([name, businessId])
+  @@index([managerId])
   @@map("departments")
 }
 
 model WorkSchedule {
   id           Int               @id @default(autoincrement())
-  name         String            @unique
+  name         String
   description  String
   status       Status            @default(Active)
   scheduleType ScheduleType      @default(Regular)
   breakType    ScheduleBreakType @default(Unpaid) @map("break_type")
   breakHours   Int               @default(0) @map("break_hours")
   businessId   Int?              @map("business_id")
-  business     Business?         @relation(name: "workSchedulesInBusiness", fields: [businessId], references: [id])
+  business     Business?         @relation(name: "workSchedulesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy    Int?              @map("created_by")
-  creator      User?             @relation(name: "workScheduleCreated", fields: [createdBy], references: [id])
-  schedules    Schedule[]        @relation(name: "workSchedule")
+  creator      User?             @relation(name: "workScheduleCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  schedules    WorkDaySchedule[] @relation(name: "workSchedule")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([name, businessId])
+  @@index([scheduleType])
   @@map("work_schedules")
 }
 
-model Schedule {
+model WorkDaySchedule {
   id             Int          @id @default(autoincrement())
   day            Int
   isWeekend      Boolean      @map("is_weekend")
   workScheduleId Int          @map("work_schedule_id")
-  workSchedule   WorkSchedule @relation(name: "workSchedule", fields: [workScheduleId], references: [id])
+  workSchedule   WorkSchedule @relation(name: "workSchedule", fields: [workScheduleId], references: [id], onDelete: Cascade)
   shifts         Shift[]      @relation(name: "shiftInSchedule")
+
+  @@unique([workScheduleId, day])
+  @@map("work_day_schedules")
 }
 
 model Shift {
-  id         Int      @id @default(autoincrement())
-  startTime  String   @map("start_time")
-  endTime    String   @map("end_time")
-  scheduleId Int      @map("schedule_id")
-  schedule   Schedule @relation(name: "shiftInSchedule", fields: [scheduleId], references: [id])
+  id         Int             @id @default(autoincrement())
+  startTime  String          @map("start_time")
+  endTime    String          @map("end_time")
+  scheduleId Int             @map("schedule_id")
+  schedule   WorkDaySchedule @relation(name: "shiftInSchedule", fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduleId, startTime, endTime])
+  @@map("work_day_schedules_shifts")
 }
 
-enum LeaveRolloverType {
-  NONE              @map("none")
-  PARTIAL_ROLL_OVER @map("partial_roll_over")
-  FULL_ROLLOVER     @map("full_roll_over")
-}
-
-model LeaveType {
-  id                  Int               @id @default(autoincrement())
-  name                String            @unique
-  leaveType           String            @map("leave_type")
-  leaveHours          Int               @default(0) @map("leave_hours")
-  leaveRolloverType   LeaveRolloverType @default(NONE) @map("leave_rollover_type")
-  carryOverLimit      Int?              @map("carry_over_limit")
-  status              Status            @default(Active)
-  employmentStatusIds Int[]             @default([]) @map("employment_status_ids")
-  businessId          Int?              @map("business_id")
-  business            Business?         @relation(name: "leaveTypesInBusiness", fields: [businessId], references: [id])
-  createdBy           Int?              @map("created_by")
-  creator             User?             @relation(name: "leaveTypeCreated", fields: [createdBy], references: [id])
+model EmploymentStatus {
+  id          Int                         @id @default(autoincrement())
+  name        String
+  description String
+  status      Status                      @default(Active)
+  leaveTypes  LeaveTypeEmploymentStatus[]
+  businessId  Int?                        @map("business_id")
+  business    Business?                   @relation(name: "employmentStatusesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  createdBy   Int?                        @map("created_by")
+  creator     User?                       @relation(name: "employmentStatusCreated", fields: [createdBy], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([name, businessId])
+  @@map("employment_statuses")
+}
+
+model LeaveTypeEmploymentStatus {
+  leaveTypeId        Int @map("leave_type_id")
+  employmentStatusId Int @map("employment_status_id")
+
+  leaveType        LeaveType        @relation(fields: [leaveTypeId], references: [id], onDelete: Cascade)
+  employmentStatus EmploymentStatus @relation(fields: [employmentStatusId], references: [id], onDelete: Restrict)
+
+  @@unique([leaveTypeId, employmentStatusId])
+  @@map("leave_type_employment_status")
+}
+
+model LeaveType {
+  id                 Int                         @id @default(autoincrement())
+  name               String
+  leaveType          String                      @map("leave_type")
+  leaveHours         Int                         @default(0) @map("leave_hours")
+  leaveRolloverType  LeaveRolloverType           @default(NONE) @map("leave_rollover_type")
+  carryOverLimit     Int?                        @map("carry_over_limit")
+  status             Status                      @default(Active)
+  employmentStatuses LeaveTypeEmploymentStatus[]
+  businessId         Int?                        @map("business_id")
+  business           Business?                   @relation(name: "leaveTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  createdBy          Int?                        @map("created_by")
+  creator            User?                       @relation(name: "leaveTypeCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([name, businessId])
   @@map("leave_types")
 }
