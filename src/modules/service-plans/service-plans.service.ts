@@ -21,6 +21,18 @@ export class ServicePlansService {
 
     return this.prisma.$transaction(
       async (prismaTransaction: Prisma.TransactionClient) => {
+        // 0. check modules
+        if (moduleIds?.length) {
+          for (const id of moduleIds) {
+            const module = await prismaTransaction.systemModule.findUnique({
+              where: { id },
+            });
+            if (!module) {
+              throw new NotFoundException(`Module with ID ${id} not found`);
+            }
+          }
+        }
+
         // 1. Create service plan
         const servicePlan = await prismaTransaction.servicePlan.create({
           data: {
@@ -29,6 +41,11 @@ export class ServicePlansService {
           },
           include: { creator: true },
         });
+
+        // 2.
+        if (!servicePlan) {
+          throw new NotFoundException('Service Plan not found');
+        }
 
         // 2. Connect modules if any
         if (moduleIds?.length) {

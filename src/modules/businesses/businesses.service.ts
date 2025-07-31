@@ -36,6 +36,15 @@ export class BusinessesService {
     // Start a database transaction
     const newBusiness = await this.prisma.$transaction(
       async (prismaTransaction: Prisma.TransactionClient) => {
+        // step 0 : check service plan
+        const servicePlan = await prismaTransaction.servicePlan.findFirst({
+          where: {
+            id: createBusinessInput.servicePlanId,
+          },
+        });
+        if (!servicePlan)
+          throw new NotImplementedException('Service plan not found');
+
         // Step 1: Create the primary user
         const createdUser = await prismaTransaction.user.create({
           data: createUserInput,
@@ -90,28 +99,59 @@ export class BusinessesService {
         });
 
         // Step 7: Assign permissions to each role (excluding SUPER_ADMIN)
-        const allPermissions = await prismaTransaction.permission.findMany();
+        const databasePermissions =
+          await prismaTransaction.permission.findMany();
 
-        const rolePermissionMap: Record<string, typeof ownerPermissions> = {
-          [ROLE.OWNER]: ownerPermissions,
-          [ROLE.MANAGER]: managerPermissions,
-          [ROLE.ADMIN]: adminPermissions,
-          [ROLE.EMPLOYEE]: employeePermissions,
+        if (!databasePermissions)
+          throw new NotImplementedException('Permissions not found');
+
+        const rolePermissionMap: Record<
+          string,
+          { resource: string; action: string }[]
+        > = {
+          [ROLE.OWNER]: ownerPermissions.flatMap((permission) =>
+            permission.action.map((action) => ({
+              resource: permission.resource,
+              action: action,
+            })),
+          ),
+          [ROLE.MANAGER]: managerPermissions.flatMap((permission) =>
+            permission.action.map((action) => ({
+              resource: permission.resource,
+              action: action,
+            })),
+          ),
+          [ROLE.ADMIN]: adminPermissions.flatMap((permission) =>
+            permission.action.map((action) => ({
+              resource: permission.resource,
+              action: action,
+            })),
+          ),
+          [ROLE.EMPLOYEE]: employeePermissions.flatMap((permission) =>
+            permission.action.map((action) => ({
+              resource: permission.resource,
+              action: action,
+            })),
+          ),
         };
 
         const rolesInBusiness = await prismaTransaction.role.findMany({
           where: { businessId },
         });
 
+        if (!rolesInBusiness)
+          throw new NotImplementedException('Roles not found');
+
         for (const role of rolesInBusiness) {
           const baseName = role.name.split('#')[0];
           const permissionConfig = rolePermissionMap[baseName];
           if (!permissionConfig) continue;
 
-          const matchedPermissions = allPermissions.filter((perm) =>
+          const matchedPermissions = databasePermissions.filter((permission) =>
             permissionConfig.some(
-              (p) =>
-                p.resource === perm.resource && p.action.includes(perm.action),
+              (superAdminPermission) =>
+                permission.resource === superAdminPermission.resource &&
+                permission.action === superAdminPermission.action,
             ),
           );
 
@@ -125,12 +165,18 @@ export class BusinessesService {
         }
 
         const creatorId = createdUser?.id;
+        // const businessId = createdBusiness?.id;
         // CREATE DEFAULT DESIGNATIONS
         await Promise.all(
           defaultDesignations.map((element) =>
             prismaTransaction.designation.create({
               data: {
                 ...element,
+                business: {
+                  connect: {
+                    id: businessId,
+                  },
+                },
                 creator: {
                   connect: {
                     id: creatorId,
@@ -147,6 +193,11 @@ export class BusinessesService {
             prismaTransaction.employmentStatus.create({
               data: {
                 ...element,
+                business: {
+                  connect: {
+                    id: businessId,
+                  },
+                },
                 creator: {
                   connect: {
                     id: creatorId,
@@ -163,6 +214,11 @@ export class BusinessesService {
             prismaTransaction.jobType.create({
               data: {
                 ...element,
+                business: {
+                  connect: {
+                    id: businessId,
+                  },
+                },
                 creator: {
                   connect: {
                     id: creatorId,
@@ -179,6 +235,11 @@ export class BusinessesService {
             prismaTransaction.jobPlatform.create({
               data: {
                 ...element,
+                business: {
+                  connect: {
+                    id: businessId,
+                  },
+                },
                 creator: {
                   connect: {
                     id: creatorId,
@@ -195,6 +256,11 @@ export class BusinessesService {
             prismaTransaction.leaveType.create({
               data: {
                 ...element,
+                business: {
+                  connect: {
+                    id: businessId,
+                  },
+                },
                 creator: {
                   connect: {
                     id: creatorId,
@@ -211,6 +277,11 @@ export class BusinessesService {
             prismaTransaction.recruitmentProcess.create({
               data: {
                 ...element,
+                business: {
+                  connect: {
+                    id: businessId,
+                  },
+                },
                 creator: {
                   connect: {
                     id: creatorId,
@@ -227,6 +298,11 @@ export class BusinessesService {
             prismaTransaction.onboardingProcess.create({
               data: {
                 ...element,
+                business: {
+                  connect: {
+                    id: businessId,
+                  },
+                },
                 creator: {
                   connect: {
                     id: creatorId,
@@ -281,6 +357,10 @@ export class BusinessesService {
         return await prismaTransaction.business.findUnique({
           where: { id: createdBusiness.id },
         });
+      },
+      {
+        maxWait: 1000 * 60 * 3, //  3 minutes
+        timeout: 1000 * 60 * 10, // 10 minutes
       },
     );
 

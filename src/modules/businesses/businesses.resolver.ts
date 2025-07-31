@@ -9,6 +9,7 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
+import { PasswordHelpers } from 'src/helpers/passwordHelpers';
 
 @Resolver(() => Business)
 export class BusinessesResolver {
@@ -23,6 +24,10 @@ export class BusinessesResolver {
     @Args('createProfileInput') createProfileInput: CreateProfileInput,
     @Args('createBusinessInput') createBusinessInput: CreateBusinessInput,
   ) {
+    createUserInput.password = await PasswordHelpers.passwordHash(
+      createUserInput.password,
+    );
+
     return await this.businessesService.createUserWithBusiness(
       createUserInput,
       createProfileInput,
