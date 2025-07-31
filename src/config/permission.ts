@@ -1,75 +1,3 @@
-// ALL PERMISSION
-export const permissions = [
-  {
-    resource: 'Service Plan',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
-    resource: 'User',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
-    resource: 'Business',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
-    resource: 'Service Plan',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
-    resource: 'Role',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
-    resource: 'Module',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
-    resource: 'Permission',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
-    resource: 'Employment Status',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
-    resource: 'Designation',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
-    resource: 'Job Type',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
-    resource: 'Job Platform',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
-    resource: 'Job Platform',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
-    resource: 'Recruitment Process',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
-    resource: 'Onboarding Process',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
-    resource: 'Work Site',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
-    resource: 'Work Schedule',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
-    resource: 'Department',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-];
-
 // ALL SUPER ADMIN PERMISSION
 export const superAdminPermissions = [
   {
@@ -99,7 +27,7 @@ export const superAdminPermissions = [
 ];
 
 // ALL BUSINESS OWNER PERMISSION
-export const businessOwnerPermissions = [
+export const ownerPermissions = [
   {
     resource: 'User',
     action: ['create', 'read', 'update', 'delete'],
@@ -158,8 +86,23 @@ export const businessOwnerPermissions = [
   },
 ];
 
-export const adminPermissions = [];
+export const adminPermissions = [
+  {
+    resource: 'Department',
+    action: ['create', 'read', 'update', 'delete'],
+  },
+];
 
-export const managerPermissions = [];
+export const managerPermissions = [
+  {
+    resource: 'Department',
+    action: ['create', 'read', 'update', 'delete'],
+  },
+];
 
-export const employeePermissions = [];
+export const employeePermissions = [
+  {
+    resource: 'Department',
+    action: ['create', 'read', 'update', 'delete'],
+  },
+];
