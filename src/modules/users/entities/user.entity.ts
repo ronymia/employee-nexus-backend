@@ -26,8 +26,8 @@ export class User {
   @HideField()
   password: string;
 
-  @Field(() => Int)
-  roleId: number;
+  @Field(() => Int, { nullable: true, description: 'ID of the role' })
+  roleId: number | null;
 
   @Field(() => Role, { nullable: true, description: 'Role of the user' })
   role?: Role | null;

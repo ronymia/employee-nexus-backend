@@ -1,5 +1,11 @@
-import { InputType, Int, Field } from '@nestjs/graphql';
-import { IsArray, IsInt, IsString } from 'class-validator';
+import { InputType, Int, Field, registerEnumType } from '@nestjs/graphql';
+import { IsArray, IsEnum, IsInt, IsString } from 'class-validator';
+import { Status } from 'generated/prisma';
+
+registerEnumType(Status, {
+  name: 'Status',
+  description: 'Status of the service plan',
+});
 
 @InputType()
 export class CreateServicePlanInput {
@@ -14,13 +20,6 @@ export class CreateServicePlanInput {
   @Field(() => Int, { description: 'One-time setup fee for the service plan' })
   @IsInt()
   setupFee: number;
-
-  @Field(() => String, {
-    description: 'Status of the service plan',
-    defaultValue: 'ACTIVE',
-  })
-  @IsString()
-  status: string;
 
   @Field(() => Int, { description: 'Price of the service plan' })
   @IsInt()

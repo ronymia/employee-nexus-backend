@@ -34,7 +34,9 @@ export const superAdminProfile = {
 export const seedSuperAdmin = async () => {
   // 1. Ensure SUPER_ADMIN role exists
   let role = await prisma.role.findUnique({
-    where: { name: ROLE.SUPER_ADMIN },
+    where: {
+      name_businessId: { name: ROLE.SUPER_ADMIN, businessId: null as any },
+    },
   });
 
   if (!role) {

@@ -135,9 +135,6 @@ input CreateServicePlanInput {
 
   """One-time setup fee for the service plan"""
   setupFee: Int!
-
-  """Status of the service plan"""
-  status: String! = "ACTIVE"
 }
 
 input CreateServicePlanModuleInput {
@@ -369,7 +366,7 @@ input ServicePlanQueryInput {
   minPrice: Int
   pagination: BasePaginationInput
   price: Int
-  status: String
+  status: Status
 }
 
 type ServicePlanQueryResponse {
@@ -386,6 +383,12 @@ type ServicePlanResponse {
   meta: PaginationMeta!
   statusCode: Float!
   success: Boolean!
+}
+
+"""Status of the service plan"""
+enum Status {
+  Active
+  Inactive
 }
 
 type SystemModule {
@@ -522,9 +525,6 @@ input UpdateServicePlanInput {
 
   """One-time setup fee for the service plan"""
   setupFee: Int!
-
-  """Status of the service plan"""
-  status: String! = "ACTIVE"
 }
 
 input UpdateServicePlanModuleInput {
@@ -567,7 +567,9 @@ type User {
 
   """Role of the user"""
   role: Role
-  roleId: Int!
+
+  """ID of the role"""
+  roleId: Int
 
   """Status of the user account"""
   status: USER_ACCOUNT_STATUS!

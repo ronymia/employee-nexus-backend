@@ -22,13 +22,6 @@ export class UpdateServicePlanInput extends PartialType(
   @IsInt()
   setupFee: number;
 
-  @Field(() => String, {
-    description: 'Status of the service plan',
-    defaultValue: 'ACTIVE',
-  })
-  @IsString()
-  status: string;
-
   @Field(() => Int, { description: 'Price of the service plan' })
   @IsInt()
   price: number;
