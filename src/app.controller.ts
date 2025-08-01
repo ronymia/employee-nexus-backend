@@ -11,6 +11,17 @@ export class AppController {
   }
 
   // ROLE REFRESH
+  @Get('/module-refresh')
+  async moduleRefresh() {
+    const res = await this.appService.moduleRefresh();
+    return {
+      success: true,
+      statusCode: 200,
+      message: 'Modules Updated',
+      data: res,
+    };
+  }
+  // ROLE REFRESH
   @Get('/role-refresh')
   async roleRefresh() {
     await this.appService.roleRefresh();
