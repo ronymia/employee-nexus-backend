@@ -55,7 +55,7 @@ export class Business {
   userId: number;
 
   @Field(() => Int)
-  servicePlanId: number;
+  subscriptionPlanId: number;
 
   @Field()
   createdAt: Date;

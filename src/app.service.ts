@@ -21,6 +21,7 @@ import { defaultJobPlatforms } from './Database/job-platform';
 import { defaultLeaveTypes } from './Database/leave-type';
 import { defaultRecruitmentProcesses } from './Database/recruitment-process';
 import { defaultOnboardingProcesses } from './Database/onboarding-process';
+import { modules } from './Database/module';
 
 @Injectable()
 export class AppService {
@@ -30,6 +31,16 @@ export class AppService {
   ) {}
   getHello(): string {
     return 'Hello World!';
+  }
+
+  // UPDATE MODULE
+  async moduleRefresh() {
+    const res = await this.prisma.module.createMany({
+      data: modules.map((module) => ({ name: module })),
+      skipDuplicates: true,
+    });
+
+    return res;
   }
 
   // SEED SUPER ADMIN AND ROLE

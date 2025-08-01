@@ -15,7 +15,7 @@ import { PasswordHelpers } from 'src/helpers/passwordHelpers';
 export class BusinessesResolver {
   constructor(private readonly businessesService: BusinessesService) {}
 
-  @Mutation(() => Business)
+  @Mutation(() => Business, { name: 'createUserWithBusiness' })
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Business:create')
   @UseGuards(GqlAuthGuard)
@@ -34,7 +34,7 @@ export class BusinessesResolver {
       createBusinessInput,
     );
   }
-  @Mutation(() => Business)
+  @Mutation(() => Business, { name: 'createBusiness' })
   createBusiness(
     @Args('createBusinessInput') createBusinessInput: CreateBusinessInput,
   ) {
@@ -46,12 +46,12 @@ export class BusinessesResolver {
     return this.businessesService.findAll();
   }
 
-  @Query(() => Business, { name: 'business' })
+  @Query(() => Business, { name: 'businessById' })
   findOne(@Args('id', { type: () => Int }) id: number) {
     return this.businessesService.findOne(id);
   }
 
-  @Mutation(() => Business)
+  @Mutation(() => Business, { name: 'updateBusiness' })
   updateBusiness(
     @Args('updateBusinessInput') updateBusinessInput: UpdateBusinessInput,
   ) {
@@ -61,7 +61,7 @@ export class BusinessesResolver {
     );
   }
 
-  @Mutation(() => Business)
+  @Mutation(() => Business, { name: 'removeBusiness' })
   removeBusiness(@Args('id', { type: () => Int }) id: number) {
     return this.businessesService.remove(id);
   }

@@ -15,12 +15,12 @@ import { PermissionsModule } from './modules/permissions/permissions.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { RolePermissionsModule } from './modules/role-permissions/role-permissions.module';
 import { UserPermissionsModule } from './modules/user-permissions/user-permissions.module';
-import { ServicePlansModule } from './modules/service-plans/service-plans.module';
 import { JwtStrategy } from './modules/auth/jwt.strategy';
-import { SystemModulesModule } from './modules/system-modules/system-modules.module';
-import { ServicePlanModulesModule } from './modules/service-plan-modules/service-plan-modules.module';
 import { BusinessModulesModule } from './modules/business-modules/business-modules.module';
 import { BusinessesModule } from './modules/businesses/businesses.module';
+import { SubscriptionPlansModule } from './modules/subscription-plans/subscription-plans.module';
+import { SubscriptionModulesModule } from './modules/subscription-modules/subscription-modules.module';
+import { ModulesModule } from './modules/modules/modules.module';
 
 @Module({
   imports: [
@@ -44,11 +44,11 @@ import { BusinessesModule } from './modules/businesses/businesses.module';
     RolesModule,
     RolePermissionsModule,
     UserPermissionsModule,
-    ServicePlansModule,
-    SystemModulesModule,
-    ServicePlanModulesModule,
+    SubscriptionPlansModule,
+    SubscriptionModulesModule,
     BusinessModulesModule,
     BusinessesModule,
+    ModulesModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

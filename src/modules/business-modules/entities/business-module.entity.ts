@@ -1,5 +1,5 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
-import { SystemModule } from 'src/modules/system-modules/entities/system-module.entity';
+import { Module } from 'src/modules/modules/entities/module.entity';
 
 @ObjectType()
 export class BusinessModule {
@@ -9,12 +9,9 @@ export class BusinessModule {
   // @Field(() => Business, { description: 'Business' })
   // business: Business;
 
-  @Field(() => Int, { description: 'System Module ID' })
+  @Field(() => Int, { description: 'Module ID' })
   systemModuleId: number;
 
-  @Field(() => SystemModule, { description: 'System Module' })
-  systemModule: SystemModule;
-
-  @Field(() => Boolean, { description: 'Is Enabled' })
-  isEnabled: boolean;
+  @Field(() => Module, { description: 'Module' })
+  systemModule: Module;
 }

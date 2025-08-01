@@ -61,5 +61,5 @@ export class CreateBusinessInput {
 
   @Field(() => Int)
   @IsInt()
-  servicePlanId: number;
+  subscriptionPlanId: number;
 }

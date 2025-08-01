@@ -2,10 +2,10 @@ import { InputType, Int, Field } from '@nestjs/graphql';
 import { IsInt } from 'class-validator';
 
 @InputType()
-export class CreateBusinessModuleInput {
-  @Field(() => Int, { description: 'Business ID' })
+export class CreateSubscriptionModuleInput {
+  @Field(() => Int, { description: 'Subscription Plan ID' })
   @IsInt()
-  businessId: number;
+  subscriptionPlanId: number;
 
   @Field(() => Int, { description: 'Module ID' })
   @IsInt()

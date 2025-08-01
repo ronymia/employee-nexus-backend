@@ -32,26 +32,12 @@ type Business {
   phone: String!
   postcode: String!
   registrationDate: DateTime!
-  servicePlanId: Int!
   status: String!
+  subscriptionPlanId: Int!
   trailEndDate: DateTime!
   updatedAt: DateTime!
   userId: Int!
   website: String
-}
-
-type BusinessModule {
-  """Business ID"""
-  businessId: Int!
-
-  """Is Enabled"""
-  isEnabled: Boolean!
-
-  """System Module"""
-  systemModule: SystemModule!
-
-  """System Module ID"""
-  systemModuleId: Int!
 }
 
 input CreateBusinessInput {
@@ -67,28 +53,9 @@ input CreateBusinessInput {
   phone: String!
   postcode: String!
   registrationDate: DateTime!
-  servicePlanId: Int!
+  subscriptionPlanId: Int!
   trailEndDate: DateTime!
   website: String
-}
-
-input CreateBusinessModuleInput {
-  """Business ID"""
-  businessId: Int!
-
-  """Is Enabled"""
-  isEnabled: Boolean!
-
-  """System Module ID"""
-  systemModuleId: Int!
-}
-
-input CreatePermissionInput {
-  """Action to be performed on the resource"""
-  action: String!
-
-  """Resource for the permission"""
-  resource: String!
 }
 
 input CreateProfileInput {
@@ -104,23 +71,7 @@ input CreateProfileInput {
   profilePicture: String
 }
 
-input CreateRoleInput {
-  """ID of the business"""
-  businessId: Int
-
-  """Name of the role"""
-  name: String!
-}
-
-input CreateRolePermissionInput {
-  """ID of the permission"""
-  permissionId: Int!
-
-  """ID of the role"""
-  roleId: Int!
-}
-
-input CreateServicePlanInput {
+input CreateSubscriptionPlanInput {
   """Description of the service plan"""
   description: String!
 
@@ -137,33 +88,9 @@ input CreateServicePlanInput {
   setupFee: Int!
 }
 
-input CreateServicePlanModuleInput {
-  """Module Is Enabled"""
-  isEnabled: Boolean!
-
-  """Service Plan ID"""
-  servicePlanId: Int!
-
-  """System Module ID"""
-  systemModuleId: Int!
-}
-
-input CreateSystemModuleInput {
-  """Name of the system module"""
-  name: String!
-}
-
 input CreateUserInput {
   email: String!
   password: String!
-}
-
-input CreateUserPermissionInput {
-  """ID of the permission"""
-  permissionId: Int!
-
-  """ID of the user"""
-  userId: Int!
 }
 
 """
@@ -191,41 +118,45 @@ enum MARITAL_STATUS {
   Single
 }
 
+type Module {
+  """Creation date of the module"""
+  createdAt: DateTime!
+
+  """ID of the module"""
+  id: ID!
+
+  """Name of the module"""
+  name: String!
+
+  """Last update date of the module"""
+  updatedAt: DateTime!
+}
+
+type ModuleQueryResponse {
+  data: [Module!]!
+  message: String!
+  statusCode: Float!
+  success: Boolean!
+}
+
+type ModuleResponse {
+  data: Module!
+  message: String!
+  statusCode: Float!
+  success: Boolean!
+}
+
 type Mutation {
   createBusiness(createBusinessInput: CreateBusinessInput!): Business!
-  createBusinessModule(createBusinessModuleInput: CreateBusinessModuleInput!): BusinessModule!
-  createPermission(createPermissionInput: CreatePermissionInput!): Permission!
-  createProfile(createProfileInput: CreateProfileInput!): Profile!
-  createRole(createRoleInput: CreateRoleInput!): Role!
-  createRolePermission(createRolePermissionInput: CreateRolePermissionInput!): RolePermission!
-  createServicePlan(createServicePlanInput: CreateServicePlanInput!): ServicePlanResponse!
-  createServicePlanModule(createServicePlanModuleInput: CreateServicePlanModuleInput!): ServicePlanModule!
-  createSystemModule(createSystemModuleInput: CreateSystemModuleInput!): SystemModuleResponse!
+  createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
   createUser(createUserInput: CreateUserInput!): User!
-  createUserPermission(createUserPermissionInput: CreateUserPermissionInput!): UserPermission!
   createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
   login(loginInput: LoginAuthInput!): Auth!
   removeBusiness(id: Int!): Business!
-  removeBusinessModule(businessId: Int!, systemModuleId: Int!): BusinessModule!
-  removePermission(id: Int!): Permission!
-  removeProfile(id: Int!): Profile!
-  removeRole(id: Int!): Role!
-  removeRolePermission(id: Int!): RolePermission!
-  removeServicePlan(id: Int!): ServicePlanResponse!
-  removeServicePlanModule(servicePlanId: Int!, systemModuleId: Int!): ServicePlanModule!
-  removeSystemModule(id: Int!): SystemModuleResponse!
+  removeSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
   removeUser(id: Int!): User!
-  removeUserPermission(id: Int!): UserPermission!
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): Business!
-  updateBusinessModule(updateBusinessModuleInput: UpdateBusinessModuleInput!): BusinessModule!
-  updatePermission(updatePermissionInput: UpdatePermissionInput!): Permission!
-  updateProfile(updateProfileInput: UpdateProfileInput!): Profile!
-  updateRole(updateRoleInput: UpdateRoleInput!): Role!
-  updateRolePermission(updateRolePermissionInput: UpdateRolePermissionInput!): RolePermission!
-  updateServicePlan(id: Int!, updateServicePlanInput: UpdateServicePlanInput!): ServicePlanResponse!
-  updateServicePlanModule(updateServicePlanModuleInput: UpdateServicePlanModuleInput!): ServicePlanModule!
-  updateSystemModule(id: Int!, updateSystemModuleInput: UpdateSystemModuleInput!): SystemModuleResponse!
-  updateUserPermission(updateUserPermissionInput: UpdateUserPermissionInput!): UserPermission!
+  updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
 }
 
 type PaginationMeta {
@@ -265,28 +196,24 @@ type Profile {
 }
 
 type Query {
-  business(id: Int!): Business!
-  businessModuleById(businessId: Int!, systemModuleId: Int!): BusinessModule!
-  businessModules: [BusinessModule!]!
+  businessById(id: Int!): Business!
   businesses: [Business!]!
-  permission(id: Int!): Permission!
+  moduleById(id: Int!): ModuleResponse!
+  modules: ModuleQueryResponse!
+  permissionById(id: Int!): Permission!
   permissions: [Permission!]!
-  profile(id: Int!): Profile!
-  profiles: [Profile!]!
-  role(id: Int!): Role!
-  rolePermission(id: Int!): RolePermission!
-  rolePermissions: [RolePermission!]!
-  roles: [Role!]!
-  servicePlanById(id: Int!): ServicePlanResponse!
-  servicePlanModuleById(servicePlanId: Int!, systemModuleId: Int!): ServicePlanModule!
-  servicePlanModules: [ServicePlanModule!]!
-  servicePlans(query: ServicePlanQueryInput): ServicePlanQueryResponse!
-  systemModuleById(id: Int!): SystemModuleResponse!
-  systemModules: SystemModuleQueryResponse!
+  subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
+  subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
   userById(id: Int!): User!
-  userPermission(id: Int!): UserPermission!
-  userPermissions: [UserPermission!]!
   users: [User!]!
+}
+
+input QuerySubscriptionPlanInput {
+  maxPrice: Int
+  minPrice: Int
+  pagination: BasePaginationInput
+  price: Int
+  status: Status
 }
 
 type Role {
@@ -300,19 +227,13 @@ type Role {
   name: String!
 }
 
-type RolePermission {
-  """ID of the permission"""
-  permission: Int!
-
-  """ID of the permission"""
-  permissionId: Int!
-  role: Role
-
-  """ID of the role"""
-  roleId: Int!
+"""Status of the service plan"""
+enum Status {
+  Active
+  Inactive
 }
 
-type ServicePlan {
+type SubscriptionPlan {
   """Timestamp when the service plan was created"""
   createdAt: DateTime!
 
@@ -344,77 +265,16 @@ type ServicePlan {
   updatedAt: DateTime!
 }
 
-type ServicePlanModule {
-  """Module Is Enabled"""
-  isEnabled: Boolean!
-
-  """Service Plan Details"""
-  servicePlan: ServicePlan!
-
-  """Service Plan ID"""
-  servicePlanId: Int!
-
-  """System Module Details"""
-  systemModule: SystemModule!
-
-  """System Module ID"""
-  systemModuleId: Int!
-}
-
-input ServicePlanQueryInput {
-  maxPrice: Int
-  minPrice: Int
-  pagination: BasePaginationInput
-  price: Int
-  status: Status
-}
-
-type ServicePlanQueryResponse {
-  data: [ServicePlan!]!
+type SubscriptionPlanQueryResponse {
+  data: [SubscriptionPlan!]!
   message: String!
   meta: PaginationMeta!
   statusCode: Float!
   success: Boolean!
 }
 
-type ServicePlanResponse {
-  data: ServicePlan!
-  message: String!
-  meta: PaginationMeta!
-  statusCode: Float!
-  success: Boolean!
-}
-
-"""Status of the service plan"""
-enum Status {
-  Active
-  Inactive
-}
-
-type SystemModule {
-  """Creation date of the system module"""
-  createdAt: DateTime!
-
-  """ID of the system module"""
-  id: ID!
-
-  """Name of the system module"""
-  name: String!
-
-  """Last update date of the system module"""
-  updatedAt: DateTime!
-}
-
-type SystemModuleQueryResponse {
-  data: [SystemModule!]!
-  message: String!
-  meta: PaginationMeta!
-  statusCode: Float!
-  success: Boolean!
-}
-
-type SystemModuleResponse {
-  data: SystemModule!
+type SubscriptionPlanResponse {
+  data: SubscriptionPlan!
   message: String!
   meta: PaginationMeta!
   statusCode: Float!
@@ -450,67 +310,12 @@ input UpdateBusinessInput {
   phone: String
   postcode: String
   registrationDate: DateTime
-  servicePlanId: Int
+  subscriptionPlanId: Int
   trailEndDate: DateTime
   website: String
 }
 
-input UpdateBusinessModuleInput {
-  """Business ID"""
-  businessId: Int!
-
-  """Is Enabled"""
-  isEnabled: Boolean!
-
-  """System Module ID"""
-  systemModuleId: Int!
-}
-
-input UpdatePermissionInput {
-  """Action to be performed on the resource"""
-  action: String!
-
-  """Unique identifier for the permission"""
-  id: ID!
-
-  """Resource for the permission"""
-  resource: String!
-}
-
-input UpdateProfileInput {
-  address: String
-  city: String
-  country: String
-  dateOfBirth: DateTime
-  fullName: String
-  gender: GENDER
-  id: Int!
-  maritalStatus: MARITAL_STATUS
-  phone: String
-  postcode: String
-  profilePicture: String
-}
-
-input UpdateRoleInput {
-  """ID of the business"""
-  businessId: Int
-
-  """Unique identifier for the role"""
-  id: ID!
-
-  """Name of the role"""
-  name: String!
-}
-
-input UpdateRolePermissionInput {
-  """ID of the permission"""
-  permissionId: Int!
-
-  """ID of the role"""
-  roleId: Int!
-}
-
-input UpdateServicePlanInput {
+input UpdateSubscriptionPlanInput {
   """Description of the service plan"""
   description: String!
 
@@ -525,32 +330,6 @@ input UpdateServicePlanInput {
 
   """One-time setup fee for the service plan"""
   setupFee: Int!
-}
-
-input UpdateServicePlanModuleInput {
-  """Module Is Enabled"""
-  isEnabled: Boolean!
-
-  """Service Plan ID"""
-  servicePlanId: Int!
-
-  """System Module ID"""
-  systemModuleId: Int!
-}
-
-input UpdateSystemModuleInput {
-  """Name of the system module"""
-  name: String!
-}
-
-input UpdateUserPermissionInput {
-  id: Int!
-
-  """ID of the permission"""
-  permissionId: Int!
-
-  """ID of the user"""
-  userId: Int!
 }
 
 type User {
@@ -576,16 +355,4 @@ type User {
 
   """Date when the user was last updated"""
   updatedAt: DateTime!
-}
-
-type UserPermission {
-  """Permission details"""
-  permission: Permission!
-
-  """ID of the permission"""
-  permissionId: Int!
-  user: User
-
-  """ID of the user"""
-  userId: Int!
 }

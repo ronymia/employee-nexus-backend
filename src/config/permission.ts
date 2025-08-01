@@ -1,7 +1,7 @@
 // ALL PERMISSION
 export const permissions = [
   {
-    resource: 'Service Plan',
+    resource: 'Subscription Plan',
     action: ['create', 'read', 'update', 'delete'],
   },
   {
@@ -13,16 +13,12 @@ export const permissions = [
     action: ['create', 'read', 'update', 'delete'],
   },
   {
-    resource: 'Service Plan',
-    action: ['create', 'read', 'update', 'delete'],
-  },
-  {
     resource: 'Role',
-    action: ['create', 'read', 'update', 'delete'],
+    action: ['read'],
   },
   {
     resource: 'Module',
-    action: ['create', 'read', 'update', 'delete'],
+    action: ['read'],
   },
   {
     resource: 'Permission',
@@ -81,16 +77,16 @@ export const superAdminPermissions = [
     action: ['create', 'read', 'update', 'delete'],
   },
   {
-    resource: 'Service Plan',
+    resource: 'Subscription Plan',
     action: ['create', 'read', 'update', 'delete'],
   },
   {
     resource: 'Role',
-    action: ['create', 'read', 'update', 'delete'],
+    action: ['read'],
   },
   {
     resource: 'Module',
-    action: ['create', 'read', 'update', 'delete'],
+    action: ['read'],
   },
   {
     resource: 'Permission',
@@ -175,6 +171,6 @@ export const managerPermissions = [
 export const employeePermissions = [
   {
     resource: 'Department',
-    action: ['create', 'read', 'update', 'delete'],
+    action: ['read'],
   },
 ];

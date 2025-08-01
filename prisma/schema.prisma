@@ -84,7 +84,7 @@ model User {
   roleId                    Int?                 @map("role_id")
   userPermissions           UserPermission[]
   business                  Business?            @relation(name: "businessOwner")
-  servicePlanCreated        ServicePlan[]        @relation(name: "servicePlanCreated")
+  subscriptionPlanCreated   SubscriptionPlan[]   @relation(name: "subscriptionPlanCreated")
   employmentStatusCreated   EmploymentStatus[]   @relation(name: "employmentStatusCreated")
   designationCreated        Designation[]        @relation(name: "designationCreated")
   jobTypeCreated            JobType[]            @relation(name: "jobTypeCreated")
@@ -145,8 +145,8 @@ model Business {
   status                   BusinessStatus       @default(Active)
   user                     User                 @relation(name: "businessOwner", fields: [userId], references: [id], onDelete: Cascade)
   userId                   Int                  @unique @map("user_id")
-  servicePlan              ServicePlan          @relation(name: "businessServicePlan", fields: [servicePlanId], references: [id])
-  servicePlanId            Int                  @map("service_plan_id")
+  subscriptionPlan         SubscriptionPlan     @relation(name: "businessSubscriptionPlan", fields: [subscriptionPlanId], references: [id])
+  subscriptionPlanId       Int                  @map("subscription_plan_id")
   modules                  businessModule[]     @relation(name: "businessModules")
   roles                    Role[]               @relation(name: "rolesInBusiness")
   businessSettings         BusinessSettings?    @relation(name: "businessSettings")
@@ -284,67 +284,65 @@ model UserPermission {
   @@map("user_permissions")
 }
 
-model ServicePlan {
-  id          Int                 @id @default(autoincrement())
-  name        String              @unique
+model SubscriptionPlan {
+  id          Int                      @id @default(autoincrement())
+  name        String                   @unique
   description String
-  setupFee    Int                 @map("setup_fee")
-  status      Status              @default(Active)
+  setupFee    Int                      @map("setup_fee")
+  status      Status                   @default(Active)
   price       Int
-  businesses  Business[]          @relation(name: "businessServicePlan")
-  modules     ServicePlanModule[] @relation(name: "servicePlanModules")
-  createdBy   Int                 @map("created_by")
-  creator     User?               @relation(name: "servicePlanCreated", fields: [createdBy], references: [id], onDelete: Cascade)
+  businesses  Business[]               @relation(name: "businessSubscriptionPlan")
+  modules     SubscriptionPlanModule[] @relation(name: "subscriptionPlanModules")
+  createdBy   Int                      @map("created_by")
+  creator     User?                    @relation(name: "subscriptionPlanCreated", fields: [createdBy], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@map("service_plans")
+  @@map("subscription_plans")
 }
 
-model SystemModule {
-  id           Int                 @id @default(autoincrement())
-  name         String              @unique
-  servicePlans ServicePlanModule[] @relation(name: "servicePlanInModules")
-  businesses   businessModule[]    @relation(name: "businessInModules")
+model Module {
+  id                Int                      @id @default(autoincrement())
+  name              String                   @unique
+  subscriptionPlans SubscriptionPlanModule[] @relation(name: "subscriptionPlanInModules")
+  businesses        businessModule[]         @relation(name: "businessInModules")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@map("system_modules")
+  @@map("modules")
 }
 
-model ServicePlanModule {
-  servicePlanId  Int          @map("service_plan_id")
-  servicePlan    ServicePlan  @relation(name: "servicePlanModules", fields: [servicePlanId], references: [id], onDelete: Cascade)
-  systemModuleId Int          @map("system_module_id")
-  systemModule   SystemModule @relation(name: "servicePlanInModules", fields: [systemModuleId], references: [id], onDelete: Cascade)
-  isEnabled      Boolean      @map("is_enabled")
+model SubscriptionPlanModule {
+  subscriptionPlanId Int              @map("subscription_plan_id")
+  subscriptionPlan   SubscriptionPlan @relation(name: "subscriptionPlanModules", fields: [subscriptionPlanId], references: [id], onDelete: Cascade)
+  moduleId           Int              @map("module_id")
+  module             Module           @relation(name: "subscriptionPlanInModules", fields: [moduleId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([servicePlanId, systemModuleId])
-  @@map("service_plan_modules")
+  @@unique([subscriptionPlanId, moduleId])
+  @@map("subscription_plan_modules")
 }
 
 model businessModule {
-  businessId     Int          @map("service_plan_id")
-  business       Business     @relation(name: "businessModules", fields: [businessId], references: [id], onDelete: Cascade)
-  systemModuleId Int          @map("system_module_id")
-  systemModule   SystemModule @relation(name: "businessInModules", fields: [systemModuleId], references: [id], onDelete: Cascade)
-  isEnabled      Boolean      @map("is_enabled")
+  businessId Int      @map("business_id")
+  business   Business @relation(name: "businessModules", fields: [businessId], references: [id], onDelete: Cascade)
+  moduleId   Int      @map("module_id")
+  module     Module   @relation(name: "businessInModules", fields: [moduleId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([businessId, systemModuleId])
+  @@unique([businessId, moduleId])
   @@map("business_modules")
 }
 
 model Designation {
   id          Int       @id @default(autoincrement())
-  name        String    @unique
+  name        String
   description String
   status      Status    @default(Active)
   businessId  Int?      @map("business_id")

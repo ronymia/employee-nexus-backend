@@ -37,9 +37,9 @@ export class BusinessesService {
     const newBusiness = await this.prisma.$transaction(
       async (prismaTransaction: Prisma.TransactionClient) => {
         // step 0 : check service plan
-        const servicePlan = await prismaTransaction.servicePlan.findFirst({
+        const servicePlan = await prismaTransaction.subscriptionPlan.findFirst({
           where: {
-            id: createBusinessInput.servicePlanId,
+            id: createBusinessInput.subscriptionPlanId,
           },
         });
         if (!servicePlan)
@@ -66,7 +66,9 @@ export class BusinessesService {
         if (!createdBusiness)
           throw new NotImplementedException('Business creation failed');
 
+        // Get business ID and creator ID
         const businessId = createdBusiness.id;
+        const creatorId = createdUser?.id;
 
         // Step 4: Create default roles for the business
         const roleNames = [ROLE.OWNER, ROLE.MANAGER, ROLE.ADMIN, ROLE.EMPLOYEE];
@@ -164,8 +166,6 @@ export class BusinessesService {
           });
         }
 
-        const creatorId = createdUser?.id;
-        // const businessId = createdBusiness?.id;
         // CREATE DEFAULT DESIGNATIONS
         await Promise.all(
           defaultDesignations.map((element) =>
