@@ -39,6 +39,6 @@ export class AppController {
   @Get('/setup')
   async setup() {
     await this.appService.setup();
-    return 'Super admin created';
+    return 'Setup complete';
   }
 }

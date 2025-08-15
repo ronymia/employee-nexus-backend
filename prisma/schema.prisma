@@ -15,69 +15,78 @@ datasource db {
 }
 
 enum USER_ACCOUNT_STATUS {
-  Active
-  Inactive
-  Blocked
-  Deleted
-  Suspended
-  Unverified
-  Verified
-  Terminated
-  Resigned
-  Retired
-  On_Leave
+  ACTIVE     @map("Active")
+  INACTIVE   @map("Inactive")
+  BLOCKED    @map("Blocked")
+  DELETED    @map("Deleted")
+  SUSPENDED  @map("Suspended")
+  VERIFIED   @map("Verified")
+  UNVERIFIED @map("Unverified")
+  TERMINATED @map("Terminated")
+  RESIGNED   @map("Resigned")
+  RETIRED    @map("Retired")
+  ON_LEAVE   @map("On_Leave")
 }
 
 enum MARITAL_STATUS {
-  Single
-  Married
+  SINGLE  @map("Single")
+  MARRIED @map("Married")
 }
 
 enum GENDER {
-  Male
-  Female
+  MALE   @map("Male")
+  FEMALE @map("Female")
 }
 
 enum Status {
-  Active
-  Inactive
+  ACTIVE      @map("Active")
+  INACTIVE    @map("Inactive")
+  DEACTIVATED @map("Deactivated")
 }
 
 enum BusinessStatus {
-  Active
-  Inactive
-  Suspended
-  Trail_Expired
+  ACTIVE        @map("Active")
+  INACTIVE      @map("Inactive")
+  SUSPENDED     @map("Suspended")
+  TRIAL_EXPIRED @map("Trial_Expired")
 }
 
 enum ScheduleType {
-  Regular
-  Scheduled
-  Flexible
+  REGULAR   @map("Regular")
+  SCHEDULED @map("Scheduled")
+  FLEXIBLE  @map("Flexible")
 }
 
 enum ScheduleBreakType {
-  Paid
-  Unpaid
+  PAID   @map("Paid")
+  UNPAID @map("Unpaid")
 }
 
 enum DeleteReadNotifications {
-  SEVEN_DAYS   @map("7_days")
-  FIFTEEN_DAYS @map("15_days")
-  THIRTY_DAYS  @map("30_days")
+  SEVEN_DAYS   @map("7")
+  FIFTEEN_DAYS @map("15")
+  THIRTY_DAYS  @map("30")
 }
 
 enum LeaveRolloverType {
-  NONE              @map("none")
-  PARTIAL_ROLL_OVER @map("partial_roll_over")
-  FULL_ROLLOVER     @map("full_roll_over")
+  NONE              @map("None")
+  PARTIAL_ROLL_OVER @map("Partial_Rollover")
+  FULL_ROLLOVER     @map("Full_Rollover")
+}
+
+enum SubscriptionStatus {
+  ACTIVE    @map("Active")
+  INACTIVE  @map("Inactive")
+  TRIAL     @map("Trial")
+  EXPIRED   @map("Expired")
+  CANCELLED @map("Cancelled")
 }
 
 model User {
   id                        Int                  @id @default(autoincrement())
   email                     String               @unique
   password                  String
-  status                    USER_ACCOUNT_STATUS  @default(Verified)
+  status                    USER_ACCOUNT_STATUS  @default(UNVERIFIED)
   deletedBy                 Int?                 @map("deleted_by")
   profile                   Profile?             @relation(name: "userProfile")
   role                      Role?                @relation(fields: [roleId], references: [id], onDelete: Cascade)
@@ -108,7 +117,7 @@ model Profile {
   fullName       String         @map("full_name")
   phone          String
   profilePicture String?        @map("profile_picture")
-  dateOfBirth    DateTime       @map("date_of_birth")
+  dateOfBirth    String         @map("date_of_birth")
   gender         GENDER
   maritalStatus  MARITAL_STATUS @map("marital_status")
   address        String
@@ -127,7 +136,7 @@ model Profile {
 }
 
 model Business {
-  id                       Int                  @id @default(autoincrement())
+  id                       Int     @id @default(autoincrement())
   name                     String
   email                    String
   phone                    String
@@ -137,33 +146,33 @@ model Business {
   postcode                 String
   lat                      Float?
   long                     Float?
-  registrationDate         DateTime             @map("registration_date")
+  registrationDate         String  @map("registration_date")
   website                  String?
-  numberOfEmployeesAllowed Int                  @map("number_of_employees_allowed")
-  isSubscribed             Boolean              @map("is_subscribed")
-  trailEndDate             DateTime             @map("trail_end_date")
-  status                   BusinessStatus       @default(Active)
-  user                     User                 @relation(name: "businessOwner", fields: [userId], references: [id], onDelete: Cascade)
-  userId                   Int                  @unique @map("user_id")
-  subscriptionPlan         SubscriptionPlan     @relation(name: "businessSubscriptionPlan", fields: [subscriptionPlanId], references: [id])
-  subscriptionPlanId       Int                  @map("subscription_plan_id")
-  modules                  businessModule[]     @relation(name: "businessModules")
-  roles                    Role[]               @relation(name: "rolesInBusiness")
-  businessSettings         BusinessSettings?    @relation(name: "businessSettings")
-  leaveSettings            LeaveSettings?       @relation(name: "leaveSettings")
-  attendanceSettings       AttendanceSettings?  @relation(name: "attendanceSettings")
-  PaymentSettings          PaymentSettings?     @relation(name: "paymentSettings")
-  employmentStatuses       EmploymentStatus[]   @relation(name: "employmentStatusesInBusiness")
-  designations             Designation[]        @relation(name: "designationsInBusiness")
-  jobTypes                 JobType[]            @relation(name: "jobTypesInBusiness")
-  jobPlatforms             JobPlatform[]        @relation(name: "jobPlatformsInBusiness")
-  recruitmentProcesses     RecruitmentProcess[] @relation(name: "recruitmentProcessesInBusiness")
-  onboardingProcesses      OnboardingProcess[]  @relation(name: "onboardingProcessesInBusiness")
-  workSites                WorkSite[]           @relation(name: "workSitesInBusiness")
-  departments              Department[]         @relation(name: "departmentsInBusiness")
-  workSchedules            WorkSchedule[]       @relation(name: "workSchedulesInBusiness")
-  businessSchedule         BusinessSchedule[]   @relation(name: "businessSchedules")
-  leaveTypes               LeaveType[]          @relation(name: "leaveTypesInBusiness")
+  numberOfEmployeesAllowed Int     @map("number_of_employees_allowed")
+
+  status               BusinessStatus         @default(ACTIVE)
+  user                 User                   @relation(name: "businessOwner", fields: [userId], references: [id], onDelete: Cascade)
+  userId               Int                    @unique @map("user_id")
+  subscriptionPlan     SubscriptionPlan       @relation(name: "businessSubscriptionPlan", fields: [subscriptionPlanId], references: [id])
+  subscriptionPlanId   Int                    @map("subscription_plan_id")
+  modules              businessModule[]       @relation(name: "businessModules")
+  roles                Role[]                 @relation(name: "rolesInBusiness")
+  businessSettings     BusinessSettings?      @relation(name: "businessSettings")
+  leaveSettings        LeaveSettings?         @relation(name: "leaveSettings")
+  attendanceSettings   AttendanceSettings?    @relation(name: "attendanceSettings")
+  PaymentSettings      PaymentSettings?       @relation(name: "paymentSettings")
+  employmentStatuses   EmploymentStatus[]     @relation(name: "employmentStatusesInBusiness")
+  designations         Designation[]          @relation(name: "designationsInBusiness")
+  jobTypes             JobType[]              @relation(name: "jobTypesInBusiness")
+  jobPlatforms         JobPlatform[]          @relation(name: "jobPlatformsInBusiness")
+  recruitmentProcesses RecruitmentProcess[]   @relation(name: "recruitmentProcessesInBusiness")
+  onboardingProcesses  OnboardingProcess[]    @relation(name: "onboardingProcessesInBusiness")
+  workSites            WorkSite[]             @relation(name: "workSitesInBusiness")
+  departments          Department[]           @relation(name: "departmentsInBusiness")
+  workSchedules        WorkSchedule[]         @relation(name: "workSchedulesInBusiness")
+  businessSchedule     BusinessSchedule[]     @relation(name: "businessSchedules")
+  leaveTypes           LeaveType[]            @relation(name: "leaveTypesInBusiness")
+  subscriptions        BusinessSubscription[] @relation(name: "businessSubscriptions")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -289,12 +298,13 @@ model SubscriptionPlan {
   name        String                   @unique
   description String
   setupFee    Int                      @map("setup_fee")
-  status      Status                   @default(Active)
+  status      Status                   @default(ACTIVE)
   price       Int
   businesses  Business[]               @relation(name: "businessSubscriptionPlan")
   modules     SubscriptionPlanModule[] @relation(name: "subscriptionPlanModules")
   createdBy   Int                      @map("created_by")
   creator     User?                    @relation(name: "subscriptionPlanCreated", fields: [createdBy], references: [id], onDelete: Cascade)
+  Businesses  BusinessSubscription[]   @relation(name: "subscriptionPlanInBusiness")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -340,11 +350,28 @@ model businessModule {
   @@map("business_modules")
 }
 
+model BusinessSubscription {
+  id                 Int                @id @default(autoincrement())
+  businessId         Int                @map("business_id")
+  business           Business           @relation(name: "businessSubscriptions", fields: [businessId], references: [id], onDelete: Cascade)
+  subscriptionPlanId Int                @map("subscription_plan_id")
+  SubscriptionPlan   SubscriptionPlan   @relation(name: "subscriptionPlanInBusiness", fields: [subscriptionPlanId], references: [id], onDelete: Cascade)
+  trialEndDate       String?            @map("trial_end_date")
+  startDate          String?            @map("start_date")
+  endDate            String?            @map("end_date")
+  status             SubscriptionStatus @default(TRIAL)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([businessId, subscriptionPlanId])
+  @@map("business_subscriptions")
+}
+
 model Designation {
   id          Int       @id @default(autoincrement())
   name        String
   description String
-  status      Status    @default(Active)
+  status      Status    @default(ACTIVE)
   businessId  Int?      @map("business_id")
   business    Business? @relation(name: "designationsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy   Int?      @map("created_by")
@@ -361,7 +388,7 @@ model JobType {
   id          Int       @id @default(autoincrement())
   name        String
   description String
-  status      Status    @default(Active)
+  status      Status    @default(ACTIVE)
   businessId  Int?      @map("business_id")
   business    Business? @relation(name: "jobTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy   Int?      @map("created_by")
@@ -378,7 +405,7 @@ model JobPlatform {
   id          Int       @id @default(autoincrement())
   name        String
   description String
-  status      Status    @default(Active)
+  status      Status    @default(ACTIVE)
   businessId  Int?      @map("business_id")
   business    Business? @relation(name: "jobPlatformsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy   Int?      @map("created_by")
@@ -395,7 +422,7 @@ model RecruitmentProcess {
   id          Int       @id @default(autoincrement())
   name        String
   description String
-  status      Status    @default(Active)
+  status      Status    @default(ACTIVE)
   isRequired  Boolean   @map("is_required")
   businessId  Int?      @map("business_id")
   business    Business? @relation(name: "recruitmentProcessesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
@@ -413,7 +440,7 @@ model OnboardingProcess {
   id          Int       @id @default(autoincrement())
   name        String
   description String
-  status      Status    @default(Active)
+  status      Status    @default(ACTIVE)
   isRequired  Boolean   @map("is_required")
   businessId  Int?      @map("business_id")
   business    Business? @relation(name: "onboardingProcessesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
@@ -431,7 +458,7 @@ model WorkSite {
   id                   Int       @id @default(autoincrement())
   name                 String
   description          String
-  status               Status    @default(Active)
+  status               Status    @default(ACTIVE)
   address              String?
   isLocationEnabled    Boolean?  @map("is_location_enabled")
   isGeoLocationEnabled Boolean?  @map("is_geo_location_enabled")
@@ -455,7 +482,7 @@ model Department {
   parent_id   Int?
   name        String
   description String
-  status      Status    @default(Active)
+  status      Status    @default(ACTIVE)
   businessId  Int?      @map("business_id")
   business    Business? @relation(name: "departmentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   managerId   Int?      @map("manager_id")
@@ -475,9 +502,9 @@ model WorkSchedule {
   id           Int               @id @default(autoincrement())
   name         String
   description  String
-  status       Status            @default(Active)
-  scheduleType ScheduleType      @default(Regular)
-  breakType    ScheduleBreakType @default(Unpaid) @map("break_type")
+  status       Status            @default(ACTIVE)
+  scheduleType ScheduleType      @default(REGULAR)
+  breakType    ScheduleBreakType @default(UNPAID) @map("break_type")
   breakHours   Int               @default(0) @map("break_hours")
   businessId   Int?              @map("business_id")
   business     Business?         @relation(name: "workSchedulesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
@@ -520,7 +547,7 @@ model EmploymentStatus {
   id          Int                         @id @default(autoincrement())
   name        String
   description String
-  status      Status                      @default(Active)
+  status      Status                      @default(ACTIVE)
   leaveTypes  LeaveTypeEmploymentStatus[]
   businessId  Int?                        @map("business_id")
   business    Business?                   @relation(name: "employmentStatusesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
@@ -552,7 +579,7 @@ model LeaveType {
   leaveHours         Int                         @default(0) @map("leave_hours")
   leaveRolloverType  LeaveRolloverType           @default(NONE) @map("leave_rollover_type")
   carryOverLimit     Int?                        @map("carry_over_limit")
-  status             Status                      @default(Active)
+  status             Status                      @default(ACTIVE)
   employmentStatuses LeaveTypeEmploymentStatus[]
   businessId         Int?                        @map("business_id")
   business           Business?                   @relation(name: "leaveTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)

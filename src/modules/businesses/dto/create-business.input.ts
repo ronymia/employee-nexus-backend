@@ -1,5 +1,5 @@
 import { InputType, Field, Int, Float } from '@nestjs/graphql';
-import { IsBoolean, IsDate, IsEmail, IsInt, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsInt, IsString } from 'class-validator';
 
 @InputType()
 export class CreateBusinessInput {
@@ -40,8 +40,7 @@ export class CreateBusinessInput {
   long?: number;
 
   @Field()
-  @IsDate()
-  registrationDate: Date;
+  registrationDate: string;
 
   @Field({ nullable: true })
   @IsString()
@@ -50,14 +49,6 @@ export class CreateBusinessInput {
   @Field(() => Int)
   @IsInt()
   numberOfEmployeesAllowed: number;
-
-  @Field()
-  @IsBoolean()
-  isSubscribed: boolean;
-
-  @Field()
-  @IsDate()
-  trailEndDate: Date;
 
   @Field(() => Int)
   @IsInt()

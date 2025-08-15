@@ -24,17 +24,15 @@ type Business {
   createdAt: DateTime!
   email: String!
   id: Int!
-  isSubscribed: Boolean!
   lat: Float
   long: Float
   name: String!
   numberOfEmployeesAllowed: Int!
   phone: String!
   postcode: String!
-  registrationDate: DateTime!
+  registrationDate: String!
   status: String!
   subscriptionPlanId: Int!
-  trailEndDate: DateTime!
   updatedAt: DateTime!
   userId: Int!
   website: String
@@ -45,16 +43,14 @@ input CreateBusinessInput {
   city: String!
   country: String!
   email: String!
-  isSubscribed: Boolean!
   lat: Float
   long: Float
   name: String!
   numberOfEmployeesAllowed: Int!
   phone: String!
   postcode: String!
-  registrationDate: DateTime!
+  registrationDate: String!
   subscriptionPlanId: Int!
-  trailEndDate: DateTime!
   website: String
 }
 
@@ -62,7 +58,7 @@ input CreateProfileInput {
   address: String!
   city: String!
   country: String!
-  dateOfBirth: DateTime!
+  dateOfBirth: String!
   fullName: String!
   gender: GENDER!
   maritalStatus: MARITAL_STATUS!
@@ -100,8 +96,8 @@ scalar DateTime
 
 """Gender of the user"""
 enum GENDER {
-  Female
-  Male
+  FEMALE
+  MALE
 }
 
 input LoginAuthInput {
@@ -114,8 +110,8 @@ input LoginAuthInput {
 
 """Marital status of the user"""
 enum MARITAL_STATUS {
-  Married
-  Single
+  MARRIED
+  SINGLE
 }
 
 type Module {
@@ -183,7 +179,7 @@ type Profile {
   city: String!
   country: String!
   createdAt: DateTime!
-  dateOfBirth: DateTime!
+  dateOfBirth: String!
   fullName: String!
   gender: GENDER!
   id: ID!
@@ -229,8 +225,9 @@ type Role {
 
 """Status of the service plan"""
 enum Status {
-  Active
-  Inactive
+  ACTIVE
+  DEACTIVATED
+  INACTIVE
 }
 
 type SubscriptionPlan {
@@ -283,17 +280,17 @@ type SubscriptionPlanResponse {
 
 """User account status"""
 enum USER_ACCOUNT_STATUS {
-  Active
-  Blocked
-  Deleted
-  Inactive
-  On_Leave
-  Resigned
-  Retired
-  Suspended
-  Terminated
-  Unverified
-  Verified
+  ACTIVE
+  BLOCKED
+  DELETED
+  INACTIVE
+  ON_LEAVE
+  RESIGNED
+  RETIRED
+  SUSPENDED
+  TERMINATED
+  UNVERIFIED
+  VERIFIED
 }
 
 input UpdateBusinessInput {
@@ -302,16 +299,14 @@ input UpdateBusinessInput {
   country: String
   email: String
   id: Int!
-  isSubscribed: Boolean
   lat: Float
   long: Float
   name: String
   numberOfEmployeesAllowed: Int
   phone: String
   postcode: String
-  registrationDate: DateTime
+  registrationDate: String
   subscriptionPlanId: Int
-  trailEndDate: DateTime
   website: String
 }
 

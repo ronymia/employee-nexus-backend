@@ -26,7 +26,7 @@ export class Profile {
   profilePicture?: string | null;
 
   @Field()
-  dateOfBirth: Date;
+  dateOfBirth: string;
 
   @Field(() => GENDER)
   gender: GENDER;

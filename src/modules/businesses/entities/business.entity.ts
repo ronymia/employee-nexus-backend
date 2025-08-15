@@ -34,19 +34,13 @@ export class Business {
   long?: number;
 
   @Field()
-  registrationDate: Date;
+  registrationDate: string;
 
   @Field({ nullable: true })
   website?: string;
 
   @Field(() => Int)
   numberOfEmployeesAllowed: number;
-
-  @Field()
-  isSubscribed: boolean;
-
-  @Field()
-  trailEndDate: Date;
 
   @Field(() => String)
   status: BusinessStatus;

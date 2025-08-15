@@ -14,19 +14,19 @@ const prisma = new PrismaClient();
 // SUPER ADMIN DATA
 export const superUser = {
   email: 'mdronymia040@gmail.com',
-  status: USER_ACCOUNT_STATUS.Verified,
+  status: USER_ACCOUNT_STATUS.VERIFIED,
 };
 
 export const superAdminProfile = {
   fullName: 'MD Rony Mia',
   phone: '01321185989',
   dateOfBirth: new Date('1998-12-10').toISOString(),
-  gender: GENDER.Male,
+  gender: GENDER.MALE,
   address: 'west khabaspur,Faridpur Sadar,Faridpur',
   city: 'Faridpur',
   country: 'Bangladesh',
   postcode: '7800',
-  maritalStatus: MARITAL_STATUS.Single,
+  maritalStatus: MARITAL_STATUS.SINGLE,
 };
 
 // SEED SUPER ADMIN

@@ -35,8 +35,8 @@ export class CreateProfileInput {
   profilePicture?: string;
 
   @Field()
-  @IsDateString()
-  dateOfBirth: Date;
+  @IsString()
+  dateOfBirth: string;
 
   @Field(() => GENDER)
   @IsEnum(GENDER)
