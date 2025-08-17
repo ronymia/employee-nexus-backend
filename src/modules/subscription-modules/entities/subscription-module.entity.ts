@@ -1,6 +1,6 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
-import { Module } from 'src/modules/modules/entities/module.entity';
 import { SubscriptionPlan } from 'src/modules/subscription-plans/entities/subscription-plan.entity';
+import { SystemModule } from 'src/modules/system-modules/entities/system-module.entity';
 
 @ObjectType()
 export class SubscriptionModule {
@@ -13,6 +13,6 @@ export class SubscriptionModule {
   @Field(() => Int, { description: 'System Module ID' })
   moduleId: number;
 
-  @Field(() => Module, { description: 'System Module Details' })
-  Module: Module;
+  @Field(() => SystemModule, { description: 'System Module Details' })
+  systemModule: SystemModule;
 }

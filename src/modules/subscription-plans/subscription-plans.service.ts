@@ -26,9 +26,11 @@ export class SubscriptionPlansService {
       async (prismaTransaction: Prisma.TransactionClient) => {
         // 1. check modules
         if (moduleIds?.length) {
-          const existingModules = await prismaTransaction.module.findMany({
-            where: { id: { in: moduleIds } },
-          });
+          const existingModules = await prismaTransaction.systemModule.findMany(
+            {
+              where: { id: { in: moduleIds } },
+            },
+          );
 
           if (existingModules.length !== moduleIds.length) {
             const foundIds = existingModules.map((m) => m?.id);
@@ -59,7 +61,7 @@ export class SubscriptionPlansService {
           await prismaTransaction.subscriptionPlanModule.createMany({
             data: moduleIds.map((id) => ({
               subscriptionPlanId: newSubscriptionPlan.id,
-              moduleId: id,
+              systemModuleId: id,
             })),
             skipDuplicates: true,
           });
@@ -70,7 +72,7 @@ export class SubscriptionPlansService {
           await prismaTransaction.subscriptionPlan.findUnique({
             where: { id: newSubscriptionPlan.id },
             include: {
-              modules: { include: { module: true } },
+              modules: { include: { systemModule: true } },
               creator: true,
             },
           });

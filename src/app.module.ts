@@ -20,8 +20,8 @@ import { BusinessModulesModule } from './modules/business-modules/business-modul
 import { BusinessesModule } from './modules/businesses/businesses.module';
 import { SubscriptionPlansModule } from './modules/subscription-plans/subscription-plans.module';
 import { SubscriptionModulesModule } from './modules/subscription-modules/subscription-modules.module';
-import { ModulesModule } from './modules/modules/modules.module';
 import { DesignationsModule } from './modules/designations/designations.module';
+import { SystemModulesModule } from './modules/system-modules/system-modules.module';
 
 @Module({
   imports: [
@@ -49,7 +49,7 @@ import { DesignationsModule } from './modules/designations/designations.module';
     SubscriptionModulesModule,
     BusinessModulesModule,
     BusinessesModule,
-    ModulesModule,
+    SystemModulesModule,
     DesignationsModule,
   ],
   controllers: [AppController],

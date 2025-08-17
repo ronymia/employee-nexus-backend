@@ -164,34 +164,6 @@ enum MARITAL_STATUS {
   SINGLE
 }
 
-type Module {
-  """Creation date of the module"""
-  createdAt: DateTime!
-
-  """ID of the module"""
-  id: ID!
-
-  """Name of the module"""
-  name: String!
-
-  """Last update date of the module"""
-  updatedAt: DateTime!
-}
-
-type ModuleQueryResponse {
-  data: [Module!]!
-  message: String!
-  statusCode: Float!
-  success: Boolean!
-}
-
-type ModuleResponse {
-  data: Module!
-  message: String!
-  statusCode: Float!
-  success: Boolean!
-}
-
 type Mutation {
   createBusiness(createBusinessInput: CreateBusinessInput!): Business!
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
@@ -248,8 +220,8 @@ type Query {
   businesses: [Business!]!
   designationById(id: Int!): DesignationResponse!
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
-  moduleById(id: Int!): ModuleResponse!
-  modules: ModuleQueryResponse!
+  moduleById(id: Int!): SystemModuleResponse!
+  modules: SystemModuleQueryResponse!
   permissionById(id: Int!): Permission!
   permissions: [Permission!]!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
@@ -335,6 +307,34 @@ type SubscriptionPlanResponse {
   data: SubscriptionPlan!
   message: String!
   meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type SystemModule {
+  """Creation date of the module"""
+  createdAt: DateTime!
+
+  """ID of the module"""
+  id: ID!
+
+  """Name of the module"""
+  name: String!
+
+  """Last update date of the module"""
+  updatedAt: DateTime!
+}
+
+type SystemModuleQueryResponse {
+  data: [SystemModule!]!
+  message: String!
+  statusCode: Float!
+  success: Boolean!
+}
+
+type SystemModuleResponse {
+  data: SystemModule!
+  message: String!
   statusCode: Float!
   success: Boolean!
 }

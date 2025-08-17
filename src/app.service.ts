@@ -35,7 +35,7 @@ export class AppService {
 
   // UPDATE MODULE
   async moduleRefresh() {
-    const res = await this.prisma.module.createMany({
+    const res = await this.prisma.systemModule.createMany({
       data: modules.map((module) => ({ name: module })),
       skipDuplicates: true,
     });

@@ -1,7 +1,7 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 
 @ObjectType()
-export class Module {
+export class SystemModule {
   @Field(() => ID, { description: 'ID of the module' })
   id: number;
 
@@ -16,7 +16,7 @@ export class Module {
 }
 
 @ObjectType()
-export class ModuleResponse {
+export class SystemModuleResponse {
   @Field()
   statusCode: number;
 
@@ -26,12 +26,12 @@ export class ModuleResponse {
   @Field()
   message: string;
 
-  @Field(() => Module)
-  data: Module;
+  @Field(() => SystemModule)
+  data: SystemModule;
 }
 
 @ObjectType()
-export class ModuleQueryResponse {
+export class SystemModuleQueryResponse {
   @Field()
   statusCode: number;
 
@@ -41,6 +41,6 @@ export class ModuleQueryResponse {
   @Field()
   message: string;
 
-  @Field(() => [Module])
-  data: Module[];
+  @Field(() => [SystemModule])
+  data: SystemModule[];
 }

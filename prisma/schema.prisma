@@ -258,8 +258,8 @@ model Role {
 
 model Permission {
   id       Int    @id @default(autoincrement())
-  resource String // e.g., "User", "Post", "Order"
-  action   String // e.g., "create", "read", "update", "delete"
+  resource String //  "User", "Post", "Order"
+  action   String //  "create", "read", "update", "delete"
 
   rolePermissions RolePermission[]
   userPermissions UserPermission[]
@@ -312,41 +312,38 @@ model SubscriptionPlan {
   @@map("subscription_plans")
 }
 
-model Module {
+model SystemModule {
   id                Int                      @id @default(autoincrement())
   name              String                   @unique
-  subscriptionPlans SubscriptionPlanModule[] @relation(name: "subscriptionPlanInModules")
-  businesses        businessModule[]         @relation(name: "businessInModules")
+  subscriptionPlans SubscriptionPlanModule[] @relation(name: "subscriptionPlanInSystemModules")
+  businesses        businessModule[]         @relation(name: "businessInSystemModules")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("modules")
+  @@map("system_modules")
 }
 
 model SubscriptionPlanModule {
   subscriptionPlanId Int              @map("subscription_plan_id")
   subscriptionPlan   SubscriptionPlan @relation(name: "subscriptionPlanModules", fields: [subscriptionPlanId], references: [id], onDelete: Cascade)
-  moduleId           Int              @map("module_id")
-  module             Module           @relation(name: "subscriptionPlanInModules", fields: [moduleId], references: [id], onDelete: Cascade)
+  systemModuleId     Int              @map("system_module_id")
+  systemModule       SystemModule     @relation(name: "subscriptionPlanInSystemModules", fields: [systemModuleId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([subscriptionPlanId, moduleId])
+  @@unique([subscriptionPlanId, systemModuleId])
   @@map("subscription_plan_modules")
 }
 
 model businessModule {
-  businessId Int      @map("business_id")
-  business   Business @relation(name: "businessModules", fields: [businessId], references: [id], onDelete: Cascade)
-  moduleId   Int      @map("module_id")
-  module     Module   @relation(name: "businessInModules", fields: [moduleId], references: [id], onDelete: Cascade)
+  businessId     Int          @map("business_id")
+  business       Business     @relation(name: "businessModules", fields: [businessId], references: [id], onDelete: Cascade)
+  systemModuleId Int          @map("system_module_id")
+  systemModule   SystemModule @relation(name: "businessInSystemModules", fields: [systemModuleId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([businessId, moduleId])
+  @@unique([businessId, systemModuleId])
   @@map("business_modules")
 }
 
