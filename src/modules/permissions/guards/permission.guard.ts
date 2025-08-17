@@ -46,6 +46,10 @@ export class PermissionsGuard implements CanActivate {
 
     // console.log({ permission });
 
+    if (!permission) {
+      throw new ForbiddenException('Access denied: You do not have permission');
+    }
+
     // 2. Get role permissions
     const rolePermissions = await this.prisma.rolePermission.findFirst({
       where: { roleId: user?.roleId, permissionId: permission?.id },

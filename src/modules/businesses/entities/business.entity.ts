@@ -28,16 +28,16 @@ export class Business {
   postcode: string;
 
   @Field(() => Float, { nullable: true })
-  lat?: number;
+  lat?: number | null;
 
   @Field(() => Float, { nullable: true })
-  long?: number;
+  long?: number | null;
 
   @Field()
   registrationDate: string;
 
-  @Field({ nullable: true })
-  website?: string;
+  @Field(() => String, { nullable: true })
+  website?: string | null;
 
   @Field(() => Int)
   numberOfEmployeesAllowed: number;

@@ -156,7 +156,7 @@ export class SubscriptionPlansService {
     const totalCount = await this.prisma.subscriptionPlan.count();
 
     // GET TOTAL COUNT (based on same filters!)
-    const paginationTotal = result?.length;
+    // const paginationTotal = result?.length;
 
     const totalPages = Math.ceil(totalCount / limit);
     // RETURN
@@ -167,7 +167,7 @@ export class SubscriptionPlansService {
         skip,
         total: totalCount,
         totalPages,
-        paginationTotal,
+        // paginationTotal,
       },
       data: result,
     };

@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 export type JwtPayload = {
   userId: number;
   roleId: number;
+  businessId: number;
 };
 
 @Injectable()

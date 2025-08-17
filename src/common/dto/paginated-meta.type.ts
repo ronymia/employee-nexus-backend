@@ -16,7 +16,4 @@ export class PaginationMeta {
 
   @Field(() => Int)
   totalPages: number;
-
-  @Field(() => Int)
-  paginationTotal: number;
 }

@@ -54,6 +54,14 @@ input CreateBusinessInput {
   website: String
 }
 
+input CreateDesignationInput {
+  """Description of the designation"""
+  description: String!
+
+  """Name of the designation"""
+  name: String!
+}
+
 input CreateProfileInput {
   address: String!
   city: String!
@@ -93,6 +101,48 @@ input CreateUserInput {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type Designation {
+  """ID of the business"""
+  businessId: Int!
+
+  """Date when the designation was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Description of the designation"""
+  description: String!
+
+  """Unique identifier for the designation"""
+  id: ID!
+
+  """Name of the designation"""
+  name: String!
+
+  """Status of the designation"""
+  status: Status!
+
+  """Date when the designation was last updated"""
+  updatedAt: DateTime!
+}
+
+type DesignationResponse {
+  data: Designation!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type DesignationsQueryResponse {
+  data: [Designation!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
 
 """Gender of the user"""
 enum GENDER {
@@ -144,21 +194,23 @@ type ModuleResponse {
 
 type Mutation {
   createBusiness(createBusinessInput: CreateBusinessInput!): Business!
+  createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
   createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
   createUser(createUserInput: CreateUserInput!): User!
   createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
+  deleteDesignation(id: Int!): DesignationResponse!
   login(loginInput: LoginAuthInput!): Auth!
   removeBusiness(id: Int!): Business!
   removeSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
   removeUser(id: Int!): User!
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): Business!
+  updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
   updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
 }
 
 type PaginationMeta {
   limit: Int!
   page: Int!
-  paginationTotal: Int!
   skip: Int!
   total: Int!
   totalPages: Int!
@@ -194,6 +246,8 @@ type Profile {
 type Query {
   businessById(id: Int!): Business!
   businesses: [Business!]!
+  designationById(id: Int!): DesignationResponse!
+  designations(query: QueryDesignationInput): DesignationsQueryResponse!
   moduleById(id: Int!): ModuleResponse!
   modules: ModuleQueryResponse!
   permissionById(id: Int!): Permission!
@@ -202,6 +256,13 @@ type Query {
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
   userById(id: Int!): User!
   users: [User!]!
+}
+
+input QueryDesignationInput {
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: Status
 }
 
 input QuerySubscriptionPlanInput {
@@ -223,7 +284,7 @@ type Role {
   name: String!
 }
 
-"""Status of the service plan"""
+"""Status of the Designation"""
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -265,7 +326,7 @@ type SubscriptionPlan {
 type SubscriptionPlanQueryResponse {
   data: [SubscriptionPlan!]!
   message: String!
-  meta: PaginationMeta!
+  meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
 }
@@ -273,7 +334,7 @@ type SubscriptionPlanQueryResponse {
 type SubscriptionPlanResponse {
   data: SubscriptionPlan!
   message: String!
-  meta: PaginationMeta!
+  meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
 }
@@ -310,6 +371,15 @@ input UpdateBusinessInput {
   website: String
 }
 
+input UpdateDesignationInput {
+  """Description of the designation"""
+  description: String!
+  id: Int!
+
+  """Name of the designation"""
+  name: String!
+}
+
 input UpdateSubscriptionPlanInput {
   """Description of the service plan"""
   description: String!
@@ -328,6 +398,8 @@ input UpdateSubscriptionPlanInput {
 }
 
 type User {
+  business: Business
+
   """Date when the user was created"""
   createdAt: DateTime!
 

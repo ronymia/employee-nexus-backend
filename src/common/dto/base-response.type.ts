@@ -14,8 +14,8 @@ export function BaseResponse<T>(TClass: Type<T>) {
     @Field()
     message: string;
 
-    @Field(() => PaginationMeta)
-    meta?: PaginationMeta;
+    @Field(() => PaginationMeta, { nullable: true })
+    meta?: PaginationMeta | null;
 
     @Field(() => TClass)
     data: T;
@@ -35,8 +35,8 @@ export function BaseQueryResponse<T>(TClass: Type<T>) {
     @Field()
     message: string;
 
-    @Field(() => PaginationMeta)
-    meta?: PaginationMeta;
+    @Field(() => PaginationMeta, { nullable: true })
+    meta?: PaginationMeta | null;
 
     @Field(() => [TClass])
     data: T[];

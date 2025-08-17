@@ -7,6 +7,7 @@ import {
   registerEnumType,
 } from '@nestjs/graphql';
 import { USER_ACCOUNT_STATUS } from 'generated/prisma';
+import { Business } from 'src/modules/businesses/entities/business.entity';
 import { Profile } from 'src/modules/profiles/entities/profile.entity';
 import { Role } from 'src/modules/roles/entities/role.entity';
 
@@ -39,6 +40,9 @@ export class User {
 
   @Field(() => Profile, { nullable: true })
   profile?: Profile | null;
+
+  @Field(() => Business, { nullable: true })
+  business: Business | null;
 
   @Field(() => Int, {
     nullable: true,
