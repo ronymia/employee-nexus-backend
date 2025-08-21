@@ -3,10 +3,14 @@
 # ------------------------------------------------------
 
 type Auth {
-  """JWT access token"""
+  """
+  JWT access token
+  """
   accessToken: String!
 
-  """User associated with the auth"""
+  """
+  User associated with the auth
+  """
   user: User!
 }
 
@@ -55,10 +59,14 @@ input CreateBusinessInput {
 }
 
 input CreateDesignationInput {
-  """Description of the designation"""
+  """
+  Description of the designation
+  """
   description: String!
 
-  """Name of the designation"""
+  """
+  Name of the designation
+  """
   name: String!
 }
 
@@ -76,19 +84,29 @@ input CreateProfileInput {
 }
 
 input CreateSubscriptionPlanInput {
-  """Description of the service plan"""
+  """
+  Description of the service plan
+  """
   description: String!
 
-  """Module Ids for the service plan"""
+  """
+  Module Ids for the service plan
+  """
   moduleIds: [Int!]!
 
-  """Name of the service plan"""
+  """
+  Name of the service plan
+  """
   name: String!
 
-  """Price of the service plan"""
+  """
+  Price of the service plan
+  """
   price: Int!
 
-  """One-time setup fee for the service plan"""
+  """
+  One-time setup fee for the service plan
+  """
   setupFee: Int!
 }
 
@@ -103,28 +121,44 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Designation {
-  """ID of the business"""
+  """
+  ID of the business
+  """
   businessId: Int!
 
-  """Date when the designation was created"""
+  """
+  Date when the designation was created
+  """
   createdAt: DateTime!
 
-  """ID of the creator"""
+  """
+  ID of the creator
+  """
   createdBy: Int!
 
-  """Description of the designation"""
+  """
+  Description of the designation
+  """
   description: String!
 
-  """Unique identifier for the designation"""
+  """
+  Unique identifier for the designation
+  """
   id: ID!
 
-  """Name of the designation"""
+  """
+  Name of the designation
+  """
   name: String!
 
-  """Status of the designation"""
+  """
+  Status of the designation
+  """
   status: Status!
 
-  """Date when the designation was last updated"""
+  """
+  Date when the designation was last updated
+  """
   updatedAt: DateTime!
 }
 
@@ -144,21 +178,29 @@ type DesignationsQueryResponse {
   success: Boolean!
 }
 
-"""Gender of the user"""
+"""
+Gender of the user
+"""
 enum GENDER {
   FEMALE
   MALE
 }
 
 input LoginAuthInput {
-  """User email"""
+  """
+  User email
+  """
   email: String!
 
-  """User password"""
+  """
+  User password
+  """
   password: String!
 }
 
-"""Marital status of the user"""
+"""
+Marital status of the user
+"""
 enum MARITAL_STATUS {
   MARRIED
   SINGLE
@@ -166,18 +208,31 @@ enum MARITAL_STATUS {
 
 type Mutation {
   createBusiness(createBusinessInput: CreateBusinessInput!): Business!
-  createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
-  createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
+  createDesignation(
+    createDesignationInput: CreateDesignationInput!
+  ): DesignationResponse!
+  createSubscriptionPlan(
+    createSubscriptionPlanInput: CreateSubscriptionPlanInput!
+  ): SubscriptionPlanResponse!
   createUser(createUserInput: CreateUserInput!): User!
-  createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
+  createUserWithBusiness(
+    createBusinessInput: CreateBusinessInput!
+    createProfileInput: CreateProfileInput!
+    createUserInput: CreateUserInput!
+  ): Business!
   deleteDesignation(id: Int!): DesignationResponse!
   login(loginInput: LoginAuthInput!): Auth!
   removeBusiness(id: Int!): Business!
   removeSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
   removeUser(id: Int!): User!
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): Business!
-  updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
-  updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
+  updateDesignation(
+    updateDesignationInput: UpdateDesignationInput!
+  ): DesignationResponse!
+  updateSubscriptionPlan(
+    id: Int!
+    updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!
+  ): SubscriptionPlanResponse!
 }
 
 type PaginationMeta {
@@ -192,7 +247,9 @@ type Permission {
   action: String!
   createdAt: DateTime!
 
-  """Unique identifier for the permission"""
+  """
+  Unique identifier for the permission
+  """
   id: ID!
   resource: String!
   updatedAt: DateTime!
@@ -225,7 +282,9 @@ type Query {
   permissionById(id: Int!): Permission!
   permissions: [Permission!]!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
-  subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
+  subscriptionPlans(
+    query: QuerySubscriptionPlanInput
+  ): SubscriptionPlanQueryResponse!
   userById(id: Int!): User!
   users: [User!]!
 }
@@ -246,17 +305,25 @@ input QuerySubscriptionPlanInput {
 }
 
 type Role {
-  """ID of the business"""
+  """
+  ID of the business
+  """
   businessId: Int
 
-  """Unique identifier for the role"""
+  """
+  Unique identifier for the role
+  """
   id: ID!
 
-  """Name of the role"""
+  """
+  Name of the role
+  """
   name: String!
 }
 
-"""Status of the Designation"""
+"""
+Status of the Designation
+"""
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -264,34 +331,54 @@ enum Status {
 }
 
 type SubscriptionPlan {
-  """Timestamp when the service plan was created"""
+  """
+  Timestamp when the service plan was created
+  """
   createdAt: DateTime!
 
-  """User who created the service plan"""
+  """
+  User who created the service plan
+  """
   createdBy: Int!
 
-  """Creator of the service plan"""
+  """
+  Creator of the service plan
+  """
   creator: User
 
-  """Description of the service plan"""
+  """
+  Description of the service plan
+  """
   description: String!
 
-  """Unique identifier for the service plan"""
+  """
+  Unique identifier for the service plan
+  """
   id: ID!
 
-  """Name of the service plan"""
+  """
+  Name of the service plan
+  """
   name: String!
 
-  """Price of the service plan"""
+  """
+  Price of the service plan
+  """
   price: Int!
 
-  """One-time setup fee for the service plan"""
+  """
+  One-time setup fee for the service plan
+  """
   setupFee: Int!
 
-  """Status of the service plan"""
+  """
+  Status of the service plan
+  """
   status: String!
 
-  """Timestamp when the service plan was last updated"""
+  """
+  Timestamp when the service plan was last updated
+  """
   updatedAt: DateTime!
 }
 
@@ -312,16 +399,24 @@ type SubscriptionPlanResponse {
 }
 
 type SystemModule {
-  """Creation date of the module"""
+  """
+  Creation date of the module
+  """
   createdAt: DateTime!
 
-  """ID of the module"""
+  """
+  ID of the module
+  """
   id: ID!
 
-  """Name of the module"""
+  """
+  Name of the module
+  """
   name: String!
 
-  """Last update date of the module"""
+  """
+  Last update date of the module
+  """
   updatedAt: DateTime!
 }
 
@@ -339,7 +434,9 @@ type SystemModuleResponse {
   success: Boolean!
 }
 
-"""User account status"""
+"""
+User account status
+"""
 enum USER_ACCOUNT_STATUS {
   ACTIVE
   BLOCKED
@@ -372,54 +469,82 @@ input UpdateBusinessInput {
 }
 
 input UpdateDesignationInput {
-  """Description of the designation"""
+  """
+  Description of the designation
+  """
   description: String!
   id: Int!
 
-  """Name of the designation"""
+  """
+  Name of the designation
+  """
   name: String!
 }
 
 input UpdateSubscriptionPlanInput {
-  """Description of the service plan"""
+  """
+  Description of the service plan
+  """
   description: String!
 
-  """Modules for the service plan"""
+  """
+  Modules for the service plan
+  """
   moduleIds: [Int!]!
 
-  """Name of the service plan"""
+  """
+  Name of the service plan
+  """
   name: String!
 
-  """Price of the service plan"""
+  """
+  Price of the service plan
+  """
   price: Int!
 
-  """One-time setup fee for the service plan"""
+  """
+  One-time setup fee for the service plan
+  """
   setupFee: Int!
 }
 
 type User {
   business: Business
 
-  """Date when the user was created"""
+  """
+  Date when the user was created
+  """
   createdAt: DateTime!
 
-  """ID of the user who deleted the user account"""
+  """
+  ID of the user who deleted the user account
+  """
   deletedBy: Int
 
-  """Email of the user"""
+  """
+  Email of the user
+  """
   email: String!
   id: ID!
   profile: Profile
 
-  """Role of the user"""
+  """
+  Role of the user
+  """
   role: Role
 
-  """ID of the role"""
+  """
+  ID of the role
+  """
   roleId: Int
 
-  """Status of the user account"""
+  """
+  Status of the user account
+  """
   status: USER_ACCOUNT_STATUS!
 
-  """Date when the user was last updated"""
+  """
+  Date when the user was last updated
+  """
   updatedAt: DateTime!
 }

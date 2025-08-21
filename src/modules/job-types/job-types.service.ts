@@ -1,31 +1,30 @@
-import { ConsoleLogger, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateDesignationInput } from './dto/create-designation.input';
-import { UpdateDesignationInput } from './dto/update-designation.input';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateJobTypeInput } from './dto/create-job-type.input';
+import { UpdateJobTypeInput } from './dto/update-job-type.input';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtPayload } from '../auth/jwt.strategy';
-import { QueryDesignationInput } from './dto/query-designation.input';
-import { paginationHelpers } from 'src/helpers/paginationHelpers';
-import { designationSearchableFields } from './designation.constant';
+import { QueryJobTypeInput } from './dto/query-job-type.input';
 import { Prisma } from 'generated/prisma';
+import { paginationHelpers } from 'src/helpers/paginationHelpers';
+import { jobTypeSearchableFields } from './jobType.constant';
 
 @Injectable()
-export class DesignationsService {
+export class JobTypesService {
   // PRISMA SERVICE
   constructor(private readonly prisma: PrismaService) {}
   // CONSOLE LOG
-  // private readonly logger = new ConsoleLogger(DesignationsService.name);
+  // private readonly logger = new ConsoleLogger(JobTypesService.name);
 
-  // CREATE
   async create({
     user,
-    createDesignationInput,
+    createJobTypeInput,
   }: {
     user: JwtPayload;
-    createDesignationInput: CreateDesignationInput;
+    createJobTypeInput: CreateJobTypeInput;
   }) {
     return await this.prisma.designation.create({
       data: {
-        ...createDesignationInput,
+        ...createJobTypeInput,
         business: {
           connect: {
             id: user.businessId,
@@ -40,7 +39,7 @@ export class DesignationsService {
     query,
   }: {
     user: JwtPayload;
-    query: QueryDesignationInput;
+    query: QueryJobTypeInput;
   }) {
     // BUSINESS ID
     const businessId = user.businessId;
@@ -58,7 +57,7 @@ export class DesignationsService {
     // Search in Field
     if (searchTerm) {
       andCondition.push({
-        OR: designationSearchableFields.map((field) => ({
+        OR: jobTypeSearchableFields.map((field) => ({
           [field]: {
             contains: searchTerm,
             mode: 'insensitive',
@@ -66,17 +65,17 @@ export class DesignationsService {
         })),
       });
     }
-    const whereCondition: Prisma.DesignationWhereInput = andCondition.length
+    const whereCondition: Prisma.JobTypeWhereInput = andCondition.length
       ? { AND: andCondition }
       : {};
 
     const result = !limit
-      ? await this.prisma.designation.findMany({
+      ? await this.prisma.jobType.findMany({
           where: {
             businessId,
           },
         })
-      : await this.prisma.designation.findMany({
+      : await this.prisma.jobType.findMany({
           where: {
             ...whereCondition,
             businessId,
@@ -90,7 +89,7 @@ export class DesignationsService {
     // this.logger.log(result);
 
     // META
-    const total = await this.prisma.designation.count({
+    const total = await this.prisma.jobType.count({
       where: {
         businessId,
       },
@@ -110,11 +109,11 @@ export class DesignationsService {
 
   async findOne({ user, id }: { user: JwtPayload; id: number }) {
     const businessId = user.businessId;
-    const result = await this.prisma.designation.findUnique({
+    const result = await this.prisma.jobType.findUnique({
       where: { id, businessId },
     });
     if (!result) {
-      throw new NotFoundException(`Designation with ID ${id} not found`);
+      throw new NotFoundException(`Job Type with ID ${id} not found`);
     }
 
     return result;
@@ -123,22 +122,21 @@ export class DesignationsService {
   async update({
     user,
     id,
-    updateDesignationInput,
+    updateJobTypeInput,
   }: {
     user: JwtPayload;
     id: number;
-    updateDesignationInput: UpdateDesignationInput;
+    updateJobTypeInput: UpdateJobTypeInput;
   }) {
-    await this.findOne({ user, id }); // Ensure the designation exists
-    return await this.prisma.designation.update({
+    await this.findOne({ user, id }); // Ensure the job type exists
+    return await this.prisma.jobType.update({
       where: { id, businessId: user.businessId },
-      data: updateDesignationInput,
+      data: updateJobTypeInput,
     });
   }
-
   async remove({ user, id }: { user: JwtPayload; id: number }) {
-    await this.findOne({ user, id }); // Ensure the designation exists
-    return await this.prisma.designation.delete({
+    await this.findOne({ user, id }); // Ensure the job type exists
+    return await this.prisma.jobType.delete({
       where: { id, businessId: user.businessId },
     });
   }

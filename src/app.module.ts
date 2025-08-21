@@ -22,6 +22,7 @@ import { SubscriptionPlansModule } from './modules/subscription-plans/subscripti
 import { SubscriptionModulesModule } from './modules/subscription-modules/subscription-modules.module';
 import { DesignationsModule } from './modules/designations/designations.module';
 import { SystemModulesModule } from './modules/system-modules/system-modules.module';
+import { JobTypesModule } from './modules/job-types/job-types.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { SystemModulesModule } from './modules/system-modules/system-modules.mod
     BusinessesModule,
     SystemModulesModule,
     DesignationsModule,
+    JobTypesModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

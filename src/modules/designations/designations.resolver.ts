@@ -29,10 +29,10 @@ export class DesignationsResolver {
     createDesignationInput: CreateDesignationInput,
     @CurrentUser() user: JwtPayload,
   ) {
-    const result = await this.designationsService.create(
+    const result = await this.designationsService.create({
       user,
       createDesignationInput,
-    );
+    });
     return {
       success: true,
       statusCode: HttpStatus.OK,
@@ -69,7 +69,7 @@ export class DesignationsResolver {
     @Args('id', { type: () => Int }) id: number,
     @CurrentUser() user: JwtPayload,
   ) {
-    const result = await this.designationsService.findOne(user, id);
+    const result = await this.designationsService.findOne({ user, id });
 
     return {
       success: true,
@@ -89,11 +89,11 @@ export class DesignationsResolver {
     @Args('updateDesignationInput')
     updateDesignationInput: UpdateDesignationInput,
   ) {
-    const result = await this.designationsService.update(
+    const result = await this.designationsService.update({
       user,
-      updateDesignationInput.id,
+      id: updateDesignationInput.id,
       updateDesignationInput,
-    );
+    });
     return {
       success: true,
       statusCode: HttpStatus.OK,
@@ -111,7 +111,7 @@ export class DesignationsResolver {
     @Args('id', { type: () => Int }) id: number,
     @CurrentUser() user: JwtPayload,
   ) {
-    const result = await this.designationsService.remove(user, id);
+    const result = await this.designationsService.remove({ user, id });
     return {
       success: true,
       statusCode: HttpStatus.OK,
