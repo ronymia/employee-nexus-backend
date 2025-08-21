@@ -38,6 +38,22 @@ type Business {
   website: String
 }
 
+type BusinessQueryResponse {
+  data: [Business!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+"""Business Status of Business"""
+enum BusinessStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  TRIAL_EXPIRED
+}
+
 input CreateBusinessInput {
   address: String!
   city: String!
@@ -270,7 +286,7 @@ type Profile {
 
 type Query {
   businessById(id: Int!): Business!
-  businesses: [Business!]!
+  businesses(query: QueryBusinessInput): BusinessQueryResponse!
   designationById(id: Int!): DesignationResponse!
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
   jobTypeById(id: Int!): JobTypeResponse!
@@ -283,6 +299,13 @@ type Query {
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
   userById(id: Int!): User!
   users: [User!]!
+}
+
+input QueryBusinessInput {
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: BusinessStatus
 }
 
 input QueryDesignationInput {

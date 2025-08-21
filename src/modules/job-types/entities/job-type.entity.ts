@@ -7,7 +7,7 @@ import {
 
 registerEnumType(Status, {
   name: 'Status',
-  description: 'Status of the service plan',
+  description: 'Status of the Job Type',
 });
 
 @ObjectType()

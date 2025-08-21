@@ -4,8 +4,8 @@ import { BusinessStatus } from 'generated/prisma';
 import { BasePaginationInput } from 'src/common/dto/base-pagination.type';
 
 registerEnumType(BusinessStatus, {
-  name: 'Status',
-  description: 'Status of the Designation',
+  name: 'BusinessStatus',
+  description: 'Business Status of Business',
 });
 
 @InputType()
