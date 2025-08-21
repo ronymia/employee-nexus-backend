@@ -41,7 +41,7 @@ export class JobTypesResolver {
   }
 
   // FIND ALL JOB TYPES
-  @Query(() => [JobTypesQueryResponse], { name: 'jobTypes' })
+  @Query(() => JobTypesQueryResponse, { name: 'jobTypes' })
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Job Type:read')
   @UseGuards(GqlAuthGuard)
