@@ -1,5 +1,9 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { BusinessStatus } from 'generated/prisma';
+import {
+  BaseQueryResponse,
+  BaseResponse,
+} from 'src/common/dto/base-response.type';
 
 @ObjectType()
 export class Business {
@@ -57,3 +61,9 @@ export class Business {
   @Field()
   updatedAt: Date;
 }
+
+@ObjectType()
+export class BusinessResponse extends BaseResponse(Business) {}
+
+@ObjectType()
+export class BusinessQueryResponse extends BaseQueryResponse(Business) {}

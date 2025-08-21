@@ -23,6 +23,10 @@ import {
   ownerPermissions,
 } from 'src/config';
 import { defaultOnboardingProcesses } from 'src/Database/onboarding-process';
+import { JwtPayload } from '../auth/jwt.strategy';
+import { QueryBusinessInput } from './dto/query-business.input';
+import { paginationHelpers } from 'src/helpers/paginationHelpers';
+import { businessSearchableFields } from './businesses.constant';
 
 @Injectable()
 export class BusinessesService {
@@ -370,8 +374,67 @@ export class BusinessesService {
     return 'This action adds a new business';
   }
 
-  findAll() {
-    return `This action returns all businesses`;
+  async findAll({
+    user,
+    query,
+  }: {
+    user: JwtPayload;
+    query: QueryBusinessInput;
+  }) {
+    // BUSINESS ID
+    const { pagination, ...filters } = query ?? {};
+
+    // PAGINATION
+    const { page, skip, limit, sortBy, sortOrder } =
+      paginationHelpers.calculatePagination(pagination || {});
+
+    // FILTER
+    const { searchTerm } = filters;
+
+    // QUERY BUILDER
+    const andCondition: any[] = [];
+    // Search in Field
+    if (searchTerm) {
+      andCondition.push({
+        OR: businessSearchableFields.map((field) => ({
+          [field]: {
+            contains: searchTerm,
+            mode: 'insensitive',
+          },
+        })),
+      });
+    }
+    const whereCondition: Prisma.BusinessWhereInput = andCondition.length
+      ? { AND: andCondition }
+      : {};
+
+    const result = !limit
+      ? await this.prisma.business.findMany()
+      : await this.prisma.business.findMany({
+          where: {
+            ...whereCondition,
+          },
+          skip,
+          take: limit,
+          orderBy: {
+            [sortBy]: sortOrder,
+          },
+        });
+    // this.logger.log(result);
+
+    // META
+    const total = await this.prisma.business.count();
+
+    return {
+      meta: {
+        page: Number(page),
+        limit: Number(limit),
+        skip: Number(skip),
+        total: Number(total),
+        totalPages: Math.ceil(total / limit),
+      },
+      data: result,
+    };
   }
 
   findOne(id: number) {
