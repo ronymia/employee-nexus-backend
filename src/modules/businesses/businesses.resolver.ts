@@ -47,7 +47,7 @@ export class BusinessesResolver {
   // FIND ALL BUSINESSES
   @Query(() => BusinessQueryResponse, { name: 'businesses' })
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('Designation:read')
+  @RequirePermissions('Business:read')
   @UseGuards(GqlAuthGuard)
   async findAll(
     @CurrentUser() user: JwtPayload,

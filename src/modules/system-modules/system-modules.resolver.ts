@@ -15,7 +15,7 @@ export class SystemModulesResolver {
   constructor(private readonly systemModulesService: SystemModulesService) {}
 
   // FIND ALL MODULES
-  @Query(() => SystemModuleQueryResponse, { name: 'modules' })
+  @Query(() => SystemModuleQueryResponse, { name: 'systemModules' })
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Module:read')
   @UseGuards(GqlAuthGuard)
@@ -30,7 +30,7 @@ export class SystemModulesResolver {
   }
 
   // FIND BY ID MODULE
-  @Query(() => SystemModuleResponse, { name: 'moduleById' })
+  @Query(() => SystemModuleResponse, { name: 'systemModuleById' })
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Module:read')
   @UseGuards(GqlAuthGuard)

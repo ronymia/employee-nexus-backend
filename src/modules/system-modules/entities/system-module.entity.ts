@@ -7,12 +7,6 @@ export class SystemModule {
 
   @Field(() => String, { description: 'Name of the module' })
   name: string;
-
-  @Field(() => Date, { description: 'Creation date of the module' })
-  createdAt: Date;
-
-  @Field(() => Date, { description: 'Last update date of the module' })
-  updatedAt: Date;
 }
 
 @ObjectType()

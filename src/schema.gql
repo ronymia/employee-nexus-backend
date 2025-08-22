@@ -291,12 +291,12 @@ type Query {
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
   jobTypeById(id: Int!): JobTypeResponse!
   jobTypes(query: QueryJobTypeInput): JobTypesQueryResponse!
-  moduleById(id: Int!): SystemModuleResponse!
-  modules: SystemModuleQueryResponse!
   permissionById(id: Int!): Permission!
   permissions: [Permission!]!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
+  systemModuleById(id: Int!): SystemModuleResponse!
+  systemModules: SystemModuleQueryResponse!
   userById(id: Int!): User!
   users: [User!]!
 }
@@ -397,17 +397,11 @@ type SubscriptionPlanResponse {
 }
 
 type SystemModule {
-  """Creation date of the module"""
-  createdAt: DateTime!
-
   """ID of the module"""
   id: ID!
 
   """Name of the module"""
   name: String!
-
-  """Last update date of the module"""
-  updatedAt: DateTime!
 }
 
 type SystemModuleQueryResponse {
