@@ -194,18 +194,72 @@ export class SubscriptionPlansService {
     updateSubscriptionPlanInput: UpdateSubscriptionPlanInput,
   ): Promise<any> {
     await this.findOne(id); // Ensure the subscription plan exists
+    const { moduleIds, ...rest } = updateSubscriptionPlanInput;
+    // return await this.prisma.subscriptionPlan.update({
+    //   where: { id },
+    //   data: updateSubscriptionPlanInput,
+    // });
 
-    return await this.prisma.subscriptionPlan.update({
-      where: { id },
-      data: updateSubscriptionPlanInput,
+    return this.prisma.$transaction(async (prismaTransaction) => {
+      // 1. check modules
+      if (moduleIds?.length) {
+        const existingModules = await prismaTransaction.systemModule.findMany({
+          where: { id: { in: moduleIds } },
+        });
+
+        if (existingModules.length !== moduleIds.length) {
+          const foundIds = existingModules.map((m) => m?.id);
+          const missing = moduleIds.filter((id) => !foundIds.includes(id));
+          throw new NotFoundException(
+            `Modules not found: ${missing.join(', ')}`,
+          );
+        }
+      }
+
+      // 2. update subscription plan
+      await prismaTransaction.subscriptionPlan.update({
+        where: { id },
+        data: rest,
+      });
+
+      // 3. update modules
+      await prismaTransaction.subscriptionPlanModule.deleteMany({
+        where: { subscriptionPlanId: id },
+      });
+
+      if (moduleIds?.length) {
+        await prismaTransaction.subscriptionPlanModule.createMany({
+          data: moduleIds.map((id) => ({
+            subscriptionPlanId: id,
+            systemModuleId: id,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      // 4. return
+      return await prismaTransaction.subscriptionPlan.findUnique({
+        where: { id },
+        include: {
+          modules: true,
+        },
+      });
     });
   }
 
   async remove(id: number): Promise<any> {
     await this.findOne(id); // Ensure the subscription plan exists
 
-    return await this.prisma.subscriptionPlan.delete({
-      where: { id },
+    return this.prisma.$transaction(async (prismaTransaction) => {
+      // 1. delete modules
+      await prismaTransaction.subscriptionPlanModule.deleteMany({
+        where: { subscriptionPlanId: id },
+      });
+
+      // 2. delete subscription plan
+      return await prismaTransaction.subscriptionPlan.delete({
+        where: { id },
+      });
     });
   }
 }
