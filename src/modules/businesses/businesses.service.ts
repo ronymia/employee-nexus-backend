@@ -27,11 +27,14 @@ import { JwtPayload } from '../auth/jwt.strategy';
 import { QueryBusinessInput } from './dto/query-business.input';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { businessSearchableFields } from './businesses.constant';
+import { UpdateUserInput } from '../users/dto/update-user.input';
+import { UpdateProfileInput } from '../profiles/dto/update-profile.input';
 
 @Injectable()
 export class BusinessesService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // REGISTER USER WITH BUSINESS
   async createUserWithBusiness(
     createUserInput: CreateUserInput,
     createProfileInput: CreateProfileInput,
@@ -370,10 +373,13 @@ export class BusinessesService {
 
     return newBusiness;
   }
+
+  // CREATE BUSINESS ONLY
   create(createBusinessInput: CreateBusinessInput) {
     return 'This action adds a new business';
   }
 
+  // FIND ALL BUSINESSES
   async findAll({
     user,
     query,
@@ -437,15 +443,80 @@ export class BusinessesService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} business`;
+  // FIND ONE BUSINESS
+  async findOne(id: number) {
+    const business = await this.prisma.business.findUniqueOrThrow({
+      where: { id },
+      include: {
+        user: true,
+        // businessSchedules: true,
+        businessSettings: true,
+      },
+    });
+    return business;
   }
 
-  update(id: number, updateBusinessInput: UpdateBusinessInput) {
-    return `This action updates a #${id} business`;
+  // UPDATE BUSINESS
+  async update(
+    id: number,
+    updateBusinessInput: UpdateBusinessInput,
+    userInput: UpdateUserInput,
+    profileInput: UpdateProfileInput,
+  ) {
+    // CHECK IF BUSINESS EXISTS
+    await this.findOne(id);
+
+    // Start a database transaction
+    const newBusiness = await this.prisma.$transaction(
+      async (prismaTransaction: Prisma.TransactionClient) => {
+        // step 0 : check service plan
+        const servicePlan = await prismaTransaction.subscriptionPlan.findFirst({
+          where: {
+            id: updateBusinessInput.subscriptionPlanId,
+          },
+        });
+        if (!servicePlan) {
+          throw new NotImplementedException('Service plan not found');
+        }
+
+        // Step 1: Create the primary user
+        await prismaTransaction.user.update({
+          where: { id: userInput.id },
+          data: userInput,
+        });
+
+        // Step 2: Create the user's profile
+        await prismaTransaction.profile.update({
+          where: { id: profileInput.id },
+          data: profileInput,
+        });
+
+        // Step 3: Create the business
+        const updateBusiness = await prismaTransaction.business.update({
+          where: { id: updateBusinessInput.id },
+          data: { ...updateBusinessInput, userId: userInput.id },
+          include: {
+            user: true,
+            // businessSchedules: true,
+            businessSettings: true,
+          },
+        });
+
+        return updateBusiness;
+      },
+      {
+        maxWait: 1000 * 60 * 3, //  3 minutes
+        timeout: 1000 * 60 * 10, // 10 minutes
+      },
+    );
+
+    return newBusiness;
   }
 
+  // DELETE BUSINESS
   remove(id: number) {
-    return `This action removes a #${id} business`;
+    return this.prisma.business.delete({
+      where: { id },
+    });
   }
 }

@@ -13,11 +13,14 @@ import { PasswordHelpers } from 'src/helpers/passwordHelpers';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { QueryBusinessInput } from './dto/query-business.input';
+import { UpdateUserInput } from '../users/dto/update-user.input';
+import { UpdateProfileInput } from '../profiles/dto/update-profile.input';
 
 @Resolver(() => Business)
 export class BusinessesResolver {
   constructor(private readonly businessesService: BusinessesService) {}
 
+  // REGISTER USER WITH BUSINESS
   @Mutation(() => Business, { name: 'createUserWithBusiness' })
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Business:create')
@@ -37,6 +40,8 @@ export class BusinessesResolver {
       createBusinessInput,
     );
   }
+
+  // CREATE BUSINESS ONLY
   @Mutation(() => Business, { name: 'createBusiness' })
   createBusiness(
     @Args('createBusinessInput') createBusinessInput: CreateBusinessInput,
@@ -62,22 +67,37 @@ export class BusinessesResolver {
       data: result?.data,
     };
   }
+
+  // FIND ONE BUSINESS
   @Query(() => Business, { name: 'businessById' })
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('Business:read')
+  @UseGuards(GqlAuthGuard)
   findOne(@Args('id', { type: () => Int }) id: number) {
     return this.businessesService.findOne(id);
   }
 
   @Mutation(() => Business, { name: 'updateBusiness' })
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('Business:update')
+  @UseGuards(GqlAuthGuard)
   updateBusiness(
+    @Args('updateUserInput') updateUserInput: UpdateUserInput,
+    @Args('updateProfileInput') updateProfileInput: UpdateProfileInput,
     @Args('updateBusinessInput') updateBusinessInput: UpdateBusinessInput,
   ) {
     return this.businessesService.update(
       updateBusinessInput.id,
       updateBusinessInput,
+      updateUserInput,
+      updateProfileInput,
     );
   }
 
   @Mutation(() => Business, { name: 'removeBusiness' })
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('Business:delete')
+  @UseGuards(GqlAuthGuard)
   removeBusiness(@Args('id', { type: () => Int }) id: number) {
     return this.businessesService.remove(id);
   }
