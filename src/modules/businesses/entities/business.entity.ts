@@ -54,7 +54,7 @@ export class Business {
   userId: number;
 
   @Field(() => User, { nullable: true })
-  owner: User | null;
+  owner?: User | null;
 
   @Field(() => Int)
   subscriptionPlanId: number;
