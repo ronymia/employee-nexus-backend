@@ -4,6 +4,7 @@ import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
+import { User } from 'src/modules/users/entities/user.entity';
 
 @ObjectType()
 export class Business {
@@ -51,6 +52,9 @@ export class Business {
 
   @Field(() => Int)
   userId: number;
+
+  @Field(() => User, { nullable: true })
+  owner: User | null;
 
   @Field(() => Int)
   subscriptionPlanId: number;
