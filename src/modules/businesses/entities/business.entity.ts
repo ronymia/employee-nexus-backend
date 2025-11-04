@@ -4,6 +4,7 @@ import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
+import { BusinessSchedule } from 'src/modules/business-schedules/entities/business-schedule.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 
 @ObjectType()
@@ -36,7 +37,7 @@ export class Business {
   lat?: number | null;
 
   @Field(() => Float, { nullable: true })
-  long?: number | null;
+  lng?: number | null;
 
   @Field()
   registrationDate: string;
@@ -54,7 +55,10 @@ export class Business {
   userId: number;
 
   @Field(() => User, { nullable: true })
-  owner?: User | null;
+  user?: User | null;
+
+  @Field(() => [BusinessSchedule], { nullable: true })
+  businessSchedules?: BusinessSchedule[] | null;
 
   @Field(() => Int)
   subscriptionPlanId: number;

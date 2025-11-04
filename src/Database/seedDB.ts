@@ -1,9 +1,9 @@
 import {
-  GENDER,
-  MARITAL_STATUS,
+  Gender,
+  MaritalStatus,
   Prisma,
   PrismaClient,
-  USER_ACCOUNT_STATUS,
+  UserAccountStatus,
 } from 'generated/prisma';
 import configuration from 'src/config/configuration';
 import { ROLE } from 'src/enums';
@@ -13,20 +13,20 @@ const prisma = new PrismaClient();
 
 // SUPER ADMIN DATA
 export const superUser = {
-  email: 'mdronymia040@gmail.com',
-  status: USER_ACCOUNT_STATUS.VERIFIED,
+  email: 'rony.mia7800@gmail.com',
+  status: UserAccountStatus.VERIFIED,
 };
 
 export const superAdminProfile = {
   fullName: 'MD Rony Mia',
   phone: '01321185989',
   dateOfBirth: new Date('1998-12-10').toISOString(),
-  gender: GENDER.MALE,
+  gender: Gender.MALE,
   address: 'west khabaspur,Faridpur Sadar,Faridpur',
   city: 'Faridpur',
   country: 'Bangladesh',
   postcode: '7800',
-  maritalStatus: MARITAL_STATUS.SINGLE,
+  maritalStatus: MaritalStatus.SINGLE,
 };
 
 // SEED SUPER ADMIN
@@ -63,7 +63,6 @@ export const seedSuperAdmin = async () => {
           data: { ...superUser, roleId: role?.id, password },
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         await prismaClient.profile.create({
           data: {
             ...superAdminProfile,

@@ -24,7 +24,6 @@ export class AuthService {
 
   // LOGIN METHOD
   async login(loginAuthInput: LoginAuthInput) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const user = await this.validateUserByEmail(loginAuthInput.email);
 
     // If user does not exist, throw an UnauthorizedException

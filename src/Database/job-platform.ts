@@ -20,17 +20,17 @@ export const defaultJobPlatforms = [
       'One of the largest job sites in the UK, providing a platform for employers and job seekers across various industries.',
   },
   {
-    name: 'Glassdoor',
+    name: 'Glass door',
     description:
       'A platform that not only provides job listings but also offers company reviews, salary information, and interview insights.',
   },
   {
-    name: 'Totaljobs',
+    name: 'Total Jobs',
     description:
       'A UK-based job board that features a variety of job listings and career resources for both employers and job seekers.',
   },
   {
-    name: 'Jobsite',
+    name: 'Job site',
     description:
       'An online recruitment platform that connects employers with job seekers, offering a range of job opportunities.',
   },

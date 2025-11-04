@@ -17,8 +17,8 @@ export const permissions = [
     action: ['read'],
   },
   {
-    resource: 'Module',
-    action: ['read'],
+    resource: 'Feature',
+    action: ['read', 'update'],
   },
   {
     resource: 'Permission',
@@ -85,11 +85,15 @@ export const superAdminPermissions = [
     action: ['read'],
   },
   {
-    resource: 'Module',
+    resource: 'Feature',
     action: ['read'],
   },
   {
     resource: 'Permission',
+    action: ['create', 'read', 'update', 'delete'],
+  },
+  {
+    resource: 'Subscription Plan',
     action: ['create', 'read', 'update', 'delete'],
   },
 ];
@@ -109,7 +113,7 @@ export const ownerPermissions = [
     action: ['read'],
   },
   {
-    resource: 'Module',
+    resource: 'Feature',
     action: ['read'],
   },
   {

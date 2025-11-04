@@ -6,15 +6,15 @@ import {
   IsDateString,
   IsInt,
 } from 'class-validator';
-import { GENDER, MARITAL_STATUS } from 'generated/prisma';
+import { Gender, MaritalStatus } from 'generated/prisma';
 import { registerEnumType } from '@nestjs/graphql';
 
-registerEnumType(GENDER, {
+registerEnumType(Gender, {
   name: 'GENDER',
   description: 'Gender of the user',
 });
 
-registerEnumType(MARITAL_STATUS, {
+registerEnumType(MaritalStatus, {
   name: 'MARITAL_STATUS',
   description: 'Marital status of the user',
 });
@@ -38,13 +38,13 @@ export class CreateProfileInput {
   @IsString()
   dateOfBirth: string;
 
-  @Field(() => GENDER)
-  @IsEnum(GENDER)
-  gender: GENDER;
+  @Field(() => Gender)
+  @IsEnum(Gender)
+  gender: Gender;
 
-  @Field(() => MARITAL_STATUS)
-  @IsEnum(MARITAL_STATUS)
-  maritalStatus: MARITAL_STATUS;
+  @Field(() => MaritalStatus)
+  @IsEnum(MaritalStatus)
+  maritalStatus: MaritalStatus;
 
   @Field()
   @IsString()

@@ -16,13 +16,14 @@ import { RolesModule } from './modules/roles/roles.module';
 import { RolePermissionsModule } from './modules/role-permissions/role-permissions.module';
 import { UserPermissionsModule } from './modules/user-permissions/user-permissions.module';
 import { JwtStrategy } from './modules/auth/jwt.strategy';
-import { BusinessModulesModule } from './modules/business-modules/business-modules.module';
+import { BusinessFeaturesModule } from './modules/business-features/business-features.module';
 import { BusinessesModule } from './modules/businesses/businesses.module';
 import { SubscriptionPlansModule } from './modules/subscription-plans/subscription-plans.module';
-import { SubscriptionModulesModule } from './modules/subscription-modules/subscription-modules.module';
+import { SubscriptionFeaturesModule } from './modules/subscription-features/subscription-features.module';
 import { DesignationsModule } from './modules/designations/designations.module';
-import { SystemModulesModule } from './modules/system-modules/system-modules.module';
+import { FeaturesModule } from './modules/features/features.module';
 import { JobTypesModule } from './modules/job-types/job-types.module';
+import { BusinessSchedulesModule } from './modules/business-schedules/business-schedules.module';
 
 @Module({
   imports: [
@@ -33,10 +34,9 @@ import { JobTypesModule } from './modules/job-types/job-types.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       graphiql: true,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'), // Automatically generate schema file
-      sortSchema: true, // Sort the schema for better readability
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      context: ({ req }) => ({ req }), // Important for GqlAuthGuard
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      sortSchema: true,
+      context: ({ req }) => ({ req }),
     }),
     PrismaModule,
     UsersModule,
@@ -47,12 +47,13 @@ import { JobTypesModule } from './modules/job-types/job-types.module';
     RolePermissionsModule,
     UserPermissionsModule,
     SubscriptionPlansModule,
-    SubscriptionModulesModule,
-    BusinessModulesModule,
+    SubscriptionFeaturesModule,
+    BusinessFeaturesModule,
     BusinessesModule,
-    SystemModulesModule,
+    FeaturesModule,
     DesignationsModule,
     JobTypesModule,
+    BusinessSchedulesModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

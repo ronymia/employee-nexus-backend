@@ -37,7 +37,7 @@ export class CreateBusinessInput {
 
   @Field(() => Float, { nullable: true })
   @IsInt()
-  long?: number;
+  lng?: number;
 
   @Field()
   registrationDate: string;

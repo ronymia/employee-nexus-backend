@@ -20,23 +20,23 @@ export class SubscriptionPlansService {
     user: JwtPayload,
     createSubscriptionPlanInput: CreateSubscriptionPlanInput,
   ): Promise<any> {
-    const { moduleIds, ...rest } = createSubscriptionPlanInput;
+    const { featureIds, ...rest } = createSubscriptionPlanInput;
 
     return this.prisma.$transaction(
       async (prismaTransaction: Prisma.TransactionClient) => {
         // 1. check modules
-        if (moduleIds?.length) {
-          const existingModules = await prismaTransaction.systemModule.findMany(
-            {
-              where: { id: { in: moduleIds } },
-            },
-          );
+        if (featureIds?.length) {
+          const existingFeatures = await prismaTransaction.feature.findMany({
+            where: { id: { in: featureIds } },
+          });
 
-          if (existingModules.length !== moduleIds.length) {
-            const foundIds = existingModules.map((m) => m?.id);
-            const missing = moduleIds.filter((id) => !foundIds.includes(id));
+          if (existingFeatures.length !== featureIds.length) {
+            const foundIds = existingFeatures.map((m) => m?.id);
+            const missing = featureIds.filter(
+              (id: number) => !foundIds.includes(id),
+            );
             throw new NotFoundException(
-              `Modules not found: ${missing.join(', ')}`,
+              `Feature not found: ${missing.join(', ')}`,
             );
           }
         }
@@ -57,11 +57,11 @@ export class SubscriptionPlansService {
         }
 
         // 3. Connect modules if any
-        if (moduleIds?.length) {
-          await prismaTransaction.subscriptionPlanModule.createMany({
-            data: moduleIds.map((id) => ({
+        if (featureIds?.length) {
+          await prismaTransaction.subscriptionPlanFeature.createMany({
+            data: featureIds.map((id) => ({
               subscriptionPlanId: newSubscriptionPlan.id,
-              systemModuleId: id,
+              featureId: id,
             })),
             skipDuplicates: true,
           });
@@ -72,7 +72,7 @@ export class SubscriptionPlansService {
           await prismaTransaction.subscriptionPlan.findUnique({
             where: { id: newSubscriptionPlan.id },
             include: {
-              modules: { include: { systemModule: true } },
+              features: { include: { feature: true } },
               creator: true,
             },
           });
@@ -194,7 +194,7 @@ export class SubscriptionPlansService {
     updateSubscriptionPlanInput: UpdateSubscriptionPlanInput,
   ): Promise<any> {
     await this.findOne(id); // Ensure the subscription plan exists
-    const { moduleIds, ...rest } = updateSubscriptionPlanInput;
+    const { featureIds, ...rest } = updateSubscriptionPlanInput;
     // return await this.prisma.subscriptionPlan.update({
     //   where: { id },
     //   data: updateSubscriptionPlanInput,
@@ -202,16 +202,16 @@ export class SubscriptionPlansService {
 
     return this.prisma.$transaction(async (prismaTransaction) => {
       // 1. check modules
-      if (moduleIds?.length) {
-        const existingModules = await prismaTransaction.systemModule.findMany({
-          where: { id: { in: moduleIds } },
+      if (featureIds?.length) {
+        const existingFeatures = await prismaTransaction.feature.findMany({
+          where: { id: { in: featureIds } },
         });
 
-        if (existingModules.length !== moduleIds.length) {
-          const foundIds = existingModules.map((m) => m?.id);
-          const missing = moduleIds.filter((id) => !foundIds.includes(id));
+        if (existingFeatures.length !== featureIds.length) {
+          const foundIds = existingFeatures.map((m) => m?.id);
+          const missing = featureIds.filter((id) => !foundIds.includes(id));
           throw new NotFoundException(
-            `Modules not found: ${missing.join(', ')}`,
+            `Feature not found: ${missing.join(', ')}`,
           );
         }
       }
@@ -223,15 +223,15 @@ export class SubscriptionPlansService {
       });
 
       // 3. update modules
-      await prismaTransaction.subscriptionPlanModule.deleteMany({
+      await prismaTransaction.subscriptionPlanFeature.deleteMany({
         where: { subscriptionPlanId: id },
       });
 
-      if (moduleIds?.length) {
-        await prismaTransaction.subscriptionPlanModule.createMany({
-          data: moduleIds.map((id) => ({
+      if (featureIds?.length) {
+        await prismaTransaction.subscriptionPlanFeature.createMany({
+          data: featureIds.map((id) => ({
             subscriptionPlanId: id,
-            systemModuleId: id,
+            featureId: id,
           })),
           skipDuplicates: true,
         });
@@ -241,7 +241,7 @@ export class SubscriptionPlansService {
       return await prismaTransaction.subscriptionPlan.findUnique({
         where: { id },
         include: {
-          modules: true,
+          features: true,
         },
       });
     });
@@ -252,7 +252,7 @@ export class SubscriptionPlansService {
 
     return this.prisma.$transaction(async (prismaTransaction) => {
       // 1. delete modules
-      await prismaTransaction.subscriptionPlanModule.deleteMany({
+      await prismaTransaction.subscriptionPlanFeature.deleteMany({
         where: { subscriptionPlanId: id },
       });
 

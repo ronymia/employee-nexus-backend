@@ -4,7 +4,7 @@ import { UpdateBusinessInput } from './dto/update-business.input';
 import { CreateUserInput } from '../users/dto/create-user.input';
 import { CreateProfileInput } from '../profiles/dto/create-profile.input';
 import { PrismaService } from '../prisma/prisma.service';
-import { DeleteReadNotifications, Prisma } from 'generated/prisma';
+import { Prisma } from 'generated/prisma';
 import { defaultDesignations } from 'src/Database/designation';
 import { defaultEmploymentStatuses } from 'src/Database/employment-status';
 import { defaultJobTypes } from 'src/Database/job-type';
@@ -15,7 +15,7 @@ import { defaultAttendanceSettings } from 'src/Database/attendance-settings';
 import { leaveSettings } from 'src/Database/leave-settings';
 import { paymentSettings } from 'src/Database/payment-settings';
 import { businessSettings } from 'src/Database/business-settings';
-import { ROLE } from 'src/enums';
+import { DeleteReadNotifications, ROLE } from 'src/enums';
 import {
   adminPermissions,
   employeePermissions,
@@ -27,13 +27,37 @@ import { JwtPayload } from '../auth/jwt.strategy';
 import { QueryBusinessInput } from './dto/query-business.input';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { businessSearchableFields } from './businesses.constant';
-import { UpdateUserInput } from '../users/dto/update-user.input';
-import { UpdateProfileInput } from '../profiles/dto/update-profile.input';
 
 @Injectable()
 export class BusinessesService {
   constructor(private readonly prisma: PrismaService) {}
+  private getDefaultBusinessSchedules(businessId: number) {
+    const daysConfig = [
+      { day: 0, isWeekend: false }, // Sunday
+      { day: 1, isWeekend: false }, // Monday
+      { day: 2, isWeekend: false }, // Tuesday
+      { day: 3, isWeekend: false }, // Wednesday
+      { day: 4, isWeekend: false }, // Thursday
+      { day: 5, isWeekend: true }, // Friday
+      { day: 6, isWeekend: true }, // Saturday
+    ];
 
+    return daysConfig.map(({ day, isWeekend }) => ({
+      day,
+      isWeekend,
+      startTime: '10:00',
+      endTime: '18:00',
+      businessId,
+    }));
+  }
+
+  private generateBusinessPrefix(businessName: string): string {
+    return businessName
+      .split(/\s+/)
+      .filter((word) => word.length > 0)
+      .map((word) => word[0].toUpperCase())
+      .join('');
+  }
   // REGISTER USER WITH BUSINESS
   async createUserWithBusiness(
     createUserInput: CreateUserInput,
@@ -70,8 +94,9 @@ export class BusinessesService {
         const createdBusiness = await prismaTransaction.business.create({
           data: { ...createBusinessInput, userId: createdUser.id },
         });
-        if (!createdBusiness)
+        if (!createdBusiness) {
           throw new NotImplementedException('Business creation failed');
+        }
 
         // Get business ID and creator ID
         const businessId = createdBusiness.id;
@@ -343,26 +368,36 @@ export class BusinessesService {
         });
 
         // Step 10: Create business settings
-        const identifierPrefix = createdBusiness.name
-          .split(' ')
-          .map((word) => word[0])
-          .join('')
-          .toUpperCase();
-
+        // CREATE DEFAULT BUSINESS SETTINGS
         await prismaTransaction.businessSettings.create({
           data: {
             ...businessSettings,
-            businessId,
-            identifierPrefix,
-            businessStartDay: 0,
-            isSelfRegistered: false,
+            businessId: createdBusiness.id,
+            identifierPrefix: this.generateBusinessPrefix(createdBusiness.name),
             deleteReadNotifications: DeleteReadNotifications.THIRTY_DAYS,
           },
+        });
+
+        // Create default business schedules
+        await prismaTransaction.businessSchedule.createMany({
+          data: this.getDefaultBusinessSchedules(createdBusiness.id),
         });
 
         // Final: Return the created business
         return await prismaTransaction.business.findUnique({
           where: { id: createdBusiness.id },
+          include: {
+            user: {
+              include: {
+                role: true,
+                profile: true,
+              },
+            },
+            subscriptionPlan: true,
+            businessSchedules: true,
+            businessSettings: true,
+            attendanceSettings: true,
+          },
         });
       },
       {
@@ -375,9 +410,9 @@ export class BusinessesService {
   }
 
   // CREATE BUSINESS ONLY
-  create(createBusinessInput: CreateBusinessInput) {
-    return 'This action adds a new business';
-  }
+  // create(createBusinessInput: CreateBusinessInput) {
+  //   return 'This action adds a new business';
+  // }
 
   // FIND ALL BUSINESSES
   async findAll({
@@ -425,6 +460,17 @@ export class BusinessesService {
           orderBy: {
             [sortBy]: sortOrder,
           },
+          include: {
+            user: {
+              include: {
+                role: true,
+                profile: true,
+                business: true,
+              },
+            },
+            businessSchedules: true,
+            businessSettings: true,
+          },
         });
     // this.logger.log(result);
 
@@ -448,8 +494,13 @@ export class BusinessesService {
     const business = await this.prisma.business.findUniqueOrThrow({
       where: { id },
       include: {
-        user: true,
-        // businessSchedules: true,
+        user: {
+          include: {
+            role: true,
+            profile: true,
+          },
+        },
+        businessSchedules: true,
         businessSettings: true,
       },
     });
@@ -460,8 +511,8 @@ export class BusinessesService {
   async update(
     id: number,
     updateBusinessInput: UpdateBusinessInput,
-    userInput: UpdateUserInput,
-    profileInput: UpdateProfileInput,
+    // userInput: UpdateUserInput,
+    // profileInput: UpdateProfileInput,
   ) {
     // CHECK IF BUSINESS EXISTS
     await this.findOne(id);
@@ -469,7 +520,7 @@ export class BusinessesService {
     // Start a database transaction
     const newBusiness = await this.prisma.$transaction(
       async (prismaTransaction: Prisma.TransactionClient) => {
-        // step 0 : check service plan
+        // step 1 : check service plan
         const servicePlan = await prismaTransaction.subscriptionPlan.findFirst({
           where: {
             id: updateBusinessInput.subscriptionPlanId,
@@ -479,25 +530,18 @@ export class BusinessesService {
           throw new NotImplementedException('Service plan not found');
         }
 
-        // Step 1: Create the primary user
-        await prismaTransaction.user.update({
-          where: { id: userInput.id },
-          data: userInput,
-        });
-
-        // Step 2: Create the user's profile
-        await prismaTransaction.profile.update({
-          where: { id: profileInput.id },
-          data: profileInput,
-        });
-
-        // Step 3: Create the business
+        // Step 2: update the business
         const updateBusiness = await prismaTransaction.business.update({
           where: { id: updateBusinessInput.id },
-          data: { ...updateBusinessInput, userId: userInput.id },
+          data: { ...updateBusinessInput },
           include: {
-            user: true,
-            // businessSchedules: true,
+            user: {
+              include: {
+                role: true,
+                profile: true,
+              },
+            },
+            businessSchedules: true,
             businessSettings: true,
           },
         });

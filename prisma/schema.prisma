@@ -14,83 +14,86 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum USER_ACCOUNT_STATUS {
-  ACTIVE     @map("Active")
-  INACTIVE   @map("Inactive")
-  BLOCKED    @map("Blocked")
-  DELETED    @map("Deleted")
-  SUSPENDED  @map("Suspended")
-  VERIFIED   @map("Verified")
-  UNVERIFIED @map("Unverified")
-  TERMINATED @map("Terminated")
-  RESIGNED   @map("Resigned")
-  RETIRED    @map("Retired")
-  ON_LEAVE   @map("On_Leave")
+enum UserAccountStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+  DELETED
+  SUSPENDED
+  VERIFIED
+  UNVERIFIED
+  TERMINATED
+  RESIGNED
+  RETIRED
+  ON_LEAVE
 }
 
-enum MARITAL_STATUS {
-  SINGLE  @map("Single")
-  MARRIED @map("Married")
+enum MaritalStatus {
+  SINGLE
+  MARRIED
 }
 
-enum GENDER {
-  MALE   @map("Male")
-  FEMALE @map("Female")
+enum Gender {
+  MALE
+  FEMALE
 }
 
 enum Status {
-  ACTIVE      @map("Active")
-  INACTIVE    @map("Inactive")
-  DEACTIVATED @map("Deactivated")
+  ACTIVE
+  INACTIVE
+  DEACTIVATED
 }
 
 enum BusinessStatus {
-  ACTIVE        @map("Active")
-  INACTIVE      @map("Inactive")
-  SUSPENDED     @map("Suspended")
-  TRIAL_EXPIRED @map("Trial_Expired")
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  TRIAL_EXPIRED
 }
 
 enum ScheduleType {
-  REGULAR   @map("Regular")
-  SCHEDULED @map("Scheduled")
-  FLEXIBLE  @map("Flexible")
+  REGULAR
+  SCHEDULED
+  FLEXIBLE
 }
 
 enum ScheduleBreakType {
-  PAID   @map("Paid")
-  UNPAID @map("Unpaid")
+  PAID
+  UNPAID
 }
 
-enum DeleteReadNotifications {
-  SEVEN_DAYS   @map("7")
-  FIFTEEN_DAYS @map("15")
-  THIRTY_DAYS  @map("30")
-}
+/**
+ * Better as an Int column rather than enum.
+ * If you must keep enum, use semantic names — but prefer Int:
+ * deleteReadNotificationsDays Int @default(30)
+ */
 
 enum LeaveRolloverType {
-  NONE              @map("None")
-  PARTIAL_ROLL_OVER @map("Partial_Rollover")
-  FULL_ROLLOVER     @map("Full_Rollover")
+  NONE
+  PARTIAL_ROLLOVER
+  FULL_ROLLOVER
 }
 
 enum SubscriptionStatus {
-  ACTIVE    @map("Active")
-  INACTIVE  @map("Inactive")
-  TRIAL     @map("Trial")
-  EXPIRED   @map("Expired")
-  CANCELLED @map("Cancelled")
+  ACTIVE
+  INACTIVE
+  TRIAL
+  EXPIRED
+  CANCELLED
 }
 
 model User {
-  id                        Int                  @id @default(autoincrement())
-  email                     String               @unique
-  password                  String
-  status                    USER_ACCOUNT_STATUS  @default(UNVERIFIED)
-  deletedBy                 Int?                 @map("deleted_by")
-  profile                   Profile?             @relation(name: "userProfile")
-  role                      Role?                @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  roleId                    Int?                 @map("role_id")
+  id        Int               @id @default(autoincrement())
+  email     String            @unique
+  password  String
+  status    UserAccountStatus @default(UNVERIFIED)
+  deletedBy Int?              @map("deleted_by")
+  profile   Profile?          @relation(name: "userProfile")
+
+  // Don't delete users when a role row is deleted
+  role   Role? @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  roleId Int?  @map("role_id")
+
   userPermissions           UserPermission[]
   business                  Business?            @relation(name: "businessOwner")
   subscriptionPlanCreated   SubscriptionPlan[]   @relation(name: "subscriptionPlanCreated")
@@ -113,21 +116,21 @@ model User {
 }
 
 model Profile {
-  id             Int            @id @default(autoincrement())
-  fullName       String         @map("full_name")
+  id             Int           @id @default(autoincrement())
+  fullName       String        @map("full_name")
   phone          String
-  profilePicture String?        @map("profile_picture")
-  dateOfBirth    String         @map("date_of_birth")
-  gender         GENDER
-  maritalStatus  MARITAL_STATUS @map("marital_status")
+  profilePicture String?       @map("profile_picture")
+  dateOfBirth    String        @map("date_of_birth")
+  gender         Gender
+  maritalStatus  MaritalStatus @map("marital_status")
   address        String
   city           String
   country        String
   postcode       String
   lat            Float?
-  long           Float?
-  user           User           @relation(name: "userProfile", fields: [userId], references: [id], onDelete: Cascade)
-  userId         Int            @unique @map("user_id")
+  lng            Float?
+  user           User          @relation(name: "userProfile", fields: [userId], references: [id], onDelete: Cascade)
+  userId         Int           @unique @map("user_id")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -145,22 +148,25 @@ model Business {
   city                     String
   postcode                 String
   lat                      Float?
-  long                     Float?
+  lng                      Float?
   registrationDate         String  @map("registration_date")
   website                  String?
   numberOfEmployeesAllowed Int     @map("number_of_employees_allowed")
 
-  status               BusinessStatus         @default(ACTIVE)
-  user                 User                   @relation(name: "businessOwner", fields: [userId], references: [id], onDelete: Cascade)
-  userId               Int                    @unique @map("user_id")
-  subscriptionPlan     SubscriptionPlan       @relation(name: "businessSubscriptionPlan", fields: [subscriptionPlanId], references: [id])
-  subscriptionPlanId   Int                    @map("subscription_plan_id")
-  modules              businessModule[]       @relation(name: "businessModules")
+  status             BusinessStatus   @default(ACTIVE)
+  user               User             @relation(name: "businessOwner", fields: [userId], references: [id], onDelete: Cascade)
+  userId             Int              @unique @map("user_id")
+  subscriptionPlan   SubscriptionPlan @relation(name: "businessSubscriptionPlan", fields: [subscriptionPlanId], references: [id])
+  subscriptionPlanId Int              @map("subscription_plan_id")
+
+  // Features via join table
+  features BusinessFeature[] @relation(name: "businessToFeatures")
+
   roles                Role[]                 @relation(name: "rolesInBusiness")
   businessSettings     BusinessSettings?      @relation(name: "businessSettings")
   leaveSettings        LeaveSettings?         @relation(name: "leaveSettings")
   attendanceSettings   AttendanceSettings?    @relation(name: "attendanceSettings")
-  PaymentSettings      PaymentSettings?       @relation(name: "paymentSettings")
+  paymentSettings      PaymentSettings?       @relation(name: "paymentSettings")
   employmentStatuses   EmploymentStatus[]     @relation(name: "employmentStatusesInBusiness")
   designations         Designation[]          @relation(name: "designationsInBusiness")
   jobTypes             JobType[]              @relation(name: "jobTypesInBusiness")
@@ -170,7 +176,7 @@ model Business {
   workSites            WorkSite[]             @relation(name: "workSitesInBusiness")
   departments          Department[]           @relation(name: "departmentsInBusiness")
   workSchedules        WorkSchedule[]         @relation(name: "workSchedulesInBusiness")
-  businessSchedule     BusinessSchedule[]     @relation(name: "businessSchedules")
+  businessSchedules    BusinessSchedule[]     @relation(name: "businessSchedules")
   leaveTypes           LeaveType[]            @relation(name: "leaveTypesInBusiness")
   subscriptions        BusinessSubscription[] @relation(name: "businessSubscriptions")
 
@@ -182,16 +188,16 @@ model Business {
 }
 
 model BusinessSettings {
-  id                      Int                     @id @default(autoincrement())
-  businessId              Int                     @unique @map("business_id")
-  business                Business?               @relation(name: "businessSettings", fields: [businessId], references: [id], onDelete: Cascade)
-  identifierPrefix        String                  @map("identifier_prefix")
-  businessStartDay        Int                     @default(0) @map("business_start_day")
-  currency                String                  @default("BDT") @map("currency")
-  isSelfRegistered        Boolean                 @default(false) @map("is_self_registered")
-  businessTimeZone        String?                 @default("Asia/Dhaka") @map("business_time_zone")
-  deleteReadNotifications DeleteReadNotifications @default(THIRTY_DAYS) @map("delete_read_notifications")
-  theme                   String?                 @map("theme")
+  id                      Int       @id @default(autoincrement())
+  businessId              Int       @unique @map("business_id")
+  business                Business? @relation(name: "businessSettings", fields: [businessId], references: [id], onDelete: Cascade)
+  identifierPrefix        String    @map("identifier_prefix")
+  businessStartDay        Int       @default(0) @map("business_start_day")
+  currency                String    @default("BDT") @map("currency")
+  isSelfRegistered        Boolean   @default(false) @map("is_self_registered")
+  businessTimeZone        String?   @default("Asia/Dhaka") @map("business_time_zone")
+  deleteReadNotifications String    @map("delete_read_notifications")
+  theme                   String?   @map("theme")
 
   @@map("business_settings")
 }
@@ -225,8 +231,8 @@ model PaymentSettings {
   businessId  Int       @unique @map("business_id")
   business    Business? @relation(name: "paymentSettings", fields: [businessId], references: [id], onDelete: Cascade)
   paymentType String    @map("payment_type")
-  dayOfWeek   Int?      @default(0) @map("day_of_week")
-  dayOfMonth  Int?      @default(5) @map("day_of_month")
+  dayOfWeek   Int?      @map("day_of_week")
+  dayOfMonth  Int?      @map("day_of_month")
 
   @@map("payment_settings")
 }
@@ -237,8 +243,12 @@ model BusinessSchedule {
   isWeekend  Boolean   @map("is_weekend")
   startTime  String    @map("start_time")
   endTime    String    @map("end_time")
-  businessId Int       @unique @map("business_id")
+  businessId Int       @map("business_id")
   business   Business? @relation(name: "businessSchedules", fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, day, startTime, endTime])
+  @@index([businessId])
+  @@map("business_schedules")
 }
 
 model Role {
@@ -278,7 +288,8 @@ model RolePermission {
   role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
   permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
-  @@unique([roleId, permissionId])
+  @@id([roleId, permissionId])
+  @@index([roleId])
   @@map("role_permissions")
 }
 
@@ -289,22 +300,23 @@ model UserPermission {
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, permissionId])
+  @@id([userId, permissionId])
   @@map("user_permissions")
 }
 
 model SubscriptionPlan {
-  id          Int                      @id @default(autoincrement())
-  name        String                   @unique
+  id          Int    @id @default(autoincrement())
+  name        String @unique
   description String
-  setupFee    Int                      @map("setup_fee")
-  status      Status                   @default(ACTIVE)
+  setupFee    Int    @map("setup_fee")
+  status      Status @default(ACTIVE)
   price       Int
-  businesses  Business[]               @relation(name: "businessSubscriptionPlan")
-  modules     SubscriptionPlanModule[] @relation(name: "subscriptionPlanModules")
-  createdBy   Int                      @map("created_by")
-  creator     User?                    @relation(name: "subscriptionPlanCreated", fields: [createdBy], references: [id], onDelete: Cascade)
-  Businesses  BusinessSubscription[]   @relation(name: "subscriptionPlanInBusiness")
+
+  businesses  Business[]                @relation(name: "businessSubscriptionPlan")
+  features    SubscriptionPlanFeature[] @relation(name: "PlanToFeature")
+  createdBy   Int                       @map("created_by")
+  creator     User?                     @relation(name: "subscriptionPlanCreated", fields: [createdBy], references: [id], onDelete: Restrict)
+  subscribers BusinessSubscription[]    @relation(name: "subscriptionPlanInBusiness")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -312,39 +324,43 @@ model SubscriptionPlan {
   @@map("subscription_plans")
 }
 
-model SystemModule {
-  id                Int                      @id @default(autoincrement())
-  name              String                   @unique
-  subscriptionPlans SubscriptionPlanModule[] @relation(name: "subscriptionPlanInSystemModules")
-  businesses        businessModule[]         @relation(name: "businessInSystemModules")
+model Feature {
+  id   Int    @id @default(autoincrement())
+  name String @unique
 
-  @@map("system_modules")
+  // Must match join side names
+  subscriptionPlans SubscriptionPlanFeature[] @relation(name: "FeatureToPlan")
+  businesses        BusinessFeature[]         @relation(name: "FeatureToBusiness")
+
+  @@map("features")
 }
 
-model SubscriptionPlanModule {
-  subscriptionPlanId Int              @map("subscription_plan_id")
-  subscriptionPlan   SubscriptionPlan @relation(name: "subscriptionPlanModules", fields: [subscriptionPlanId], references: [id], onDelete: Cascade)
-  systemModuleId     Int              @map("system_module_id")
-  systemModule       SystemModule     @relation(name: "subscriptionPlanInSystemModules", fields: [systemModuleId], references: [id], onDelete: Cascade)
+model SubscriptionPlanFeature {
+  subscriptionPlanId Int
+  featureId          Int
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  subscriptionPlan SubscriptionPlan @relation(name: "PlanToFeature", fields: [subscriptionPlanId], references: [id], onDelete: Cascade)
+  feature          Feature          @relation(name: "FeatureToPlan", fields: [featureId], references: [id], onDelete: Cascade)
 
-  @@unique([subscriptionPlanId, systemModuleId])
-  @@map("subscription_plan_modules")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([subscriptionPlanId, featureId])
+  @@map("subscription_plan_features")
 }
 
-model businessModule {
-  businessId     Int          @map("business_id")
-  business       Business     @relation(name: "businessModules", fields: [businessId], references: [id], onDelete: Cascade)
-  systemModuleId Int          @map("system_module_id")
-  systemModule   SystemModule @relation(name: "businessInSystemModules", fields: [systemModuleId], references: [id], onDelete: Cascade)
+model BusinessFeature {
+  businessId Int
+  featureId  Int
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  business Business @relation(name: "businessToFeatures", fields: [businessId], references: [id], onDelete: Cascade)
+  feature  Feature  @relation(name: "FeatureToBusiness", fields: [featureId], references: [id], onDelete: Cascade)
 
-  @@unique([businessId, systemModuleId])
-  @@map("business_modules")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([businessId, featureId])
+  @@map("business_features")
 }
 
 model BusinessSubscription {
@@ -359,8 +375,10 @@ model BusinessSubscription {
   status             SubscriptionStatus @default(TRIAL)
 
   createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([businessId, subscriptionPlanId])
+  @@index([businessId])
   @@map("business_subscriptions")
 }
 
@@ -378,6 +396,7 @@ model Designation {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([name, businessId])
+  @@index([businessId])
   @@map("designations")
 }
 
@@ -395,6 +414,7 @@ model JobType {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([name, businessId])
+  @@index([businessId])
   @@map("job_types")
 }
 
@@ -412,6 +432,7 @@ model JobPlatform {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([name, businessId])
+  @@index([businessId])
   @@map("job_platforms")
 }
 
@@ -430,6 +451,7 @@ model RecruitmentProcess {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([name, businessId])
+  @@index([businessId])
   @@map("recruitment_processes")
 }
 
@@ -448,6 +470,7 @@ model OnboardingProcess {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([name, businessId])
+  @@index([businessId])
   @@map("onboarding_processes")
 }
 
@@ -471,27 +494,31 @@ model WorkSite {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([name, businessId])
+  @@index([businessId])
   @@map("work_sites")
 }
 
 model Department {
-  id          Int       @id @default(autoincrement())
-  parent_id   Int?
+  id          Int          @id @default(autoincrement())
+  parentId    Int?         @map("parent_id")
+  parent      Department?  @relation(name: "DepartmentHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
   name        String
   description String
-  status      Status    @default(ACTIVE)
-  businessId  Int?      @map("business_id")
-  business    Business? @relation(name: "departmentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  managerId   Int?      @map("manager_id")
-  manager     User?     @relation(name: "managedDepartments", fields: [managerId], references: [id], onDelete: Restrict)
-  createdBy   Int?      @map("created_by")
-  creator     User?     @relation(name: "departmentCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  status      Status       @default(ACTIVE)
+  businessId  Int?         @map("business_id")
+  business    Business?    @relation(name: "departmentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  managerId   Int?         @map("manager_id")
+  manager     User?        @relation(name: "managedDepartments", fields: [managerId], references: [id], onDelete: Restrict)
+  createdBy   Int?         @map("created_by")
+  creator     User?        @relation(name: "departmentCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  children    Department[] @relation("DepartmentHierarchy")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([name, businessId])
   @@index([managerId])
+  @@index([parentId])
   @@map("departments")
 }
 
@@ -507,37 +534,38 @@ model WorkSchedule {
   business     Business?         @relation(name: "workSchedulesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy    Int?              @map("created_by")
   creator      User?             @relation(name: "workScheduleCreated", fields: [createdBy], references: [id], onDelete: SetNull)
-  schedules    WorkDaySchedule[] @relation(name: "workSchedule")
+  schedules    DaySchedule[]     @relation(name: "daySchedule")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([name, businessId])
-  @@index([scheduleType])
+  @@index([scheduleType, businessId])
   @@map("work_schedules")
 }
 
-model WorkDaySchedule {
+model DaySchedule {
   id             Int          @id @default(autoincrement())
   day            Int
   isWeekend      Boolean      @map("is_weekend")
   workScheduleId Int          @map("work_schedule_id")
-  workSchedule   WorkSchedule @relation(name: "workSchedule", fields: [workScheduleId], references: [id], onDelete: Cascade)
-  shifts         Shift[]      @relation(name: "shiftInSchedule")
+  workSchedule   WorkSchedule @relation(name: "daySchedule", fields: [workScheduleId], references: [id], onDelete: Cascade)
+  timeSlots      TimeSlot[]   @relation(name: "shiftInSchedule")
 
   @@unique([workScheduleId, day])
+  @@index([workScheduleId])
   @@map("work_day_schedules")
 }
 
-model Shift {
-  id         Int             @id @default(autoincrement())
-  startTime  String          @map("start_time")
-  endTime    String          @map("end_time")
-  scheduleId Int             @map("schedule_id")
-  schedule   WorkDaySchedule @relation(name: "shiftInSchedule", fields: [scheduleId], references: [id], onDelete: Cascade)
+model TimeSlot {
+  startTime  String      @map("start_time")
+  endTime    String      @map("end_time")
+  scheduleId Int         @map("schedule_id")
+  schedule   DaySchedule @relation(name: "shiftInSchedule", fields: [scheduleId], references: [id], onDelete: Cascade)
 
-  @@unique([scheduleId, startTime, endTime])
-  @@map("work_day_schedules_shifts")
+  @@id([scheduleId, startTime, endTime])
+  @@index([scheduleId])
+  @@map("schedules_time_slots")
 }
 
 model EmploymentStatus {
@@ -549,12 +577,13 @@ model EmploymentStatus {
   businessId  Int?                        @map("business_id")
   business    Business?                   @relation(name: "employmentStatusesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy   Int?                        @map("created_by")
-  creator     User?                       @relation(name: "employmentStatusCreated", fields: [createdBy], references: [id])
+  creator     User?                       @relation(name: "employmentStatusCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([name, businessId])
+  @@index([businessId])
   @@map("employment_statuses")
 }
 
@@ -563,9 +592,9 @@ model LeaveTypeEmploymentStatus {
   employmentStatusId Int @map("employment_status_id")
 
   leaveType        LeaveType        @relation(fields: [leaveTypeId], references: [id], onDelete: Cascade)
-  employmentStatus EmploymentStatus @relation(fields: [employmentStatusId], references: [id], onDelete: Restrict)
+  employmentStatus EmploymentStatus @relation(fields: [employmentStatusId], references: [id], onDelete: Cascade)
 
-  @@unique([leaveTypeId, employmentStatusId])
+  @@id([leaveTypeId, employmentStatusId])
   @@map("leave_type_employment_status")
 }
 
@@ -587,5 +616,6 @@ model LeaveType {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([name, businessId])
+  @@index([businessId])
   @@map("leave_types")
 }

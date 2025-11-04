@@ -98,7 +98,7 @@ export class SubscriptionPlansResolver {
   }
 
   // DELETE
-  @Mutation(() => SubscriptionPlanResponse, { name: 'removeSubscriptionPlan' })
+  @Mutation(() => SubscriptionPlanResponse, { name: 'deleteSubscriptionPlan' })
   @UseGuards(GqlAuthGuard)
   @RequirePermissions('Subscription Plan:delete')
   async removeSubscriptionPlan(@Args('id', { type: () => Int }) id: number) {

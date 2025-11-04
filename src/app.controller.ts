@@ -22,9 +22,9 @@ export class AppController {
     };
   }
   // ROLE REFRESH
-  @Get('/role-refresh')
+  @Get('/role-permissions-refresh')
   async roleRefresh() {
-    await this.appService.roleRefresh();
+    await this.appService.rolePermissionsRefresh();
     return 'Roles refreshed';
   }
 

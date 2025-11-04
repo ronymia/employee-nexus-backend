@@ -26,5 +26,5 @@ export class UpdateSubscriptionPlanInput extends PartialType(
     description: 'Modules for the service plan',
   })
   @IsArray()
-  moduleIds: number[];
+  featureIds: number[];
 }

@@ -23,5 +23,5 @@ export class CreateSubscriptionPlanInput {
     description: 'Module Ids for the service plan',
   })
   @IsArray()
-  moduleIds: number[];
+  featureIds: number[];
 }

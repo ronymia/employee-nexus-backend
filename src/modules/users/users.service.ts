@@ -12,6 +12,9 @@ export class UsersService {
       data: { ...createUserInput, role: { connect: { id: 1 } } },
       include: {
         role: true,
+        profile: true,
+        business: true,
+        userPermissions: { include: { permission: true } },
       },
     });
   }
@@ -20,7 +23,10 @@ export class UsersService {
   findAll() {
     return this.prisma.user.findMany({
       include: {
-        profile: true, // Include related profile data
+        role: true,
+        profile: true,
+        business: true,
+        userPermissions: { include: { permission: true } },
       },
     });
   }
@@ -30,7 +36,10 @@ export class UsersService {
     return this.prisma.user.findUnique({
       where: { id },
       include: {
-        profile: true, // Include related profile data
+        role: true,
+        profile: true,
+        business: true,
+        userPermissions: { include: { permission: true } },
       },
     });
   }
@@ -40,10 +49,10 @@ export class UsersService {
     return this.prisma.user.findUnique({
       where: { email },
       include: {
-        profile: true, // Include related profile data
-        role: true, // Include related role data
-        business: true, // Include related business data
-        // UserPermissions: true, // Include related user permissions
+        role: true,
+        profile: true,
+        business: true,
+        userPermissions: { include: { permission: true } },
       },
     });
   }
@@ -60,6 +69,12 @@ export class UsersService {
   remove(id: number) {
     return this.prisma.user.delete({
       where: { id },
+      include: {
+        role: true,
+        profile: true,
+        business: true,
+        userPermissions: { include: { permission: true } },
+      },
     });
   }
 }

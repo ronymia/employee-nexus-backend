@@ -6,12 +6,12 @@ import {
   ObjectType,
   registerEnumType,
 } from '@nestjs/graphql';
-import { USER_ACCOUNT_STATUS } from 'generated/prisma';
+import { UserAccountStatus } from 'generated/prisma';
 import { Business } from 'src/modules/businesses/entities/business.entity';
 import { Profile } from 'src/modules/profiles/entities/profile.entity';
 import { Role } from 'src/modules/roles/entities/role.entity';
 
-registerEnumType(USER_ACCOUNT_STATUS, {
+registerEnumType(UserAccountStatus, {
   name: 'USER_ACCOUNT_STATUS',
   description: 'User account status',
 });
@@ -33,10 +33,10 @@ export class User {
   @Field(() => Role, { nullable: true, description: 'Role of the user' })
   role?: Role | null;
 
-  @Field(() => USER_ACCOUNT_STATUS, {
+  @Field(() => UserAccountStatus, {
     description: 'Status of the user account',
   })
-  status: USER_ACCOUNT_STATUS;
+  status: UserAccountStatus;
 
   @Field(() => Profile, { nullable: true })
   profile?: Profile | null;

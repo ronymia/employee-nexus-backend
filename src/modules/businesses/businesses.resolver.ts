@@ -13,8 +13,6 @@ import { PasswordHelpers } from 'src/helpers/passwordHelpers';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { QueryBusinessInput } from './dto/query-business.input';
-import { UpdateUserInput } from '../users/dto/update-user.input';
-import { UpdateProfileInput } from '../profiles/dto/update-profile.input';
 
 @Resolver(() => Business)
 export class BusinessesResolver {
@@ -42,12 +40,12 @@ export class BusinessesResolver {
   }
 
   // CREATE BUSINESS ONLY
-  @Mutation(() => Business, { name: 'createBusiness' })
-  createBusiness(
-    @Args('createBusinessInput') createBusinessInput: CreateBusinessInput,
-  ) {
-    return this.businessesService.create(createBusinessInput);
-  }
+  // @Mutation(() => Business, { name: 'createBusiness' })
+  // createBusiness(
+  //   @Args('createBusinessInput') createBusinessInput: CreateBusinessInput,
+  // ) {
+  //   return this.businessesService.create(createBusinessInput);
+  // }
 
   // FIND ALL BUSINESSES
   @Query(() => BusinessQueryResponse, { name: 'businesses' })
@@ -82,19 +80,19 @@ export class BusinessesResolver {
   @RequirePermissions('Business:update')
   @UseGuards(GqlAuthGuard)
   updateBusiness(
-    @Args('updateUserInput') updateUserInput: UpdateUserInput,
-    @Args('updateProfileInput') updateProfileInput: UpdateProfileInput,
+    // @Args('updateUserInput') updateUserInput: UpdateUserInput,
+    // @Args('updateProfileInput') updateProfileInput: UpdateProfileInput,
     @Args('updateBusinessInput') updateBusinessInput: UpdateBusinessInput,
   ) {
     return this.businessesService.update(
       updateBusinessInput.id,
       updateBusinessInput,
-      updateUserInput,
-      updateProfileInput,
+      // updateUserInput,
+      // updateProfileInput,
     );
   }
 
-  @Mutation(() => Business, { name: 'removeBusiness' })
+  @Mutation(() => Business, { name: 'deleteBusiness' })
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Business:delete')
   @UseGuards(GqlAuthGuard)

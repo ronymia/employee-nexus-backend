@@ -21,7 +21,7 @@ import { defaultJobPlatforms } from './Database/job-platform';
 import { defaultLeaveTypes } from './Database/leave-type';
 import { defaultRecruitmentProcesses } from './Database/recruitment-process';
 import { defaultOnboardingProcesses } from './Database/onboarding-process';
-import { modules } from './Database/module';
+import { features } from './Database/features';
 
 @Injectable()
 export class AppService {
@@ -35,8 +35,8 @@ export class AppService {
 
   // UPDATE MODULE
   async moduleRefresh() {
-    const res = await this.prisma.systemModule.createMany({
-      data: modules.map((module) => ({ name: module })),
+    const res = await this.prisma.feature.createMany({
+      data: features.map((module) => ({ name: module })),
       skipDuplicates: true,
     });
 
@@ -231,7 +231,7 @@ export class AppService {
   //   return roleRefresh;
   // }
 
-  async roleRefresh() {
+  async rolePermissionsRefresh() {
     // GET SUPER ADMIN ROLE ID
     const superAdminRole = await this.prisma.role.findFirst({
       where: {
