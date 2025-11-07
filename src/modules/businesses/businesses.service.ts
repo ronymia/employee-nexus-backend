@@ -415,13 +415,7 @@ export class BusinessesService {
   // }
 
   // FIND ALL BUSINESSES
-  async findAll({
-    user,
-    query,
-  }: {
-    user: JwtPayload;
-    query: QueryBusinessInput;
-  }) {
+  async findAll({ query }: { query: QueryBusinessInput }) {
     // BUSINESS ID
     const { pagination, ...filters } = query ?? {};
 

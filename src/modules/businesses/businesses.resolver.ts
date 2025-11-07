@@ -10,8 +10,6 @@ import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { PasswordHelpers } from 'src/helpers/passwordHelpers';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtPayload } from '../auth/jwt.strategy';
 import { QueryBusinessInput } from './dto/query-business.input';
 
 @Resolver(() => Business)
@@ -52,11 +50,8 @@ export class BusinessesResolver {
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Business:read')
   @UseGuards(GqlAuthGuard)
-  async findAll(
-    @CurrentUser() user: JwtPayload,
-    @Args('query', { nullable: true }) query: QueryBusinessInput,
-  ) {
-    const result = await this.businessesService.findAll({ user, query });
+  async findAll(@Args('query', { nullable: true }) query: QueryBusinessInput) {
+    const result = await this.businessesService.findAll({ query });
     return {
       success: true,
       statusCode: HttpStatus.OK,

@@ -96,6 +96,46 @@ export const superAdminPermissions = [
     resource: 'Subscription Plan',
     action: ['create', 'read', 'update', 'delete'],
   },
+  {
+    resource: 'Employment Status',
+    action: ['create', 'read', 'update', 'delete'],
+  },
+  {
+    resource: 'Designation',
+    action: ['create', 'read', 'update', 'delete'],
+  },
+  {
+    resource: 'Job Type',
+    action: ['create', 'read', 'update', 'delete'],
+  },
+  {
+    resource: 'Job Platform',
+    action: ['create', 'read', 'update', 'delete'],
+  },
+  {
+    resource: 'Job Platform',
+    action: ['create', 'read', 'update', 'delete'],
+  },
+  {
+    resource: 'Recruitment Process',
+    action: ['create', 'read', 'update', 'delete'],
+  },
+  {
+    resource: 'Onboarding Process',
+    action: ['create', 'read', 'update', 'delete'],
+  },
+  {
+    resource: 'Work Site',
+    action: ['create', 'read', 'update', 'delete'],
+  },
+  {
+    resource: 'Work Schedule',
+    action: ['create', 'read', 'update', 'delete'],
+  },
+  {
+    resource: 'Department',
+    action: ['create', 'read', 'update', 'delete'],
+  },
 ];
 
 // ALL BUSINESS OWNER PERMISSION
