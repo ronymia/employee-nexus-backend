@@ -27,6 +27,7 @@ import { BusinessSchedulesModule } from './modules/business-schedules/business-s
 import { JobPlatformsModule } from './modules/job-platforms/job-platforms.module';
 import { RecruitmentProcessesModule } from './modules/recruitment-processes/recruitment-processes.module';
 import { OnboardingProcessesModule } from './modules/onboarding-processes/onboarding-processes.module';
+import { WorkSitesModule } from './modules/work-sites/work-sites.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { OnboardingProcessesModule } from './modules/onboarding-processes/onboar
     JobPlatformsModule,
     RecruitmentProcessesModule,
     OnboardingProcessesModule,
+    WorkSitesModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

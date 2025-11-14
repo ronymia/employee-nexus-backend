@@ -162,6 +162,32 @@ input CreateUserInput {
   password: String!
 }
 
+input CreateWorkSiteInput {
+  """Address of the work site"""
+  address: String
+
+  """Description of the work site"""
+  description: String!
+
+  """IP address"""
+  ipAddress: String
+
+  """Whether geo location is enabled"""
+  isGeoLocationEnabled: Boolean
+
+  """Whether IP is enabled"""
+  isIpEnabled: Boolean
+
+  """Whether location is enabled"""
+  isLocationEnabled: Boolean
+
+  """Maximum radius for location"""
+  maxRadius: Int
+
+  """Name of the work site"""
+  name: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -344,6 +370,7 @@ type Mutation {
   createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
   createUser(createUserInput: CreateUserInput!): User!
   createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
+  createWorkSite(createWorkSiteInput: CreateWorkSiteInput!): WorkSiteResponse!
   deleteBusiness(id: Int!): Business!
   deleteDesignation(id: Int!): DesignationResponse!
   deleteJobPlatform(id: Int!): JobPlatformResponse!
@@ -352,6 +379,7 @@ type Mutation {
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
   deleteUser(id: Int!): User!
+  deleteWorkSite(id: Int!): WorkSiteResponse!
   login(loginInput: LoginAuthInput!): Auth!
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): Business!
   updateBusinessSchedule(data: UpdateBusinessScheduleInput!): BusinessSchedule!
@@ -361,6 +389,7 @@ type Mutation {
   updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
   updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
   updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
+  updateWorkSite(updateWorkSiteInput: UpdateWorkSiteInput!): WorkSiteResponse!
 }
 
 type OnboardingProcess {
@@ -465,6 +494,8 @@ type Query {
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
   userById(id: Int!): User!
   users: [User!]!
+  workSiteById(id: Int!): WorkSiteResponse!
+  workSites(query: QueryWorkSiteInput): WorkSitesQueryResponse!
 }
 
 input QueryBusinessInput {
@@ -516,6 +547,19 @@ input QuerySubscriptionPlanInput {
   minPrice: Int
   pagination: BasePaginationInput
   price: Int
+  status: Status
+}
+
+input QueryWorkSiteInput {
+  address: String
+  ipAddress: String
+  isGeoLocationEnabled: Boolean
+  isIpEnabled: Boolean
+  isLocationEnabled: Boolean
+  maxRadius: Int
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
   status: Status
 }
 
@@ -588,7 +632,7 @@ type RolePermission {
   roleId: Int!
 }
 
-"""Status of the Onboarding Process"""
+"""Status of the Work Site"""
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -756,6 +800,33 @@ input UpdateSubscriptionPlanInput {
   setupFee: Int!
 }
 
+input UpdateWorkSiteInput {
+  """Address of the work site"""
+  address: String
+
+  """Description of the work site"""
+  description: String
+  id: Int!
+
+  """IP address"""
+  ipAddress: String
+
+  """Whether geo location is enabled"""
+  isGeoLocationEnabled: Boolean
+
+  """Whether IP is enabled"""
+  isIpEnabled: Boolean
+
+  """Whether location is enabled"""
+  isLocationEnabled: Boolean
+
+  """Maximum radius for location"""
+  maxRadius: Int
+
+  """Name of the work site"""
+  name: String
+}
+
 type User {
   business: Business
 
@@ -797,4 +868,64 @@ type UserPermission {
 
   """ID of the user"""
   userId: Int!
+}
+
+type WorkSite {
+  """Address of the work site"""
+  address: String
+
+  """ID of the business"""
+  businessId: Int!
+
+  """Date when the work site was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Description of the work site"""
+  description: String!
+
+  """Unique identifier for the work site"""
+  id: ID!
+
+  """IP address"""
+  ipAddress: String
+
+  """Whether geo location is enabled"""
+  isGeoLocationEnabled: Boolean
+
+  """Whether IP is enabled"""
+  isIpEnabled: Boolean
+
+  """Whether location is enabled"""
+  isLocationEnabled: Boolean
+
+  """Maximum radius for location"""
+  maxRadius: Int
+
+  """Name of the work site"""
+  name: String!
+
+  """Status of the work site"""
+  status: Status!
+
+  """Date when the work site was last updated"""
+  updatedAt: DateTime!
+}
+
+type WorkSiteResponse {
+  data: WorkSite!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type WorkSitesQueryResponse {
+  data: [WorkSite!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
