@@ -89,6 +89,14 @@ input CreateDesignationInput {
   name: String!
 }
 
+input CreateJobPlatformInput {
+  """Description of the job platform"""
+  description: String!
+
+  """Name of the job platform"""
+  name: String!
+}
+
 input CreateJobTypeInput {
   """Description of the job type"""
   description: String!
@@ -207,6 +215,48 @@ enum GENDER {
   MALE
 }
 
+type JobPlatform {
+  """ID of the business"""
+  businessId: Int!
+
+  """Date when the job platform was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Description of the job platform"""
+  description: String!
+
+  """Unique identifier for the job platform"""
+  id: ID!
+
+  """Name of the job platform"""
+  name: String!
+
+  """Status of the job platform"""
+  status: Status!
+
+  """Date when the job platform was last updated"""
+  updatedAt: DateTime!
+}
+
+type JobPlatformResponse {
+  data: JobPlatform!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type JobPlatformsQueryResponse {
+  data: [JobPlatform!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type JobType {
   """ID of the business"""
   businessId: Int!
@@ -265,12 +315,14 @@ enum MARITAL_STATUS {
 
 type Mutation {
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
+  createJobPlatform(createJobPlatformInput: CreateJobPlatformInput!): JobPlatformResponse!
   createJobType(createJobTypeInput: CreateJobTypeInput!): JobTypeResponse!
   createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
   createUser(createUserInput: CreateUserInput!): User!
   createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
   deleteBusiness(id: Int!): Business!
   deleteDesignation(id: Int!): DesignationResponse!
+  deleteJobPlatform(id: Int!): JobPlatformResponse!
   deleteJobType(id: Int!): JobTypeResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
   deleteUser(id: Int!): User!
@@ -278,6 +330,7 @@ type Mutation {
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): Business!
   updateBusinessSchedule(data: UpdateBusinessScheduleInput!): BusinessSchedule!
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
+  updateJobPlatform(updateJobPlatformInput: UpdateJobPlatformInput!): JobPlatformResponse!
   updateJobType(updateJobTypeInput: UpdateJobTypeInput!): JobTypeResponse!
   updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
 }
@@ -325,6 +378,8 @@ type Query {
   businesses(query: QueryBusinessInput): BusinessQueryResponse!
   designationById(id: Int!): DesignationResponse!
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
+  jobPlatformById(id: Int!): JobPlatformResponse!
+  jobPlatforms(query: QueryJobPlatformInput): JobPlatformsQueryResponse!
   jobTypeById(id: Int!): JobTypeResponse!
   jobTypes(query: QueryJobTypeInput): JobTypesQueryResponse!
   permissionById(id: Int!): Permission!
@@ -343,6 +398,13 @@ input QueryBusinessInput {
 }
 
 input QueryDesignationInput {
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: Status
+}
+
+input QueryJobPlatformInput {
   name: String
   pagination: BasePaginationInput
   searchTerm: String
@@ -388,7 +450,7 @@ type RolePermission {
   roleId: Int!
 }
 
-"""Status of the Job Type"""
+"""Status of the Job Platform"""
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -494,6 +556,15 @@ input UpdateDesignationInput {
   id: Int!
 
   """Name of the designation"""
+  name: String
+}
+
+input UpdateJobPlatformInput {
+  """Description of the job platform"""
+  description: String
+  id: Int!
+
+  """Name of the job platform"""
   name: String
 }
 

@@ -24,6 +24,7 @@ import { DesignationsModule } from './modules/designations/designations.module';
 import { FeaturesModule } from './modules/features/features.module';
 import { JobTypesModule } from './modules/job-types/job-types.module';
 import { BusinessSchedulesModule } from './modules/business-schedules/business-schedules.module';
+import { JobPlatformsModule } from './modules/job-platforms/job-platforms.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { BusinessSchedulesModule } from './modules/business-schedules/business-s
     DesignationsModule,
     JobTypesModule,
     BusinessSchedulesModule,
+    JobPlatformsModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],
