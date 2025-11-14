@@ -26,7 +26,7 @@ export class Designation {
   businessId: number;
 
   @Field(() => Int, { description: 'ID of the creator' })
-  createdBy: number;
+  createdBy?: number;
 
   @Field(() => Date, { description: 'Date when the designation was created' })
   createdAt: Date;

@@ -10,6 +10,7 @@ import { UserAccountStatus } from 'generated/prisma';
 import { Business } from 'src/modules/businesses/entities/business.entity';
 import { Profile } from 'src/modules/profiles/entities/profile.entity';
 import { Role } from 'src/modules/roles/entities/role.entity';
+import { UserPermission } from 'src/modules/user-permissions/entities/user-permission.entity';
 
 registerEnumType(UserAccountStatus, {
   name: 'USER_ACCOUNT_STATUS',
@@ -43,6 +44,9 @@ export class User {
 
   @Field(() => Business, { nullable: true })
   business: Business | null;
+
+  @Field(() => [UserPermission], { nullable: true })
+  userPermissions: UserPermission[] | null;
 
   @Field(() => Int, {
     nullable: true,

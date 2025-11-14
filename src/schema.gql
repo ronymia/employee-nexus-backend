@@ -373,6 +373,19 @@ type Role {
 
   """Name of the role"""
   name: String!
+  rolePermissions: [RolePermission!]
+}
+
+type RolePermission {
+  """ID of the permission"""
+  permission: Permission!
+
+  """ID of the permission"""
+  permissionId: Int!
+  role: Role
+
+  """ID of the role"""
+  roleId: Int!
 }
 
 """Status of the Job Type"""
@@ -477,20 +490,20 @@ input UpdateBusinessScheduleInput {
 
 input UpdateDesignationInput {
   """Description of the designation"""
-  description: String!
+  description: String
   id: Int!
 
   """Name of the designation"""
-  name: String!
+  name: String
 }
 
 input UpdateJobTypeInput {
   """Description of the job type"""
-  description: String!
+  description: String
   id: Int!
 
   """Name of the job type"""
-  name: String!
+  name: String
 }
 
 input UpdateSubscriptionPlanInput {
@@ -522,6 +535,9 @@ type User {
   """Email of the user"""
   email: String!
   id: ID!
+
+  """Formatted permissions as ["Resource:action"]"""
+  permissions: [String!]
   profile: Profile
 
   """Role of the user"""
@@ -535,4 +551,17 @@ type User {
 
   """Date when the user was last updated"""
   updatedAt: DateTime!
+  userPermissions: [UserPermission!]
+}
+
+type UserPermission {
+  """Permission details"""
+  permission: Permission!
+
+  """ID of the permission"""
+  permissionId: Int!
+  user: User
+
+  """ID of the user"""
+  userId: Int!
 }

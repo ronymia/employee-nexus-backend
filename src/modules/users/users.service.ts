@@ -11,10 +11,22 @@ export class UsersService {
     return this.prisma.user.create({
       data: { ...createUserInput, role: { connect: { id: 1 } } },
       include: {
-        role: true,
         profile: true,
         business: true,
-        userPermissions: { include: { permission: true } },
+        userPermissions: {
+          include: {
+            permission: { select: { resource: true, action: true } },
+          },
+        },
+        role: {
+          include: {
+            rolePermissions: {
+              include: {
+                permission: { select: { resource: true, action: true } },
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -23,10 +35,22 @@ export class UsersService {
   findAll() {
     return this.prisma.user.findMany({
       include: {
-        role: true,
         profile: true,
         business: true,
-        userPermissions: { include: { permission: true } },
+        userPermissions: {
+          include: {
+            permission: { select: { resource: true, action: true } },
+          },
+        },
+        role: {
+          include: {
+            rolePermissions: {
+              include: {
+                permission: { select: { resource: true, action: true } },
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -36,10 +60,22 @@ export class UsersService {
     return this.prisma.user.findUnique({
       where: { id },
       include: {
-        role: true,
         profile: true,
         business: true,
-        userPermissions: { include: { permission: true } },
+        userPermissions: {
+          include: {
+            permission: { select: { resource: true, action: true } },
+          },
+        },
+        role: {
+          include: {
+            rolePermissions: {
+              include: {
+                permission: { select: { resource: true, action: true } },
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -49,10 +85,22 @@ export class UsersService {
     return this.prisma.user.findUnique({
       where: { email },
       include: {
-        role: true,
         profile: true,
         business: true,
-        userPermissions: { include: { permission: true } },
+        userPermissions: {
+          include: {
+            permission: { select: { resource: true, action: true } },
+          },
+        },
+        role: {
+          include: {
+            rolePermissions: {
+              include: {
+                permission: true,
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -70,10 +118,22 @@ export class UsersService {
     return this.prisma.user.delete({
       where: { id },
       include: {
-        role: true,
         profile: true,
         business: true,
-        userPermissions: { include: { permission: true } },
+        userPermissions: {
+          include: {
+            permission: { select: { resource: true, action: true } },
+          },
+        },
+        role: {
+          include: {
+            rolePermissions: {
+              include: {
+                permission: { select: { resource: true, action: true } },
+              },
+            },
+          },
+        },
       },
     });
   }

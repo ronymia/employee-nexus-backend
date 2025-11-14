@@ -25,11 +25,8 @@ export class JobTypesService {
     return await this.prisma.jobType.create({
       data: {
         ...createJobTypeInput,
-        business: {
-          connect: {
-            id: user.businessId,
-          },
-        },
+        createdBy: user.userId,
+        businessId: user.businessId,
       },
     });
   }

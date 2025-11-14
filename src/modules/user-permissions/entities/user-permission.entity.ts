@@ -5,13 +5,13 @@ import { User } from 'src/modules/users/entities/user.entity';
 @ObjectType()
 export class UserPermission {
   @Field(() => Int, { description: 'ID of the user' })
-  userId: number;
+  userId?: number;
 
   @Field(() => User, { nullable: true })
   user?: User | null;
 
   @Field(() => Int, { description: 'ID of the permission' })
-  permissionId: number;
+  permissionId?: number;
 
   @Field(() => Permission, { description: 'Permission details' })
   permission: Permission;

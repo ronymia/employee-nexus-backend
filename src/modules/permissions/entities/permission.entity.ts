@@ -3,7 +3,7 @@ import { ObjectType, Field, ID } from '@nestjs/graphql';
 @ObjectType()
 export class Permission {
   @Field(() => ID, { description: 'Unique identifier for the permission' })
-  id: number;
+  id?: number;
 
   @Field()
   resource: string;
@@ -12,8 +12,8 @@ export class Permission {
   action: string;
 
   @Field()
-  createdAt: Date;
+  createdAt?: Date;
 
   @Field()
-  updatedAt: Date;
+  updatedAt?: Date;
 }

@@ -4,6 +4,7 @@ import { UsersService } from '../users/users.service';
 import { PasswordHelpers } from 'src/helpers/passwordHelpers';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/entities/user.entity';
+import { PermissionUtils } from 'src/utils/permission.utils';
 
 @Injectable()
 export class AuthService {
@@ -36,6 +37,8 @@ export class AuthService {
       user?.password,
     );
 
+    // console.log({ permissions: user.role?.rolePermissions });
+
     // Check if password is correct
     if (!isMatchPassword) {
       throw new UnauthorizedException();
@@ -50,6 +53,8 @@ export class AuthService {
 
     // Generate JWT token
     const accessToken = this.jwtService.sign(payload);
+
+    user['permissions'] = PermissionUtils.formatUserPermissions(user as any);
 
     return {
       accessToken,
