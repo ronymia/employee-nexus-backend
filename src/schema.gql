@@ -118,6 +118,17 @@ input CreateProfileInput {
   profilePicture: String
 }
 
+input CreateRecruitmentProcessInput {
+  """Description of the recruitment process"""
+  description: String!
+
+  """Whether the recruitment process is required"""
+  isRequired: Boolean!
+
+  """Name of the recruitment process"""
+  name: String!
+}
+
 input CreateSubscriptionPlanInput {
   """Description of the service plan"""
   description: String!
@@ -317,6 +328,7 @@ type Mutation {
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
   createJobPlatform(createJobPlatformInput: CreateJobPlatformInput!): JobPlatformResponse!
   createJobType(createJobTypeInput: CreateJobTypeInput!): JobTypeResponse!
+  createRecruitmentProcess(createRecruitmentProcessInput: CreateRecruitmentProcessInput!): RecruitmentProcessResponse!
   createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
   createUser(createUserInput: CreateUserInput!): User!
   createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
@@ -324,6 +336,7 @@ type Mutation {
   deleteDesignation(id: Int!): DesignationResponse!
   deleteJobPlatform(id: Int!): JobPlatformResponse!
   deleteJobType(id: Int!): JobTypeResponse!
+  deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
   deleteUser(id: Int!): User!
   login(loginInput: LoginAuthInput!): Auth!
@@ -332,6 +345,7 @@ type Mutation {
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
   updateJobPlatform(updateJobPlatformInput: UpdateJobPlatformInput!): JobPlatformResponse!
   updateJobType(updateJobTypeInput: UpdateJobTypeInput!): JobTypeResponse!
+  updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
   updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
 }
 
@@ -384,6 +398,8 @@ type Query {
   jobTypes(query: QueryJobTypeInput): JobTypesQueryResponse!
   permissionById(id: Int!): Permission!
   permissions: [Permission!]!
+  recruitmentProcessById(id: Int!): RecruitmentProcessResponse!
+  recruitmentProcesses(query: QueryRecruitmentProcessInput): RecruitmentProcessesQueryResponse!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
   userById(id: Int!): User!
@@ -418,12 +434,65 @@ input QueryJobTypeInput {
   status: Status
 }
 
+input QueryRecruitmentProcessInput {
+  isRequired: Boolean
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: Status
+}
+
 input QuerySubscriptionPlanInput {
   maxPrice: Int
   minPrice: Int
   pagination: BasePaginationInput
   price: Int
   status: Status
+}
+
+type RecruitmentProcess {
+  """ID of the business"""
+  businessId: Int!
+
+  """Date when the recruitment process was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Description of the recruitment process"""
+  description: String!
+
+  """Unique identifier for the recruitment process"""
+  id: ID!
+
+  """Whether the recruitment process is required"""
+  isRequired: Boolean!
+
+  """Name of the recruitment process"""
+  name: String!
+
+  """Status of the recruitment process"""
+  status: Status!
+
+  """Date when the recruitment process was last updated"""
+  updatedAt: DateTime!
+}
+
+type RecruitmentProcessResponse {
+  data: RecruitmentProcess!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type RecruitmentProcessesQueryResponse {
+  data: [RecruitmentProcess!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type Role {
@@ -450,7 +519,7 @@ type RolePermission {
   roleId: Int!
 }
 
-"""Status of the Job Platform"""
+"""Status of the Recruitment Process"""
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -574,6 +643,18 @@ input UpdateJobTypeInput {
   id: Int!
 
   """Name of the job type"""
+  name: String
+}
+
+input UpdateRecruitmentProcessInput {
+  """Description of the recruitment process"""
+  description: String
+  id: Int!
+
+  """Whether the recruitment process is required"""
+  isRequired: Boolean
+
+  """Name of the recruitment process"""
   name: String
 }
 
