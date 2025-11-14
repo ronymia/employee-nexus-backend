@@ -105,6 +105,17 @@ input CreateJobTypeInput {
   name: String!
 }
 
+input CreateOnboardingProcessInput {
+  """Description of the onboarding process"""
+  description: String!
+
+  """Whether the onboarding process is required"""
+  isRequired: Boolean!
+
+  """Name of the onboarding process"""
+  name: String!
+}
+
 input CreateProfileInput {
   address: String!
   city: String!
@@ -328,6 +339,7 @@ type Mutation {
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
   createJobPlatform(createJobPlatformInput: CreateJobPlatformInput!): JobPlatformResponse!
   createJobType(createJobTypeInput: CreateJobTypeInput!): JobTypeResponse!
+  createOnboardingProcess(createOnboardingProcessInput: CreateOnboardingProcessInput!): OnboardingProcessResponse!
   createRecruitmentProcess(createRecruitmentProcessInput: CreateRecruitmentProcessInput!): RecruitmentProcessResponse!
   createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
   createUser(createUserInput: CreateUserInput!): User!
@@ -336,6 +348,7 @@ type Mutation {
   deleteDesignation(id: Int!): DesignationResponse!
   deleteJobPlatform(id: Int!): JobPlatformResponse!
   deleteJobType(id: Int!): JobTypeResponse!
+  deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
   deleteUser(id: Int!): User!
@@ -345,8 +358,54 @@ type Mutation {
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
   updateJobPlatform(updateJobPlatformInput: UpdateJobPlatformInput!): JobPlatformResponse!
   updateJobType(updateJobTypeInput: UpdateJobTypeInput!): JobTypeResponse!
+  updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
   updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
   updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
+}
+
+type OnboardingProcess {
+  """ID of the business"""
+  businessId: Int!
+
+  """Date when the onboarding process was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Description of the onboarding process"""
+  description: String!
+
+  """Unique identifier for the onboarding process"""
+  id: ID!
+
+  """Whether the onboarding process is required"""
+  isRequired: Boolean!
+
+  """Name of the onboarding process"""
+  name: String!
+
+  """Status of the onboarding process"""
+  status: Status!
+
+  """Date when the onboarding process was last updated"""
+  updatedAt: DateTime!
+}
+
+type OnboardingProcessResponse {
+  data: OnboardingProcess!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type OnboardingProcessesQueryResponse {
+  data: [OnboardingProcess!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type PaginationMeta {
@@ -396,6 +455,8 @@ type Query {
   jobPlatforms(query: QueryJobPlatformInput): JobPlatformsQueryResponse!
   jobTypeById(id: Int!): JobTypeResponse!
   jobTypes(query: QueryJobTypeInput): JobTypesQueryResponse!
+  onboardingProcessById(id: Int!): OnboardingProcessResponse!
+  onboardingProcesses(query: QueryOnboardingProcessInput): OnboardingProcessesQueryResponse!
   permissionById(id: Int!): Permission!
   permissions: [Permission!]!
   recruitmentProcessById(id: Int!): RecruitmentProcessResponse!
@@ -428,6 +489,14 @@ input QueryJobPlatformInput {
 }
 
 input QueryJobTypeInput {
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: Status
+}
+
+input QueryOnboardingProcessInput {
+  isRequired: Boolean
   name: String
   pagination: BasePaginationInput
   searchTerm: String
@@ -519,7 +588,7 @@ type RolePermission {
   roleId: Int!
 }
 
-"""Status of the Recruitment Process"""
+"""Status of the Onboarding Process"""
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -643,6 +712,18 @@ input UpdateJobTypeInput {
   id: Int!
 
   """Name of the job type"""
+  name: String
+}
+
+input UpdateOnboardingProcessInput {
+  """Description of the onboarding process"""
+  description: String
+  id: Int!
+
+  """Whether the onboarding process is required"""
+  isRequired: Boolean
+
+  """Name of the onboarding process"""
   name: String
 }
 

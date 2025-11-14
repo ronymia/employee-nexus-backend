@@ -26,6 +26,7 @@ import { JobTypesModule } from './modules/job-types/job-types.module';
 import { BusinessSchedulesModule } from './modules/business-schedules/business-schedules.module';
 import { JobPlatformsModule } from './modules/job-platforms/job-platforms.module';
 import { RecruitmentProcessesModule } from './modules/recruitment-processes/recruitment-processes.module';
+import { OnboardingProcessesModule } from './modules/onboarding-processes/onboarding-processes.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { RecruitmentProcessesModule } from './modules/recruitment-processes/recr
     BusinessSchedulesModule,
     JobPlatformsModule,
     RecruitmentProcessesModule,
+    OnboardingProcessesModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],
