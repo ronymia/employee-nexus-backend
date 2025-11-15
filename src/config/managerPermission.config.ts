@@ -69,4 +69,8 @@ export const managerPermissions = [
     resource: PermissionResource.ATTENDANCE_SETTINGS,
     action: [PermissionAction.READ, PermissionAction.UPDATE],
   },
+  {
+    resource: PermissionResource.LEAVE_SETTINGS,
+    action: [PermissionAction.READ, PermissionAction.UPDATE],
+  },
 ];

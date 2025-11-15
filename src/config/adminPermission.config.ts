@@ -119,4 +119,13 @@ export const adminPermissions = [
       PermissionAction.DELETE,
     ],
   },
+  {
+    resource: PermissionResource.LEAVE_SETTINGS,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
 ];

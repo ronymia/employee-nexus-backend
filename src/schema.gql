@@ -538,6 +538,31 @@ enum LeaveRolloverType {
   PARTIAL_ROLLOVER
 }
 
+type LeaveSetting {
+  """Whether leave requests are auto-approved"""
+  autoApproval: Boolean!
+
+  """Business this leave setting belongs to"""
+  business: Business!
+
+  """ID of the business"""
+  businessId: Int!
+
+  """Unique identifier for the leave setting"""
+  id: ID!
+
+  """Start month for leave cycle (0-11)"""
+  startMonth: Int!
+}
+
+type LeaveSettingResponse {
+  data: LeaveSetting!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type LeaveType {
   """ID of the business"""
   businessId: Int!
@@ -646,6 +671,7 @@ type Mutation {
   updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
   updateJobPlatform(updateJobPlatformInput: UpdateJobPlatformInput!): JobPlatformResponse!
   updateJobType(updateJobTypeInput: UpdateJobTypeInput!): JobTypeResponse!
+  updateLeaveSetting(updateLeaveSettingInput: UpdateLeaveSettingInput!): LeaveSettingResponse!
   updateLeaveType(updateLeaveTypeInput: UpdateLeaveTypeInput!): LeaveTypeResponse!
   updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
   updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
@@ -750,6 +776,7 @@ type Query {
   jobPlatforms(query: QueryJobPlatformInput): JobPlatformsQueryResponse!
   jobTypeById(id: Int!): JobTypeResponse!
   jobTypes(query: QueryJobTypeInput): JobTypesQueryResponse!
+  leaveSettingByBusinessId: LeaveSettingResponse!
   leaveTypeById(id: Int!): LeaveTypeResponse!
   leaveTypes(query: QueryLeaveTypeInput): LeaveTypesQueryResponse!
   onboardingProcessById(id: Int!): OnboardingProcessResponse!
@@ -1090,6 +1117,14 @@ input UpdateJobTypeInput {
 
   """Name of the job type"""
   name: String
+}
+
+input UpdateLeaveSettingInput {
+  """Whether leave requests are auto-approved"""
+  autoApproval: Boolean = false
+
+  """Start month for leave cycle (0-11, where 0=January)"""
+  startMonth: Int = 0
 }
 
 input UpdateLeaveTypeInput {
