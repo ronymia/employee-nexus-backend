@@ -31,6 +31,7 @@ import { WorkSitesModule } from './modules/work-sites/work-sites.module';
 import { EmploymentStatusModule } from './modules/employment-status/employment-status.module';
 import { LeaveTypesModule } from './modules/leave-types/leave-types.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
+import { AttendanceSettingsModule } from './modules/attendance-settings/attendance-settings.module';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { DepartmentsModule } from './modules/departments/departments.module';
     EmploymentStatusModule,
     LeaveTypesModule,
     DepartmentsModule,
+    AttendanceSettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

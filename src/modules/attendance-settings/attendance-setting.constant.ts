@@ -1,0 +1,2 @@
+// ATTENDANCE SETTING CONSTANTS - DEFINES SEARCHABLE FIELDS FOR ATTENDANCE SETTING QUERIES
+export const attendanceSettingSearchableFields: string[] = [];

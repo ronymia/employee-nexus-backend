@@ -2,6 +2,43 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AttendanceSetting {
+  """Whether auto approval is enabled"""
+  autoApproval: Boolean!
+
+  """Business this attendance setting belongs to"""
+  business: Business!
+
+  """ID of the business"""
+  businessId: Int!
+
+  """Unique identifier for the attendance setting"""
+  id: ID!
+
+  """Whether geo location is enabled"""
+  isGeoLocationEnabled: Boolean!
+
+  """Whether punch in/out alerts are enabled"""
+  punchInOutAlert: Boolean!
+
+  """Punch in/out interval in hours"""
+  punchInOutInterval: Int!
+
+  """Punch in time tolerance in minutes"""
+  punchInTimeTolerance: Int!
+
+  """Work availability definition percentage"""
+  workAvailabilityDefinition: Int!
+}
+
+type AttendanceSettingResponse {
+  data: AttendanceSetting!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type Auth {
   """JWT access token"""
   accessToken: String!
@@ -601,6 +638,7 @@ type Mutation {
   deleteUser(id: Int!): User!
   deleteWorkSite(id: Int!): WorkSiteResponse!
   login(loginInput: LoginAuthInput!): Auth!
+  updateAttendanceSetting(updateAttendanceSettingInput: UpdateAttendanceSettingInput!): AttendanceSettingResponse!
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): Business!
   updateBusinessSchedule(data: UpdateBusinessScheduleInput!): BusinessSchedule!
   updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): DepartmentResponse!
@@ -698,6 +736,7 @@ type Profile {
 type Query {
   FeatureById(id: Int!): FeatureResponse!
   allFeatures: FeatureQueryResponse!
+  attendanceSettingsByBusiness: AttendanceSettingResponse!
   businessById(id: Int!): Business!
   businessScheduleByBusinessId(id: Int!): BusinessSchedule!
   businesses(query: QueryBusinessInput): BusinessQueryResponse!
@@ -950,6 +989,26 @@ enum USER_ACCOUNT_STATUS {
   TERMINATED
   UNVERIFIED
   VERIFIED
+}
+
+input UpdateAttendanceSettingInput {
+  """Whether auto approval is enabled"""
+  autoApproval: Boolean = false
+
+  """Whether geo location is enabled"""
+  isGeoLocationEnabled: Boolean = false
+
+  """Whether punch in/out alerts are enabled"""
+  punchInOutAlert: Boolean = true
+
+  """Punch in/out interval in hours"""
+  punchInOutInterval: Int = 1
+
+  """Punch in time tolerance in minutes"""
+  punchInTimeTolerance: Int = 15
+
+  """Work availability definition percentage"""
+  workAvailabilityDefinition: Int = 80
 }
 
 input UpdateBusinessInput {

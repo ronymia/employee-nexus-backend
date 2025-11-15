@@ -22,4 +22,5 @@ export enum PermissionResource {
   WORK_SCHEDULE = 'Work Schedule',
   DEPARTMENT = 'Department',
   LEAVE_TYPE = 'Leave Type',
+  ATTENDANCE_SETTINGS = 'Attendance Settings',
 }
