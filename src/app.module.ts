@@ -29,6 +29,7 @@ import { RecruitmentProcessesModule } from './modules/recruitment-processes/recr
 import { OnboardingProcessesModule } from './modules/onboarding-processes/onboarding-processes.module';
 import { WorkSitesModule } from './modules/work-sites/work-sites.module';
 import { EmploymentStatusModule } from './modules/employment-status/employment-status.module';
+import { LeaveTypesModule } from './modules/leave-types/leave-types.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { EmploymentStatusModule } from './modules/employment-status/employment-s
     OnboardingProcessesModule,
     WorkSitesModule,
     EmploymentStatusModule,
+    LeaveTypesModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

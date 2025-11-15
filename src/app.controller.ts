@@ -25,7 +25,11 @@ export class AppController {
   @Get('/role-permissions-refresh')
   async roleRefresh() {
     await this.appService.rolePermissionsRefresh();
-    return 'Roles refreshed';
+    return {
+      success: true,
+      statusCode: 200,
+      message: 'Role Permissions Updated',
+    };
   }
 
   // SETUP

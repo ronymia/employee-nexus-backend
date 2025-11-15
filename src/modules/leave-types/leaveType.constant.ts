@@ -1,0 +1,2 @@
+// LEAVE TYPES CONSTANTS - DEFINES SEARCHABLE FIELDS FOR LEAVE TYPE QUERIES
+export const leaveTypeSearchableFields = ['name'];

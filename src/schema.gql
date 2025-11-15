@@ -113,6 +113,26 @@ input CreateJobTypeInput {
   name: String!
 }
 
+input CreateLeaveTypeInput {
+  """Maximum carry over limit"""
+  carryOverLimit: Int
+
+  """Array of employment status IDs to associate with this leave type"""
+  employmentStatuses: [Int!] = []
+
+  """Number of leave hours allocated"""
+  leaveHours: Int! = 0
+
+  """Leave rollover policy type"""
+  leaveRolloverType: LeaveRolloverType! = NONE
+
+  """Type of leave (PAID or UNPAID)"""
+  leaveType: LeaveTypeEnum!
+
+  """Name of the leave type"""
+  name: String!
+}
+
 input CreateOnboardingProcessInput {
   """Description of the onboarding process"""
   description: String!
@@ -397,6 +417,73 @@ type JobTypesQueryResponse {
   success: Boolean!
 }
 
+"""Type of leave rollover policy"""
+enum LeaveRolloverType {
+  FULL_ROLLOVER
+  NONE
+  PARTIAL_ROLLOVER
+}
+
+type LeaveType {
+  """ID of the business"""
+  businessId: Int!
+
+  """Maximum carry over limit"""
+  carryOverLimit: Int
+
+  """Date when the leave type was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Array of employment statuses associated with this leave type"""
+  employmentStatuses: [EmploymentStatus!]
+
+  """Unique identifier for the leave type"""
+  id: ID!
+
+  """Number of leave hours allocated"""
+  leaveHours: Int!
+
+  """Leave rollover policy type"""
+  leaveRolloverType: LeaveRolloverType!
+
+  """Type of leave (PAID or UNPAID)"""
+  leaveType: LeaveTypeEnum!
+
+  """Name of the leave type"""
+  name: String!
+
+  """Status of the leave type"""
+  status: Status!
+
+  """Date when the leave type was last updated"""
+  updatedAt: DateTime!
+}
+
+"""Type of leave - PAID or UNPAID"""
+enum LeaveTypeEnum {
+  PAID
+  UNPAID
+}
+
+type LeaveTypeResponse {
+  data: LeaveType!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type LeaveTypesQueryResponse {
+  data: [LeaveType!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 input LoginAuthInput {
   """User email"""
   email: String!
@@ -416,6 +503,7 @@ type Mutation {
   createEmploymentStatus(createEmploymentStatusInput: CreateEmploymentStatusInput!): EmploymentStatusResponse!
   createJobPlatform(createJobPlatformInput: CreateJobPlatformInput!): JobPlatformResponse!
   createJobType(createJobTypeInput: CreateJobTypeInput!): JobTypeResponse!
+  createLeaveType(createLeaveTypeInput: CreateLeaveTypeInput!): LeaveTypeResponse!
   createOnboardingProcess(createOnboardingProcessInput: CreateOnboardingProcessInput!): OnboardingProcessResponse!
   createRecruitmentProcess(createRecruitmentProcessInput: CreateRecruitmentProcessInput!): RecruitmentProcessResponse!
   createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
@@ -427,6 +515,7 @@ type Mutation {
   deleteEmploymentStatus(id: Int!): EmploymentStatusResponse!
   deleteJobPlatform(id: Int!): JobPlatformResponse!
   deleteJobType(id: Int!): JobTypeResponse!
+  deleteLeaveType(id: Int!): LeaveTypeResponse!
   deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
@@ -439,6 +528,7 @@ type Mutation {
   updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
   updateJobPlatform(updateJobPlatformInput: UpdateJobPlatformInput!): JobPlatformResponse!
   updateJobType(updateJobTypeInput: UpdateJobTypeInput!): JobTypeResponse!
+  updateLeaveType(updateLeaveTypeInput: UpdateLeaveTypeInput!): LeaveTypeResponse!
   updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
   updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
   updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
@@ -539,6 +629,8 @@ type Query {
   jobPlatforms(query: QueryJobPlatformInput): JobPlatformsQueryResponse!
   jobTypeById(id: Int!): JobTypeResponse!
   jobTypes(query: QueryJobTypeInput): JobTypesQueryResponse!
+  leaveTypeById(id: Int!): LeaveTypeResponse!
+  leaveTypes(query: QueryLeaveTypeInput): LeaveTypesQueryResponse!
   onboardingProcessById(id: Int!): OnboardingProcessResponse!
   onboardingProcesses(query: QueryOnboardingProcessInput): OnboardingProcessesQueryResponse!
   permissionById(id: Int!): Permission!
@@ -583,6 +675,13 @@ input QueryJobPlatformInput {
 
 input QueryJobTypeInput {
   name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: Status
+}
+
+input QueryLeaveTypeInput {
+  leaveType: LeaveTypeEnum
   pagination: BasePaginationInput
   searchTerm: String
   status: Status
@@ -694,7 +793,7 @@ type RolePermission {
   roleId: Int!
 }
 
-"""Status of the Employment Status"""
+"""Status of the Leave Type"""
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -827,6 +926,27 @@ input UpdateJobTypeInput {
   id: Int!
 
   """Name of the job type"""
+  name: String
+}
+
+input UpdateLeaveTypeInput {
+  """Maximum carry over limit"""
+  carryOverLimit: Int
+
+  """Array of employment status IDs to associate with this leave type"""
+  employmentStatuses: [Int!] = []
+  id: Int!
+
+  """Number of leave hours allocated"""
+  leaveHours: Int = 0
+
+  """Leave rollover policy type"""
+  leaveRolloverType: LeaveRolloverType = NONE
+
+  """Type of leave (PAID or UNPAID)"""
+  leaveType: LeaveTypeEnum
+
+  """Name of the leave type"""
   name: String
 }
 
