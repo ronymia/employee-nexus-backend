@@ -28,6 +28,7 @@ import { JobPlatformsModule } from './modules/job-platforms/job-platforms.module
 import { RecruitmentProcessesModule } from './modules/recruitment-processes/recruitment-processes.module';
 import { OnboardingProcessesModule } from './modules/onboarding-processes/onboarding-processes.module';
 import { WorkSitesModule } from './modules/work-sites/work-sites.module';
+import { EmploymentStatusModule } from './modules/employment-status/employment-status.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { WorkSitesModule } from './modules/work-sites/work-sites.module';
     RecruitmentProcessesModule,
     OnboardingProcessesModule,
     WorkSitesModule,
+    EmploymentStatusModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

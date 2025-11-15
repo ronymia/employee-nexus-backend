@@ -89,6 +89,14 @@ input CreateDesignationInput {
   name: String!
 }
 
+input CreateEmploymentStatusInput {
+  """Description of the employment status"""
+  description: String!
+
+  """Name of the employment status"""
+  name: String!
+}
+
 input CreateJobPlatformInput {
   """Description of the job platform"""
   description: String!
@@ -235,6 +243,48 @@ type DesignationsQueryResponse {
   success: Boolean!
 }
 
+type EmploymentStatus {
+  """ID of the business"""
+  businessId: Int!
+
+  """Date when the employment status was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Description of the employment status"""
+  description: String!
+
+  """Unique identifier for the employment status"""
+  id: ID!
+
+  """Name of the employment status"""
+  name: String!
+
+  """Status of the employment status"""
+  status: Status!
+
+  """Date when the employment status was last updated"""
+  updatedAt: DateTime!
+}
+
+type EmploymentStatusResponse {
+  data: EmploymentStatus!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EmploymentStatusesQueryResponse {
+  data: [EmploymentStatus!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type Feature {
   """ID of the module"""
   id: ID!
@@ -363,6 +413,7 @@ enum MARITAL_STATUS {
 
 type Mutation {
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
+  createEmploymentStatus(createEmploymentStatusInput: CreateEmploymentStatusInput!): EmploymentStatusResponse!
   createJobPlatform(createJobPlatformInput: CreateJobPlatformInput!): JobPlatformResponse!
   createJobType(createJobTypeInput: CreateJobTypeInput!): JobTypeResponse!
   createOnboardingProcess(createOnboardingProcessInput: CreateOnboardingProcessInput!): OnboardingProcessResponse!
@@ -373,6 +424,7 @@ type Mutation {
   createWorkSite(createWorkSiteInput: CreateWorkSiteInput!): WorkSiteResponse!
   deleteBusiness(id: Int!): Business!
   deleteDesignation(id: Int!): DesignationResponse!
+  deleteEmploymentStatus(id: Int!): EmploymentStatusResponse!
   deleteJobPlatform(id: Int!): JobPlatformResponse!
   deleteJobType(id: Int!): JobTypeResponse!
   deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
@@ -384,6 +436,7 @@ type Mutation {
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): Business!
   updateBusinessSchedule(data: UpdateBusinessScheduleInput!): BusinessSchedule!
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
+  updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
   updateJobPlatform(updateJobPlatformInput: UpdateJobPlatformInput!): JobPlatformResponse!
   updateJobType(updateJobTypeInput: UpdateJobTypeInput!): JobTypeResponse!
   updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
@@ -480,6 +533,8 @@ type Query {
   businesses(query: QueryBusinessInput): BusinessQueryResponse!
   designationById(id: Int!): DesignationResponse!
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
+  employmentStatusById(id: Int!): EmploymentStatusResponse!
+  employmentStatuses(query: QueryEmploymentStatusInput): EmploymentStatusesQueryResponse!
   jobPlatformById(id: Int!): JobPlatformResponse!
   jobPlatforms(query: QueryJobPlatformInput): JobPlatformsQueryResponse!
   jobTypeById(id: Int!): JobTypeResponse!
@@ -506,6 +561,13 @@ input QueryBusinessInput {
 }
 
 input QueryDesignationInput {
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: Status
+}
+
+input QueryEmploymentStatusInput {
   name: String
   pagination: BasePaginationInput
   searchTerm: String
@@ -632,7 +694,7 @@ type RolePermission {
   roleId: Int!
 }
 
-"""Status of the Work Site"""
+"""Status of the Employment Status"""
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -738,6 +800,15 @@ input UpdateDesignationInput {
   id: Int!
 
   """Name of the designation"""
+  name: String
+}
+
+input UpdateEmploymentStatusInput {
+  """Description of the employment status"""
+  description: String
+  id: Int!
+
+  """Name of the employment status"""
   name: String
 }
 

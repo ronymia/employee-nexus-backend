@@ -1,0 +1,2 @@
+// EMPLOYMENT STATUS CONSTANTS - DEFINES SEARCHABLE FIELDS FOR EMPLOYMENT STATUS QUERIES
+export const employmentStatusSearchableFields = ['name'];
