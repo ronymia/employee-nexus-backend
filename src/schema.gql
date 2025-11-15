@@ -81,6 +81,20 @@ input CreateBusinessInput {
   website: String
 }
 
+input CreateDepartmentInput {
+  """Description of the department"""
+  description: String!
+
+  """ID of the manager"""
+  managerId: Int
+
+  """Name of the department"""
+  name: String!
+
+  """ID of the parent department"""
+  parentId: Int
+}
+
 input CreateDesignationInput {
   """Description of the designation"""
   description: String!
@@ -220,6 +234,69 @@ input CreateWorkSiteInput {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type Department {
+  """Business this department belongs to"""
+  business: Business!
+
+  """ID of the business"""
+  businessId: Int!
+
+  """Child departments"""
+  children: [Department!]
+
+  """Date when the department was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Creator of the department"""
+  creator: User!
+
+  """Description of the department"""
+  description: String!
+
+  """Unique identifier for the department"""
+  id: ID!
+
+  """Manager of the department"""
+  manager: User
+
+  """ID of the manager"""
+  managerId: Int
+
+  """Name of the department"""
+  name: String!
+
+  """Parent department"""
+  parent: Department
+
+  """ID of the parent department"""
+  parentId: Int
+
+  """Status of the department"""
+  status: Status!
+
+  """Date when the department was last updated"""
+  updatedAt: DateTime!
+}
+
+type DepartmentResponse {
+  data: Department!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type DepartmentsQueryResponse {
+  data: [Department!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
 
 type Designation {
   """ID of the business"""
@@ -499,6 +576,7 @@ enum MARITAL_STATUS {
 }
 
 type Mutation {
+  createDepartment(createDepartmentInput: CreateDepartmentInput!): DepartmentResponse!
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
   createEmploymentStatus(createEmploymentStatusInput: CreateEmploymentStatusInput!): EmploymentStatusResponse!
   createJobPlatform(createJobPlatformInput: CreateJobPlatformInput!): JobPlatformResponse!
@@ -511,6 +589,7 @@ type Mutation {
   createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
   createWorkSite(createWorkSiteInput: CreateWorkSiteInput!): WorkSiteResponse!
   deleteBusiness(id: Int!): Business!
+  deleteDepartment(id: Int!): DepartmentResponse!
   deleteDesignation(id: Int!): DesignationResponse!
   deleteEmploymentStatus(id: Int!): EmploymentStatusResponse!
   deleteJobPlatform(id: Int!): JobPlatformResponse!
@@ -524,6 +603,7 @@ type Mutation {
   login(loginInput: LoginAuthInput!): Auth!
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): Business!
   updateBusinessSchedule(data: UpdateBusinessScheduleInput!): BusinessSchedule!
+  updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): DepartmentResponse!
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
   updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
   updateJobPlatform(updateJobPlatformInput: UpdateJobPlatformInput!): JobPlatformResponse!
@@ -621,6 +701,8 @@ type Query {
   businessById(id: Int!): Business!
   businessScheduleByBusinessId(id: Int!): BusinessSchedule!
   businesses(query: QueryBusinessInput): BusinessQueryResponse!
+  departmentById(id: Int!): DepartmentResponse!
+  departments(query: QueryDepartmentInput): DepartmentsQueryResponse!
   designationById(id: Int!): DesignationResponse!
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
   employmentStatusById(id: Int!): EmploymentStatusResponse!
@@ -650,6 +732,13 @@ input QueryBusinessInput {
   pagination: BasePaginationInput
   searchTerm: String
   status: BusinessStatus
+}
+
+input QueryDepartmentInput {
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: Status
 }
 
 input QueryDesignationInput {
@@ -793,7 +882,7 @@ type RolePermission {
   roleId: Int!
 }
 
-"""Status of the Leave Type"""
+"""Status of the Department"""
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -891,6 +980,21 @@ input UpdateBusinessScheduleInput {
 
   """HH:MM:SS"""
   startTime: String
+}
+
+input UpdateDepartmentInput {
+  """Description of the department"""
+  description: String
+  id: Int!
+
+  """ID of the manager"""
+  managerId: Int
+
+  """Name of the department"""
+  name: String
+
+  """ID of the parent department"""
+  parentId: Int
 }
 
 input UpdateDesignationInput {
