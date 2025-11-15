@@ -148,4 +148,13 @@ export const permissions = [
       PermissionAction.DELETE,
     ],
   },
+  {
+    resource: PermissionResource.BUSINESS_SETTINGS,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
 ];

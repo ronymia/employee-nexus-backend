@@ -94,6 +94,46 @@ type BusinessSchedule {
   startTime: String!
 }
 
+type BusinessSetting {
+  """Business this setting belongs to"""
+  business: Business!
+
+  """ID of the business"""
+  businessId: Int!
+
+  """Business start day of the week (0-6, where 0=Sunday)"""
+  businessStartDay: Int!
+
+  """Business time zone"""
+  businessTimeZone: String
+
+  """Business currency code"""
+  currency: String!
+
+  """Delete read notifications setting"""
+  deleteReadNotifications: String!
+
+  """Unique identifier for the business setting"""
+  id: ID!
+
+  """Prefix for business identifiers"""
+  identifierPrefix: String!
+
+  """Whether self-registration is enabled"""
+  isSelfRegistered: Boolean!
+
+  """Business theme"""
+  theme: String
+}
+
+type BusinessSettingResponse {
+  data: BusinessSetting!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 """Business Status of Business"""
 enum BusinessStatus {
   ACTIVE
@@ -666,6 +706,7 @@ type Mutation {
   updateAttendanceSetting(updateAttendanceSettingInput: UpdateAttendanceSettingInput!): AttendanceSettingResponse!
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): Business!
   updateBusinessSchedule(data: UpdateBusinessScheduleInput!): BusinessSchedule!
+  updateBusinessSetting(updateBusinessSettingInput: UpdateBusinessSettingInput!): BusinessSettingResponse!
   updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): DepartmentResponse!
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
   updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
@@ -765,6 +806,7 @@ type Query {
   attendanceSettingsByBusiness: AttendanceSettingResponse!
   businessById(id: Int!): Business!
   businessScheduleByBusinessId(id: Int!): BusinessSchedule!
+  businessSettingByBusinessId: BusinessSettingResponse!
   businesses(query: QueryBusinessInput): BusinessQueryResponse!
   departmentById(id: Int!): DepartmentResponse!
   departments(query: QueryDepartmentInput): DepartmentsQueryResponse!
@@ -1066,6 +1108,29 @@ input UpdateBusinessScheduleInput {
 
   """HH:MM:SS"""
   startTime: String
+}
+
+input UpdateBusinessSettingInput {
+  """Business start day of the week (0-6, where 0=Sunday)"""
+  businessStartDay: Int = 0
+
+  """Business time zone"""
+  businessTimeZone: String = "Asia/Dhaka"
+
+  """Business currency code"""
+  currency: String = "BDT"
+
+  """Delete read notifications setting"""
+  deleteReadNotifications: String
+
+  """Prefix for business identifiers"""
+  identifierPrefix: String
+
+  """Whether self-registration is enabled"""
+  isSelfRegistered: Boolean = false
+
+  """Business theme"""
+  theme: String
 }
 
 input UpdateDepartmentInput {

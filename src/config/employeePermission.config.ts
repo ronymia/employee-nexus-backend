@@ -60,4 +60,16 @@ export const employeePermissions = [
     resource: PermissionResource.LEAVE_TYPE,
     action: [PermissionAction.READ],
   },
+  {
+    resource: PermissionResource.ATTENDANCE_SETTINGS,
+    action: [PermissionAction.READ],
+  },
+  {
+    resource: PermissionResource.LEAVE_SETTINGS,
+    action: [PermissionAction.READ],
+  },
+  {
+    resource: PermissionResource.BUSINESS_SETTINGS,
+    action: [PermissionAction.READ],
+  },
 ];

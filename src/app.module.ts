@@ -33,6 +33,7 @@ import { LeaveTypesModule } from './modules/leave-types/leave-types.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { AttendanceSettingsModule } from './modules/attendance-settings/attendance-settings.module';
 import { LeaveSettingsModule } from './modules/leave-settings/leave-settings.module';
+import { BusinessSettingsModule } from './modules/business-settings/business-settings.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { LeaveSettingsModule } from './modules/leave-settings/leave-settings.mod
     DepartmentsModule,
     AttendanceSettingsModule,
     LeaveSettingsModule,
+    BusinessSettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],
