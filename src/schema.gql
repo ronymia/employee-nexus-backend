@@ -158,6 +158,19 @@ input CreateBusinessInput {
   website: String
 }
 
+input CreateDayScheduleInput {
+  """Day of the week (0-6, where 0 is Sunday)"""
+  day: Int!
+
+  """Whether this day is a weekend"""
+  isWeekend: Boolean!
+
+  """
+  Time slots for this day. REGULAR: single slot (same for all days), SCHEDULED: single slot (different per day), FLEXIBLE: multiple slots per day
+  """
+  timeSlots: [CreateTimeSlotInput!]!
+}
+
 input CreateDepartmentInput {
   """Description of the department"""
   description: String!
@@ -276,9 +289,42 @@ input CreateSubscriptionPlanInput {
   setupFee: Int!
 }
 
+input CreateTimeSlotInput {
+  """End time in HH:mm format (e.g., 17:00)"""
+  endTime: String!
+
+  """Start time in HH:mm format (e.g., 09:00)"""
+  startTime: String!
+}
+
 input CreateUserInput {
   email: String!
   password: String!
+}
+
+input CreateWorkScheduleInput {
+  """Number of break hours"""
+  breakHours: Int! = 0
+
+  """Type of break in the schedule"""
+  breakType: ScheduleBreakType! = UNPAID
+
+  """Description of the work schedule"""
+  description: String!
+
+  """Name of the work schedule"""
+  name: String!
+
+  """Type of the schedule"""
+  scheduleType: ScheduleType! = REGULAR
+
+  """
+  Day schedules for this work schedule. Required for SCHEDULED and FLEXIBLE types. For REGULAR type, provide 7 schedules (one per day) with same time slots.
+  """
+  schedules: [CreateDayScheduleInput!]!
+
+  """Status of the work schedule"""
+  status: Status! = ACTIVE
 }
 
 input CreateWorkSiteInput {
@@ -311,6 +357,26 @@ input CreateWorkSiteInput {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type DaySchedule {
+  """Day of the week (0-6, where 0=Sunday)"""
+  day: Int!
+
+  """Unique identifier for the day schedule"""
+  id: ID!
+
+  """Whether this day is a weekend"""
+  isWeekend: Boolean!
+
+  """Time slots for this day"""
+  timeSlots: [TimeSlot!]!
+
+  """Work schedule this day belongs to"""
+  workSchedule: WorkSchedule!
+
+  """ID of the work schedule"""
+  workScheduleId: Int!
+}
 
 type Department {
   """Business this department belongs to"""
@@ -689,6 +755,7 @@ type Mutation {
   createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
   createUser(createUserInput: CreateUserInput!): User!
   createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
+  createWorkSchedule(createWorkScheduleInput: CreateWorkScheduleInput!): WorkScheduleResponse!
   createWorkSite(createWorkSiteInput: CreateWorkSiteInput!): WorkSiteResponse!
   deleteBusiness(id: Int!): Business!
   deleteDepartment(id: Int!): DepartmentResponse!
@@ -701,6 +768,7 @@ type Mutation {
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
   deleteUser(id: Int!): User!
+  deleteWorkSchedule(id: Int!): WorkScheduleResponse!
   deleteWorkSite(id: Int!): WorkSiteResponse!
   login(loginInput: LoginAuthInput!): Auth!
   updateAttendanceSetting(updateAttendanceSettingInput: UpdateAttendanceSettingInput!): AttendanceSettingResponse!
@@ -717,6 +785,7 @@ type Mutation {
   updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
   updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
   updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
+  updateWorkSchedule(updateWorkScheduleInput: UpdateWorkScheduleInput!): WorkScheduleResponse!
   updateWorkSite(updateWorkSiteInput: UpdateWorkSiteInput!): WorkSiteResponse!
 }
 
@@ -831,6 +900,8 @@ type Query {
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
   userById(id: Int!): User!
   users: [User!]!
+  workScheduleById(id: Int!): WorkScheduleResponse!
+  workSchedules(query: QueryWorkScheduleInput): WorkSchedulesQueryResponse!
   workSiteById(id: Int!): WorkSiteResponse!
   workSites(query: QueryWorkSiteInput): WorkSitesQueryResponse!
 }
@@ -905,6 +976,16 @@ input QuerySubscriptionPlanInput {
   minPrice: Int
   pagination: BasePaginationInput
   price: Int
+  status: Status
+}
+
+input QueryWorkScheduleInput {
+  limit: Int
+  page: Int
+  scheduleType: ScheduleType
+  search: String
+  sortBy: String
+  sortOrder: String
   status: Status
 }
 
@@ -990,7 +1071,17 @@ type RolePermission {
   roleId: Int!
 }
 
-"""Status of the Department"""
+enum ScheduleBreakType {
+  PAID
+  UNPAID
+}
+
+enum ScheduleType {
+  FLEXIBLE
+  REGULAR
+  SCHEDULED
+}
+
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -1043,6 +1134,20 @@ type SubscriptionPlanResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
+}
+
+type TimeSlot {
+  """End time of the slot"""
+  endTime: String!
+
+  """Day schedule this time slot belongs to"""
+  schedule: DaySchedule!
+
+  """ID of the day schedule"""
+  scheduleId: Int!
+
+  """Start time of the slot"""
+  startTime: String!
 }
 
 """User account status"""
@@ -1254,6 +1359,34 @@ input UpdateSubscriptionPlanInput {
   setupFee: Int!
 }
 
+input UpdateWorkScheduleInput {
+  """Number of break hours"""
+  breakHours: Int = 0
+
+  """Type of break in the schedule"""
+  breakType: ScheduleBreakType = UNPAID
+
+  """Description of the work schedule"""
+  description: String
+
+  """ID of the work schedule to update"""
+  id: Int!
+
+  """Name of the work schedule"""
+  name: String
+
+  """Type of the schedule"""
+  scheduleType: ScheduleType = REGULAR
+
+  """
+  Day schedules for this work schedule. Required for SCHEDULED and FLEXIBLE types. For REGULAR type, provide 7 schedules (one per day) with same time slots.
+  """
+  schedules: [CreateDayScheduleInput!]
+
+  """Status of the work schedule"""
+  status: Status = ACTIVE
+}
+
 input UpdateWorkSiteInput {
   """Address of the work site"""
   address: String
@@ -1322,6 +1455,66 @@ type UserPermission {
 
   """ID of the user"""
   userId: Int!
+}
+
+type WorkSchedule {
+  """Number of break hours"""
+  breakHours: Int!
+
+  """Type of break in the schedule"""
+  breakType: ScheduleBreakType!
+
+  """Business this work schedule belongs to"""
+  business: Business
+
+  """ID of the business"""
+  businessId: Int
+
+  """Creation timestamp"""
+  createdAt: DateTime!
+
+  """ID of the user who created this schedule"""
+  createdBy: Int
+
+  """User who created this work schedule"""
+  creator: User
+
+  """Description of the work schedule"""
+  description: String!
+
+  """Unique identifier for the work schedule"""
+  id: ID!
+
+  """Name of the work schedule"""
+  name: String!
+
+  """Type of the schedule"""
+  scheduleType: ScheduleType!
+
+  """Day schedules associated with this work schedule"""
+  schedules: [DaySchedule!]!
+
+  """Status of the work schedule"""
+  status: Status!
+
+  """Last update timestamp"""
+  updatedAt: DateTime!
+}
+
+type WorkScheduleResponse {
+  data: WorkSchedule!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type WorkSchedulesQueryResponse {
+  data: [WorkSchedule!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type WorkSite {
