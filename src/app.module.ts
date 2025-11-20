@@ -35,6 +35,7 @@ import { AttendanceSettingsModule } from './modules/attendance-settings/attendan
 import { LeaveSettingsModule } from './modules/leave-settings/leave-settings.module';
 import { BusinessSettingsModule } from './modules/business-settings/business-settings.module';
 import { WorkSchedulesModule } from './modules/work-schedules/work-schedules.module';
+import { AssetTypesModule } from './modules/asset-types/asset-types.module';
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { WorkSchedulesModule } from './modules/work-schedules/work-schedules.mod
     LeaveSettingsModule,
     BusinessSettingsModule,
     WorkSchedulesModule,
+    AssetTypesModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

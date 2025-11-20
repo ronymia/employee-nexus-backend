@@ -108,6 +108,7 @@ model User {
   managedDepartments        Department[]         @relation(name: "managedDepartments")
   departmentCreated         Department[]         @relation(name: "departmentCreated")
   leaveTypeCreated          LeaveType[]          @relation(name: "leaveTypeCreated")
+  assetTypes                AssetType[]          @relation(name: "assetTypesCreated")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -179,6 +180,7 @@ model Business {
   businessSchedules    BusinessSchedule[]     @relation(name: "businessSchedules")
   leaveTypes           LeaveType[]            @relation(name: "leaveTypesInBusiness")
   subscriptions        BusinessSubscription[] @relation(name: "businessSubscriptions")
+  assetTypes           AssetType[]            @relation(name: "assetTypesInBusiness")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -618,4 +620,22 @@ model LeaveType {
   @@unique([name, businessId])
   @@index([businessId])
   @@map("leave_types")
+}
+
+model AssetType {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  status      Status    @default(ACTIVE)
+  businessId  Int?      @map("business_id")
+  business    Business? @relation(name: "assetTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  createdBy   Int?      @map("created_by")
+  creator     User?     @relation(name: "assetTypesCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([name, businessId])
+  @@index([businessId])
+  @@map("asset_types")
 }
