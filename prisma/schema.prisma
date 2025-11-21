@@ -112,6 +112,8 @@ model User {
   assetAssignments          AssetAssignment[]    @relation(name: "assetAssignmentsAssignedToUser")
   assetAssignmentsBy        AssetAssignment[]    @relation(name: "assetAssignmentsAssignedByUser")
   assetCreated              Asset[]              @relation(name: "assetCreated")
+  projectCreated            Project[]            @relation(name: "projectCreated")
+  projects                  ProjectMember[]      @relation(name: "projectMembersInUser")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -184,6 +186,7 @@ model Business {
   leaveTypes           LeaveType[]            @relation(name: "leaveTypesInBusiness")
   subscriptions        BusinessSubscription[] @relation(name: "businessSubscriptions")
   assetTypes           AssetType[]            @relation(name: "assetTypesInBusiness")
+  projects             Project[]              @relation(name: "projectsInBusiness")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -688,4 +691,43 @@ model AssetAssignment {
   @@index([assignedTo])
   @@index([assignedBy])
   @@map("asset_assignments")
+}
+
+model Project {
+  id             Int             @id @default(autoincrement())
+  name           String
+  description    String?
+  cover          String
+  status         String
+  startDate      String?         @map("start_date")
+  endDate        String?         @map("end_date")
+  businessId     Int?            @map("business_id")
+  business       Business?       @relation(name: "projectsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  createdBy      Int?            @map("created_by")
+  creator        User?           @relation(name: "projectCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  projectMembers ProjectMember[] @relation(name: "projectMembersInProject")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([name, businessId])
+  @@index([businessId])
+  @@map("projects")
+}
+
+model ProjectMember {
+  id        Int     @id @default(autoincrement())
+  projectId Int     @map("project_id")
+  project   Project @relation(name: "projectMembersInProject", fields: [projectId], references: [id], onDelete: Cascade)
+  userId    Int     @map("user_id")
+  user      User    @relation(name: "projectMembersInUser", fields: [userId], references: [id], onDelete: Cascade)
+  role      String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+  @@map("project_members")
 }

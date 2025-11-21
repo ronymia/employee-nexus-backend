@@ -69,6 +69,14 @@ export const employeePermissions = [
     action: [PermissionAction.READ],
   },
   {
+    resource: PermissionResource.PROJECT,
+    action: [PermissionAction.READ],
+  },
+  {
+    resource: PermissionResource.PROJECT_MEMBER,
+    action: [PermissionAction.READ],
+  },
+  {
     resource: PermissionResource.ATTENDANCE_SETTINGS,
     action: [PermissionAction.READ],
   },

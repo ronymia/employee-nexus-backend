@@ -109,6 +109,12 @@ input AssignAssetInput {
   assignedTo: Int!
 }
 
+input AssignProjectMemberInput {
+  projectId: Int!
+  role: String
+  userId: Int!
+}
+
 type AttendanceSetting {
   """Whether auto approval is enabled"""
   autoApproval: Boolean!
@@ -384,6 +390,15 @@ input CreateProfileInput {
   phone: String!
   postcode: String!
   profilePicture: String
+}
+
+input CreateProjectInput {
+  cover: String!
+  description: String
+  endDate: String
+  name: String!
+  startDate: String
+  status: String!
 }
 
 input CreateRecruitmentProcessInput {
@@ -870,6 +885,7 @@ enum MARITAL_STATUS {
 
 type Mutation {
   assignAsset(assignAssetInput: AssignAssetInput!): AssetAssignmentResponse!
+  assignProjectMember(assignProjectMemberInput: AssignProjectMemberInput!): ProjectMemberResponse!
   createAsset(createAssetInput: CreateAssetInput!): AssetResponse!
   createAssetType(createAssetTypeInput: CreateAssetTypeInput!): AssetTypeResponse!
   createDepartment(createDepartmentInput: CreateDepartmentInput!): DepartmentResponse!
@@ -879,6 +895,7 @@ type Mutation {
   createJobType(createJobTypeInput: CreateJobTypeInput!): JobTypeResponse!
   createLeaveType(createLeaveTypeInput: CreateLeaveTypeInput!): LeaveTypeResponse!
   createOnboardingProcess(createOnboardingProcessInput: CreateOnboardingProcessInput!): OnboardingProcessResponse!
+  createProject(createProjectInput: CreateProjectInput!): ProjectResponse!
   createRecruitmentProcess(createRecruitmentProcessInput: CreateRecruitmentProcessInput!): RecruitmentProcessResponse!
   createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
   createUser(createUserInput: CreateUserInput!): User!
@@ -901,7 +918,9 @@ type Mutation {
   login(loginInput: LoginAuthInput!): Auth!
   removeAsset(id: Int!): AssetResponse!
   removeAssetType(id: Int!): AssetTypeResponse!
+  removeProject(id: Int!): ProjectResponse!
   returnAsset(returnAssetInput: ReturnAssetInput!): AssetAssignmentResponse!
+  unassignProjectMember(unassignProjectMemberInput: UnassignProjectMemberInput!): ProjectMemberResponse!
   updateAsset(updateAssetInput: UpdateAssetInput!): AssetResponse!
   updateAssetType(updateAssetTypeInput: UpdateAssetTypeInput!): AssetTypeResponse!
   updateAttendanceSetting(updateAttendanceSettingInput: UpdateAttendanceSettingInput!): AttendanceSettingResponse!
@@ -916,6 +935,7 @@ type Mutation {
   updateLeaveSetting(updateLeaveSettingInput: UpdateLeaveSettingInput!): LeaveSettingResponse!
   updateLeaveType(updateLeaveTypeInput: UpdateLeaveTypeInput!): LeaveTypeResponse!
   updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
+  updateProject(updateProjectInput: UpdateProjectInput!): ProjectResponse!
   updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
   updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
   updateWorkSchedule(updateWorkScheduleInput: UpdateWorkScheduleInput!): WorkScheduleResponse!
@@ -1002,6 +1022,58 @@ type Profile {
   userId: Int!
 }
 
+type Project {
+  business: Business
+  businessId: Int
+  cover: String!
+  createdAt: DateTime!
+  createdBy: Int
+  creator: User
+  description: String
+  endDate: String
+  id: Int!
+  name: String!
+  projectMembers: [ProjectMember!]!
+  startDate: String
+  status: String!
+  updatedAt: DateTime!
+}
+
+type ProjectMember {
+  createdAt: DateTime!
+  id: Int!
+  project: Project!
+  projectId: Int!
+  role: String
+  updatedAt: DateTime!
+  user: User!
+  userId: Int!
+}
+
+type ProjectMemberResponse {
+  data: ProjectMember!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type ProjectResponse {
+  data: Project!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type ProjectsQueryResponse {
+  data: [Project!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type Query {
   FeatureById(id: Int!): FeatureResponse!
   allFeatures: FeatureQueryResponse!
@@ -1031,6 +1103,8 @@ type Query {
   onboardingProcesses(query: QueryOnboardingProcessInput): OnboardingProcessesQueryResponse!
   permissionById(id: Int!): Permission!
   permissions: [Permission!]!
+  project(id: Int!): ProjectResponse!
+  projects(businessId: Int): ProjectsQueryResponse!
   recruitmentProcessById(id: Int!): RecruitmentProcessResponse!
   recruitmentProcesses(query: QueryRecruitmentProcessInput): RecruitmentProcessesQueryResponse!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
@@ -1314,6 +1388,11 @@ enum USER_ACCOUNT_STATUS {
   VERIFIED
 }
 
+input UnassignProjectMemberInput {
+  projectId: Int!
+  userId: Int!
+}
+
 input UpdateAssetInput {
   assetTypeId: Int
   assignedTo: Int
@@ -1497,6 +1576,16 @@ input UpdateOnboardingProcessInput {
 
   """Name of the onboarding process"""
   name: String
+}
+
+input UpdateProjectInput {
+  cover: String
+  description: String
+  endDate: String
+  id: Int!
+  name: String
+  startDate: String
+  status: String
 }
 
 input UpdateRecruitmentProcessInput {

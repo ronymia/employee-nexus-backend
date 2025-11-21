@@ -37,6 +37,7 @@ import { BusinessSettingsModule } from './modules/business-settings/business-set
 import { WorkSchedulesModule } from './modules/work-schedules/work-schedules.module';
 import { AssetTypesModule } from './modules/asset-types/asset-types.module';
 import { AssetsModule } from './modules/assets/assets.module';
+import { ProjectsModule } from './modules/projects/projects.module';
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import { AssetsModule } from './modules/assets/assets.module';
     WorkSchedulesModule,
     AssetTypesModule,
     AssetsModule,
+    ProjectsModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],
