@@ -109,6 +109,9 @@ model User {
   departmentCreated         Department[]         @relation(name: "departmentCreated")
   leaveTypeCreated          LeaveType[]          @relation(name: "leaveTypeCreated")
   assetTypes                AssetType[]          @relation(name: "assetTypesCreated")
+  assetAssignments          AssetAssignment[]    @relation(name: "assetAssignmentsAssignedToUser")
+  assetAssignmentsBy        AssetAssignment[]    @relation(name: "assetAssignmentsAssignedByUser")
+  assetCreated              Asset[]              @relation(name: "assetCreated")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -184,6 +187,7 @@ model Business {
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+  assets    Asset[]  @relation(name: "businessAssets")
 
   @@unique([name, userId, email])
   @@map("businesses")
@@ -631,6 +635,7 @@ model AssetType {
   business    Business? @relation(name: "assetTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy   Int?      @map("created_by")
   creator     User?     @relation(name: "assetTypesCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  assets      Asset[]   @relation(name: "assetTypesInAsset")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -638,4 +643,49 @@ model AssetType {
   @@unique([name, businessId])
   @@index([businessId])
   @@map("asset_types")
+}
+
+model Asset {
+  id               Int               @id @default(autoincrement())
+  name             String
+  code             String
+  date             String
+  note             String?
+  assetTypeId      Int?              @map("asset_type_id")
+  assetType        AssetType?        @relation(name: "assetTypesInAsset", fields: [assetTypeId], references: [id], onDelete: SetNull)
+  image            String?
+  status           String            @default("unassigned")
+  businessId       Int?              @map("business_id")
+  business         Business?         @relation(name: "businessAssets", fields: [businessId], references: [id], onDelete: Cascade)
+  createdBy        Int?              @map("created_by")
+  creator          User?             @relation(name: "assetCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  assetAssignments AssetAssignment[] @relation(name: "assetAssignmentsInAsset")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([name, businessId])
+  @@index([businessId])
+  @@map("assets")
+}
+
+model AssetAssignment {
+  id             Int       @id @default(autoincrement())
+  assetId        Int       @map("asset_id")
+  asset          Asset     @relation(name: "assetAssignmentsInAsset", fields: [assetId], references: [id], onDelete: Cascade)
+  assignedTo     Int       @map("assigned_to")
+  assignedToUser User      @relation(name: "assetAssignmentsAssignedToUser", fields: [assignedTo], references: [id], onDelete: Cascade)
+  assignedBy     Int       @map("assigned_by")
+  assignedByUser User      @relation(name: "assetAssignmentsAssignedByUser", fields: [assignedBy], references: [id], onDelete: SetNull)
+  assignedAt     DateTime  @default(now()) @map("assigned_at")
+  returnedAt     DateTime? @map("returned_at")
+  status         String    @default("assigned")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([assetId])
+  @@index([assignedTo])
+  @@index([assignedBy])
+  @@map("asset_assignments")
 }

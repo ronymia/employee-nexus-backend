@@ -117,6 +117,24 @@ export const ownerPermissions = [
     ],
   },
   {
+    resource: PermissionResource.ASSET_TYPE,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
+  {
+    resource: PermissionResource.ASSET,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
+  {
     resource: PermissionResource.ATTENDANCE_SETTINGS,
     action: [
       PermissionAction.CREATE,

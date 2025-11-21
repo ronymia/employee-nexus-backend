@@ -66,6 +66,14 @@ export const managerPermissions = [
     action: [PermissionAction.READ, PermissionAction.UPDATE],
   },
   {
+    resource: PermissionResource.ASSET_TYPE,
+    action: [PermissionAction.READ, PermissionAction.UPDATE],
+  },
+  {
+    resource: PermissionResource.ASSET,
+    action: [PermissionAction.READ, PermissionAction.UPDATE],
+  },
+  {
     resource: PermissionResource.ATTENDANCE_SETTINGS,
     action: [PermissionAction.READ, PermissionAction.UPDATE],
   },

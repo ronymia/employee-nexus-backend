@@ -61,6 +61,14 @@ export const employeePermissions = [
     action: [PermissionAction.READ],
   },
   {
+    resource: PermissionResource.ASSET_TYPE,
+    action: [PermissionAction.READ],
+  },
+  {
+    resource: PermissionResource.ASSET,
+    action: [PermissionAction.READ],
+  },
+  {
     resource: PermissionResource.ATTENDANCE_SETTINGS,
     action: [PermissionAction.READ],
   },

@@ -2,6 +2,113 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Asset {
+  assetAssignments: [AssetAssignment!]!
+  assetType: AssetType
+  assetTypeId: Int
+  business: Business
+  businessId: Int
+  code: String!
+  createdAt: DateTime!
+  createdBy: Int
+  creator: User
+  date: String!
+  id: Int!
+  image: String
+  name: String!
+  note: String
+  status: String!
+  updatedAt: DateTime!
+  user: User
+  userId: Int
+}
+
+type AssetAssignment {
+  asset: Asset!
+  assetId: Int!
+  assignedAt: DateTime!
+  assignedBy: Int!
+  assignedByUser: User
+  assignedTo: Int!
+  assignedToUser: User!
+  createdAt: DateTime!
+  id: Int!
+  returnedAt: DateTime
+  status: String!
+  updatedAt: DateTime!
+}
+
+type AssetAssignmentResponse {
+  data: AssetAssignment!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type AssetResponse {
+  data: Asset!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type AssetType {
+  """ID of the business"""
+  businessId: Int!
+
+  """Date when the asset type was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Description of the asset type"""
+  description: String!
+
+  """Unique identifier for the asset type"""
+  id: ID!
+
+  """Name of the asset type"""
+  name: String!
+
+  """Status of the asset type"""
+  status: Status!
+
+  """Date when the asset type was last updated"""
+  updatedAt: DateTime!
+}
+
+type AssetTypeResponse {
+  data: AssetType!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type AssetTypesQueryResponse {
+  data: [AssetType!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type AssetsQueryResponse {
+  data: [Asset!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+input AssignAssetInput {
+  assetId: Int!
+  assignedTo: Int!
+}
+
 type AttendanceSetting {
   """Whether auto approval is enabled"""
   autoApproval: Boolean!
@@ -140,6 +247,24 @@ enum BusinessStatus {
   INACTIVE
   SUSPENDED
   TRIAL_EXPIRED
+}
+
+input CreateAssetInput {
+  assetTypeId: Int
+  assignedTo: Int
+  code: String!
+  date: String!
+  image: String
+  name: String!
+  note: String
+}
+
+input CreateAssetTypeInput {
+  """Description of the asset type"""
+  description: String!
+
+  """Name of the asset type"""
+  name: String!
 }
 
 input CreateBusinessInput {
@@ -744,6 +869,9 @@ enum MARITAL_STATUS {
 }
 
 type Mutation {
+  assignAsset(assignAssetInput: AssignAssetInput!): AssetAssignmentResponse!
+  createAsset(createAssetInput: CreateAssetInput!): AssetResponse!
+  createAssetType(createAssetTypeInput: CreateAssetTypeInput!): AssetTypeResponse!
   createDepartment(createDepartmentInput: CreateDepartmentInput!): DepartmentResponse!
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
   createEmploymentStatus(createEmploymentStatusInput: CreateEmploymentStatusInput!): EmploymentStatusResponse!
@@ -771,6 +899,11 @@ type Mutation {
   deleteWorkSchedule(id: Int!): WorkScheduleResponse!
   deleteWorkSite(id: Int!): WorkSiteResponse!
   login(loginInput: LoginAuthInput!): Auth!
+  removeAsset(id: Int!): AssetResponse!
+  removeAssetType(id: Int!): AssetTypeResponse!
+  returnAsset(returnAssetInput: ReturnAssetInput!): AssetAssignmentResponse!
+  updateAsset(updateAssetInput: UpdateAssetInput!): AssetResponse!
+  updateAssetType(updateAssetTypeInput: UpdateAssetTypeInput!): AssetTypeResponse!
   updateAttendanceSetting(updateAttendanceSettingInput: UpdateAttendanceSettingInput!): AttendanceSettingResponse!
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): Business!
   updateBusinessSchedule(data: UpdateBusinessScheduleInput!): BusinessSchedule!
@@ -872,6 +1005,10 @@ type Profile {
 type Query {
   FeatureById(id: Int!): FeatureResponse!
   allFeatures: FeatureQueryResponse!
+  asset(id: Int!): AssetResponse!
+  assetType(id: Int!): AssetTypeResponse!
+  assetTypes(query: QueryAssetTypeInput): AssetTypesQueryResponse!
+  assets(businessId: Int): AssetsQueryResponse!
   attendanceSettingsByBusiness: AttendanceSettingResponse!
   businessById(id: Int!): Business!
   businessScheduleByBusinessId(id: Int!): BusinessSchedule!
@@ -904,6 +1041,13 @@ type Query {
   workSchedules(query: QueryWorkScheduleInput): WorkSchedulesQueryResponse!
   workSiteById(id: Int!): WorkSiteResponse!
   workSites(query: QueryWorkSiteInput): WorkSitesQueryResponse!
+}
+
+input QueryAssetTypeInput {
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: Status
 }
 
 input QueryBusinessInput {
@@ -1047,6 +1191,10 @@ type RecruitmentProcessesQueryResponse {
   success: Boolean!
 }
 
+input ReturnAssetInput {
+  assetId: Int!
+}
+
 type Role {
   """ID of the business"""
   businessId: Int
@@ -1082,6 +1230,7 @@ enum ScheduleType {
   SCHEDULED
 }
 
+"""Status of the Asset Type"""
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -1163,6 +1312,26 @@ enum USER_ACCOUNT_STATUS {
   TERMINATED
   UNVERIFIED
   VERIFIED
+}
+
+input UpdateAssetInput {
+  assetTypeId: Int
+  assignedTo: Int
+  code: String
+  date: String
+  id: Int!
+  image: String
+  name: String
+  note: String
+}
+
+input UpdateAssetTypeInput {
+  """Description of the asset type"""
+  description: String
+  id: Int!
+
+  """Name of the asset type"""
+  name: String
 }
 
 input UpdateAttendanceSettingInput {
