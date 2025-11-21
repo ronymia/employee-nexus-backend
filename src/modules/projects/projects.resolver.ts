@@ -68,7 +68,7 @@ export class ProjectsResolver {
     };
   }
 
-  @Query(() => ProjectResponse, { name: 'project' })
+  @Query(() => ProjectResponse, { name: 'projectById' })
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Project:read')
   @UseGuards(GqlAuthGuard)

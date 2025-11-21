@@ -1103,7 +1103,7 @@ type Query {
   onboardingProcesses(query: QueryOnboardingProcessInput): OnboardingProcessesQueryResponse!
   permissionById(id: Int!): Permission!
   permissions: [Permission!]!
-  project(id: Int!): ProjectResponse!
+  projectById(id: Int!): ProjectResponse!
   projects(businessId: Int): ProjectsQueryResponse!
   recruitmentProcessById(id: Int!): RecruitmentProcessResponse!
   recruitmentProcesses(query: QueryRecruitmentProcessInput): RecruitmentProcessesQueryResponse!
