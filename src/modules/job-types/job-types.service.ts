@@ -1,4 +1,4 @@
-import { ConsoleLogger, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateJobTypeInput } from './dto/create-job-type.input';
 import { UpdateJobTypeInput } from './dto/update-job-type.input';
 import { PrismaService } from '../prisma/prisma.service';
@@ -12,8 +12,6 @@ import { jobTypeSearchableFields } from './jobType.constant';
 export class JobTypesService {
   // PRISMA SERVICE
   constructor(private readonly prisma: PrismaService) {}
-  // CONSOLE LOG
-  private readonly logger = new ConsoleLogger(JobTypesService.name);
 
   async create({
     user,
@@ -25,11 +23,8 @@ export class JobTypesService {
     return await this.prisma.jobType.create({
       data: {
         ...createJobTypeInput,
-        business: {
-          connect: {
-            id: user.businessId,
-          },
-        },
+        createdBy: user.userId,
+        businessId: user.businessId,
       },
     });
   }

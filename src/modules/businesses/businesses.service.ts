@@ -23,7 +23,6 @@ import {
   ownerPermissions,
 } from 'src/config';
 import { defaultOnboardingProcesses } from 'src/Database/onboarding-process';
-import { JwtPayload } from '../auth/jwt.strategy';
 import { QueryBusinessInput } from './dto/query-business.input';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { businessSearchableFields } from './businesses.constant';
@@ -98,6 +97,12 @@ export class BusinessesService {
           throw new NotImplementedException('Business creation failed');
         }
 
+        await prismaTransaction.user.update({
+          where: { id: createdUser.id },
+          data: {
+            businessId: createdBusiness.id,
+          },
+        });
         // Get business ID and creator ID
         const businessId = createdBusiness.id;
         const creatorId = createdUser?.id;
@@ -387,7 +392,7 @@ export class BusinessesService {
         return await prismaTransaction.business.findUnique({
           where: { id: createdBusiness.id },
           include: {
-            user: {
+            owner: {
               include: {
                 role: true,
                 profile: true,
@@ -455,11 +460,11 @@ export class BusinessesService {
             [sortBy]: sortOrder,
           },
           include: {
-            user: {
+            owner: {
               include: {
                 role: true,
                 profile: true,
-                business: true,
+                ownedBusiness: true,
               },
             },
             businessSchedules: true,
@@ -488,7 +493,7 @@ export class BusinessesService {
     const business = await this.prisma.business.findUniqueOrThrow({
       where: { id },
       include: {
-        user: {
+        owner: {
           include: {
             role: true,
             profile: true,
@@ -529,7 +534,7 @@ export class BusinessesService {
           where: { id: updateBusinessInput.id },
           data: { ...updateBusinessInput },
           include: {
-            user: {
+            owner: {
               include: {
                 role: true,
                 profile: true,

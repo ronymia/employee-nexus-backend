@@ -24,6 +24,20 @@ import { DesignationsModule } from './modules/designations/designations.module';
 import { FeaturesModule } from './modules/features/features.module';
 import { JobTypesModule } from './modules/job-types/job-types.module';
 import { BusinessSchedulesModule } from './modules/business-schedules/business-schedules.module';
+import { JobPlatformsModule } from './modules/job-platforms/job-platforms.module';
+import { RecruitmentProcessesModule } from './modules/recruitment-processes/recruitment-processes.module';
+import { OnboardingProcessesModule } from './modules/onboarding-processes/onboarding-processes.module';
+import { WorkSitesModule } from './modules/work-sites/work-sites.module';
+import { EmploymentStatusModule } from './modules/employment-status/employment-status.module';
+import { LeaveTypesModule } from './modules/leave-types/leave-types.module';
+import { DepartmentsModule } from './modules/departments/departments.module';
+import { AttendanceSettingsModule } from './modules/attendance-settings/attendance-settings.module';
+import { LeaveSettingsModule } from './modules/leave-settings/leave-settings.module';
+import { BusinessSettingsModule } from './modules/business-settings/business-settings.module';
+import { WorkSchedulesModule } from './modules/work-schedules/work-schedules.module';
+import { AssetTypesModule } from './modules/asset-types/asset-types.module';
+import { AssetsModule } from './modules/assets/assets.module';
+import { ProjectsModule } from './modules/projects/projects.module';
 
 @Module({
   imports: [
@@ -54,6 +68,20 @@ import { BusinessSchedulesModule } from './modules/business-schedules/business-s
     DesignationsModule,
     JobTypesModule,
     BusinessSchedulesModule,
+    JobPlatformsModule,
+    RecruitmentProcessesModule,
+    OnboardingProcessesModule,
+    WorkSitesModule,
+    EmploymentStatusModule,
+    LeaveTypesModule,
+    DepartmentsModule,
+    AttendanceSettingsModule,
+    LeaveSettingsModule,
+    BusinessSettingsModule,
+    WorkSchedulesModule,
+    AssetTypesModule,
+    AssetsModule,
+    ProjectsModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

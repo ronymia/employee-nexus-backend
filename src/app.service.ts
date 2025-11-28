@@ -232,67 +232,14 @@ export class AppService {
   // }
 
   async rolePermissionsRefresh() {
-    // GET SUPER ADMIN ROLE ID
-    const superAdminRole = await this.prisma.role.findFirst({
-      where: {
-        name: ROLE.SUPER_ADMIN,
-        businessId: null,
-      },
-    });
+    // GET ALL ROLES FROM DATABASE
+    const allRoles = await this.prisma.role.findMany();
 
-    if (!superAdminRole) {
-      throw new NotImplementedException('No Super Admin Role Found');
+    if (!allRoles || allRoles.length === 0) {
+      throw new NotImplementedException('No Roles Found');
     }
 
-    // GET OWNER ROLE ID
-    const ownerRole = await this.prisma.role.findFirst({
-      where: {
-        name: ROLE.OWNER,
-        businessId: null,
-      },
-    });
-
-    if (!ownerRole) {
-      throw new NotImplementedException('No Owner Role Found');
-    }
-
-    // GET MANAGER ROLE ID
-    const managerRole = await this.prisma.role.findFirst({
-      where: {
-        name: ROLE.MANAGER,
-        businessId: null,
-      },
-    });
-
-    if (!managerRole) {
-      throw new NotImplementedException('No Manager Role Found');
-    }
-
-    // GET ADMIN ROLE ID
-    const adminRole = await this.prisma.role.findFirst({
-      where: {
-        name: ROLE.ADMIN,
-        businessId: null,
-      },
-    });
-
-    if (!adminRole) {
-      throw new NotImplementedException('No Admin Role Found');
-    }
-
-    // GET EMPLOYEE ROLE ID
-    const EmployeeRole = await this.prisma.role.findFirst({
-      where: {
-        name: ROLE.EMPLOYEE,
-        businessId: null,
-      },
-    });
-
-    if (!EmployeeRole) {
-      throw new NotImplementedException('No Employee Role Found');
-    }
-
-    // GET ALL PERMISSIONS
+    // GET ALL PERMISSIONS CONFIG
     const formattedPermissions = permissions.flatMap((permission) =>
       permission.action.map((action) => ({
         resource: permission.resource,
@@ -300,55 +247,39 @@ export class AppService {
       })),
     );
 
-    // GET ALL SUPER ADMIN PERMISSIONS
-    const formattedSuperAdminPermissions = superAdminPermissions.flatMap(
-      (permission) =>
+    // GET ALL ROLE PERMISSION CONFIGS
+    const rolePermissionConfigs = {
+      [ROLE.SUPER_ADMIN]: superAdminPermissions.flatMap((permission) =>
         permission.action.map((action) => ({
           resource: permission.resource,
           action: action,
         })),
-    );
-
-    // GET ALL OWNER PERMISSIONS
-    const formattedOwnerPermissions = ownerPermissions.flatMap((permission) =>
-      permission.action.map((action) => ({
-        resource: permission.resource,
-        action: action,
-      })),
-    );
-
-    // GET ALL MANAGER PERMISSIONS
-    const formattedManagerPermissions = managerPermissions.flatMap(
-      (permission) =>
+      ),
+      [ROLE.OWNER]: ownerPermissions.flatMap((permission) =>
         permission.action.map((action) => ({
           resource: permission.resource,
           action: action,
         })),
-    );
-
-    // GET ALL ADMIN PERMISSIONS
-    const formattedAdminPermissions = adminPermissions.flatMap((permission) =>
-      permission.action.map((action) => ({
-        resource: permission.resource,
-        action: action,
-      })),
-    );
-
-    // GET ALL EMPLOYEE PERMISSIONS
-    const formattedEmployeePermissions = employeePermissions.flatMap(
-      (permission) =>
+      ),
+      [ROLE.MANAGER]: managerPermissions.flatMap((permission) =>
         permission.action.map((action) => ({
           resource: permission.resource,
           action: action,
         })),
-    );
-
-    // GET SUPER ADMIN ROLE ID
-    const superAdminRoleId = superAdminRole?.id;
-    const ownerRoleId = ownerRole?.id;
-    const managerRoleId = managerRole?.id;
-    const adminRoleId = adminRole?.id;
-    const employeeRoleId = EmployeeRole?.id;
+      ),
+      [ROLE.ADMIN]: adminPermissions.flatMap((permission) =>
+        permission.action.map((action) => ({
+          resource: permission.resource,
+          action: action,
+        })),
+      ),
+      [ROLE.EMPLOYEE]: employeePermissions.flatMap((permission) =>
+        permission.action.map((action) => ({
+          resource: permission.resource,
+          action: action,
+        })),
+      ),
+    };
 
     // CREATE PERMISSION AND ROLE PERMISSION
     const roleRefresh = await this.prisma.$transaction(
@@ -366,109 +297,50 @@ export class AppService {
           throw new NotImplementedException('No Permissions Found');
         }
 
-        // MATCH SUPER ADMIN PERMISSION
+        // PROCESS EACH ROLE
+        for (const role of allRoles) {
+          // Determine role type (handle names like "OWNER#123" or "SUPER_ADMIN")
+          const baseRoleName = role.name
+            .split('#')[0]
+            .toLowerCase()
+            .replace('_', '_') as keyof typeof rolePermissionConfigs;
 
-        // Match super admin permissions (with ID)
-        const matchedSuperAdminPermissions = databasePermissions.filter(
-          (permission) =>
-            formattedSuperAdminPermissions.some(
-              (superAdminPermission) =>
-                permission.resource === superAdminPermission.resource &&
-                permission.action === superAdminPermission.action,
+          // Skip if role type is not recognized
+          if (!rolePermissionConfigs[baseRoleName]) {
+            continue;
+          }
+
+          const rolePermissions = rolePermissionConfigs[baseRoleName];
+
+          // Match permissions for this role
+          const matchedPermissions = databasePermissions.filter((permission) =>
+            rolePermissions.some(
+              (rolePermission) =>
+                String(permission.resource) ===
+                  String(rolePermission.resource) &&
+                String(permission.action) === String(rolePermission.action),
             ),
-        );
+          );
 
-        // Create role-permission links
-        await prismaClient.rolePermission.createMany({
-          data: matchedSuperAdminPermissions.map((permission) => ({
-            roleId: superAdminRoleId,
-            permissionId: permission?.id,
-          })),
-          skipDuplicates: true,
-        });
+          // Remove existing role permissions first
+          await prismaClient.rolePermission.deleteMany({
+            where: { roleId: role.id },
+          });
 
-        // CREATE OWNER PERMISSION
-        // Match owner permissions (with ID)
-        const matchedOwnerPermissions = databasePermissions.filter(
-          (permission) =>
-            formattedOwnerPermissions.some(
-              (ownerPermission) =>
-                permission.resource === ownerPermission.resource &&
-                permission.action === ownerPermission.action,
-            ),
-        );
-
-        // Create role-permission links
-        await prismaClient.rolePermission.createMany({
-          data: matchedOwnerPermissions.map((permission) => ({
-            roleId: ownerRoleId,
-            permissionId: permission?.id,
-          })),
-          skipDuplicates: true,
-        });
-
-        // CREATE MANAGER PERMISSION
-        // Match owner permissions (with ID)
-        const matchedManagerPermissions = databasePermissions.filter(
-          (permission) =>
-            formattedManagerPermissions.some(
-              (ownerPermission) =>
-                permission.resource === ownerPermission.resource &&
-                permission.action === ownerPermission.action,
-            ),
-        );
-
-        // Create role-permission links
-        await prismaClient.rolePermission.createMany({
-          data: matchedManagerPermissions.map((permission) => ({
-            roleId: managerRoleId,
-            permissionId: permission?.id,
-          })),
-          skipDuplicates: true,
-        });
-
-        // CREATE ADMIN PERMISSION
-        // Match admin permissions (with ID)
-        const matchedAdminPermissions = databasePermissions.filter(
-          (permission) =>
-            formattedAdminPermissions.some(
-              (ownerPermission) =>
-                permission.resource === ownerPermission.resource &&
-                permission.action === ownerPermission.action,
-            ),
-        );
-
-        // Create role-permission links
-        await prismaClient.rolePermission.createMany({
-          data: matchedAdminPermissions.map((permission) => ({
-            roleId: adminRoleId,
-            permissionId: permission?.id,
-          })),
-          skipDuplicates: true,
-        });
-
-        // CREATE EMPLOYEE PERMISSION
-        // Match employee permissions (with ID)
-        const matchedEmployeePermissions = databasePermissions.filter(
-          (permission) =>
-            formattedEmployeePermissions.some(
-              (ownerPermission) =>
-                permission.resource === ownerPermission.resource &&
-                permission.action === ownerPermission.action,
-            ),
-        );
-
-        // Create role-permission links
-        await prismaClient.rolePermission.createMany({
-          data: matchedEmployeePermissions.map((permission) => ({
-            roleId: employeeRoleId,
-            permissionId: permission?.id,
-          })),
-          skipDuplicates: true,
-        });
+          // Create new role-permission links
+          if (matchedPermissions.length > 0) {
+            await prismaClient.rolePermission.createMany({
+              data: matchedPermissions.map((permission) => ({
+                roleId: role.id,
+                permissionId: permission.id,
+              })),
+              skipDuplicates: true,
+            });
+          }
+        }
 
         // RETURN
-        return `Role Refresh`;
+        return `Role Permissions Refreshed for ${allRoles.length} roles`;
       },
       {
         maxWait: 1000 * 60,

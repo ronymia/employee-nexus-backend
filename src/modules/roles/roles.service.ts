@@ -1,14 +1,27 @@
 import { Injectable } from '@nestjs/common';
+import { JwtPayload } from '../auth/jwt.strategy';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class RolesService {
-  // constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
   // create(createRoleInput: CreateRoleInput) {
   //   return this.prisma.role.create({ data: createRoleInput });
   // }
-  // findAll() {
-  //   return this.prisma.role.findMany();
-  // }
+  async findAll(user: JwtPayload) {
+    const result = await this.prisma.role.findMany({
+      where: { businessId: user.businessId },
+      include: {
+        business: true,
+        rolePermissions: {
+          include: {
+            permission: true,
+          },
+        },
+      },
+    });
+    return result;
+  }
   // findOne(id: number) {
   //   return this.prisma.role.findUnique({ where: { id } });
   // }

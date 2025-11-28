@@ -1,4 +1,4 @@
-import { ConsoleLogger, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDesignationInput } from './dto/create-designation.input';
 import { UpdateDesignationInput } from './dto/update-designation.input';
 import { PrismaService } from '../prisma/prisma.service';
@@ -26,11 +26,8 @@ export class DesignationsService {
     return await this.prisma.designation.create({
       data: {
         ...createDesignationInput,
-        business: {
-          connect: {
-            id: user.businessId,
-          },
-        },
+        createdBy: user.userId,
+        businessId: user.businessId,
       },
     });
   }

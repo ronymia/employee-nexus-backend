@@ -2,6 +2,156 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Asset {
+  assetAssignments: [AssetAssignment!]!
+  assetType: AssetType
+  assetTypeId: Int
+  business: Business
+  businessId: Int
+  code: String!
+  createdAt: DateTime!
+  createdBy: Int
+  creator: User
+  date: String!
+  id: Int!
+  image: String
+  name: String!
+  note: String
+  status: String!
+  updatedAt: DateTime!
+  user: User
+  userId: Int
+}
+
+type AssetAssignment {
+  asset: Asset!
+  assetId: Int!
+  assignedAt: DateTime!
+  assignedBy: Int!
+  assignedByUser: User
+  assignedTo: Int!
+  assignedToUser: User!
+  createdAt: DateTime!
+  id: Int!
+  returnedAt: DateTime
+  status: String!
+  updatedAt: DateTime!
+}
+
+type AssetAssignmentResponse {
+  data: AssetAssignment!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type AssetResponse {
+  data: Asset!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type AssetType {
+  """ID of the business"""
+  businessId: Int!
+
+  """Date when the asset type was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Description of the asset type"""
+  description: String!
+
+  """Unique identifier for the asset type"""
+  id: ID!
+
+  """Name of the asset type"""
+  name: String!
+
+  """Status of the asset type"""
+  status: Status!
+
+  """Date when the asset type was last updated"""
+  updatedAt: DateTime!
+}
+
+type AssetTypeResponse {
+  data: AssetType!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type AssetTypesQueryResponse {
+  data: [AssetType!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type AssetsQueryResponse {
+  data: [Asset!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+input AssignAssetInput {
+  assetId: Int!
+  assignedTo: Int!
+}
+
+input AssignProjectMemberInput {
+  projectId: Int!
+  role: String
+  userId: Int!
+}
+
+type AttendanceSetting {
+  """Whether auto approval is enabled"""
+  autoApproval: Boolean!
+
+  """Business this attendance setting belongs to"""
+  business: Business!
+
+  """ID of the business"""
+  businessId: Int!
+
+  """Unique identifier for the attendance setting"""
+  id: ID!
+
+  """Whether geo location is enabled"""
+  isGeoLocationEnabled: Boolean!
+
+  """Whether punch in/out alerts are enabled"""
+  punchInOutAlert: Boolean!
+
+  """Punch in/out interval in hours"""
+  punchInOutInterval: Int!
+
+  """Punch in time tolerance in minutes"""
+  punchInTimeTolerance: Int!
+
+  """Work availability definition percentage"""
+  workAvailabilityDefinition: Int!
+}
+
+type AttendanceSettingResponse {
+  data: AttendanceSetting!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type Auth {
   """JWT access token"""
   accessToken: String!
@@ -29,13 +179,13 @@ type Business {
   lng: Float
   name: String!
   numberOfEmployeesAllowed: Int!
+  owner: User
   phone: String!
   postcode: String!
   registrationDate: String!
   status: String!
   subscriptionPlanId: Int!
   updatedAt: DateTime!
-  user: User
   userId: Int!
   website: String
 }
@@ -57,12 +207,70 @@ type BusinessSchedule {
   startTime: String!
 }
 
+type BusinessSetting {
+  """Business this setting belongs to"""
+  business: Business!
+
+  """ID of the business"""
+  businessId: Int!
+
+  """Business start day of the week (0-6, where 0=Sunday)"""
+  businessStartDay: Int!
+
+  """Business time zone"""
+  businessTimeZone: String
+
+  """Business currency code"""
+  currency: String!
+
+  """Delete read notifications setting"""
+  deleteReadNotifications: String!
+
+  """Unique identifier for the business setting"""
+  id: ID!
+
+  """Prefix for business identifiers"""
+  identifierPrefix: String!
+
+  """Whether self-registration is enabled"""
+  isSelfRegistered: Boolean!
+
+  """Business theme"""
+  theme: String
+}
+
+type BusinessSettingResponse {
+  data: BusinessSetting!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 """Business Status of Business"""
 enum BusinessStatus {
   ACTIVE
   INACTIVE
   SUSPENDED
   TRIAL_EXPIRED
+}
+
+input CreateAssetInput {
+  assetTypeId: Int
+  assignedTo: Int
+  code: String!
+  date: String!
+  image: String
+  name: String!
+  note: String
+}
+
+input CreateAssetTypeInput {
+  """Description of the asset type"""
+  description: String!
+
+  """Name of the asset type"""
+  name: String!
 }
 
 input CreateBusinessInput {
@@ -81,6 +289,33 @@ input CreateBusinessInput {
   website: String
 }
 
+input CreateDayScheduleInput {
+  """Day of the week (0-6, where 0 is Sunday)"""
+  day: Int!
+
+  """Whether this day is a weekend"""
+  isWeekend: Boolean!
+
+  """
+  Time slots for this day. REGULAR: single slot (same for all days), SCHEDULED: single slot (different per day), FLEXIBLE: multiple slots per day
+  """
+  timeSlots: [CreateTimeSlotInput!]!
+}
+
+input CreateDepartmentInput {
+  """Description of the department"""
+  description: String!
+
+  """ID of the manager"""
+  managerId: Int
+
+  """Name of the department"""
+  name: String!
+
+  """ID of the parent department"""
+  parentId: Int
+}
+
 input CreateDesignationInput {
   """Description of the designation"""
   description: String!
@@ -89,11 +324,82 @@ input CreateDesignationInput {
   name: String!
 }
 
+input CreateEmergencyContactInput {
+  name: String!
+  phone: String!
+  relation: String!
+}
+
+input CreateEmployeeInput {
+  departmentId: Int!
+  designationId: Int!
+  emergencyContact: CreateEmergencyContactInput
+  employeeId: String
+  employmentStatusId: Int!
+  joiningDate: DateTime!
+  nidNumber: String!
+  profile: CreateProfileInput!
+  rotaType: String
+  salaryPerMonth: Float!
+  user: CreateUserInput!
+  workScheduleId: Int!
+  workSiteId: Int!
+  workingDaysPerWeek: Int
+  workingHoursPerWeek: Int
+}
+
+input CreateEmploymentStatusInput {
+  """Description of the employment status"""
+  description: String!
+
+  """Name of the employment status"""
+  name: String!
+}
+
+input CreateJobPlatformInput {
+  """Description of the job platform"""
+  description: String!
+
+  """Name of the job platform"""
+  name: String!
+}
+
 input CreateJobTypeInput {
   """Description of the job type"""
   description: String!
 
   """Name of the job type"""
+  name: String!
+}
+
+input CreateLeaveTypeInput {
+  """Maximum carry over limit"""
+  carryOverLimit: Int
+
+  """Array of employment status IDs to associate with this leave type"""
+  employmentStatuses: [Int!] = []
+
+  """Number of leave hours allocated"""
+  leaveHours: Int! = 0
+
+  """Leave rollover policy type"""
+  leaveRolloverType: LeaveRolloverType! = NONE
+
+  """Type of leave (PAID or UNPAID)"""
+  leaveType: LeaveTypeEnum!
+
+  """Name of the leave type"""
+  name: String!
+}
+
+input CreateOnboardingProcessInput {
+  """Description of the onboarding process"""
+  description: String!
+
+  """Whether the onboarding process is required"""
+  isRequired: Boolean!
+
+  """Name of the onboarding process"""
   name: String!
 }
 
@@ -108,6 +414,26 @@ input CreateProfileInput {
   phone: String!
   postcode: String!
   profilePicture: String
+}
+
+input CreateProjectInput {
+  cover: String!
+  description: String
+  endDate: String
+  name: String!
+  startDate: String
+  status: String!
+}
+
+input CreateRecruitmentProcessInput {
+  """Description of the recruitment process"""
+  description: String!
+
+  """Whether the recruitment process is required"""
+  isRequired: Boolean!
+
+  """Name of the recruitment process"""
+  name: String!
 }
 
 input CreateSubscriptionPlanInput {
@@ -127,15 +453,159 @@ input CreateSubscriptionPlanInput {
   setupFee: Int!
 }
 
+input CreateTimeSlotInput {
+  """End time in HH:mm format (e.g., 17:00)"""
+  endTime: String!
+
+  """Start time in HH:mm format (e.g., 09:00)"""
+  startTime: String!
+}
+
 input CreateUserInput {
+  businessId: Int
   email: String!
   password: String!
+  roleId: Int!
+}
+
+input CreateWorkScheduleInput {
+  """Number of break hours"""
+  breakHours: Int! = 0
+
+  """Type of break in the schedule"""
+  breakType: ScheduleBreakType! = UNPAID
+
+  """Description of the work schedule"""
+  description: String!
+
+  """Name of the work schedule"""
+  name: String!
+
+  """Type of the schedule"""
+  scheduleType: ScheduleType! = REGULAR
+
+  """
+  Day schedules for this work schedule. Required for SCHEDULED and FLEXIBLE types. For REGULAR type, provide 7 schedules (one per day) with same time slots.
+  """
+  schedules: [CreateDayScheduleInput!]!
+
+  """Status of the work schedule"""
+  status: Status! = ACTIVE
+}
+
+input CreateWorkSiteInput {
+  """Address of the work site"""
+  address: String
+
+  """Description of the work site"""
+  description: String!
+
+  """IP address"""
+  ipAddress: String
+
+  """Whether geo location is enabled"""
+  isGeoLocationEnabled: Boolean
+
+  """Whether IP is enabled"""
+  isIpEnabled: Boolean
+
+  """Whether location is enabled"""
+  isLocationEnabled: Boolean
+
+  """Maximum radius for location"""
+  maxRadius: Int
+
+  """Name of the work site"""
+  name: String!
 }
 
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type DaySchedule {
+  """Day of the week (0-6, where 0=Sunday)"""
+  day: Int!
+
+  """Unique identifier for the day schedule"""
+  id: ID!
+
+  """Whether this day is a weekend"""
+  isWeekend: Boolean!
+
+  """Time slots for this day"""
+  timeSlots: [TimeSlot!]!
+
+  """Work schedule this day belongs to"""
+  workSchedule: WorkSchedule!
+
+  """ID of the work schedule"""
+  workScheduleId: Int!
+}
+
+type Department {
+  """Business this department belongs to"""
+  business: Business!
+
+  """ID of the business"""
+  businessId: Int!
+
+  """Child departments"""
+  children: [Department!]
+
+  """Date when the department was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Creator of the department"""
+  creator: User!
+
+  """Description of the department"""
+  description: String!
+
+  """Unique identifier for the department"""
+  id: ID!
+
+  """Manager of the department"""
+  manager: User
+
+  """ID of the manager"""
+  managerId: Int
+
+  """Name of the department"""
+  name: String!
+
+  """Parent department"""
+  parent: Department
+
+  """ID of the parent department"""
+  parentId: Int
+
+  """Status of the department"""
+  status: Status!
+
+  """Date when the department was last updated"""
+  updatedAt: DateTime!
+}
+
+type DepartmentResponse {
+  data: Department!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type DepartmentsQueryResponse {
+  data: [Department!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
 
 type Designation {
   """ID of the business"""
@@ -179,6 +649,82 @@ type DesignationsQueryResponse {
   success: Boolean!
 }
 
+type EmergencyContact {
+  createdAt: DateTime!
+  name: String!
+  phone: String!
+  profileId: Int!
+  relation: String!
+  updatedAt: DateTime!
+}
+
+type Employee {
+  createdAt: DateTime!
+  department: Department!
+  departmentId: Int!
+  designation: Designation!
+  designationId: Int!
+  employeeId: String!
+  employmentStatus: EmploymentStatus!
+  employmentStatusId: Int!
+  id: ID!
+  joiningDate: DateTime!
+  nidNumber: String!
+  rotaType: String!
+  salaryPerMonth: Float!
+  updatedAt: DateTime!
+  user: User!
+  userId: Int!
+  workSchedule: WorkSchedule!
+  workScheduleId: Int!
+  workSite: WorkSite!
+  workSiteId: Int!
+  workingDaysPerWeek: Int
+  workingHoursPerWeek: Int
+}
+
+type EmploymentStatus {
+  """ID of the business"""
+  businessId: Int!
+
+  """Date when the employment status was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Description of the employment status"""
+  description: String!
+
+  """Unique identifier for the employment status"""
+  id: ID!
+
+  """Name of the employment status"""
+  name: String!
+
+  """Status of the employment status"""
+  status: Status!
+
+  """Date when the employment status was last updated"""
+  updatedAt: DateTime!
+}
+
+type EmploymentStatusResponse {
+  data: EmploymentStatus!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EmploymentStatusesQueryResponse {
+  data: [EmploymentStatus!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type Feature {
   """ID of the module"""
   id: ID!
@@ -205,6 +751,48 @@ type FeatureResponse {
 enum GENDER {
   FEMALE
   MALE
+}
+
+type JobPlatform {
+  """ID of the business"""
+  businessId: Int!
+
+  """Date when the job platform was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Description of the job platform"""
+  description: String!
+
+  """Unique identifier for the job platform"""
+  id: ID!
+
+  """Name of the job platform"""
+  name: String!
+
+  """Status of the job platform"""
+  status: Status!
+
+  """Date when the job platform was last updated"""
+  updatedAt: DateTime!
+}
+
+type JobPlatformResponse {
+  data: JobPlatform!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type JobPlatformsQueryResponse {
+  data: [JobPlatform!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type JobType {
@@ -249,6 +837,98 @@ type JobTypesQueryResponse {
   success: Boolean!
 }
 
+"""Type of leave rollover policy"""
+enum LeaveRolloverType {
+  FULL_ROLLOVER
+  NONE
+  PARTIAL_ROLLOVER
+}
+
+type LeaveSetting {
+  """Whether leave requests are auto-approved"""
+  autoApproval: Boolean!
+
+  """Business this leave setting belongs to"""
+  business: Business!
+
+  """ID of the business"""
+  businessId: Int!
+
+  """Unique identifier for the leave setting"""
+  id: ID!
+
+  """Start month for leave cycle (0-11)"""
+  startMonth: Int!
+}
+
+type LeaveSettingResponse {
+  data: LeaveSetting!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type LeaveType {
+  """ID of the business"""
+  businessId: Int!
+
+  """Maximum carry over limit"""
+  carryOverLimit: Int
+
+  """Date when the leave type was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Array of employment statuses associated with this leave type"""
+  employmentStatuses: [EmploymentStatus!]
+
+  """Unique identifier for the leave type"""
+  id: ID!
+
+  """Number of leave hours allocated"""
+  leaveHours: Int!
+
+  """Leave rollover policy type"""
+  leaveRolloverType: LeaveRolloverType!
+
+  """Type of leave (PAID or UNPAID)"""
+  leaveType: LeaveTypeEnum!
+
+  """Name of the leave type"""
+  name: String!
+
+  """Status of the leave type"""
+  status: Status!
+
+  """Date when the leave type was last updated"""
+  updatedAt: DateTime!
+}
+
+"""Type of leave - PAID or UNPAID"""
+enum LeaveTypeEnum {
+  PAID
+  UNPAID
+}
+
+type LeaveTypeResponse {
+  data: LeaveType!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type LeaveTypesQueryResponse {
+  data: [LeaveType!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 input LoginAuthInput {
   """User email"""
   email: String!
@@ -264,22 +944,109 @@ enum MARITAL_STATUS {
 }
 
 type Mutation {
+  assignAsset(assignAssetInput: AssignAssetInput!): AssetAssignmentResponse!
+  assignProjectMember(assignProjectMemberInput: AssignProjectMemberInput!): ProjectMemberResponse!
+  createAsset(createAssetInput: CreateAssetInput!): AssetResponse!
+  createAssetType(createAssetTypeInput: CreateAssetTypeInput!): AssetTypeResponse!
+  createDepartment(createDepartmentInput: CreateDepartmentInput!): DepartmentResponse!
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
+  createEmployee(createEmployeeInput: CreateEmployeeInput!): UserResponse!
+  createEmploymentStatus(createEmploymentStatusInput: CreateEmploymentStatusInput!): EmploymentStatusResponse!
+  createJobPlatform(createJobPlatformInput: CreateJobPlatformInput!): JobPlatformResponse!
   createJobType(createJobTypeInput: CreateJobTypeInput!): JobTypeResponse!
+  createLeaveType(createLeaveTypeInput: CreateLeaveTypeInput!): LeaveTypeResponse!
+  createOnboardingProcess(createOnboardingProcessInput: CreateOnboardingProcessInput!): OnboardingProcessResponse!
+  createProject(createProjectInput: CreateProjectInput!): ProjectResponse!
+  createRecruitmentProcess(createRecruitmentProcessInput: CreateRecruitmentProcessInput!): RecruitmentProcessResponse!
   createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
-  createUser(createUserInput: CreateUserInput!): User!
   createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
+  createWorkSchedule(createWorkScheduleInput: CreateWorkScheduleInput!): WorkScheduleResponse!
+  createWorkSite(createWorkSiteInput: CreateWorkSiteInput!): WorkSiteResponse!
   deleteBusiness(id: Int!): Business!
+  deleteDepartment(id: Int!): DepartmentResponse!
   deleteDesignation(id: Int!): DesignationResponse!
+  deleteEmployee(id: Int!): UserResponse!
+  deleteEmploymentStatus(id: Int!): EmploymentStatusResponse!
+  deleteJobPlatform(id: Int!): JobPlatformResponse!
   deleteJobType(id: Int!): JobTypeResponse!
+  deleteLeaveType(id: Int!): LeaveTypeResponse!
+  deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
+  deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
-  deleteUser(id: Int!): User!
+  deleteUser(id: Int!): UserResponse!
+  deleteWorkSchedule(id: Int!): WorkScheduleResponse!
+  deleteWorkSite(id: Int!): WorkSiteResponse!
   login(loginInput: LoginAuthInput!): Auth!
+  removeAsset(id: Int!): AssetResponse!
+  removeAssetType(id: Int!): AssetTypeResponse!
+  removeProject(id: Int!): ProjectResponse!
+  returnAsset(returnAssetInput: ReturnAssetInput!): AssetAssignmentResponse!
+  unassignProjectMember(unassignProjectMemberInput: UnassignProjectMemberInput!): ProjectMemberResponse!
+  updateAsset(updateAssetInput: UpdateAssetInput!): AssetResponse!
+  updateAssetType(updateAssetTypeInput: UpdateAssetTypeInput!): AssetTypeResponse!
+  updateAttendanceSetting(updateAttendanceSettingInput: UpdateAttendanceSettingInput!): AttendanceSettingResponse!
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): Business!
   updateBusinessSchedule(data: UpdateBusinessScheduleInput!): BusinessSchedule!
+  updateBusinessSetting(updateBusinessSettingInput: UpdateBusinessSettingInput!): BusinessSettingResponse!
+  updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): DepartmentResponse!
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
+  updateEmployee(updateEmployeeInput: UpdateEmployeeInput!): UserResponse!
+  updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
+  updateJobPlatform(updateJobPlatformInput: UpdateJobPlatformInput!): JobPlatformResponse!
   updateJobType(updateJobTypeInput: UpdateJobTypeInput!): JobTypeResponse!
+  updateLeaveSetting(updateLeaveSettingInput: UpdateLeaveSettingInput!): LeaveSettingResponse!
+  updateLeaveType(updateLeaveTypeInput: UpdateLeaveTypeInput!): LeaveTypeResponse!
+  updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
+  updateProject(updateProjectInput: UpdateProjectInput!): ProjectResponse!
+  updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
   updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
+  updateWorkSchedule(updateWorkScheduleInput: UpdateWorkScheduleInput!): WorkScheduleResponse!
+  updateWorkSite(updateWorkSiteInput: UpdateWorkSiteInput!): WorkSiteResponse!
+}
+
+type OnboardingProcess {
+  """ID of the business"""
+  businessId: Int!
+
+  """Date when the onboarding process was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Description of the onboarding process"""
+  description: String!
+
+  """Unique identifier for the onboarding process"""
+  id: ID!
+
+  """Whether the onboarding process is required"""
+  isRequired: Boolean!
+
+  """Name of the onboarding process"""
+  name: String!
+
+  """Status of the onboarding process"""
+  status: Status!
+
+  """Date when the onboarding process was last updated"""
+  updatedAt: DateTime!
+}
+
+type OnboardingProcessResponse {
+  data: OnboardingProcess!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type OnboardingProcessesQueryResponse {
+  data: [OnboardingProcess!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type PaginationMeta {
@@ -306,6 +1073,7 @@ type Profile {
   country: String!
   createdAt: DateTime!
   dateOfBirth: String!
+  emergencyContact: EmergencyContact
   fullName: String!
   gender: GENDER!
   id: ID!
@@ -317,22 +1085,109 @@ type Profile {
   userId: Int!
 }
 
+type Project {
+  business: Business
+  businessId: Int
+  cover: String!
+  createdAt: DateTime!
+  createdBy: Int
+  creator: User
+  description: String
+  endDate: String
+  id: Int!
+  name: String!
+  projectMembers: [ProjectMember!]!
+  startDate: String
+  status: String!
+  updatedAt: DateTime!
+}
+
+type ProjectMember {
+  createdAt: DateTime!
+  id: Int!
+  project: Project!
+  projectId: Int!
+  role: String
+  updatedAt: DateTime!
+  user: User!
+  userId: Int!
+}
+
+type ProjectMemberResponse {
+  data: ProjectMember!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type ProjectResponse {
+  data: Project!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type ProjectsQueryResponse {
+  data: [Project!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type Query {
   FeatureById(id: Int!): FeatureResponse!
   allFeatures: FeatureQueryResponse!
+  asset(id: Int!): AssetResponse!
+  assetType(id: Int!): AssetTypeResponse!
+  assetTypes(query: QueryAssetTypeInput): AssetTypesQueryResponse!
+  assets(businessId: Int): AssetsQueryResponse!
+  attendanceSettingsByBusiness: AttendanceSettingResponse!
   businessById(id: Int!): Business!
   businessScheduleByBusinessId(id: Int!): BusinessSchedule!
+  businessSettingByBusinessId: BusinessSettingResponse!
   businesses(query: QueryBusinessInput): BusinessQueryResponse!
+  departmentById(id: Int!): DepartmentResponse!
+  departments(query: QueryDepartmentInput): DepartmentsQueryResponse!
   designationById(id: Int!): DesignationResponse!
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
+  employeeById(id: Int!): UserResponse!
+  employees(query: QueryUserInput): UsersQueryResponse!
+  employmentStatusById(id: Int!): EmploymentStatusResponse!
+  employmentStatuses(query: QueryEmploymentStatusInput): EmploymentStatusesQueryResponse!
+  jobPlatformById(id: Int!): JobPlatformResponse!
+  jobPlatforms(query: QueryJobPlatformInput): JobPlatformsQueryResponse!
   jobTypeById(id: Int!): JobTypeResponse!
   jobTypes(query: QueryJobTypeInput): JobTypesQueryResponse!
+  leaveSettingByBusinessId: LeaveSettingResponse!
+  leaveTypeById(id: Int!): LeaveTypeResponse!
+  leaveTypes(query: QueryLeaveTypeInput): LeaveTypesQueryResponse!
+  onboardingProcessById(id: Int!): OnboardingProcessResponse!
+  onboardingProcesses(query: QueryOnboardingProcessInput): OnboardingProcessesQueryResponse!
   permissionById(id: Int!): Permission!
   permissions: [Permission!]!
+  projectById(id: Int!): ProjectResponse!
+  projects(businessId: Int): ProjectsQueryResponse!
+  recruitmentProcessById(id: Int!): RecruitmentProcessResponse!
+  recruitmentProcesses(query: QueryRecruitmentProcessInput): RecruitmentProcessesQueryResponse!
+  roles: RoleResponse!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
-  userById(id: Int!): User!
+  userById(id: Int!): UserResponse!
   users: [User!]!
+  workScheduleById(id: Int!): WorkScheduleResponse!
+  workSchedules(query: QueryWorkScheduleInput): WorkSchedulesQueryResponse!
+  workSiteById(id: Int!): WorkSiteResponse!
+  workSites(query: QueryWorkSiteInput): WorkSitesQueryResponse!
+}
+
+input QueryAssetTypeInput {
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: Status
 }
 
 input QueryBusinessInput {
@@ -342,6 +1197,13 @@ input QueryBusinessInput {
   status: BusinessStatus
 }
 
+input QueryDepartmentInput {
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: Status
+}
+
 input QueryDesignationInput {
   name: String
   pagination: BasePaginationInput
@@ -349,7 +1211,44 @@ input QueryDesignationInput {
   status: Status
 }
 
+input QueryEmploymentStatusInput {
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: Status
+}
+
+input QueryJobPlatformInput {
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: Status
+}
+
 input QueryJobTypeInput {
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: Status
+}
+
+input QueryLeaveTypeInput {
+  leaveType: LeaveTypeEnum
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: Status
+}
+
+input QueryOnboardingProcessInput {
+  isRequired: Boolean
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: Status
+}
+
+input QueryRecruitmentProcessInput {
+  isRequired: Boolean
   name: String
   pagination: BasePaginationInput
   searchTerm: String
@@ -364,6 +1263,83 @@ input QuerySubscriptionPlanInput {
   status: Status
 }
 
+input QueryUserInput {
+  pagination: BasePaginationInput
+  searchTerm: String
+}
+
+input QueryWorkScheduleInput {
+  limit: Int
+  page: Int
+  scheduleType: ScheduleType
+  search: String
+  sortBy: String
+  sortOrder: String
+  status: Status
+}
+
+input QueryWorkSiteInput {
+  address: String
+  ipAddress: String
+  isGeoLocationEnabled: Boolean
+  isIpEnabled: Boolean
+  isLocationEnabled: Boolean
+  maxRadius: Int
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+  status: Status
+}
+
+type RecruitmentProcess {
+  """ID of the business"""
+  businessId: Int!
+
+  """Date when the recruitment process was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Description of the recruitment process"""
+  description: String!
+
+  """Unique identifier for the recruitment process"""
+  id: ID!
+
+  """Whether the recruitment process is required"""
+  isRequired: Boolean!
+
+  """Name of the recruitment process"""
+  name: String!
+
+  """Status of the recruitment process"""
+  status: Status!
+
+  """Date when the recruitment process was last updated"""
+  updatedAt: DateTime!
+}
+
+type RecruitmentProcessResponse {
+  data: RecruitmentProcess!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type RecruitmentProcessesQueryResponse {
+  data: [RecruitmentProcess!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+input ReturnAssetInput {
+  assetId: Int!
+}
+
 type Role {
   """ID of the business"""
   businessId: Int
@@ -373,9 +1349,41 @@ type Role {
 
   """Name of the role"""
   name: String!
+  rolePermissions: [RolePermission!]
 }
 
-"""Status of the Job Type"""
+type RolePermission {
+  """ID of the permission"""
+  permission: Permission!
+
+  """ID of the permission"""
+  permissionId: Int!
+  role: Role
+
+  """ID of the role"""
+  roleId: Int!
+}
+
+type RoleResponse {
+  data: [Role!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+enum ScheduleBreakType {
+  PAID
+  UNPAID
+}
+
+enum ScheduleType {
+  FLEXIBLE
+  REGULAR
+  SCHEDULED
+}
+
+"""Status of the Asset Type"""
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -430,6 +1438,20 @@ type SubscriptionPlanResponse {
   success: Boolean!
 }
 
+type TimeSlot {
+  """End time of the slot"""
+  endTime: String!
+
+  """Day schedule this time slot belongs to"""
+  schedule: DaySchedule!
+
+  """ID of the day schedule"""
+  scheduleId: Int!
+
+  """Start time of the slot"""
+  startTime: String!
+}
+
 """User account status"""
 enum USER_ACCOUNT_STATUS {
   ACTIVE
@@ -443,6 +1465,51 @@ enum USER_ACCOUNT_STATUS {
   TERMINATED
   UNVERIFIED
   VERIFIED
+}
+
+input UnassignProjectMemberInput {
+  projectId: Int!
+  userId: Int!
+}
+
+input UpdateAssetInput {
+  assetTypeId: Int
+  assignedTo: Int
+  code: String
+  date: String
+  id: Int!
+  image: String
+  name: String
+  note: String
+}
+
+input UpdateAssetTypeInput {
+  """Description of the asset type"""
+  description: String
+  id: Int!
+
+  """Name of the asset type"""
+  name: String
+}
+
+input UpdateAttendanceSettingInput {
+  """Whether auto approval is enabled"""
+  autoApproval: Boolean = false
+
+  """Whether geo location is enabled"""
+  isGeoLocationEnabled: Boolean = false
+
+  """Whether punch in/out alerts are enabled"""
+  punchInOutAlert: Boolean = true
+
+  """Punch in/out interval in hours"""
+  punchInOutInterval: Int = 1
+
+  """Punch in time tolerance in minutes"""
+  punchInTimeTolerance: Int = 15
+
+  """Work availability definition percentage"""
+  workAvailabilityDefinition: Int = 80
 }
 
 input UpdateBusinessInput {
@@ -475,22 +1542,160 @@ input UpdateBusinessScheduleInput {
   startTime: String
 }
 
+input UpdateBusinessSettingInput {
+  """Business start day of the week (0-6, where 0=Sunday)"""
+  businessStartDay: Int = 0
+
+  """Business time zone"""
+  businessTimeZone: String = "Asia/Dhaka"
+
+  """Business currency code"""
+  currency: String = "BDT"
+
+  """Delete read notifications setting"""
+  deleteReadNotifications: String
+
+  """Prefix for business identifiers"""
+  identifierPrefix: String
+
+  """Whether self-registration is enabled"""
+  isSelfRegistered: Boolean = false
+
+  """Business theme"""
+  theme: String
+}
+
+input UpdateDepartmentInput {
+  """Description of the department"""
+  description: String
+  id: Int!
+
+  """ID of the manager"""
+  managerId: Int
+
+  """Name of the department"""
+  name: String
+
+  """ID of the parent department"""
+  parentId: Int
+}
+
 input UpdateDesignationInput {
   """Description of the designation"""
-  description: String!
+  description: String
   id: Int!
 
   """Name of the designation"""
-  name: String!
+  name: String
+}
+
+input UpdateEmployeeInput {
+  departmentId: Int
+  designationId: Int
+  emergencyContact: CreateEmergencyContactInput
+  employeeId: String
+  employmentStatusId: Int
+  id: Int!
+  joiningDate: DateTime
+  nidNumber: String
+  profile: CreateProfileInput
+  rotaType: String
+  salaryPerMonth: Float
+  user: CreateUserInput
+  workScheduleId: Int
+  workSiteId: Int
+  workingDaysPerWeek: Int
+  workingHoursPerWeek: Int
+}
+
+input UpdateEmploymentStatusInput {
+  """Description of the employment status"""
+  description: String
+  id: Int!
+
+  """Name of the employment status"""
+  name: String
+}
+
+input UpdateJobPlatformInput {
+  """Description of the job platform"""
+  description: String
+  id: Int!
+
+  """Name of the job platform"""
+  name: String
 }
 
 input UpdateJobTypeInput {
   """Description of the job type"""
-  description: String!
+  description: String
   id: Int!
 
   """Name of the job type"""
-  name: String!
+  name: String
+}
+
+input UpdateLeaveSettingInput {
+  """Whether leave requests are auto-approved"""
+  autoApproval: Boolean = false
+
+  """Start month for leave cycle (0-11, where 0=January)"""
+  startMonth: Int = 0
+}
+
+input UpdateLeaveTypeInput {
+  """Maximum carry over limit"""
+  carryOverLimit: Int
+
+  """Array of employment status IDs to associate with this leave type"""
+  employmentStatuses: [Int!] = []
+  id: Int!
+
+  """Number of leave hours allocated"""
+  leaveHours: Int = 0
+
+  """Leave rollover policy type"""
+  leaveRolloverType: LeaveRolloverType = NONE
+
+  """Type of leave (PAID or UNPAID)"""
+  leaveType: LeaveTypeEnum
+
+  """Name of the leave type"""
+  name: String
+}
+
+input UpdateOnboardingProcessInput {
+  """Description of the onboarding process"""
+  description: String
+  id: Int!
+
+  """Whether the onboarding process is required"""
+  isRequired: Boolean
+
+  """Name of the onboarding process"""
+  name: String
+}
+
+input UpdateProjectInput {
+  cover: String
+  description: String
+  endDate: String
+  id: Int!
+  name: String
+  startDate: String
+  status: String
+}
+
+input UpdateRecruitmentProcessInput {
+  """Description of the recruitment process"""
+  description: String
+  id: Int!
+
+  """Whether the recruitment process is required"""
+  isRequired: Boolean
+
+  """Name of the recruitment process"""
+  name: String
 }
 
 input UpdateSubscriptionPlanInput {
@@ -510,8 +1715,66 @@ input UpdateSubscriptionPlanInput {
   setupFee: Int!
 }
 
+input UpdateWorkScheduleInput {
+  """Number of break hours"""
+  breakHours: Int = 0
+
+  """Type of break in the schedule"""
+  breakType: ScheduleBreakType = UNPAID
+
+  """Description of the work schedule"""
+  description: String
+
+  """ID of the work schedule to update"""
+  id: Int!
+
+  """Name of the work schedule"""
+  name: String
+
+  """Type of the schedule"""
+  scheduleType: ScheduleType = REGULAR
+
+  """
+  Day schedules for this work schedule. Required for SCHEDULED and FLEXIBLE types. For REGULAR type, provide 7 schedules (one per day) with same time slots.
+  """
+  schedules: [CreateDayScheduleInput!]
+
+  """Status of the work schedule"""
+  status: Status = ACTIVE
+}
+
+input UpdateWorkSiteInput {
+  """Address of the work site"""
+  address: String
+
+  """Description of the work site"""
+  description: String
+  id: Int!
+
+  """IP address"""
+  ipAddress: String
+
+  """Whether geo location is enabled"""
+  isGeoLocationEnabled: Boolean
+
+  """Whether IP is enabled"""
+  isIpEnabled: Boolean
+
+  """Whether location is enabled"""
+  isLocationEnabled: Boolean
+
+  """Maximum radius for location"""
+  maxRadius: Int
+
+  """Name of the work site"""
+  name: String
+}
+
 type User {
   business: Business
+
+  """ID of the business (direct connection)"""
+  businessId: Int
 
   """Date when the user was created"""
   createdAt: DateTime!
@@ -521,7 +1784,11 @@ type User {
 
   """Email of the user"""
   email: String!
+  employee: Employee
   id: ID!
+
+  """Formatted permissions as ["Resource:action"]"""
+  permissions: [String!]
   profile: Profile
 
   """Role of the user"""
@@ -535,4 +1802,153 @@ type User {
 
   """Date when the user was last updated"""
   updatedAt: DateTime!
+  userPermissions: [UserPermission!]
+}
+
+type UserPermission {
+  """Permission details"""
+  permission: Permission!
+
+  """ID of the permission"""
+  permissionId: Int!
+  user: User
+
+  """ID of the user"""
+  userId: Int!
+}
+
+type UserResponse {
+  data: User!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type UsersQueryResponse {
+  data: [User!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type WorkSchedule {
+  """Number of break hours"""
+  breakHours: Int!
+
+  """Type of break in the schedule"""
+  breakType: ScheduleBreakType!
+
+  """Business this work schedule belongs to"""
+  business: Business
+
+  """ID of the business"""
+  businessId: Int
+
+  """Creation timestamp"""
+  createdAt: DateTime!
+
+  """ID of the user who created this schedule"""
+  createdBy: Int
+
+  """User who created this work schedule"""
+  creator: User
+
+  """Description of the work schedule"""
+  description: String!
+
+  """Unique identifier for the work schedule"""
+  id: ID!
+
+  """Name of the work schedule"""
+  name: String!
+
+  """Type of the schedule"""
+  scheduleType: ScheduleType!
+
+  """Day schedules associated with this work schedule"""
+  schedules: [DaySchedule!]!
+
+  """Status of the work schedule"""
+  status: Status!
+
+  """Last update timestamp"""
+  updatedAt: DateTime!
+}
+
+type WorkScheduleResponse {
+  data: WorkSchedule!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type WorkSchedulesQueryResponse {
+  data: [WorkSchedule!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type WorkSite {
+  """Address of the work site"""
+  address: String
+
+  """ID of the business"""
+  businessId: Int!
+
+  """Date when the work site was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Description of the work site"""
+  description: String!
+
+  """Unique identifier for the work site"""
+  id: ID!
+
+  """IP address"""
+  ipAddress: String
+
+  """Whether geo location is enabled"""
+  isGeoLocationEnabled: Boolean
+
+  """Whether IP is enabled"""
+  isIpEnabled: Boolean
+
+  """Whether location is enabled"""
+  isLocationEnabled: Boolean
+
+  """Maximum radius for location"""
+  maxRadius: Int
+
+  """Name of the work site"""
+  name: String!
+
+  """Status of the work site"""
+  status: Status!
+
+  """Date when the work site was last updated"""
+  updatedAt: DateTime!
+}
+
+type WorkSiteResponse {
+  data: WorkSite!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type WorkSitesQueryResponse {
+  data: [WorkSite!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }

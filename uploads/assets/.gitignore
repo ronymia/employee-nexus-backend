@@ -1,0 +1,8 @@
+# This directory stores uploaded asset files
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.pdf
+!.gitkeep

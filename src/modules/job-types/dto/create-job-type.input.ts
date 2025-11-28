@@ -1,5 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 @InputType()
 export class CreateJobTypeInput {
@@ -9,5 +9,6 @@ export class CreateJobTypeInput {
 
   @Field(() => String, { description: 'Description of the job type' })
   @IsString()
+  @IsOptional()
   description: string;
 }
