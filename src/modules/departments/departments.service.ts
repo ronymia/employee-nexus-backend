@@ -115,7 +115,6 @@ export class DepartmentsService {
     const whereCondition: Prisma.DepartmentWhereInput = andCondition.length
       ? { AND: andCondition }
       : {};
-
     const result = !limit
       ? await this.prisma.department.findMany({
           where: {

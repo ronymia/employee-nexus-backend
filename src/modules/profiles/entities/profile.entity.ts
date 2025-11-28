@@ -1,5 +1,6 @@
 import { Field, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Gender, MaritalStatus } from 'generated/prisma';
+import { EmergencyContact } from './emergency-contact.entity';
 
 registerEnumType(Gender, {
   name: 'GENDER',
@@ -48,6 +49,9 @@ export class Profile {
 
   @Field(() => Int)
   userId: number;
+
+  @Field(() => EmergencyContact, { nullable: true })
+  emergencyContact?: EmergencyContact | null;
 
   @Field(() => Date)
   createdAt: Date;

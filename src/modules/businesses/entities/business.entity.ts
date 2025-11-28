@@ -55,7 +55,7 @@ export class Business {
   userId: number;
 
   @Field(() => User, { nullable: true })
-  user?: User | null;
+  owner?: User | null;
 
   @Field(() => [BusinessSchedule], { nullable: true })
   businessSchedules?: BusinessSchedule[] | null;

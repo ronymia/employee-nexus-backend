@@ -11,6 +11,11 @@ import { Business } from 'src/modules/businesses/entities/business.entity';
 import { Profile } from 'src/modules/profiles/entities/profile.entity';
 import { Role } from 'src/modules/roles/entities/role.entity';
 import { UserPermission } from 'src/modules/user-permissions/entities/user-permission.entity';
+import { Employee } from './employee.entity';
+import {
+  BaseQueryResponse,
+  BaseResponse,
+} from 'src/common/dto/base-response.type';
 
 registerEnumType(UserAccountStatus, {
   name: 'USER_ACCOUNT_STATUS',
@@ -34,6 +39,12 @@ export class User {
   @Field(() => Role, { nullable: true, description: 'Role of the user' })
   role?: Role | null;
 
+  @Field(() => Int, {
+    nullable: true,
+    description: 'ID of the business (direct connection)',
+  })
+  businessId?: number | null;
+
   @Field(() => UserAccountStatus, {
     description: 'Status of the user account',
   })
@@ -48,6 +59,9 @@ export class User {
   @Field(() => [UserPermission], { nullable: true })
   userPermissions: UserPermission[] | null;
 
+  @Field(() => Employee, { nullable: true })
+  employee?: Employee | null;
+
   @Field(() => Int, {
     nullable: true,
     description: 'ID of the user who deleted the user account',
@@ -60,3 +74,9 @@ export class User {
   @Field(() => Date, { description: 'Date when the user was last updated' })
   updatedAt: Date;
 }
+
+@ObjectType()
+export class UserResponse extends BaseResponse(User) {}
+
+@ObjectType()
+export class UsersQueryResponse extends BaseQueryResponse(User) {}

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -90,12 +84,18 @@ model User {
   deletedBy Int?              @map("deleted_by")
   profile   Profile?          @relation(name: "userProfile")
 
+  employee Employee? @relation(name: "userEmployee")
+
   // Don't delete users when a role row is deleted
   role   Role? @relation(fields: [roleId], references: [id], onDelete: Restrict)
   roleId Int?  @map("role_id")
 
+  // Direct business connection (optional for employees/managers/admins)
+  businessId Int?      @map("business_id")
+  business   Business? @relation(name: "userBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+
   userPermissions           UserPermission[]
-  business                  Business?            @relation(name: "businessOwner")
+  ownedBusiness             Business?            @relation(name: "businessOwner")
   subscriptionPlanCreated   SubscriptionPlan[]   @relation(name: "subscriptionPlanCreated")
   employmentStatusCreated   EmploymentStatus[]   @relation(name: "employmentStatusCreated")
   designationCreated        Designation[]        @relation(name: "designationCreated")
@@ -138,6 +138,8 @@ model Profile {
   user           User          @relation(name: "userProfile", fields: [userId], references: [id], onDelete: Cascade)
   userId         Int           @unique @map("user_id")
 
+  emergencyContact EmergencyContact? @relation(name: "profileEmergencyContact")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -160,7 +162,7 @@ model Business {
   numberOfEmployeesAllowed Int     @map("number_of_employees_allowed")
 
   status             BusinessStatus   @default(ACTIVE)
-  user               User             @relation(name: "businessOwner", fields: [userId], references: [id], onDelete: Cascade)
+  owner              User             @relation(name: "businessOwner", fields: [userId], references: [id], onDelete: Cascade)
   userId             Int              @unique @map("user_id")
   subscriptionPlan   SubscriptionPlan @relation(name: "businessSubscriptionPlan", fields: [subscriptionPlanId], references: [id])
   subscriptionPlanId Int              @map("subscription_plan_id")
@@ -168,6 +170,7 @@ model Business {
   // Features via join table
   features BusinessFeature[] @relation(name: "businessToFeatures")
 
+  users                User[]                 @relation(name: "userBusiness")
   roles                Role[]                 @relation(name: "rolesInBusiness")
   businessSettings     BusinessSettings?      @relation(name: "businessSettings")
   leaveSettings        LeaveSettings?         @relation(name: "leaveSettings")
@@ -401,6 +404,8 @@ model Designation {
   createdBy   Int?      @map("created_by")
   creator     User?     @relation(name: "designationCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
+  employees Employee[] @relation(name: "employeeDesignation")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -499,6 +504,8 @@ model WorkSite {
   createdBy            Int?      @map("created_by")
   creator              User?     @relation(name: "workSiteCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
+  employees Employee[] @relation(name: "employeeWorkSite")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -522,6 +529,8 @@ model Department {
   creator     User?        @relation(name: "departmentCreated", fields: [createdBy], references: [id], onDelete: SetNull)
   children    Department[] @relation("DepartmentHierarchy")
 
+  employees Employee[] @relation(name: "employeeDepartment")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -544,6 +553,8 @@ model WorkSchedule {
   createdBy    Int?              @map("created_by")
   creator      User?             @relation(name: "workScheduleCreated", fields: [createdBy], references: [id], onDelete: SetNull)
   schedules    DaySchedule[]     @relation(name: "daySchedule")
+
+  employees Employee[] @relation(name: "employeeWorkSchedule")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -587,6 +598,8 @@ model EmploymentStatus {
   business    Business?                   @relation(name: "employmentStatusesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy   Int?                        @map("created_by")
   creator     User?                       @relation(name: "employmentStatusCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  employees Employee[] @relation(name: "employeeEmploymentStatus")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -730,4 +743,45 @@ model ProjectMember {
   @@index([projectId])
   @@index([userId])
   @@map("project_members")
+}
+
+model Employee {
+  id                  Int              @id @default(autoincrement())
+  userId              Int              @unique @map("user_id")
+  user                User             @relation(name: "userEmployee", fields: [userId], references: [id], onDelete: Cascade)
+  employeeId          String           @unique @map("employee_id")
+  nidNumber           String           @map("nid_number")
+  joiningDate         DateTime         @map("joining_date")
+  salaryPerMonth      Float            @map("salary_per_month")
+  workingDaysPerWeek  Int?             @map("working_days_per_week")
+  workingHoursPerWeek Int?             @map("working_hours_per_week")
+  designationId       Int              @map("designation_id")
+  designation         Designation      @relation(name: "employeeDesignation", fields: [designationId], references: [id])
+  employmentStatusId  Int              @map("employment_status_id")
+  employmentStatus    EmploymentStatus @relation(name: "employeeEmploymentStatus", fields: [employmentStatusId], references: [id])
+  departmentId        Int              @map("department_id")
+  department          Department       @relation(name: "employeeDepartment", fields: [departmentId], references: [id])
+  workSiteId          Int              @map("work_site_id")
+  workSite            WorkSite         @relation(name: "employeeWorkSite", fields: [workSiteId], references: [id])
+  workScheduleId      Int              @map("work_schedule_id")
+  workSchedule        WorkSchedule     @relation(name: "employeeWorkSchedule", fields: [workScheduleId], references: [id])
+  rotaType            String           @default("day_base") @map("rota_type")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("employees")
+}
+
+model EmergencyContact {
+  profileId Int     @id @map("profile_id")
+  profile   Profile @relation(name: "profileEmergencyContact", fields: [profileId], references: [id], onDelete: Cascade)
+  name      String  @map("name")
+  phone     String  @map("phone")
+  relation  String  @map("relation")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("emergency_contacts")
 }

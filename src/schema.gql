@@ -179,13 +179,13 @@ type Business {
   lng: Float
   name: String!
   numberOfEmployeesAllowed: Int!
+  owner: User
   phone: String!
   postcode: String!
   registrationDate: String!
   status: String!
   subscriptionPlanId: Int!
   updatedAt: DateTime!
-  user: User
   userId: Int!
   website: String
 }
@@ -324,6 +324,30 @@ input CreateDesignationInput {
   name: String!
 }
 
+input CreateEmergencyContactInput {
+  name: String!
+  phone: String!
+  relation: String!
+}
+
+input CreateEmployeeInput {
+  departmentId: Int!
+  designationId: Int!
+  emergencyContact: CreateEmergencyContactInput
+  employeeId: String
+  employmentStatusId: Int!
+  joiningDate: DateTime!
+  nidNumber: String!
+  profile: CreateProfileInput!
+  rotaType: String
+  salaryPerMonth: Float!
+  user: CreateUserInput!
+  workScheduleId: Int!
+  workSiteId: Int!
+  workingDaysPerWeek: Int
+  workingHoursPerWeek: Int
+}
+
 input CreateEmploymentStatusInput {
   """Description of the employment status"""
   description: String!
@@ -438,8 +462,10 @@ input CreateTimeSlotInput {
 }
 
 input CreateUserInput {
+  businessId: Int
   email: String!
   password: String!
+  roleId: Int!
 }
 
 input CreateWorkScheduleInput {
@@ -621,6 +647,40 @@ type DesignationsQueryResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
+}
+
+type EmergencyContact {
+  createdAt: DateTime!
+  name: String!
+  phone: String!
+  profileId: Int!
+  relation: String!
+  updatedAt: DateTime!
+}
+
+type Employee {
+  createdAt: DateTime!
+  department: Department!
+  departmentId: Int!
+  designation: Designation!
+  designationId: Int!
+  employeeId: String!
+  employmentStatus: EmploymentStatus!
+  employmentStatusId: Int!
+  id: ID!
+  joiningDate: DateTime!
+  nidNumber: String!
+  rotaType: String!
+  salaryPerMonth: Float!
+  updatedAt: DateTime!
+  user: User!
+  userId: Int!
+  workSchedule: WorkSchedule!
+  workScheduleId: Int!
+  workSite: WorkSite!
+  workSiteId: Int!
+  workingDaysPerWeek: Int
+  workingHoursPerWeek: Int
 }
 
 type EmploymentStatus {
@@ -890,6 +950,7 @@ type Mutation {
   createAssetType(createAssetTypeInput: CreateAssetTypeInput!): AssetTypeResponse!
   createDepartment(createDepartmentInput: CreateDepartmentInput!): DepartmentResponse!
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
+  createEmployee(createEmployeeInput: CreateEmployeeInput!): UserResponse!
   createEmploymentStatus(createEmploymentStatusInput: CreateEmploymentStatusInput!): EmploymentStatusResponse!
   createJobPlatform(createJobPlatformInput: CreateJobPlatformInput!): JobPlatformResponse!
   createJobType(createJobTypeInput: CreateJobTypeInput!): JobTypeResponse!
@@ -898,13 +959,13 @@ type Mutation {
   createProject(createProjectInput: CreateProjectInput!): ProjectResponse!
   createRecruitmentProcess(createRecruitmentProcessInput: CreateRecruitmentProcessInput!): RecruitmentProcessResponse!
   createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
-  createUser(createUserInput: CreateUserInput!): User!
   createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
   createWorkSchedule(createWorkScheduleInput: CreateWorkScheduleInput!): WorkScheduleResponse!
   createWorkSite(createWorkSiteInput: CreateWorkSiteInput!): WorkSiteResponse!
   deleteBusiness(id: Int!): Business!
   deleteDepartment(id: Int!): DepartmentResponse!
   deleteDesignation(id: Int!): DesignationResponse!
+  deleteEmployee(id: Int!): UserResponse!
   deleteEmploymentStatus(id: Int!): EmploymentStatusResponse!
   deleteJobPlatform(id: Int!): JobPlatformResponse!
   deleteJobType(id: Int!): JobTypeResponse!
@@ -912,7 +973,7 @@ type Mutation {
   deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
-  deleteUser(id: Int!): User!
+  deleteUser(id: Int!): UserResponse!
   deleteWorkSchedule(id: Int!): WorkScheduleResponse!
   deleteWorkSite(id: Int!): WorkSiteResponse!
   login(loginInput: LoginAuthInput!): Auth!
@@ -929,6 +990,7 @@ type Mutation {
   updateBusinessSetting(updateBusinessSettingInput: UpdateBusinessSettingInput!): BusinessSettingResponse!
   updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): DepartmentResponse!
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
+  updateEmployee(updateEmployeeInput: UpdateEmployeeInput!): UserResponse!
   updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
   updateJobPlatform(updateJobPlatformInput: UpdateJobPlatformInput!): JobPlatformResponse!
   updateJobType(updateJobTypeInput: UpdateJobTypeInput!): JobTypeResponse!
@@ -1011,6 +1073,7 @@ type Profile {
   country: String!
   createdAt: DateTime!
   dateOfBirth: String!
+  emergencyContact: EmergencyContact
   fullName: String!
   gender: GENDER!
   id: ID!
@@ -1090,6 +1153,8 @@ type Query {
   departments(query: QueryDepartmentInput): DepartmentsQueryResponse!
   designationById(id: Int!): DesignationResponse!
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
+  employeeById(id: Int!): UserResponse!
+  employees(query: QueryUserInput): UsersQueryResponse!
   employmentStatusById(id: Int!): EmploymentStatusResponse!
   employmentStatuses(query: QueryEmploymentStatusInput): EmploymentStatusesQueryResponse!
   jobPlatformById(id: Int!): JobPlatformResponse!
@@ -1107,9 +1172,10 @@ type Query {
   projects(businessId: Int): ProjectsQueryResponse!
   recruitmentProcessById(id: Int!): RecruitmentProcessResponse!
   recruitmentProcesses(query: QueryRecruitmentProcessInput): RecruitmentProcessesQueryResponse!
+  roles: RoleResponse!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
-  userById(id: Int!): User!
+  userById(id: Int!): UserResponse!
   users: [User!]!
   workScheduleById(id: Int!): WorkScheduleResponse!
   workSchedules(query: QueryWorkScheduleInput): WorkSchedulesQueryResponse!
@@ -1195,6 +1261,11 @@ input QuerySubscriptionPlanInput {
   pagination: BasePaginationInput
   price: Int
   status: Status
+}
+
+input QueryUserInput {
+  pagination: BasePaginationInput
+  searchTerm: String
 }
 
 input QueryWorkScheduleInput {
@@ -1291,6 +1362,14 @@ type RolePermission {
 
   """ID of the role"""
   roleId: Int!
+}
+
+type RoleResponse {
+  data: [Role!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 enum ScheduleBreakType {
@@ -1510,6 +1589,25 @@ input UpdateDesignationInput {
   name: String
 }
 
+input UpdateEmployeeInput {
+  departmentId: Int
+  designationId: Int
+  emergencyContact: CreateEmergencyContactInput
+  employeeId: String
+  employmentStatusId: Int
+  id: Int!
+  joiningDate: DateTime
+  nidNumber: String
+  profile: CreateProfileInput
+  rotaType: String
+  salaryPerMonth: Float
+  user: CreateUserInput
+  workScheduleId: Int
+  workSiteId: Int
+  workingDaysPerWeek: Int
+  workingHoursPerWeek: Int
+}
+
 input UpdateEmploymentStatusInput {
   """Description of the employment status"""
   description: String
@@ -1675,6 +1773,9 @@ input UpdateWorkSiteInput {
 type User {
   business: Business
 
+  """ID of the business (direct connection)"""
+  businessId: Int
+
   """Date when the user was created"""
   createdAt: DateTime!
 
@@ -1683,6 +1784,7 @@ type User {
 
   """Email of the user"""
   email: String!
+  employee: Employee
   id: ID!
 
   """Formatted permissions as ["Resource:action"]"""
@@ -1713,6 +1815,22 @@ type UserPermission {
 
   """ID of the user"""
   userId: Int!
+}
+
+type UserResponse {
+  data: User!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type UsersQueryResponse {
+  data: [User!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type WorkSchedule {
