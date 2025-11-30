@@ -38,6 +38,7 @@ import { WorkSchedulesModule } from './modules/work-schedules/work-schedules.mod
 import { AssetTypesModule } from './modules/asset-types/asset-types.module';
 import { AssetsModule } from './modules/assets/assets.module';
 import { ProjectsModule } from './modules/projects/projects.module';
+import { EducationHistoriesModule } from './modules/education-histories/education-histories.module';
 
 @Module({
   imports: [
@@ -82,6 +83,7 @@ import { ProjectsModule } from './modules/projects/projects.module';
     AssetTypesModule,
     AssetsModule,
     ProjectsModule,
+    EducationHistoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

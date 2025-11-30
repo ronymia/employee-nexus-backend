@@ -324,6 +324,38 @@ input CreateDesignationInput {
   name: String!
 }
 
+input CreateEducationHistoryInput {
+  """City where institution is located"""
+  city: String
+
+  """Country where institution is located"""
+  country: String!
+
+  """Degree or qualification"""
+  degree: String!
+
+  """Additional details or achievements"""
+  description: String
+
+  """End/graduation date (MM-YYYY or YYYY)"""
+  endDate: String
+
+  """Field of study or major"""
+  fieldOfStudy: String!
+
+  """Grade, GPA, or percentage"""
+  grade: String
+
+  """Institution or university name"""
+  institution: String!
+
+  """Whether currently studying"""
+  isCurrentlyStudying: Boolean! = false
+
+  """Start date (MM-YYYY or YYYY)"""
+  startDate: String!
+}
+
 input CreateEmergencyContactInput {
   name: String!
   phone: String!
@@ -649,6 +681,67 @@ type DesignationsQueryResponse {
   success: Boolean!
 }
 
+type EducationHistoriesQueryResponse {
+  data: [EducationHistory!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EducationHistory {
+  """City where institution is located"""
+  city: String
+
+  """Country where institution is located"""
+  country: String!
+
+  """Date when the record was created"""
+  createdAt: DateTime!
+
+  """Degree or qualification"""
+  degree: String!
+
+  """Additional details or achievements"""
+  description: String
+
+  """End/graduation date (MM-YYYY or YYYY)"""
+  endDate: String
+
+  """Field of study or major"""
+  fieldOfStudy: String!
+
+  """Grade, GPA, or percentage"""
+  grade: String
+  id: ID!
+
+  """Institution or university name"""
+  institution: String!
+
+  """Whether currently studying"""
+  isCurrentlyStudying: Boolean!
+
+  """Start date (MM-YYYY or YYYY)"""
+  startDate: String!
+
+  """Date when the record was last updated"""
+  updatedAt: DateTime!
+
+  """User who owns this education history"""
+  user: User
+
+  """ID of the user"""
+  userId: Int!
+}
+
+type EducationHistoryResponse {
+  data: EducationHistory!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type EmergencyContact {
   createdAt: DateTime!
   name: String!
@@ -950,6 +1043,7 @@ type Mutation {
   createAssetType(createAssetTypeInput: CreateAssetTypeInput!): AssetTypeResponse!
   createDepartment(createDepartmentInput: CreateDepartmentInput!): DepartmentResponse!
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
+  createEducationHistory(createEducationHistoryInput: CreateEducationHistoryInput!): EducationHistoryResponse!
   createEmployee(createEmployeeInput: CreateEmployeeInput!): UserResponse!
   createEmploymentStatus(createEmploymentStatusInput: CreateEmploymentStatusInput!): EmploymentStatusResponse!
   createJobPlatform(createJobPlatformInput: CreateJobPlatformInput!): JobPlatformResponse!
@@ -965,6 +1059,7 @@ type Mutation {
   deleteBusiness(id: Int!): Business!
   deleteDepartment(id: Int!): DepartmentResponse!
   deleteDesignation(id: Int!): DesignationResponse!
+  deleteEducationHistory(id: Int!): EducationHistoryResponse!
   deleteEmployee(id: Int!): UserResponse!
   deleteEmploymentStatus(id: Int!): EmploymentStatusResponse!
   deleteJobPlatform(id: Int!): JobPlatformResponse!
@@ -990,6 +1085,7 @@ type Mutation {
   updateBusinessSetting(updateBusinessSettingInput: UpdateBusinessSettingInput!): BusinessSettingResponse!
   updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): DepartmentResponse!
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
+  updateEducationHistory(updateEducationHistoryInput: UpdateEducationHistoryInput!): EducationHistoryResponse!
   updateEmployee(updateEmployeeInput: UpdateEmployeeInput!): UserResponse!
   updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
   updateJobPlatform(updateJobPlatformInput: UpdateJobPlatformInput!): JobPlatformResponse!
@@ -1153,6 +1249,8 @@ type Query {
   departments(query: QueryDepartmentInput): DepartmentsQueryResponse!
   designationById(id: Int!): DesignationResponse!
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
+  educationHistories: EducationHistoriesQueryResponse!
+  educationHistory(id: Int!): EducationHistoryResponse!
   employeeById(id: Int!): UserResponse!
   employees(query: QueryUserInput): UsersQueryResponse!
   employmentStatusById(id: Int!): EmploymentStatusResponse!
@@ -1587,6 +1685,39 @@ input UpdateDesignationInput {
 
   """Name of the designation"""
   name: String
+}
+
+input UpdateEducationHistoryInput {
+  """City where institution is located"""
+  city: String
+
+  """Country where institution is located"""
+  country: String
+
+  """Degree or qualification"""
+  degree: String
+
+  """Additional details or achievements"""
+  description: String
+
+  """End/graduation date (MM-YYYY or YYYY)"""
+  endDate: String
+
+  """Field of study or major"""
+  fieldOfStudy: String
+
+  """Grade, GPA, or percentage"""
+  grade: String
+  id: Int!
+
+  """Institution or university name"""
+  institution: String
+
+  """Whether currently studying"""
+  isCurrentlyStudying: Boolean = false
+
+  """Start date (MM-YYYY or YYYY)"""
+  startDate: String
 }
 
 input UpdateEmployeeInput {
