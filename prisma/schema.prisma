@@ -95,27 +95,32 @@ model User {
   business   Business? @relation(name: "userBusiness", fields: [businessId], references: [id], onDelete: Cascade)
 
   userPermissions           UserPermission[]
-  ownedBusiness             Business?            @relation(name: "businessOwner")
-  subscriptionPlanCreated   SubscriptionPlan[]   @relation(name: "subscriptionPlanCreated")
-  employmentStatusCreated   EmploymentStatus[]   @relation(name: "employmentStatusCreated")
-  designationCreated        Designation[]        @relation(name: "designationCreated")
-  jobTypeCreated            JobType[]            @relation(name: "jobTypeCreated")
-  jobPlatformCreated        JobPlatform[]        @relation(name: "jobPlatformCreated")
-  recruitmentProcessCreated RecruitmentProcess[] @relation(name: "recruitmentProcessCreated")
-  onboardingProcessCreated  OnboardingProcess[]  @relation(name: "onboardingProcessCreated")
-  workSiteCreated           WorkSite[]           @relation(name: "workSiteCreated")
-  workScheduleCreated       WorkSchedule[]       @relation(name: "workScheduleCreated")
-  managedDepartments        Department[]         @relation(name: "managedDepartments")
-  departmentCreated         Department[]         @relation(name: "departmentCreated")
-  leaveTypeCreated          LeaveType[]          @relation(name: "leaveTypeCreated")
-  assetTypes                AssetType[]          @relation(name: "assetTypesCreated")
-  assetAssignments          AssetAssignment[]    @relation(name: "assetAssignmentsAssignedToUser")
-  assetAssignmentsBy        AssetAssignment[]    @relation(name: "assetAssignmentsAssignedByUser")
-  assetCreated              Asset[]              @relation(name: "assetCreated")
-  projectCreated            Project[]            @relation(name: "projectCreated")
-  projects                  ProjectMember[]      @relation(name: "projectMembersInUser")
-  educationHistory          EducationHistory[]   @relation(name: "userEducationHistory")
-  jobHistory                JobHistory[]         @relation(name: "userJobHistory")
+  ownedBusiness             Business?                    @relation(name: "businessOwner")
+  subscriptionPlanCreated   SubscriptionPlan[]           @relation(name: "subscriptionPlanCreated")
+  employmentStatusCreated   EmploymentStatus[]           @relation(name: "employmentStatusCreated")
+  designationCreated        Designation[]                @relation(name: "designationCreated")
+  jobTypeCreated            JobType[]                    @relation(name: "jobTypeCreated")
+  jobPlatformCreated        JobPlatform[]                @relation(name: "jobPlatformCreated")
+  recruitmentProcessCreated RecruitmentProcess[]         @relation(name: "recruitmentProcessCreated")
+  onboardingProcessCreated  OnboardingProcess[]          @relation(name: "onboardingProcessCreated")
+  workSiteCreated           WorkSite[]                   @relation(name: "workSiteCreated")
+  workScheduleCreated       WorkSchedule[]               @relation(name: "workScheduleCreated")
+  managedDepartments        Department[]                 @relation(name: "managedDepartments")
+  departmentCreated         Department[]                 @relation(name: "departmentCreated")
+  leaveTypeCreated          LeaveType[]                  @relation(name: "leaveTypeCreated")
+  assetTypes                AssetType[]                  @relation(name: "assetTypesCreated")
+  assetAssignments          AssetAssignment[]            @relation(name: "assetAssignmentsAssignedToUser")
+  assetAssignmentsBy        AssetAssignment[]            @relation(name: "assetAssignmentsAssignedByUser")
+  assetCreated              Asset[]                      @relation(name: "assetCreated")
+  projectCreated            Project[]                    @relation(name: "projectCreated")
+  projects                  ProjectMember[]              @relation(name: "projectMembersInUser")
+  educationHistory          EducationHistory[]           @relation(name: "userEducationHistory")
+  jobHistory                JobHistory[]                 @relation(name: "userJobHistory")
+  scheduleAssignments       EmployeeScheduleAssignment[] @relation(name: "userScheduleAssignments")
+  scheduleAssignmentsBy     EmployeeScheduleAssignment[] @relation(name: "scheduleAssignmentsByUser")
+  documents                 Document[]                   @relation(name: "userDocuments")
+  notes                     Note[]                       @relation(name: "userNotes")
+  notesCreated              Note[]                       @relation(name: "noteCreatedBy")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -556,7 +561,8 @@ model WorkSchedule {
   creator      User?             @relation(name: "workScheduleCreated", fields: [createdBy], references: [id], onDelete: SetNull)
   schedules    DaySchedule[]     @relation(name: "daySchedule")
 
-  employees Employee[] @relation(name: "employeeWorkSchedule")
+  employees           Employee[]                   @relation(name: "employeeWorkSchedule")
+  scheduleAssignments EmployeeScheduleAssignment[] @relation(name: "workScheduleAssignments")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -564,6 +570,28 @@ model WorkSchedule {
   @@unique([name, businessId])
   @@index([scheduleType, businessId])
   @@map("work_schedules")
+}
+
+model EmployeeScheduleAssignment {
+  id             Int          @id @default(autoincrement())
+  userId         Int          @map("user_id")
+  user           User         @relation(name: "userScheduleAssignments", fields: [userId], references: [id], onDelete: Cascade)
+  workScheduleId Int          @map("work_schedule_id")
+  workSchedule   WorkSchedule @relation(name: "workScheduleAssignments", fields: [workScheduleId], references: [id], onDelete: Restrict)
+  startDate      DateTime     @map("start_date") // When the assignment becomes effective
+  endDate        DateTime?    @map("end_date") // When the assignment ends, null if current
+  isActive       Boolean      @default(true) @map("is_active") // Whether this is the active schedule
+  assignedBy     Int          @map("assigned_by")
+  assignedByUser User         @relation(name: "scheduleAssignmentsByUser", fields: [assignedBy], references: [id], onDelete: SetNull)
+  notes          String? // Optional notes about the assignment
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([workScheduleId])
+  @@index([userId, isActive])
+  @@map("employee_schedule_assignments")
 }
 
 model DaySchedule {
@@ -829,4 +857,38 @@ model JobHistory {
 
   @@index([userId])
   @@map("job_history")
+}
+
+model Document {
+  id          Int     @id @default(autoincrement())
+  userId      Int     @map("user_id")
+  user        User    @relation(name: "userDocuments", fields: [userId], references: [id], onDelete: Cascade)
+  title       String  @map("title")
+  description String? @map("description")
+  attachment  String  @map("attachment")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("documents")
+}
+
+model Note {
+  id        Int     @id @default(autoincrement())
+  userId    Int     @map("user_id")
+  user      User    @relation(name: "userNotes", fields: [userId], references: [id], onDelete: Cascade)
+  createdBy Int     @map("created_by")
+  creator   User    @relation(name: "noteCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  title     String  @map("title")
+  content   String  @map("content")
+  category  String? @map("category") // e.g., "Performance", "Incident", "General", "Feedback"
+  isPrivate Boolean @default(true) @map("is_private")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([createdBy])
+  @@map("notes")
 }

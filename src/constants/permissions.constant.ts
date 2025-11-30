@@ -29,4 +29,6 @@ export enum PermissionResource {
   ATTENDANCE_SETTINGS = 'Attendance Settings',
   LEAVE_SETTINGS = 'Leave Settings',
   BUSINESS_SETTINGS = 'Business Settings',
+  DOCUMENT = 'Document',
+  NOTE = 'Note',
 }

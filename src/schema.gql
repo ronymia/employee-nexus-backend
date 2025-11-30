@@ -324,6 +324,17 @@ input CreateDesignationInput {
   name: String!
 }
 
+input CreateDocumentInput {
+  """Attachment URL or path"""
+  attachment: String!
+
+  """Description of the document"""
+  description: String
+
+  """Title of the document"""
+  title: String!
+}
+
 input CreateEducationHistoryInput {
   """City where institution is located"""
   city: String
@@ -380,6 +391,26 @@ input CreateEmployeeInput {
   workingHoursPerWeek: Int
 }
 
+input CreateEmployeeScheduleAssignmentInput {
+  """Assignment end date (ISO 8601)"""
+  endDate: String
+
+  """Whether this is the active schedule"""
+  isActive: Boolean! = true
+
+  """Optional notes about assignment"""
+  notes: String
+
+  """Assignment start date (ISO 8601)"""
+  startDate: String!
+
+  """ID of the user/employee"""
+  userId: Int!
+
+  """ID of the work schedule"""
+  workScheduleId: Int!
+}
+
 input CreateEmploymentStatusInput {
   """Description of the employment status"""
   description: String!
@@ -389,8 +420,32 @@ input CreateEmploymentStatusInput {
 }
 
 input CreateJobHistoryInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  """Key achievements and accomplishments"""
+  achievements: String
+
+  """City where job was located"""
+  city: String
+
+  """Company or organization name"""
+  companyName: String!
+
+  """Country where job was located"""
+  country: String!
+
+  """Employment type"""
+  employmentType: String!
+
+  """End date (MM-YYYY or YYYY)"""
+  endDate: String
+
+  """Job title or position"""
+  jobTitle: String!
+
+  """Job responsibilities and duties"""
+  responsibilities: String
+
+  """Start date (MM-YYYY or YYYY)"""
+  startDate: String!
 }
 
 input CreateJobPlatformInput {
@@ -427,6 +482,23 @@ input CreateLeaveTypeInput {
 
   """Name of the leave type"""
   name: String!
+}
+
+input CreateNoteInput {
+  """Category of the note"""
+  category: String
+
+  """Content of the note"""
+  content: String!
+
+  """Whether the note is private"""
+  isPrivate: Boolean
+
+  """Title of the note"""
+  title: String!
+
+  """ID of the user this note is about"""
+  userId: Int!
 }
 
 input CreateOnboardingProcessInput {
@@ -686,6 +758,45 @@ type DesignationsQueryResponse {
   success: Boolean!
 }
 
+type Document {
+  """Attachment URL or path"""
+  attachment: String!
+
+  """Date when the document was created"""
+  createdAt: DateTime!
+
+  """Description of the document"""
+  description: String
+
+  """Unique identifier for the document"""
+  id: ID!
+
+  """Title of the document"""
+  title: String!
+
+  """Date when the document was last updated"""
+  updatedAt: DateTime!
+
+  """ID of the user who owns the document"""
+  userId: Int!
+}
+
+type DocumentResponse {
+  data: Document!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type DocumentsQueryResponse {
+  data: [Document!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type EducationHistoriesQueryResponse {
   data: [EducationHistory!]!
   message: String!
@@ -781,6 +892,61 @@ type Employee {
   workingHoursPerWeek: Int
 }
 
+type EmployeeScheduleAssignment {
+  """ID of user who assigned the schedule"""
+  assignedBy: Int!
+
+  """User who assigned the schedule"""
+  assignedByUser: User
+
+  """Date when the record was created"""
+  createdAt: DateTime!
+
+  """Assignment end date"""
+  endDate: DateTime
+  id: ID!
+
+  """Whether this is the active schedule"""
+  isActive: Boolean!
+
+  """Optional notes about assignment"""
+  notes: String
+
+  """Assignment start date"""
+  startDate: DateTime!
+
+  """Date when the record was last updated"""
+  updatedAt: DateTime!
+
+  """User/employee assigned to schedule"""
+  user: User
+
+  """ID of the user/employee"""
+  userId: Int!
+
+  """Assigned work schedule"""
+  workSchedule: WorkSchedule
+
+  """ID of the work schedule"""
+  workScheduleId: Int!
+}
+
+type EmployeeScheduleAssignmentResponse {
+  data: EmployeeScheduleAssignment!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EmployeeScheduleAssignmentsQueryResponse {
+  data: [EmployeeScheduleAssignment!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type EmploymentStatus {
   """ID of the business"""
   businessId: Int!
@@ -851,9 +1017,62 @@ enum GENDER {
   MALE
 }
 
+type JobHistoriesQueryResponse {
+  data: [JobHistory!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type JobHistory {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  """Key achievements and accomplishments"""
+  achievements: String
+
+  """City where job was located"""
+  city: String
+
+  """Company or organization name"""
+  companyName: String!
+
+  """Country where job was located"""
+  country: String!
+
+  """Date when the record was created"""
+  createdAt: DateTime!
+
+  """Employment type"""
+  employmentType: String!
+
+  """End date (MM-YYYY or YYYY)"""
+  endDate: String
+  id: ID!
+
+  """Job title or position"""
+  jobTitle: String!
+
+  """Job responsibilities and duties"""
+  responsibilities: String
+
+  """Start date (MM-YYYY or YYYY)"""
+  startDate: String!
+
+  """Date when the record was last updated"""
+  updatedAt: DateTime!
+
+  """User who owns this job history"""
+  user: User
+
+  """ID of the user"""
+  userId: Int!
+}
+
+type JobHistoryResponse {
+  data: JobHistory!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type JobPlatform {
@@ -1053,13 +1272,16 @@ type Mutation {
   createAssetType(createAssetTypeInput: CreateAssetTypeInput!): AssetTypeResponse!
   createDepartment(createDepartmentInput: CreateDepartmentInput!): DepartmentResponse!
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
+  createDocument(createDocumentInput: CreateDocumentInput!): DocumentResponse!
   createEducationHistory(createEducationHistoryInput: CreateEducationHistoryInput!): EducationHistoryResponse!
   createEmployee(createEmployeeInput: CreateEmployeeInput!): UserResponse!
+  createEmployeeScheduleAssignment(createEmployeeScheduleAssignmentInput: CreateEmployeeScheduleAssignmentInput!): EmployeeScheduleAssignmentResponse!
   createEmploymentStatus(createEmploymentStatusInput: CreateEmploymentStatusInput!): EmploymentStatusResponse!
-  createJobHistory(createJobHistoryInput: CreateJobHistoryInput!): JobHistory!
+  createJobHistory(createJobHistoryInput: CreateJobHistoryInput!): JobHistoryResponse!
   createJobPlatform(createJobPlatformInput: CreateJobPlatformInput!): JobPlatformResponse!
   createJobType(createJobTypeInput: CreateJobTypeInput!): JobTypeResponse!
   createLeaveType(createLeaveTypeInput: CreateLeaveTypeInput!): LeaveTypeResponse!
+  createNote(createNoteInput: CreateNoteInput!): NoteResponse!
   createOnboardingProcess(createOnboardingProcessInput: CreateOnboardingProcessInput!): OnboardingProcessResponse!
   createProject(createProjectInput: CreateProjectInput!): ProjectResponse!
   createRecruitmentProcess(createRecruitmentProcessInput: CreateRecruitmentProcessInput!): RecruitmentProcessResponse!
@@ -1070,12 +1292,16 @@ type Mutation {
   deleteBusiness(id: Int!): Business!
   deleteDepartment(id: Int!): DepartmentResponse!
   deleteDesignation(id: Int!): DesignationResponse!
+  deleteDocument(id: Int!): DocumentResponse!
   deleteEducationHistory(id: Int!): EducationHistoryResponse!
   deleteEmployee(id: Int!): UserResponse!
+  deleteEmployeeScheduleAssignment(id: Int!): EmployeeScheduleAssignmentResponse!
   deleteEmploymentStatus(id: Int!): EmploymentStatusResponse!
+  deleteJobHistory(id: Int!): JobHistoryResponse!
   deleteJobPlatform(id: Int!): JobPlatformResponse!
   deleteJobType(id: Int!): JobTypeResponse!
   deleteLeaveType(id: Int!): LeaveTypeResponse!
+  deleteNote(id: Int!): NoteResponse!
   deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
@@ -1085,7 +1311,6 @@ type Mutation {
   login(loginInput: LoginAuthInput!): Auth!
   removeAsset(id: Int!): AssetResponse!
   removeAssetType(id: Int!): AssetTypeResponse!
-  removeJobHistory(id: Int!): JobHistory!
   removeProject(id: Int!): ProjectResponse!
   returnAsset(returnAssetInput: ReturnAssetInput!): AssetAssignmentResponse!
   unassignProjectMember(unassignProjectMemberInput: UnassignProjectMemberInput!): ProjectMemberResponse!
@@ -1097,20 +1322,68 @@ type Mutation {
   updateBusinessSetting(updateBusinessSettingInput: UpdateBusinessSettingInput!): BusinessSettingResponse!
   updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): DepartmentResponse!
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
+  updateDocument(updateDocumentInput: UpdateDocumentInput!): DocumentResponse!
   updateEducationHistory(updateEducationHistoryInput: UpdateEducationHistoryInput!): EducationHistoryResponse!
   updateEmployee(updateEmployeeInput: UpdateEmployeeInput!): UserResponse!
+  updateEmployeeScheduleAssignment(updateEmployeeScheduleAssignmentInput: UpdateEmployeeScheduleAssignmentInput!): EmployeeScheduleAssignmentResponse!
   updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
-  updateJobHistory(updateJobHistoryInput: UpdateJobHistoryInput!): JobHistory!
+  updateJobHistory(updateJobHistoryInput: UpdateJobHistoryInput!): JobHistoryResponse!
   updateJobPlatform(updateJobPlatformInput: UpdateJobPlatformInput!): JobPlatformResponse!
   updateJobType(updateJobTypeInput: UpdateJobTypeInput!): JobTypeResponse!
   updateLeaveSetting(updateLeaveSettingInput: UpdateLeaveSettingInput!): LeaveSettingResponse!
   updateLeaveType(updateLeaveTypeInput: UpdateLeaveTypeInput!): LeaveTypeResponse!
+  updateNote(updateNoteInput: UpdateNoteInput!): NoteResponse!
   updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
   updateProject(updateProjectInput: UpdateProjectInput!): ProjectResponse!
   updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
   updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
   updateWorkSchedule(updateWorkScheduleInput: UpdateWorkScheduleInput!): WorkScheduleResponse!
   updateWorkSite(updateWorkSiteInput: UpdateWorkSiteInput!): WorkSiteResponse!
+}
+
+type Note {
+  """Category of the note"""
+  category: String
+
+  """Content of the note"""
+  content: String!
+
+  """Date when the note was created"""
+  createdAt: DateTime!
+
+  """ID of the user who created this note"""
+  createdBy: Int!
+
+  """Unique identifier for the note"""
+  id: ID!
+
+  """Whether the note is private"""
+  isPrivate: Boolean!
+
+  """Title of the note"""
+  title: String!
+
+  """Date when the note was last updated"""
+  updatedAt: DateTime!
+
+  """ID of the user this note is about"""
+  userId: Int!
+}
+
+type NoteResponse {
+  data: Note!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type NotesQueryResponse {
+  data: [Note!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type OnboardingProcess {
@@ -1248,6 +1521,7 @@ type ProjectsQueryResponse {
 
 type Query {
   FeatureById(id: Int!): FeatureResponse!
+  activeEmployeeScheduleAssignment(userId: Int!): EmployeeScheduleAssignmentResponse!
   allFeatures: FeatureQueryResponse!
   asset(id: Int!): AssetResponse!
   assetType(id: Int!): AssetTypeResponse!
@@ -1262,14 +1536,19 @@ type Query {
   departments(query: QueryDepartmentInput): DepartmentsQueryResponse!
   designationById(id: Int!): DesignationResponse!
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
+  documentById(id: Int!): DocumentResponse!
+  documents(query: QueryDocumentInput): DocumentsQueryResponse!
   educationHistories: EducationHistoriesQueryResponse!
   educationHistory(id: Int!): EducationHistoryResponse!
   employeeById(id: Int!): UserResponse!
+  employeeScheduleAssignment(id: Int!): EmployeeScheduleAssignmentResponse!
+  employeeScheduleAssignments: EmployeeScheduleAssignmentsQueryResponse!
+  employeeScheduleAssignmentsByUser(userId: Int!): EmployeeScheduleAssignmentsQueryResponse!
   employees(query: QueryUserInput): UsersQueryResponse!
   employmentStatusById(id: Int!): EmploymentStatusResponse!
   employmentStatuses(query: QueryEmploymentStatusInput): EmploymentStatusesQueryResponse!
-  jobHistories: [JobHistory!]!
-  jobHistory(id: Int!): JobHistory!
+  jobHistories: JobHistoriesQueryResponse!
+  jobHistory(id: Int!): JobHistoryResponse!
   jobPlatformById(id: Int!): JobPlatformResponse!
   jobPlatforms(query: QueryJobPlatformInput): JobPlatformsQueryResponse!
   jobTypeById(id: Int!): JobTypeResponse!
@@ -1277,6 +1556,8 @@ type Query {
   leaveSettingByBusinessId: LeaveSettingResponse!
   leaveTypeById(id: Int!): LeaveTypeResponse!
   leaveTypes(query: QueryLeaveTypeInput): LeaveTypesQueryResponse!
+  noteById(id: Int!): NoteResponse!
+  notes(query: QueryNoteInput): NotesQueryResponse!
   onboardingProcessById(id: Int!): OnboardingProcessResponse!
   onboardingProcesses(query: QueryOnboardingProcessInput): OnboardingProcessesQueryResponse!
   permissionById(id: Int!): Permission!
@@ -1324,6 +1605,12 @@ input QueryDesignationInput {
   status: Status
 }
 
+input QueryDocumentInput {
+  pagination: BasePaginationInput
+  searchTerm: String
+  title: String
+}
+
 input QueryEmploymentStatusInput {
   name: String
   pagination: BasePaginationInput
@@ -1350,6 +1637,14 @@ input QueryLeaveTypeInput {
   pagination: BasePaginationInput
   searchTerm: String
   status: Status
+}
+
+input QueryNoteInput {
+  category: String
+  isPrivate: Boolean
+  pagination: BasePaginationInput
+  searchTerm: String
+  title: String
 }
 
 input QueryOnboardingProcessInput {
@@ -1702,6 +1997,18 @@ input UpdateDesignationInput {
   name: String
 }
 
+input UpdateDocumentInput {
+  """Attachment URL or path"""
+  attachment: String
+
+  """Description of the document"""
+  description: String
+  id: Int!
+
+  """Title of the document"""
+  title: String
+}
+
 input UpdateEducationHistoryInput {
   """City where institution is located"""
   city: String
@@ -1754,6 +2061,27 @@ input UpdateEmployeeInput {
   workingHoursPerWeek: Int
 }
 
+input UpdateEmployeeScheduleAssignmentInput {
+  """Assignment end date (ISO 8601)"""
+  endDate: String
+  id: Int!
+
+  """Whether this is the active schedule"""
+  isActive: Boolean = true
+
+  """Optional notes about assignment"""
+  notes: String
+
+  """Assignment start date (ISO 8601)"""
+  startDate: String
+
+  """ID of the user/employee"""
+  userId: Int
+
+  """ID of the work schedule"""
+  workScheduleId: Int
+}
+
 input UpdateEmploymentStatusInput {
   """Description of the employment status"""
   description: String
@@ -1764,9 +2092,33 @@ input UpdateEmploymentStatusInput {
 }
 
 input UpdateJobHistoryInput {
-  """Example field (placeholder)"""
-  exampleField: Int
+  """Key achievements and accomplishments"""
+  achievements: String
+
+  """City where job was located"""
+  city: String
+
+  """Company or organization name"""
+  companyName: String
+
+  """Country where job was located"""
+  country: String
+
+  """Employment type"""
+  employmentType: String
+
+  """End date (MM-YYYY or YYYY)"""
+  endDate: String
   id: Int!
+
+  """Job title or position"""
+  jobTitle: String
+
+  """Job responsibilities and duties"""
+  responsibilities: String
+
+  """Start date (MM-YYYY or YYYY)"""
+  startDate: String
 }
 
 input UpdateJobPlatformInput {
@@ -1814,6 +2166,24 @@ input UpdateLeaveTypeInput {
 
   """Name of the leave type"""
   name: String
+}
+
+input UpdateNoteInput {
+  """Category of the note"""
+  category: String
+
+  """Content of the note"""
+  content: String
+  id: Int!
+
+  """Whether the note is private"""
+  isPrivate: Boolean
+
+  """Title of the note"""
+  title: String
+
+  """ID of the user this note is about"""
+  userId: Int
 }
 
 input UpdateOnboardingProcessInput {

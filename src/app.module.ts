@@ -40,6 +40,9 @@ import { AssetsModule } from './modules/assets/assets.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { EducationHistoriesModule } from './modules/education-histories/education-histories.module';
 import { JobHistoriesModule } from './modules/job-histories/job-histories.module';
+import { EmployeeScheduleAssignmentsModule } from './modules/employee-schedule-assignments/employee-schedule-assignments.module';
+import { DocumentsModule } from './modules/documents/documents.module';
+import { NotesModule } from './modules/notes/notes.module';
 
 @Module({
   imports: [
@@ -86,6 +89,9 @@ import { JobHistoriesModule } from './modules/job-histories/job-histories.module
     ProjectsModule,
     EducationHistoriesModule,
     JobHistoriesModule,
+    EmployeeScheduleAssignmentsModule,
+    DocumentsModule,
+    NotesModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

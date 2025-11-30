@@ -88,4 +88,22 @@ export const employeePermissions = [
     resource: PermissionResource.BUSINESS_SETTINGS,
     action: [PermissionAction.READ],
   },
+  {
+    resource: PermissionResource.DOCUMENT,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
+  {
+    resource: PermissionResource.NOTE,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
 ];

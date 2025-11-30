@@ -173,4 +173,22 @@ export const adminPermissions = [
       PermissionAction.DELETE,
     ],
   },
+  {
+    resource: PermissionResource.DOCUMENT,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
+  {
+    resource: PermissionResource.NOTE,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
 ];
