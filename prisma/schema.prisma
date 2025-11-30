@@ -115,6 +115,7 @@ model User {
   projectCreated            Project[]            @relation(name: "projectCreated")
   projects                  ProjectMember[]      @relation(name: "projectMembersInUser")
   educationHistory          EducationHistory[]   @relation(name: "userEducationHistory")
+  jobHistory                JobHistory[]         @relation(name: "userJobHistory")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -807,4 +808,25 @@ model EducationHistory {
 
   @@index([userId])
   @@map("education_history")
+}
+
+model JobHistory {
+  id               Int     @id @default(autoincrement())
+  userId           Int     @map("user_id")
+  user             User    @relation(name: "userJobHistory", fields: [userId], references: [id], onDelete: Cascade)
+  jobTitle         String  @map("job_title") // e.g., "Software Engineer", "Project Manager"
+  companyName      String  @map("company_name") // Name of the company/organization
+  employmentType   String  @map("employment_type") // e.g., "Full-time", "Part-time", "Contract", "Freelance"
+  country          String // Country where job was located
+  city             String? // City where job was located
+  startDate        String  @map("start_date") // Format: "MM-YYYY" or "YYYY"
+  endDate          String? @map("end_date") // Format: "MM-YYYY" or "YYYY", null if currently working
+  responsibilities String? // Job responsibilities and duties
+  achievements     String? // Key achievements and accomplishments
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("job_history")
 }

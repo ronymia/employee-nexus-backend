@@ -388,6 +388,11 @@ input CreateEmploymentStatusInput {
   name: String!
 }
 
+input CreateJobHistoryInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
 input CreateJobPlatformInput {
   """Description of the job platform"""
   description: String!
@@ -846,6 +851,11 @@ enum GENDER {
   MALE
 }
 
+type JobHistory {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
 type JobPlatform {
   """ID of the business"""
   businessId: Int!
@@ -1046,6 +1056,7 @@ type Mutation {
   createEducationHistory(createEducationHistoryInput: CreateEducationHistoryInput!): EducationHistoryResponse!
   createEmployee(createEmployeeInput: CreateEmployeeInput!): UserResponse!
   createEmploymentStatus(createEmploymentStatusInput: CreateEmploymentStatusInput!): EmploymentStatusResponse!
+  createJobHistory(createJobHistoryInput: CreateJobHistoryInput!): JobHistory!
   createJobPlatform(createJobPlatformInput: CreateJobPlatformInput!): JobPlatformResponse!
   createJobType(createJobTypeInput: CreateJobTypeInput!): JobTypeResponse!
   createLeaveType(createLeaveTypeInput: CreateLeaveTypeInput!): LeaveTypeResponse!
@@ -1074,6 +1085,7 @@ type Mutation {
   login(loginInput: LoginAuthInput!): Auth!
   removeAsset(id: Int!): AssetResponse!
   removeAssetType(id: Int!): AssetTypeResponse!
+  removeJobHistory(id: Int!): JobHistory!
   removeProject(id: Int!): ProjectResponse!
   returnAsset(returnAssetInput: ReturnAssetInput!): AssetAssignmentResponse!
   unassignProjectMember(unassignProjectMemberInput: UnassignProjectMemberInput!): ProjectMemberResponse!
@@ -1088,6 +1100,7 @@ type Mutation {
   updateEducationHistory(updateEducationHistoryInput: UpdateEducationHistoryInput!): EducationHistoryResponse!
   updateEmployee(updateEmployeeInput: UpdateEmployeeInput!): UserResponse!
   updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
+  updateJobHistory(updateJobHistoryInput: UpdateJobHistoryInput!): JobHistory!
   updateJobPlatform(updateJobPlatformInput: UpdateJobPlatformInput!): JobPlatformResponse!
   updateJobType(updateJobTypeInput: UpdateJobTypeInput!): JobTypeResponse!
   updateLeaveSetting(updateLeaveSettingInput: UpdateLeaveSettingInput!): LeaveSettingResponse!
@@ -1255,6 +1268,8 @@ type Query {
   employees(query: QueryUserInput): UsersQueryResponse!
   employmentStatusById(id: Int!): EmploymentStatusResponse!
   employmentStatuses(query: QueryEmploymentStatusInput): EmploymentStatusesQueryResponse!
+  jobHistories: [JobHistory!]!
+  jobHistory(id: Int!): JobHistory!
   jobPlatformById(id: Int!): JobPlatformResponse!
   jobPlatforms(query: QueryJobPlatformInput): JobPlatformsQueryResponse!
   jobTypeById(id: Int!): JobTypeResponse!
@@ -1746,6 +1761,12 @@ input UpdateEmploymentStatusInput {
 
   """Name of the employment status"""
   name: String
+}
+
+input UpdateJobHistoryInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
 }
 
 input UpdateJobPlatformInput {

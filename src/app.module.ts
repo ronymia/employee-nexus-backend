@@ -39,6 +39,7 @@ import { AssetTypesModule } from './modules/asset-types/asset-types.module';
 import { AssetsModule } from './modules/assets/assets.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { EducationHistoriesModule } from './modules/education-histories/education-histories.module';
+import { JobHistoriesModule } from './modules/job-histories/job-histories.module';
 
 @Module({
   imports: [
@@ -84,6 +85,7 @@ import { EducationHistoriesModule } from './modules/education-histories/educatio
     AssetsModule,
     ProjectsModule,
     EducationHistoriesModule,
+    JobHistoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],
