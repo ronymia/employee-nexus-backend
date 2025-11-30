@@ -106,4 +106,13 @@ export const employeePermissions = [
       PermissionAction.DELETE,
     ],
   },
+  {
+    resource: PermissionResource.SOCIAL_LINK,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
 ];

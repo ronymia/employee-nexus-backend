@@ -545,6 +545,26 @@ input CreateRecruitmentProcessInput {
   name: String!
 }
 
+input CreateSocialLinkInput {
+  """Facebook profile URL"""
+  facebook: String
+
+  """GitHub profile URL"""
+  github: String
+
+  """Instagram profile URL"""
+  instagram: String
+
+  """LinkedIn profile URL"""
+  linkedin: String
+
+  """Profile ID"""
+  profileId: String!
+
+  """Twitter profile URL"""
+  twitter: String
+}
+
 input CreateSubscriptionPlanInput {
   """Description of the service plan"""
   description: String!
@@ -1285,6 +1305,7 @@ type Mutation {
   createOnboardingProcess(createOnboardingProcessInput: CreateOnboardingProcessInput!): OnboardingProcessResponse!
   createProject(createProjectInput: CreateProjectInput!): ProjectResponse!
   createRecruitmentProcess(createRecruitmentProcessInput: CreateRecruitmentProcessInput!): RecruitmentProcessResponse!
+  createSocialLink(createSocialLinkInput: CreateSocialLinkInput!): SocialLink!
   createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
   createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
   createWorkSchedule(createWorkScheduleInput: CreateWorkScheduleInput!): WorkScheduleResponse!
@@ -1312,6 +1333,7 @@ type Mutation {
   removeAsset(id: Int!): AssetResponse!
   removeAssetType(id: Int!): AssetTypeResponse!
   removeProject(id: Int!): ProjectResponse!
+  removeSocialLink(id: Int!): SocialLink!
   returnAsset(returnAssetInput: ReturnAssetInput!): AssetAssignmentResponse!
   unassignProjectMember(unassignProjectMemberInput: UnassignProjectMemberInput!): ProjectMemberResponse!
   updateAsset(updateAssetInput: UpdateAssetInput!): AssetResponse!
@@ -1336,6 +1358,7 @@ type Mutation {
   updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
   updateProject(updateProjectInput: UpdateProjectInput!): ProjectResponse!
   updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
+  updateSocialLink(updateSocialLinkInput: UpdateSocialLinkInput!): SocialLink!
   updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
   updateWorkSchedule(updateWorkScheduleInput: UpdateWorkScheduleInput!): WorkScheduleResponse!
   updateWorkSite(updateWorkSiteInput: UpdateWorkSiteInput!): WorkSiteResponse!
@@ -1567,6 +1590,8 @@ type Query {
   recruitmentProcessById(id: Int!): RecruitmentProcessResponse!
   recruitmentProcesses(query: QueryRecruitmentProcessInput): RecruitmentProcessesQueryResponse!
   roles: RoleResponse!
+  socialLink(id: Int!): SocialLink!
+  socialLinks: [SocialLink!]!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
   userById(id: Int!): UserResponse!
@@ -1789,6 +1814,32 @@ enum ScheduleType {
   FLEXIBLE
   REGULAR
   SCHEDULED
+}
+
+type SocialLink {
+  """Date when the social links were created"""
+  createdAt: DateTime!
+
+  """Facebook profile URL"""
+  facebook: String
+
+  """GitHub profile URL"""
+  github: String
+
+  """Instagram profile URL"""
+  instagram: String
+
+  """LinkedIn profile URL"""
+  linkedin: String
+
+  """Profile ID (primary key)"""
+  profileId: ID!
+
+  """Twitter profile URL"""
+  twitter: String
+
+  """Date when the social links were last updated"""
+  updatedAt: DateTime!
 }
 
 """Status of the Asset Type"""
@@ -2218,6 +2269,27 @@ input UpdateRecruitmentProcessInput {
 
   """Name of the recruitment process"""
   name: String
+}
+
+input UpdateSocialLinkInput {
+  """Facebook profile URL"""
+  facebook: String
+
+  """GitHub profile URL"""
+  github: String
+  id: Int!
+
+  """Instagram profile URL"""
+  instagram: String
+
+  """LinkedIn profile URL"""
+  linkedin: String
+
+  """Profile ID"""
+  profileId: String
+
+  """Twitter profile URL"""
+  twitter: String
 }
 
 input UpdateSubscriptionPlanInput {

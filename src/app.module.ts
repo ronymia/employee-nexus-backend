@@ -43,6 +43,7 @@ import { JobHistoriesModule } from './modules/job-histories/job-histories.module
 import { EmployeeScheduleAssignmentsModule } from './modules/employee-schedule-assignments/employee-schedule-assignments.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { NotesModule } from './modules/notes/notes.module';
+import { SocialLinksModule } from './modules/social-links/social-links.module';
 
 @Module({
   imports: [
@@ -92,6 +93,7 @@ import { NotesModule } from './modules/notes/notes.module';
     EmployeeScheduleAssignmentsModule,
     DocumentsModule,
     NotesModule,
+    SocialLinksModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

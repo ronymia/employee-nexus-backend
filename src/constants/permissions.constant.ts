@@ -31,4 +31,5 @@ export enum PermissionResource {
   BUSINESS_SETTINGS = 'Business Settings',
   DOCUMENT = 'Document',
   NOTE = 'Note',
+  SOCIAL_LINK = 'Social Link',
 }

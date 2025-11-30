@@ -146,6 +146,7 @@ model Profile {
   userId         Int           @unique @map("user_id")
 
   emergencyContact EmergencyContact? @relation(name: "profileEmergencyContact")
+  socialLinks      SocialLink[]      @relation(name: "profileSocialLinks")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -891,4 +892,19 @@ model Note {
   @@index([userId])
   @@index([createdBy])
   @@map("notes")
+}
+
+model SocialLink {
+  profileId Int     @id @map("profile_id")
+  profile   Profile @relation(name: "profileSocialLinks", fields: [profileId], references: [id], onDelete: Cascade)
+  facebook  String? @map("facebook")
+  twitter   String? @map("twitter")
+  linkedin  String? @map("linkedin")
+  instagram String? @map("instagram")
+  github    String? @map("github")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("social_links")
 }
