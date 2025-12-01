@@ -3,6 +3,7 @@ import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
+import { User } from 'src/modules/users/entities/user.entity';
 
 @ObjectType()
 export class Document {
@@ -11,6 +12,12 @@ export class Document {
 
   @Field(() => Int, { description: 'ID of the user who owns the document' })
   userId: number;
+
+  @Field(() => User, {
+    nullable: true,
+    description: 'User who owns this document',
+  })
+  user?: User;
 
   @Field(() => String, { description: 'Title of the document' })
   title: string;

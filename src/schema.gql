@@ -525,6 +525,9 @@ input CreateDocumentInput {
 
   """Title of the document"""
   title: String!
+
+  """ID of the user"""
+  userId: Int!
 }
 
 input CreateEducationHistoryInput {
@@ -1043,6 +1046,9 @@ type Document {
 
   """Date when the document was last updated"""
   updatedAt: DateTime!
+
+  """User who owns this document"""
+  user: User
 
   """ID of the user who owns the document"""
   userId: Int!
@@ -1738,7 +1744,7 @@ type Mutation {
   deleteBusiness(id: Int!): Business!
   deleteDepartment(id: Int!): DepartmentResponse!
   deleteDesignation(id: Int!): DesignationResponse!
-  deleteDocument(id: Int!): DocumentResponse!
+  deleteDocument(id: Int!, userId: Int!): DocumentResponse!
   deleteEducationHistory(id: Int!, userId: Int!): EducationHistoryResponse!
   deleteEmployee(id: Int!): UserResponse!
   deleteEmployeeScheduleAssignment(id: Int!): EmployeeScheduleAssignmentResponse!
@@ -2004,8 +2010,8 @@ type Query {
   departments(query: QueryDepartmentInput): DepartmentsQueryResponse!
   designationById(id: Int!): DesignationResponse!
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
-  documentById(id: Int!): DocumentResponse!
-  documents(query: QueryDocumentInput): DocumentsQueryResponse!
+  document(id: Int!, userId: Int!): DocumentResponse!
+  documentsByUserId(query: QueryDocumentInput, userId: Int!): DocumentsQueryResponse!
   educationHistory(id: Int!, userId: Int!): EducationHistoryResponse!
   educationHistoryByUserId(userId: Int!): EducationHistoriesQueryResponse!
   employeeById(id: Int!): UserResponse!
@@ -2636,6 +2642,9 @@ input UpdateDocumentInput {
 
   """Title of the document"""
   title: String
+
+  """ID of the user"""
+  userId: Int
 }
 
 input UpdateEducationHistoryInput {

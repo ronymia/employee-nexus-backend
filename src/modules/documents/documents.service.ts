@@ -23,20 +23,25 @@ export class DocumentsService {
     return await this.prisma.document.create({
       data: {
         ...createDocumentInput,
-        userId: user.userId,
+      },
+      include: {
+        user: {
+          include: {
+            profile: true,
+            role: true,
+          },
+        },
       },
     });
   }
 
   async findAll({
-    user,
+    userId,
     query,
   }: {
-    user: JwtPayload;
+    userId: number;
     query: QueryDocumentInput;
   }) {
-    // USER ID
-    const userId = user.userId;
     const { pagination, ...filters } = query ?? {};
 
     // PAGINATION
@@ -100,10 +105,17 @@ export class DocumentsService {
     };
   }
 
-  async findOne({ user, id }: { user: JwtPayload; id: number }) {
-    const userId = user.userId;
+  async findOne({ userId, id }: { userId: number; id: number }) {
     const result = await this.prisma.document.findUnique({
       where: { id, userId },
+      include: {
+        user: {
+          include: {
+            profile: true,
+            role: true,
+          },
+        },
+      },
     });
     if (!result) {
       throw new NotFoundException(`Document with ID ${id} not found`);
@@ -113,25 +125,41 @@ export class DocumentsService {
   }
 
   async update({
-    user,
     id,
     updateDocumentInput,
   }: {
-    user: JwtPayload;
     id: number;
     updateDocumentInput: UpdateDocumentInput;
   }) {
-    await this.findOne({ user, id }); // Ensure the document exists
+    const userId = updateDocumentInput.userId as number;
+
+    await this.findOne({ userId, id }); // Ensure the document exists
     return await this.prisma.document.update({
-      where: { id, userId: user.userId },
+      where: { id, userId },
       data: updateDocumentInput,
+      include: {
+        user: {
+          include: {
+            profile: true,
+            role: true,
+          },
+        },
+      },
     });
   }
 
-  async remove({ user, id }: { user: JwtPayload; id: number }) {
-    await this.findOne({ user, id }); // Ensure the document exists
+  async remove({ userId, id }: { userId: number; id: number }) {
+    await this.findOne({ userId, id }); // Ensure the document exists
     return await this.prisma.document.delete({
-      where: { id, userId: user.userId },
+      where: { id, userId },
+      include: {
+        user: {
+          include: {
+            profile: true,
+            role: true,
+          },
+        },
+      },
     });
   }
 }

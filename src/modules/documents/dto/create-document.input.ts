@@ -1,8 +1,11 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
 import { IsOptional, IsString } from 'class-validator';
 
 @InputType()
 export class CreateDocumentInput {
+  @Field(() => Int, { description: 'ID of the user' })
+  userId: number;
+
   @Field(() => String, { description: 'Title of the document' })
   @IsString()
   title: string;

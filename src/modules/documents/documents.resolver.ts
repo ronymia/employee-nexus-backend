@@ -21,8 +21,8 @@ export class DocumentsResolver {
 
   // CREATE DOCUMENT
   @Mutation(() => DocumentResponse, { name: 'createDocument' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Document:create')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Document:create')
   @UseGuards(GqlAuthGuard)
   async createDocument(
     @Args('createDocumentInput') createDocumentInput: CreateDocumentInput,
@@ -41,15 +41,16 @@ export class DocumentsResolver {
   }
 
   // FIND ALL DOCUMENTS
-  @Query(() => DocumentsQueryResponse, { name: 'documents' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Document:read')
+  @Query(() => DocumentsQueryResponse, { name: 'documentsByUserId' })
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Document:read')
   @UseGuards(GqlAuthGuard)
   async findAll(
     @CurrentUser() user: JwtPayload,
+    @Args('userId', { type: () => Int }) userId: number,
     @Args('query', { nullable: true }) query: QueryDocumentInput,
   ) {
-    const result = await this.documentsService.findAll({ user, query });
+    const result = await this.documentsService.findAll({ userId, query });
     return {
       success: true,
       statusCode: HttpStatus.OK,
@@ -60,15 +61,15 @@ export class DocumentsResolver {
   }
 
   // FIND ONE DOCUMENT
-  @Query(() => DocumentResponse, { name: 'documentById' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Document:read')
+  @Query(() => DocumentResponse, { name: 'document' })
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Document:read')
   @UseGuards(GqlAuthGuard)
   async findOne(
     @Args('id', { type: () => Int }) id: number,
-    @CurrentUser() user: JwtPayload,
+    @Args('userId', { type: () => Int }) userId: number,
   ) {
-    const result = await this.documentsService.findOne({ user, id });
+    const result = await this.documentsService.findOne({ userId, id });
 
     return {
       success: true,
@@ -80,15 +81,13 @@ export class DocumentsResolver {
 
   // UPDATE DOCUMENT
   @Mutation(() => DocumentResponse, { name: 'updateDocument' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Document:update')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Document:update')
   @UseGuards(GqlAuthGuard)
   async updateDocument(
-    @CurrentUser() user: JwtPayload,
     @Args('updateDocumentInput') updateDocumentInput: UpdateDocumentInput,
   ) {
     const result = await this.documentsService.update({
-      user,
       id: updateDocumentInput.id,
       updateDocumentInput,
     });
@@ -102,14 +101,14 @@ export class DocumentsResolver {
 
   // REMOVE DOCUMENT
   @Mutation(() => DocumentResponse, { name: 'deleteDocument' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Document:delete')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Document:delete')
   @UseGuards(GqlAuthGuard)
   async removeDocument(
     @Args('id', { type: () => Int }) id: number,
-    @CurrentUser() user: JwtPayload,
+    @Args('userId', { type: () => Int }) userId: number,
   ) {
-    const result = await this.documentsService.remove({ user, id });
+    const result = await this.documentsService.remove({ userId, id });
     return {
       success: true,
       statusCode: HttpStatus.OK,
