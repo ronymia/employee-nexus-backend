@@ -664,6 +664,9 @@ input CreateJobHistoryInput {
 
   """Start date (MM-YYYY or YYYY)"""
   startDate: String!
+
+  """ID of the user"""
+  userId: Int!
 }
 
 input CreateJobPlatformInput {
@@ -1741,7 +1744,7 @@ type Mutation {
   deleteEmployeeScheduleAssignment(id: Int!): EmployeeScheduleAssignmentResponse!
   deleteEmploymentStatus(id: Int!): EmploymentStatusResponse!
   deleteHoliday(id: Int!): HolidayResponse!
-  deleteJobHistory(id: Int!): JobHistoryResponse!
+  deleteJobHistory(id: Int!, userId: Int!): JobHistoryResponse!
   deleteJobPlatform(id: Int!): JobPlatformResponse!
   deleteJobType(id: Int!): JobTypeResponse!
   deleteLeave(id: Int!): LeaveResponse!
@@ -2014,8 +2017,8 @@ type Query {
   employmentStatuses(query: QueryEmploymentStatusInput): EmploymentStatusesQueryResponse!
   holidayById(id: Int!): HolidayResponse!
   holidays(query: QueryHolidayInput): HolidaysQueryResponse!
-  jobHistories: JobHistoriesQueryResponse!
-  jobHistory(id: Int!): JobHistoryResponse!
+  jobHistory(id: Int!, userId: Int!): JobHistoryResponse!
+  jobHistoryByUserId(userId: Int!): JobHistoriesQueryResponse!
   jobPlatformById(id: Int!): JobPlatformResponse!
   jobPlatforms(query: QueryJobPlatformInput): JobPlatformsQueryResponse!
   jobTypeById(id: Int!): JobTypeResponse!
@@ -2827,6 +2830,9 @@ input UpdateJobHistoryInput {
 
   """Start date (MM-YYYY or YYYY)"""
   startDate: String
+
+  """ID of the user"""
+  userId: Int
 }
 
 input UpdateJobPlatformInput {

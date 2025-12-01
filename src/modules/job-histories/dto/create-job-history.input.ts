@@ -1,8 +1,11 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
 import { IsString, IsOptional } from 'class-validator';
 
 @InputType()
 export class CreateJobHistoryInput {
+  @Field(() => Int, { description: 'ID of the user' })
+  userId: number;
+
   @Field(() => String, { description: 'Job title or position' })
   @IsString()
   jobTitle: string;

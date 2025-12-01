@@ -18,7 +18,6 @@ export class JobHistoriesService {
     return await this.prisma.jobHistory.create({
       data: {
         ...createJobHistoryInput,
-        userId: user.userId,
       },
       include: {
         user: {
@@ -31,10 +30,10 @@ export class JobHistoriesService {
     });
   }
 
-  async findAll({ user }: { user: JwtPayload }) {
+  async findAll({ userId }: { userId: number }) {
     return await this.prisma.jobHistory.findMany({
       where: {
-        userId: user.userId,
+        userId: userId,
       },
       include: {
         user: {
@@ -50,9 +49,9 @@ export class JobHistoriesService {
     });
   }
 
-  async findOne({ user, id }: { user: JwtPayload; id: number }) {
+  async findOne({ userId, id }: { userId: number; id: number }) {
     const jobHistory = await this.prisma.jobHistory.findUnique({
-      where: { id, userId: user.userId },
+      where: { id, userId },
       include: {
         user: {
           include: {
@@ -71,18 +70,18 @@ export class JobHistoriesService {
   }
 
   async update({
-    user,
     id,
     updateJobHistoryInput,
   }: {
-    user: JwtPayload;
     id: number;
     updateJobHistoryInput: UpdateJobHistoryInput;
   }) {
-    await this.findOne({ user, id });
+    const userId = updateJobHistoryInput.userId as number;
+
+    await this.findOne({ userId, id });
 
     return await this.prisma.jobHistory.update({
-      where: { id, userId: user.userId },
+      where: { id, userId },
       data: updateJobHistoryInput,
       include: {
         user: {
@@ -95,11 +94,11 @@ export class JobHistoriesService {
     });
   }
 
-  async remove({ user, id }: { user: JwtPayload; id: number }) {
-    await this.findOne({ user, id });
+  async remove({ userId, id }: { userId: number; id: number }) {
+    await this.findOne({ userId, id });
 
     return await this.prisma.jobHistory.delete({
-      where: { id, userId: user.userId },
+      where: { id, userId },
       include: {
         user: {
           include: {

@@ -40,11 +40,14 @@ export class JobHistoriesResolver {
 
   // FIND ALL JOB HISTORIES
   @Query(() => JobHistoriesQueryResponse, {
-    name: 'jobHistories',
+    name: 'jobHistoryByUserId',
   })
   @UseGuards(GqlAuthGuard)
-  async findAll(@CurrentUser() user: JwtPayload) {
-    const result = await this.jobHistoriesService.findAll({ user });
+  async findAll(
+    @CurrentUser() user: JwtPayload,
+    @Args('userId', { type: () => Int }) userId: number,
+  ) {
+    const result = await this.jobHistoriesService.findAll({ userId });
     return {
       success: true,
       statusCode: HttpStatus.OK,
@@ -58,9 +61,9 @@ export class JobHistoriesResolver {
   @UseGuards(GqlAuthGuard)
   async findOne(
     @Args('id', { type: () => Int }) id: number,
-    @CurrentUser() user: JwtPayload,
+    @Args('userId', { type: () => Int }) userId: number,
   ) {
-    const result = await this.jobHistoriesService.findOne({ user, id });
+    const result = await this.jobHistoriesService.findOne({ userId, id });
 
     return {
       success: true,
@@ -76,12 +79,10 @@ export class JobHistoriesResolver {
   })
   @UseGuards(GqlAuthGuard)
   async updateJobHistory(
-    @CurrentUser() user: JwtPayload,
     @Args('updateJobHistoryInput')
     updateJobHistoryInput: UpdateJobHistoryInput,
   ) {
     const result = await this.jobHistoriesService.update({
-      user,
       id: updateJobHistoryInput.id,
       updateJobHistoryInput,
     });
@@ -100,9 +101,9 @@ export class JobHistoriesResolver {
   @UseGuards(GqlAuthGuard)
   async removeJobHistory(
     @Args('id', { type: () => Int }) id: number,
-    @CurrentUser() user: JwtPayload,
+    @Args('userId', { type: () => Int }) userId: number,
   ) {
-    const result = await this.jobHistoriesService.remove({ user, id });
+    const result = await this.jobHistoriesService.remove({ userId, id });
     return {
       success: true,
       statusCode: HttpStatus.OK,
