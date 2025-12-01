@@ -115,6 +115,112 @@ input AssignProjectMemberInput {
   userId: Int!
 }
 
+type Attendance {
+  """Total break hours for the day"""
+  breakHours: Float
+
+  """Creation timestamp"""
+  createdAt: DateTime!
+
+  """Date of attendance"""
+  date: DateTime!
+
+  """Unique identifier for the attendance"""
+  id: ID!
+
+  """Punch records for this attendance"""
+  punchRecords: [AttendancePunch!]
+
+  """Attendance status"""
+  status: String!
+
+  """Total working hours for the day"""
+  totalHours: Float
+
+  """Last update timestamp"""
+  updatedAt: DateTime!
+
+  """User associated with this attendance"""
+  user: User!
+
+  """User ID"""
+  userId: Int!
+}
+
+type AttendancePunch {
+  """Attendance associated with this punch"""
+  attendance: Attendance!
+
+  """Attendance ID"""
+  attendanceId: Int!
+
+  """Break end timestamp"""
+  breakEnd: DateTime
+
+  """Calculated break hours for this session"""
+  breakHours: Float
+
+  """Break start timestamp"""
+  breakStart: DateTime
+
+  """Creation timestamp"""
+  createdAt: DateTime!
+
+  """Unique identifier for the punch record"""
+  id: ID!
+
+  """Notes for this punch session"""
+  notes: String
+
+  """Project associated with this punch"""
+  project: Project
+
+  """Project ID if working on a project"""
+  projectId: Int
+
+  """Clock in timestamp"""
+  punchIn: DateTime!
+
+  """Punch in device information"""
+  punchInDevice: String
+
+  """Punch in IP address"""
+  punchInIp: String
+
+  """Punch in latitude"""
+  punchInLat: Float
+
+  """Punch in longitude"""
+  punchInLng: Float
+
+  """Clock out timestamp"""
+  punchOut: DateTime
+
+  """Punch out device information"""
+  punchOutDevice: String
+
+  """Punch out IP address"""
+  punchOutIp: String
+
+  """Punch out latitude"""
+  punchOutLat: Float
+
+  """Punch out longitude"""
+  punchOutLng: Float
+
+  """Last update timestamp"""
+  updatedAt: DateTime!
+
+  """Calculated work hours for this session"""
+  workHours: Float
+
+  """Work site associated with this punch"""
+  workSite: WorkSite
+
+  """Work site ID"""
+  workSiteId: Int
+}
+
 type AttendanceSetting {
   """Whether auto approval is enabled"""
   autoApproval: Boolean!
@@ -271,6 +377,11 @@ input CreateAssetTypeInput {
 
   """Name of the asset type"""
   name: String!
+}
+
+input CreateAttendanceInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
 }
 
 input CreateBusinessInput {
@@ -1290,6 +1401,7 @@ type Mutation {
   assignProjectMember(assignProjectMemberInput: AssignProjectMemberInput!): ProjectMemberResponse!
   createAsset(createAssetInput: CreateAssetInput!): AssetResponse!
   createAssetType(createAssetTypeInput: CreateAssetTypeInput!): AssetTypeResponse!
+  createAttendance(createAttendanceInput: CreateAttendanceInput!): Attendance!
   createDepartment(createDepartmentInput: CreateDepartmentInput!): DepartmentResponse!
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
   createDocument(createDocumentInput: CreateDocumentInput!): DocumentResponse!
@@ -1305,7 +1417,7 @@ type Mutation {
   createOnboardingProcess(createOnboardingProcessInput: CreateOnboardingProcessInput!): OnboardingProcessResponse!
   createProject(createProjectInput: CreateProjectInput!): ProjectResponse!
   createRecruitmentProcess(createRecruitmentProcessInput: CreateRecruitmentProcessInput!): RecruitmentProcessResponse!
-  createSocialLink(createSocialLinkInput: CreateSocialLinkInput!): SocialLink!
+  createSocialLink(createSocialLinkInput: CreateSocialLinkInput!): SocialLinkResponse!
   createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
   createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
   createWorkSchedule(createWorkScheduleInput: CreateWorkScheduleInput!): WorkScheduleResponse!
@@ -1325,6 +1437,7 @@ type Mutation {
   deleteNote(id: Int!): NoteResponse!
   deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
+  deleteSocialLink(profileId: Int!): SocialLinkResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
   deleteUser(id: Int!): UserResponse!
   deleteWorkSchedule(id: Int!): WorkScheduleResponse!
@@ -1332,12 +1445,13 @@ type Mutation {
   login(loginInput: LoginAuthInput!): Auth!
   removeAsset(id: Int!): AssetResponse!
   removeAssetType(id: Int!): AssetTypeResponse!
+  removeAttendance(id: Int!): Attendance!
   removeProject(id: Int!): ProjectResponse!
-  removeSocialLink(id: Int!): SocialLink!
   returnAsset(returnAssetInput: ReturnAssetInput!): AssetAssignmentResponse!
   unassignProjectMember(unassignProjectMemberInput: UnassignProjectMemberInput!): ProjectMemberResponse!
   updateAsset(updateAssetInput: UpdateAssetInput!): AssetResponse!
   updateAssetType(updateAssetTypeInput: UpdateAssetTypeInput!): AssetTypeResponse!
+  updateAttendance(updateAttendanceInput: UpdateAttendanceInput!): Attendance!
   updateAttendanceSetting(updateAttendanceSettingInput: UpdateAttendanceSettingInput!): AttendanceSettingResponse!
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): Business!
   updateBusinessSchedule(data: UpdateBusinessScheduleInput!): BusinessSchedule!
@@ -1358,7 +1472,7 @@ type Mutation {
   updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
   updateProject(updateProjectInput: UpdateProjectInput!): ProjectResponse!
   updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
-  updateSocialLink(updateSocialLinkInput: UpdateSocialLinkInput!): SocialLink!
+  updateSocialLink(updateSocialLinkInput: UpdateSocialLinkInput!): SocialLinkResponse!
   updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
   updateWorkSchedule(updateWorkScheduleInput: UpdateWorkScheduleInput!): WorkScheduleResponse!
   updateWorkSite(updateWorkSiteInput: UpdateWorkSiteInput!): WorkSiteResponse!
@@ -1550,7 +1664,9 @@ type Query {
   assetType(id: Int!): AssetTypeResponse!
   assetTypes(query: QueryAssetTypeInput): AssetTypesQueryResponse!
   assets(businessId: Int): AssetsQueryResponse!
+  attendance(id: Int!): Attendance!
   attendanceSettingsByBusiness: AttendanceSettingResponse!
+  attendances: [Attendance!]!
   businessById(id: Int!): Business!
   businessScheduleByBusinessId(id: Int!): BusinessSchedule!
   businessSettingByBusinessId: BusinessSettingResponse!
@@ -1590,8 +1706,8 @@ type Query {
   recruitmentProcessById(id: Int!): RecruitmentProcessResponse!
   recruitmentProcesses(query: QueryRecruitmentProcessInput): RecruitmentProcessesQueryResponse!
   roles: RoleResponse!
-  socialLink(id: Int!): SocialLink!
-  socialLinks: [SocialLink!]!
+  socialLinkByProfileId(profileId: Int!): SocialLinkResponse!
+  socialLinks(query: QuerySocialLinkInput): SocialLinksQueryResponse!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
   userById(id: Int!): UserResponse!
@@ -1686,6 +1802,11 @@ input QueryRecruitmentProcessInput {
   pagination: BasePaginationInput
   searchTerm: String
   status: Status
+}
+
+input QuerySocialLinkInput {
+  pagination: BasePaginationInput
+  searchTerm: String
 }
 
 input QuerySubscriptionPlanInput {
@@ -1842,6 +1963,22 @@ type SocialLink {
   updatedAt: DateTime!
 }
 
+type SocialLinkResponse {
+  data: SocialLink!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type SocialLinksQueryResponse {
+  data: [SocialLink!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 """Status of the Asset Type"""
 enum Status {
   ACTIVE
@@ -1949,6 +2086,12 @@ input UpdateAssetTypeInput {
 
   """Name of the asset type"""
   name: String
+}
+
+input UpdateAttendanceInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
 }
 
 input UpdateAttendanceSettingInput {
@@ -2277,16 +2420,13 @@ input UpdateSocialLinkInput {
 
   """GitHub profile URL"""
   github: String
-  id: Int!
 
   """Instagram profile URL"""
   instagram: String
 
   """LinkedIn profile URL"""
   linkedin: String
-
-  """Profile ID"""
-  profileId: String
+  profileId: String!
 
   """Twitter profile URL"""
   twitter: String

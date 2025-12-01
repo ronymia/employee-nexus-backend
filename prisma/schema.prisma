@@ -121,6 +121,9 @@ model User {
   documents                 Document[]                   @relation(name: "userDocuments")
   notes                     Note[]                       @relation(name: "userNotes")
   notesCreated              Note[]                       @relation(name: "noteCreatedBy")
+  attendances               Attendance[]                 @relation(name: "userAttendance")
+  leaves                    Leave[]                      @relation(name: "userLeaves")
+  reviewedLeaves            Leave[]                      @relation(name: "leaveReviewedBy")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -512,7 +515,8 @@ model WorkSite {
   createdBy            Int?      @map("created_by")
   creator              User?     @relation(name: "workSiteCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
-  employees Employee[] @relation(name: "employeeWorkSite")
+  employees         Employee[]        @relation(name: "employeeWorkSite")
+  attendancePunches AttendancePunch[] @relation(name: "attendancePunchWorkSite")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -664,6 +668,7 @@ model LeaveType {
   business           Business?                   @relation(name: "leaveTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy          Int?                        @map("created_by")
   creator            User?                       @relation(name: "leaveTypeCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  leaves             Leave[]                     @relation(name: "leaveTypeInLeave")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -738,18 +743,19 @@ model AssetAssignment {
 }
 
 model Project {
-  id             Int             @id @default(autoincrement())
-  name           String
-  description    String?
-  cover          String
-  status         String
-  startDate      String?         @map("start_date")
-  endDate        String?         @map("end_date")
-  businessId     Int?            @map("business_id")
-  business       Business?       @relation(name: "projectsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  createdBy      Int?            @map("created_by")
-  creator        User?           @relation(name: "projectCreated", fields: [createdBy], references: [id], onDelete: SetNull)
-  projectMembers ProjectMember[] @relation(name: "projectMembersInProject")
+  id                Int               @id @default(autoincrement())
+  name              String
+  description       String?
+  cover             String
+  status            String
+  startDate         String?           @map("start_date")
+  endDate           String?           @map("end_date")
+  businessId        Int               @map("business_id")
+  business          Business?         @relation(name: "projectsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  createdBy         Int?              @map("created_by")
+  creator           User?             @relation(name: "projectCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  projectMembers    ProjectMember[]   @relation(name: "projectMembersInProject")
+  attendancePunches AttendancePunch[] @relation(name: "attendancePunchProject")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -907,4 +913,88 @@ model SocialLink {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("social_links")
+}
+
+model Attendance {
+  id           Int               @id @default(autoincrement())
+  userId       Int               @map("user_id")
+  user         User              @relation(name: "userAttendance", fields: [userId], references: [id], onDelete: Cascade)
+  date         DateTime          @map("date") // Date of attendance (stored as date only for grouping)
+  totalHours   Float?            @map("total_hours") // Calculated total working hours for the day
+  breakHours   Float?            @map("break_hours") // Calculated total break hours for the day
+  status       String            @default("pending_approve") @map("status") // present, absent, late, half_day, on_leave
+  punchRecords AttendancePunch[] @relation(name: "attendancePunchRecords")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+  @@index([userId, date])
+  @@map("attendances")
+}
+
+model AttendancePunch {
+  id             Int        @id @default(autoincrement())
+  attendanceId   Int        @map("attendance_id")
+  attendance     Attendance @relation(name: "attendancePunchRecords", fields: [attendanceId], references: [id], onDelete: Cascade)
+  projectId      Int?       @map("project_id")
+  project        Project?   @relation(name: "attendancePunchProject", fields: [projectId], references: [id], onDelete: SetNull)
+  workSiteId     Int?       @map("work_site_id")
+  workSite       WorkSite?  @relation(name: "attendancePunchWorkSite", fields: [workSiteId], references: [id], onDelete: SetNull)
+  punchIn        DateTime   @map("punch_in") // Clock in timestamp
+  punchOut       DateTime?  @map("punch_out") // Clock out timestamp (null if not clocked out yet)
+  breakStart     DateTime?  @map("break_start") // Break start timestamp
+  breakEnd       DateTime?  @map("break_end") // Break end timestamp
+  workHours      Float?     @map("work_hours") // Calculated hours for this punch session
+  breakHours     Float?     @map("break_hours") // Calculated break hours for this punch session
+  punchInIp      String?    @map("punch_in_ip") // IP address used for punch in
+  punchOutIp     String?    @map("punch_out_ip") // IP address used for punch out
+  punchInLat     Float?     @map("punch_in_lat") // Punch in latitude
+  punchInLng     Float?     @map("punch_in_lng") // Punch in longitude
+  punchOutLat    Float?     @map("punch_out_lat") // Punch out latitude
+  punchOutLng    Float?     @map("punch_out_lng") // Punch out longitude
+  punchInDevice  String?    @map("punch_in_device") // Device info for punch in
+  punchOutDevice String?    @map("punch_out_device") // Device info for punch out
+  notes          String?    @map("notes") // Notes for this specific punch session
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([attendanceId])
+  @@index([projectId])
+  @@index([workSiteId])
+  @@index([punchIn])
+  @@map("attendance_punches")
+}
+
+model Leave {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @map("user_id")
+  user            User      @relation(name: "userLeaves", fields: [userId], references: [id], onDelete: Cascade)
+  leaveTypeId     Int       @map("leave_type_id")
+  leaveType       LeaveType @relation(name: "leaveTypeInLeave", fields: [leaveTypeId], references: [id], onDelete: Restrict)
+  startDate       DateTime  @map("start_date") // Leave start date
+  endDate         DateTime  @map("end_date") // Leave end date
+  totalDays       Float     @map("total_days") // Total leave days (can be decimal for half days)
+  status          String    @default("pending_approve") @map("status") // pending, approved, rejected, cancelled
+  appliedAt       DateTime  @default(now()) @map("applied_at") // When leave was requested
+  reviewedAt      DateTime? @map("reviewed_at") // When leave was approved/rejected
+  reviewedBy      Int?      @map("reviewed_by") // Manager/admin who reviewed
+  reviewer        User?     @relation(name: "leaveReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  rejectionReason String?   @map("rejection_reason") // Reason for rejection if rejected
+  attachments     String?   @map("attachments") // Supporting documents (JSON array or comma-separated URLs)
+  isHalfDay       Boolean   @default(false) @map("is_half_day") // Whether it's a half-day leave
+  notes           String?   @map("notes") // Additional notes or comments
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([leaveTypeId])
+  @@index([status])
+  @@index([startDate, endDate])
+  @@index([userId, status])
+  @@map("leaves")
 }

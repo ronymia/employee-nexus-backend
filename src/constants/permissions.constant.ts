@@ -32,4 +32,5 @@ export enum PermissionResource {
   DOCUMENT = 'Document',
   NOTE = 'Note',
   SOCIAL_LINK = 'Social Link',
+  ATTENDANCE = 'Attendance',
 }

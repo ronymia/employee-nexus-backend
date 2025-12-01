@@ -44,6 +44,7 @@ import { EmployeeScheduleAssignmentsModule } from './modules/employee-schedule-a
 import { DocumentsModule } from './modules/documents/documents.module';
 import { NotesModule } from './modules/notes/notes.module';
 import { SocialLinksModule } from './modules/social-links/social-links.module';
+import { AttendancesModule } from './modules/attendances/attendances.module';
 
 @Module({
   imports: [
@@ -94,6 +95,7 @@ import { SocialLinksModule } from './modules/social-links/social-links.module';
     DocumentsModule,
     NotesModule,
     SocialLinksModule,
+    AttendancesModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

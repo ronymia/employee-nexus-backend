@@ -229,4 +229,13 @@ export const superAdminPermissions = [
       PermissionAction.DELETE,
     ],
   },
+  {
+    resource: PermissionResource.ATTENDANCE,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
 ];

@@ -183,7 +183,16 @@ export const adminPermissions = [
     ],
   },
   {
-    resource: PermissionResource.NOTE,
+    resource: PermissionResource.SOCIAL_LINK,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
+  {
+    resource: PermissionResource.ATTENDANCE,
     action: [
       PermissionAction.CREATE,
       PermissionAction.READ,
