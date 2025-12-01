@@ -224,4 +224,13 @@ export const ownerPermissions = [
       PermissionAction.DELETE,
     ],
   },
+  {
+    resource: PermissionResource.HOLIDAY,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
 ];

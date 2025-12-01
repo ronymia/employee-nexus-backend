@@ -46,6 +46,7 @@ import { NotesModule } from './modules/notes/notes.module';
 import { SocialLinksModule } from './modules/social-links/social-links.module';
 import { AttendancesModule } from './modules/attendances/attendances.module';
 import { LeavesModule } from './modules/leaves/leaves.module';
+import { HolidaysModule } from './modules/holidays/holidays.module';
 
 @Module({
   imports: [
@@ -98,6 +99,7 @@ import { LeavesModule } from './modules/leaves/leaves.module';
     SocialLinksModule,
     AttendancesModule,
     LeavesModule,
+    HolidaysModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

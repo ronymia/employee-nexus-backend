@@ -82,6 +82,13 @@ enum LeaveDuration {
   HALF_DAY
 }
 
+enum HolidayType {
+  PUBLIC
+  RELIGIOUS
+  COMPANY_SPECIFIC
+  REGIONAL
+}
+
 model User {
   id        Int               @id @default(autoincrement())
   email     String            @unique
@@ -130,6 +137,7 @@ model User {
   attendances               Attendance[]                 @relation(name: "userAttendance")
   leaves                    Leave[]                      @relation(name: "userLeaves")
   reviewedLeaves            Leave[]                      @relation(name: "leaveReviewedBy")
+  holidaysCreated           Holiday[]                    @relation(name: "holidayCreated")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -207,6 +215,7 @@ model Business {
   subscriptions        BusinessSubscription[] @relation(name: "businessSubscriptions")
   assetTypes           AssetType[]            @relation(name: "assetTypesInBusiness")
   projects             Project[]              @relation(name: "projectsInBusiness")
+  holidays             Holiday[]              @relation(name: "holidaysInBusiness")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1005,4 +1014,27 @@ model Leave {
   @@index([userId, status])
   @@index([userId, leaveYear])
   @@map("leaves")
+}
+
+model Holiday {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String?
+  startDate   DateTime    @map("start_date") // Holiday start date
+  endDate     DateTime    @map("end_date") // Holiday end date (same as startDate for single-day)
+  isRecurring Boolean     @default(false) @map("is_recurring") // Annual recurring holiday
+  isPaid      Boolean     @default(true) @map("is_paid") // Paid holiday or unpaid
+  holidayType HolidayType @map("holiday_type") // PUBLIC, RELIGIOUS, COMPANY_SPECIFIC, REGIONAL
+  businessId  Int?        @map("business_id")
+  business    Business?   @relation(name: "holidaysInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  createdBy   Int?        @map("created_by")
+  creator     User?       @relation(name: "holidayCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([businessId])
+  @@index([startDate, endDate])
+  @@index([businessId, startDate])
+  @@map("holidays")
 }

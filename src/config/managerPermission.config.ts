@@ -138,4 +138,8 @@ export const managerPermissions = [
       PermissionAction.DELETE,
     ],
   },
+  {
+    resource: PermissionResource.HOLIDAY,
+    action: [PermissionAction.READ],
+  },
 ];
