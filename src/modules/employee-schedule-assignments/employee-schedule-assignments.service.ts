@@ -126,7 +126,15 @@ export class EmployeeScheduleAssignmentsService {
             role: true,
           },
         },
-        workSchedule: true,
+        workSchedule: {
+          include: {
+            schedules: {
+              include: {
+                timeSlots: true,
+              },
+            },
+          },
+        },
         assignedByUser: {
           include: {
             profile: true,
