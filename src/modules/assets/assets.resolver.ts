@@ -138,7 +138,6 @@ export class AssetsResolver {
   ) {
     const result = await this.assetsService.update({
       user,
-      id: updateAssetInput.id,
       updateAssetInput,
     });
     return {

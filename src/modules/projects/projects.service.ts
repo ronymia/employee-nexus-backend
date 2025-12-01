@@ -83,7 +83,6 @@ export class ProjectsService {
 
   async update({
     user,
-    id,
     updateProjectInput,
   }: {
     user: JwtPayload;
@@ -212,5 +211,46 @@ export class ProjectsService {
         user: true,
       },
     });
+  }
+
+  async getUserProjects({ userId }: { userId: number }) {
+    const projectMembers = await this.prisma.projectMember.findMany({
+      where: {
+        userId,
+      },
+      include: {
+        project: {
+          include: {
+            business: true,
+            creator: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
+            projectMembers: {
+              include: {
+                user: {
+                  include: {
+                    profile: true,
+                    role: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        user: {
+          include: {
+            profile: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Extract projects from project members
+    return projectMembers;
   }
 }

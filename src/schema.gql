@@ -1999,6 +1999,14 @@ type ProjectMemberResponse {
   success: Boolean!
 }
 
+type ProjectMembersQueryResponse {
+  data: [ProjectMember!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type ProjectResponse {
   data: Project!
   message: String!
@@ -2077,6 +2085,7 @@ type Query {
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
   userAssetAssignments(userId: Int!): AssetAssignmentQueryResponse!
   userById(id: Int!): UserResponse!
+  userProjects(userId: Int!): ProjectMembersQueryResponse!
   users: [User!]!
   workScheduleById(id: Int!): WorkScheduleResponse!
   workSchedules(query: QueryWorkScheduleInput): WorkSchedulesQueryResponse!

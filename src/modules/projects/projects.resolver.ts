@@ -5,6 +5,7 @@ import {
   ProjectResponse,
   ProjectsQueryResponse,
   ProjectMemberResponse,
+  ProjectMembersQueryResponse,
 } from './entities/project.entity';
 import { CreateProjectInput } from './dto/create-project.input';
 import { UpdateProjectInput } from './dto/update-project.input';
@@ -160,6 +161,26 @@ export class ProjectsResolver {
       statusCode: HttpStatus.OK,
       message: 'Project member unassigned successfully',
       data: result,
+    };
+  }
+
+  @Query(() => ProjectMembersQueryResponse, { name: 'userProjects' })
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('Project:read')
+  @UseGuards(GqlAuthGuard)
+  async getUserProjects(@Args('userId', { type: () => Int }) userId: number) {
+    const result = await this.projectsService.getUserProjects({ userId });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'User projects retrieved successfully',
+      data: result,
+      meta: {
+        total: result.length,
+        page: 1,
+        limit: result.length,
+        totalPages: 1,
+      },
     };
   }
 }
