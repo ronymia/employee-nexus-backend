@@ -4,6 +4,8 @@ import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
+import { Business } from 'src/modules/businesses/entities/business.entity';
+import { User } from 'src/modules/users/entities/user.entity';
 
 registerEnumType(HolidayType, {
   name: 'HolidayType',
@@ -42,8 +44,16 @@ export class Holiday {
   @Field(() => Int, { description: 'ID of the business' })
   businessId: number;
 
+  @Field(() => Business, {
+    description: 'Business associated with the holiday',
+  })
+  business: Business;
+
   @Field(() => Int, { description: 'ID of the creator' })
   createdBy: number;
+
+  @Field(() => User, { description: 'ID of the updater' })
+  creator: User;
 
   @Field(() => Date, { description: 'Date when the holiday was created' })
   createdAt: Date;

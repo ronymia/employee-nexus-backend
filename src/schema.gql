@@ -1323,6 +1323,9 @@ enum GENDER {
 }
 
 type Holiday {
+  """Business associated with the holiday"""
+  business: Business!
+
   """ID of the business"""
   businessId: Int!
 
@@ -1331,6 +1334,9 @@ type Holiday {
 
   """ID of the creator"""
   createdBy: Int!
+
+  """ID of the updater"""
+  creator: User!
 
   """Description of the holiday"""
   description: String

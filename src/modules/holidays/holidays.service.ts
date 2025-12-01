@@ -104,6 +104,10 @@ export class HolidaysService {
           where: {
             businessId,
           },
+          include: {
+            business: true,
+            creator: true,
+          },
         })
       : await this.prisma.holiday.findMany({
           where: {
@@ -114,6 +118,10 @@ export class HolidaysService {
           take: limit,
           orderBy: {
             [sortBy]: sortOrder,
+          },
+          include: {
+            business: true,
+            creator: true,
           },
         });
 

@@ -21,8 +21,8 @@ export class HolidaysResolver {
 
   // CREATE HOLIDAY
   @Mutation(() => HolidayResponse, { name: 'createHoliday' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Holiday:create')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Holiday:create')
   @UseGuards(GqlAuthGuard)
   async createHoliday(
     @Args('createHolidayInput') createHolidayInput: CreateHolidayInput,
@@ -42,8 +42,8 @@ export class HolidaysResolver {
 
   // FIND ALL HOLIDAYS
   @Query(() => HolidaysQueryResponse, { name: 'holidays' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Holiday:read')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Holiday:read')
   @UseGuards(GqlAuthGuard)
   async findAll(
     @CurrentUser() user: JwtPayload,
@@ -61,8 +61,8 @@ export class HolidaysResolver {
 
   // FIND ONE HOLIDAY
   @Query(() => HolidayResponse, { name: 'holidayById' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Holiday:read')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Holiday:read')
   @UseGuards(GqlAuthGuard)
   async findOne(
     @Args('id', { type: () => Int }) id: number,
@@ -80,8 +80,8 @@ export class HolidaysResolver {
 
   // UPDATE HOLIDAY
   @Mutation(() => HolidayResponse, { name: 'updateHoliday' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Holiday:update')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Holiday:update')
   @UseGuards(GqlAuthGuard)
   async updateHoliday(
     @CurrentUser() user: JwtPayload,
@@ -102,8 +102,8 @@ export class HolidaysResolver {
 
   // REMOVE HOLIDAY
   @Mutation(() => HolidayResponse, { name: 'deleteHoliday' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Holiday:delete')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Holiday:delete')
   @UseGuards(GqlAuthGuard)
   async removeHoliday(
     @Args('id', { type: () => Int }) id: number,
