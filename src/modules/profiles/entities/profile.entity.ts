@@ -59,3 +59,33 @@ export class Profile {
   @Field(() => Date)
   updatedAt: Date;
 }
+
+@ObjectType()
+export class ProfileResponse {
+  @Field(() => Boolean)
+  success: boolean;
+
+  @Field(() => Int)
+  statusCode: number;
+
+  @Field(() => String)
+  message: string;
+
+  @Field(() => Profile)
+  data: Profile;
+}
+
+@ObjectType()
+export class EmergencyContactResponse {
+  @Field(() => Boolean)
+  success: boolean;
+
+  @Field(() => Int)
+  statusCode: number;
+
+  @Field(() => String)
+  message: string;
+
+  @Field(() => EmergencyContact)
+  data: EmergencyContact;
+}

@@ -612,8 +612,26 @@ input CreateEmploymentStatusInput {
 }
 
 input CreateHolidayInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  """Description of the holiday"""
+  description: String
+
+  """Holiday end date"""
+  endDate: String!
+
+  """Type of holiday"""
+  holidayType: HolidayType!
+
+  """Is this a paid holiday"""
+  isPaid: Boolean! = true
+
+  """Is this a recurring annual holiday"""
+  isRecurring: Boolean! = false
+
+  """Name of the holiday"""
+  name: String!
+
+  """Holiday start date"""
+  startDate: String!
 }
 
 input CreateJobHistoryInput {
@@ -1110,6 +1128,13 @@ type EmergencyContact {
   updatedAt: DateTime!
 }
 
+type EmergencyContactResponse {
+  data: EmergencyContact!
+  message: String!
+  statusCode: Int!
+  success: Boolean!
+}
+
 type Employee {
   createdAt: DateTime!
   department: Department!
@@ -1133,6 +1158,13 @@ type Employee {
   workSiteId: Int!
   workingDaysPerWeek: Int
   workingHoursPerWeek: Int
+}
+
+type EmployeeResponse {
+  data: Employee!
+  message: String!
+  statusCode: Int!
+  success: Boolean!
 }
 
 type EmployeeScheduleAssignment {
@@ -1261,8 +1293,65 @@ enum GENDER {
 }
 
 type Holiday {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  """ID of the business"""
+  businessId: Int!
+
+  """Date when the holiday was created"""
+  createdAt: DateTime!
+
+  """ID of the creator"""
+  createdBy: Int!
+
+  """Description of the holiday"""
+  description: String
+
+  """Holiday end date"""
+  endDate: DateTime!
+
+  """Type of holiday"""
+  holidayType: HolidayType!
+
+  """Unique identifier for the holiday"""
+  id: ID!
+
+  """Is this a paid holiday"""
+  isPaid: Boolean!
+
+  """Is this a recurring annual holiday"""
+  isRecurring: Boolean!
+
+  """Name of the holiday"""
+  name: String!
+
+  """Holiday start date"""
+  startDate: DateTime!
+
+  """Date when the holiday was last updated"""
+  updatedAt: DateTime!
+}
+
+type HolidayResponse {
+  data: Holiday!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+"""Type of holiday"""
+enum HolidayType {
+  COMPANY_SPECIFIC
+  PUBLIC
+  REGIONAL
+  RELIGIOUS
+}
+
+type HolidaysQueryResponse {
+  data: [Holiday!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type JobHistoriesQueryResponse {
@@ -1625,7 +1714,7 @@ type Mutation {
   createEmployee(createEmployeeInput: CreateEmployeeInput!): UserResponse!
   createEmployeeScheduleAssignment(createEmployeeScheduleAssignmentInput: CreateEmployeeScheduleAssignmentInput!): EmployeeScheduleAssignmentResponse!
   createEmploymentStatus(createEmploymentStatusInput: CreateEmploymentStatusInput!): EmploymentStatusResponse!
-  createHoliday(createHolidayInput: CreateHolidayInput!): Holiday!
+  createHoliday(createHolidayInput: CreateHolidayInput!): HolidayResponse!
   createJobHistory(createJobHistoryInput: CreateJobHistoryInput!): JobHistoryResponse!
   createJobPlatform(createJobPlatformInput: CreateJobPlatformInput!): JobPlatformResponse!
   createJobType(createJobTypeInput: CreateJobTypeInput!): JobTypeResponse!
@@ -1648,6 +1737,7 @@ type Mutation {
   deleteEmployee(id: Int!): UserResponse!
   deleteEmployeeScheduleAssignment(id: Int!): EmployeeScheduleAssignmentResponse!
   deleteEmploymentStatus(id: Int!): EmploymentStatusResponse!
+  deleteHoliday(id: Int!): HolidayResponse!
   deleteJobHistory(id: Int!): JobHistoryResponse!
   deleteJobPlatform(id: Int!): JobPlatformResponse!
   deleteJobType(id: Int!): JobTypeResponse!
@@ -1666,7 +1756,6 @@ type Mutation {
   removeAssetType(id: Int!): AssetTypeResponse!
   removeAttendance(id: Int!): AttendanceResponse!
   removeAttendancePunch(id: Int!): AttendancePunch!
-  removeHoliday(id: Int!): Holiday!
   removeProject(id: Int!): ProjectResponse!
   returnAsset(returnAssetInput: ReturnAssetInput!): AssetAssignmentResponse!
   unassignProjectMember(unassignProjectMemberInput: UnassignProjectMemberInput!): ProjectMemberResponse!
@@ -1682,10 +1771,12 @@ type Mutation {
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
   updateDocument(updateDocumentInput: UpdateDocumentInput!): DocumentResponse!
   updateEducationHistory(updateEducationHistoryInput: UpdateEducationHistoryInput!): EducationHistoryResponse!
+  updateEmergencyContact(updateEmergencyContactInput: UpdateEmergencyContactInput!): EmergencyContactResponse!
   updateEmployee(updateEmployeeInput: UpdateEmployeeInput!): UserResponse!
   updateEmployeeScheduleAssignment(updateEmployeeScheduleAssignmentInput: UpdateEmployeeScheduleAssignmentInput!): EmployeeScheduleAssignmentResponse!
+  updateEmploymentDetails(updateEmploymentDetailsInput: UpdateEmploymentDetailsInput!): EmployeeResponse!
   updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
-  updateHoliday(updateHolidayInput: UpdateHolidayInput!): Holiday!
+  updateHoliday(updateHolidayInput: UpdateHolidayInput!): HolidayResponse!
   updateJobHistory(updateJobHistoryInput: UpdateJobHistoryInput!): JobHistoryResponse!
   updateJobPlatform(updateJobPlatformInput: UpdateJobPlatformInput!): JobPlatformResponse!
   updateJobType(updateJobTypeInput: UpdateJobTypeInput!): JobTypeResponse!
@@ -1694,6 +1785,7 @@ type Mutation {
   updateLeaveType(updateLeaveTypeInput: UpdateLeaveTypeInput!): LeaveTypeResponse!
   updateNote(updateNoteInput: UpdateNoteInput!): NoteResponse!
   updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
+  updateProfile(updateProfileInput: UpdateProfileInput!): ProfileResponse!
   updateProject(updateProjectInput: UpdateProjectInput!): ProjectResponse!
   updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
   updateSocialLink(updateSocialLinkInput: UpdateSocialLinkInput!): SocialLinkResponse!
@@ -1828,6 +1920,13 @@ type Profile {
   userId: Int!
 }
 
+type ProfileResponse {
+  data: Profile!
+  message: String!
+  statusCode: Int!
+  success: Boolean!
+}
+
 type Project {
   business: Business
   businessId: Int
@@ -1910,8 +2009,8 @@ type Query {
   employees(query: QueryUserInput): UsersQueryResponse!
   employmentStatusById(id: Int!): EmploymentStatusResponse!
   employmentStatuses(query: QueryEmploymentStatusInput): EmploymentStatusesQueryResponse!
-  holiday(id: Int!): Holiday!
-  holidays: [Holiday!]!
+  holidayById(id: Int!): HolidayResponse!
+  holidays(query: QueryHolidayInput): HolidaysQueryResponse!
   jobHistories: JobHistoriesQueryResponse!
   jobHistory(id: Int!): JobHistoryResponse!
   jobPlatformById(id: Int!): JobPlatformResponse!
@@ -1993,6 +2092,20 @@ input QueryEmploymentStatusInput {
   pagination: BasePaginationInput
   searchTerm: String
   status: Status
+}
+
+input QueryHolidayInput {
+  """Filter holidays ending before this date"""
+  endDate: String
+  holidayType: HolidayType
+  isPaid: Boolean
+  isRecurring: Boolean
+  name: String
+  pagination: BasePaginationInput
+  searchTerm: String
+
+  """Filter holidays starting from this date"""
+  startDate: String
 }
 
 input QueryJobPlatformInput {
@@ -2552,6 +2665,20 @@ input UpdateEducationHistoryInput {
   startDate: String
 }
 
+input UpdateEmergencyContactInput {
+  """ID of the profile to update"""
+  id: Int!
+
+  """Emergency contact name"""
+  name: String!
+
+  """Emergency contact phone number"""
+  phone: String!
+
+  """Relationship to the person"""
+  relation: String!
+}
+
 input UpdateEmployeeInput {
   departmentId: Int
   designationId: Int
@@ -2592,6 +2719,47 @@ input UpdateEmployeeScheduleAssignmentInput {
   workScheduleId: Int
 }
 
+input UpdateEmploymentDetailsInput {
+  """Department ID"""
+  departmentId: Int
+
+  """Designation ID"""
+  designationId: Int
+
+  """Employee ID"""
+  employeeId: String!
+
+  """Employment Status ID"""
+  employmentStatusId: Int
+
+  """Profile ID (userId)"""
+  id: Int!
+
+  """Joining date"""
+  joiningDate: String
+
+  """National ID Number"""
+  nidNumber: String
+
+  """Rota type"""
+  rotaType: String
+
+  """Salary per month"""
+  salaryPerMonth: Float
+
+  """Work Schedule ID"""
+  workScheduleId: Int
+
+  """Work Site ID"""
+  workSiteId: Int
+
+  """Working days per week"""
+  workingDaysPerWeek: Int
+
+  """Working hours per week"""
+  workingHoursPerWeek: Int
+}
+
 input UpdateEmploymentStatusInput {
   """Description of the employment status"""
   description: String
@@ -2602,9 +2770,27 @@ input UpdateEmploymentStatusInput {
 }
 
 input UpdateHolidayInput {
-  """Example field (placeholder)"""
-  exampleField: Int
+  """Description of the holiday"""
+  description: String
+
+  """Holiday end date"""
+  endDate: String
+
+  """Type of holiday"""
+  holidayType: HolidayType
   id: Int!
+
+  """Is this a paid holiday"""
+  isPaid: Boolean = true
+
+  """Is this a recurring annual holiday"""
+  isRecurring: Boolean = false
+
+  """Name of the holiday"""
+  name: String
+
+  """Holiday start date"""
+  startDate: String
 }
 
 input UpdateJobHistoryInput {
@@ -2739,6 +2925,22 @@ input UpdateOnboardingProcessInput {
 
   """Name of the onboarding process"""
   name: String
+}
+
+input UpdateProfileInput {
+  address: String
+  city: String
+  country: String
+  dateOfBirth: String
+  fullName: String
+  gender: GENDER
+
+  """ID of the profile to update"""
+  id: Int!
+  maritalStatus: MARITAL_STATUS
+  phone: String
+  postcode: String
+  profilePicture: String
 }
 
 input UpdateProjectInput {
