@@ -5,11 +5,13 @@ import {
   AssetResponse,
   AssetsQueryResponse,
   AssetAssignmentResponse,
+  AssetAssignmentQueryResponse,
 } from './entities/asset.entity';
 import { CreateAssetInput } from './dto/create-asset.input';
 import { UpdateAssetInput } from './dto/update-asset.input';
 import { AssignAssetInput } from './dto/assign-asset.input';
 import { ReturnAssetInput } from './dto/return-asset.input';
+import { QueryAssetInput } from './dto/query-asset.input';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
@@ -47,17 +49,58 @@ export class AssetsResolver {
   @UseGuards(GqlAuthGuard)
   async findAll(
     @CurrentUser() user: JwtPayload,
-    @Args('businessId', { type: () => Int, nullable: true })
-    businessId?: number,
+    @Args('query', { nullable: true }) query?: QueryAssetInput,
   ) {
     const result = await this.assetsService.findAll({
       user,
-      businessId,
+      query,
     });
     return {
       success: true,
       statusCode: HttpStatus.OK,
       message: 'Assets retrieved successfully',
+      data: result,
+      meta: {
+        total: result.length,
+        page: 1,
+        limit: result.length,
+        totalPages: 1,
+      },
+    };
+  }
+
+  @Query(() => AssetsQueryResponse, { name: 'assetsByUserId' })
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('Asset:read')
+  @UseGuards(GqlAuthGuard)
+  async findByUserId(@Args('userId', { type: () => Int }) userId: number) {
+    const result = await this.assetsService.findByUserId({ userId });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Assets retrieved successfully',
+      data: result,
+      meta: {
+        total: result.length,
+        page: 1,
+        limit: result.length,
+        totalPages: 1,
+      },
+    };
+  }
+
+  @Query(() => AssetAssignmentQueryResponse, { name: 'userAssetAssignments' })
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('Asset:read')
+  @UseGuards(GqlAuthGuard)
+  async getUserAssetAssignments(
+    @Args('userId', { type: () => Int }) userId: number,
+  ) {
+    const result = await this.assetsService.getUserAssetAssignments({ userId });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'User asset assignments retrieved successfully',
       data: result,
       meta: {
         total: result.length,

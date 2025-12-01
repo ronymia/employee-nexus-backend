@@ -747,6 +747,7 @@ model AssetAssignment {
   assignedAt     DateTime  @default(now()) @map("assigned_at")
   returnedAt     DateTime? @map("returned_at")
   status         String    @default("assigned")
+  note           String?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

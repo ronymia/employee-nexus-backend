@@ -33,9 +33,18 @@ type AssetAssignment {
   assignedToUser: User!
   createdAt: DateTime!
   id: Int!
+  note: String
   returnedAt: DateTime
   status: String!
   updatedAt: DateTime!
+}
+
+type AssetAssignmentQueryResponse {
+  data: [AssetAssignment!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type AssetAssignmentResponse {
@@ -105,8 +114,17 @@ type AssetsQueryResponse {
 }
 
 input AssignAssetInput {
+  """ID of the asset to be assigned"""
   assetId: Int!
+
+  """Date when the asset was assigned"""
+  assignedAt: DateTime!
+
+  """ID of the user to whom the asset is assigned"""
   assignedTo: Int!
+
+  """Optional note for the asset assignment"""
+  note: String
 }
 
 input AssignProjectMemberInput {
@@ -2004,7 +2022,8 @@ type Query {
   asset(id: Int!): AssetResponse!
   assetType(id: Int!): AssetTypeResponse!
   assetTypes(query: QueryAssetTypeInput): AssetTypesQueryResponse!
-  assets(businessId: Int): AssetsQueryResponse!
+  assets(query: QueryAssetInput): AssetsQueryResponse!
+  assetsByUserId(userId: Int!): AssetsQueryResponse!
   attendance(id: Int!): AttendanceResponse!
   attendanceSettingsByBusiness: AttendanceSettingResponse!
   attendances(query: QueryAttendanceInput): AttendanceQueryResponse!
@@ -2056,12 +2075,18 @@ type Query {
   socialLinksByProfileId(profileId: Int): SocialLinkResponse!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
+  userAssetAssignments(userId: Int!): AssetAssignmentQueryResponse!
   userById(id: Int!): UserResponse!
   users: [User!]!
   workScheduleById(id: Int!): WorkScheduleResponse!
   workSchedules(query: QueryWorkScheduleInput): WorkSchedulesQueryResponse!
   workSiteById(id: Int!): WorkSiteResponse!
   workSites(query: QueryWorkSiteInput): WorkSitesQueryResponse!
+}
+
+input QueryAssetInput {
+  businessId: Int
+  status: String
 }
 
 input QueryAssetTypeInput {
@@ -2268,6 +2293,9 @@ type RecruitmentProcessesQueryResponse {
 
 input ReturnAssetInput {
   assetId: Int!
+
+  """Optional note for the asset assignment"""
+  note: String
 }
 
 type Role {
