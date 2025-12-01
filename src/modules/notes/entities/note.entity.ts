@@ -3,6 +3,7 @@ import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
+import { User } from 'src/modules/users/entities/user.entity';
 
 @ObjectType()
 export class Note {
@@ -12,8 +13,20 @@ export class Note {
   @Field(() => Int, { description: 'ID of the user this note is about' })
   userId: number;
 
+  @Field(() => User, {
+    nullable: true,
+    description: 'User this note is about',
+  })
+  user?: User;
+
   @Field(() => Int, { description: 'ID of the user who created this note' })
   createdBy: number;
+
+  @Field(() => User, {
+    nullable: true,
+    description: 'User who created this note',
+  })
+  creator?: User;
 
   @Field(() => String, { description: 'Title of the note' })
   title: string;

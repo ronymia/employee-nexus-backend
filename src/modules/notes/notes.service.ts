@@ -28,12 +28,24 @@ export class NotesService {
         createdBy: user.userId,
         isPrivate: noteData.isPrivate ?? true,
       },
+      include: {
+        user: {
+          include: {
+            profile: true,
+            role: true,
+          },
+        },
+        creator: {
+          include: {
+            profile: true,
+            role: true,
+          },
+        },
+      },
     });
   }
 
-  async findAll({ user, query }: { user: JwtPayload; query: QueryNoteInput }) {
-    // USER ID
-    const userId = user.userId;
+  async findAll({ userId, query }: { userId: number; query: QueryNoteInput }) {
     const { pagination, ...filters } = query ?? {};
 
     // PAGINATION
@@ -66,9 +78,16 @@ export class NotesService {
             userId,
           },
           include: {
+            user: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
             creator: {
               include: {
                 profile: true,
+                role: true,
               },
             },
           },
@@ -84,9 +103,16 @@ export class NotesService {
             [sortBy]: sortOrder,
           },
           include: {
+            user: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
             creator: {
               include: {
                 profile: true,
+                role: true,
               },
             },
           },
@@ -111,14 +137,20 @@ export class NotesService {
     };
   }
 
-  async findOne({ user, id }: { user: JwtPayload; id: number }) {
-    const userId = user.userId;
+  async findOne({ userId, id }: { userId: number; id: number }) {
     const result = await this.prisma.note.findUnique({
       where: { id, userId },
       include: {
+        user: {
+          include: {
+            profile: true,
+            role: true,
+          },
+        },
         creator: {
           include: {
             profile: true,
+            role: true,
           },
         },
       },
@@ -131,37 +163,51 @@ export class NotesService {
   }
 
   async update({
-    user,
     id,
     updateNoteInput,
   }: {
-    user: JwtPayload;
     id: number;
     updateNoteInput: UpdateNoteInput;
   }) {
-    await this.findOne({ user, id }); // Ensure the note exists
+    const userId = updateNoteInput.userId as number;
+
+    await this.findOne({ userId, id }); // Ensure the note exists
     const { ...updateData } = updateNoteInput; // Get update data (id is handled separately)
     return await this.prisma.note.update({
-      where: { id, userId: user.userId },
+      where: { id, userId },
       data: updateData,
       include: {
+        user: {
+          include: {
+            profile: true,
+            role: true,
+          },
+        },
         creator: {
           include: {
             profile: true,
+            role: true,
           },
         },
       },
     });
   }
 
-  async remove({ user, id }: { user: JwtPayload; id: number }) {
-    await this.findOne({ user, id }); // Ensure the note exists
+  async remove({ userId, id }: { userId: number; id: number }) {
+    await this.findOne({ userId, id }); // Ensure the note exists
     return await this.prisma.note.delete({
-      where: { id, userId: user.userId },
+      where: { id, userId },
       include: {
+        user: {
+          include: {
+            profile: true,
+            role: true,
+          },
+        },
         creator: {
           include: {
             profile: true,
+            role: true,
           },
         },
       },

@@ -17,8 +17,8 @@ export class NotesResolver {
 
   // CREATE NOTE
   @Mutation(() => NoteResponse, { name: 'createNote' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Note:create')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Note:create')
   @UseGuards(GqlAuthGuard)
   async createNote(
     @Args('createNoteInput') createNoteInput: CreateNoteInput,
@@ -37,15 +37,16 @@ export class NotesResolver {
   }
 
   // FIND ALL NOTES
-  @Query(() => NotesQueryResponse, { name: 'notes' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Note:read')
+  @Query(() => NotesQueryResponse, { name: 'notesByUserId' })
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Note:read')
   @UseGuards(GqlAuthGuard)
   async findAll(
     @CurrentUser() user: JwtPayload,
+    @Args('userId', { type: () => Int }) userId: number,
     @Args('query', { nullable: true }) query: QueryNoteInput,
   ) {
-    const result = await this.notesService.findAll({ user, query });
+    const result = await this.notesService.findAll({ userId, query });
     return {
       success: true,
       statusCode: HttpStatus.OK,
@@ -56,15 +57,15 @@ export class NotesResolver {
   }
 
   // FIND ONE NOTE
-  @Query(() => NoteResponse, { name: 'noteById' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Note:read')
+  @Query(() => NoteResponse, { name: 'note' })
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Note:read')
   @UseGuards(GqlAuthGuard)
   async findOne(
     @Args('id', { type: () => Int }) id: number,
-    @CurrentUser() user: JwtPayload,
+    @Args('userId', { type: () => Int }) userId: number,
   ) {
-    const result = await this.notesService.findOne({ user, id });
+    const result = await this.notesService.findOne({ userId, id });
 
     return {
       success: true,
@@ -76,15 +77,11 @@ export class NotesResolver {
 
   // UPDATE NOTE
   @Mutation(() => NoteResponse, { name: 'updateNote' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Note:update')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Note:update')
   @UseGuards(GqlAuthGuard)
-  async updateNote(
-    @CurrentUser() user: JwtPayload,
-    @Args('updateNoteInput') updateNoteInput: UpdateNoteInput,
-  ) {
+  async updateNote(@Args('updateNoteInput') updateNoteInput: UpdateNoteInput) {
     const result = await this.notesService.update({
-      user,
       id: updateNoteInput.id,
       updateNoteInput,
     });
@@ -98,14 +95,14 @@ export class NotesResolver {
 
   // REMOVE NOTE
   @Mutation(() => NoteResponse, { name: 'deleteNote' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Note:delete')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Note:delete')
   @UseGuards(GqlAuthGuard)
   async removeNote(
     @Args('id', { type: () => Int }) id: number,
-    @CurrentUser() user: JwtPayload,
+    @Args('userId', { type: () => Int }) userId: number,
   ) {
-    const result = await this.notesService.remove({ user, id });
+    const result = await this.notesService.remove({ userId, id });
     return {
       success: true,
       statusCode: HttpStatus.OK,

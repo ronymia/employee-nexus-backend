@@ -1755,7 +1755,7 @@ type Mutation {
   deleteJobType(id: Int!): JobTypeResponse!
   deleteLeave(id: Int!): LeaveResponse!
   deleteLeaveType(id: Int!): LeaveTypeResponse!
-  deleteNote(id: Int!): NoteResponse!
+  deleteNote(id: Int!, userId: Int!): NoteResponse!
   deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
   deleteSocialLink(profileId: Int!): SocialLinkResponse!
@@ -1819,6 +1819,9 @@ type Note {
   """ID of the user who created this note"""
   createdBy: Int!
 
+  """User who created this note"""
+  creator: User
+
   """Unique identifier for the note"""
   id: ID!
 
@@ -1830,6 +1833,9 @@ type Note {
 
   """Date when the note was last updated"""
   updatedAt: DateTime!
+
+  """User this note is about"""
+  user: User
 
   """ID of the user this note is about"""
   userId: Int!
@@ -2035,8 +2041,8 @@ type Query {
   leaveTypeById(id: Int!): LeaveTypeResponse!
   leaveTypes(query: QueryLeaveTypeInput): LeaveTypesQueryResponse!
   leaves(query: QueryLeaveInput): LeavesQueryResponse!
-  noteById(id: Int!): NoteResponse!
-  notes(query: QueryNoteInput): NotesQueryResponse!
+  note(id: Int!, userId: Int!): NoteResponse!
+  notesByUserId(query: QueryNoteInput, userId: Int!): NotesQueryResponse!
   onboardingProcessById(id: Int!): OnboardingProcessResponse!
   onboardingProcesses(query: QueryOnboardingProcessInput): OnboardingProcessesQueryResponse!
   permissionById(id: Int!): Permission!
