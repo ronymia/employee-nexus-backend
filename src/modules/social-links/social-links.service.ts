@@ -3,10 +3,7 @@ import { CreateSocialLinkInput } from './dto/create-social-link.input';
 import { UpdateSocialLinkInput } from './dto/update-social-link.input';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtPayload } from '../auth/jwt.strategy';
-import { QuerySocialLinkInput } from './dto/query-social-link.input';
 import { Prisma } from 'generated/prisma';
-import { paginationHelpers } from 'src/helpers/paginationHelpers';
-import { socialLinkSearchableFields } from './social-link.constant';
 
 @Injectable()
 export class SocialLinksService {
@@ -21,148 +18,74 @@ export class SocialLinksService {
     createSocialLinkInput: CreateSocialLinkInput;
   }) {
     const { profileId, ...socialLinkData } = createSocialLinkInput;
-
-    // Verify that the profile belongs to the user
-    const profile = await this.prisma.profile.findUnique({
-      where: { id: parseInt(profileId), userId: user.userId },
-    });
-
-    if (!profile) {
-      throw new NotFoundException(
-        'Profile not found or does not belong to user',
-      );
-    }
+    const parsedProfileId = profileId;
 
     return await this.prisma.socialLink.upsert({
-      where: { profileId: parseInt(profileId) },
+      where: { profileId: parsedProfileId },
       update: socialLinkData,
       create: {
-        profileId: parseInt(profileId),
+        profileId: parsedProfileId,
         ...socialLinkData,
       },
+      include: {
+        profile: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
+          },
+        },
+      },
     });
   }
 
-  async findAll({
-    user,
-    query,
-  }: {
-    user: JwtPayload;
-    query: QuerySocialLinkInput;
-  }) {
-    const { pagination, ...filters } = query ?? {};
-
-    // PAGINATION
-    const { page, skip, limit, sortBy, sortOrder } =
-      paginationHelpers.calculatePagination(pagination || {});
-
-    // FILTER
-    const { searchTerm } = filters;
-
+  async findAll({ profileId }: { profileId?: number }) {
     // QUERY BUILDER
     const andCondition: any[] = [];
-    // Search in Field
-    if (searchTerm) {
-      andCondition.push({
-        OR: socialLinkSearchableFields.map((field) => ({
-          [field]: {
-            contains: searchTerm,
-            mode: 'insensitive',
-          },
-        })),
-      });
+
+    // Filter by specific profileId if provided
+    if (profileId) {
+      andCondition.push({ profileId });
     }
 
-    // Only show social links for profiles that belong to the user's business
-    const userProfiles = await this.prisma.profile.findMany({
-      where: {
-        user: {
-          businessId: user.businessId,
-        },
-      },
-      select: { id: true },
-    });
+    const whereCondition: Prisma.SocialLinkWhereInput = andCondition.length
+      ? { AND: andCondition }
+      : {};
 
-    const profileIds = userProfiles.map((p) => p.id);
-
-    const whereCondition: Prisma.SocialLinkWhereInput = {
-      AND: [
-        ...andCondition,
-        {
-          profileId: {
-            in: profileIds,
-          },
-        },
-      ],
-    };
-
-    const result = !limit
-      ? await this.prisma.socialLink.findMany({
-          where: whereCondition,
-          include: {
-            profile: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        })
-      : await this.prisma.socialLink.findMany({
-          where: whereCondition,
-          skip,
-          take: limit,
-          orderBy: {
-            [sortBy]: sortOrder,
-          },
-          include: {
-            profile: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        });
-
-    // META
-    const total = await this.prisma.socialLink.count({
+    const result = await this.prisma.socialLink.findFirst({
       where: whereCondition,
+      include: {
+        profile: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
+          },
+        },
+      },
     });
 
-    return {
-      meta: {
-        page: Number(page),
-        limit: Number(limit),
-        skip: Number(skip),
-        total: Number(total),
-        totalPages: Math.ceil(total / limit),
-      },
-      data: result,
-    };
+    return result;
   }
 
-  async findOne({ user, profileId }: { user: JwtPayload; profileId: number }) {
-    // Verify that the profile belongs to the user's business
-    const profile = await this.prisma.profile.findFirst({
-      where: {
-        id: profileId,
-        user: {
-          businessId: user.businessId,
-        },
-      },
-    });
-
-    if (!profile) {
-      throw new NotFoundException(
-        'Profile not found or does not belong to user',
-      );
-    }
-
+  async findOne({ profileId }: { profileId: number }) {
     const result = await this.prisma.socialLink.findUnique({
       where: { profileId },
       include: {
         profile: {
           include: {
-            user: true,
+            user: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
           },
         },
       },
@@ -178,72 +101,49 @@ export class SocialLinksService {
   }
 
   async update({
-    user,
-    profileId,
     updateSocialLinkInput,
   }: {
-    user: JwtPayload;
-    profileId: number;
     updateSocialLinkInput: UpdateSocialLinkInput;
   }) {
-    // Verify that the profile belongs to the user
-    const profile = await this.prisma.profile.findUnique({
-      where: { id: profileId, userId: user.userId },
-    });
-
-    if (!profile) {
-      throw new NotFoundException(
-        'Profile not found or does not belong to user',
-      );
-    }
-
-    const { profileId: _, ...updateData } = updateSocialLinkInput;
+    const { profileId, ...updateData } = updateSocialLinkInput;
+    const parsedProfileId = profileId as number;
 
     return await this.prisma.socialLink.upsert({
-      where: { profileId },
+      where: { profileId: parsedProfileId },
       update: updateData,
       create: {
-        profileId,
+        profileId: parsedProfileId,
         ...updateData,
       },
       include: {
         profile: {
           include: {
-            user: true,
+            user: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
           },
         },
       },
     });
   }
 
-  async remove({ user, profileId }: { user: JwtPayload; profileId: number }) {
-    // Verify that the profile belongs to the user
-    const profile = await this.prisma.profile.findUnique({
-      where: { id: profileId, userId: user.userId },
-    });
-
-    if (!profile) {
-      throw new NotFoundException(
-        'Profile not found or does not belong to user',
-      );
-    }
-
-    const socialLink = await this.prisma.socialLink.findUnique({
-      where: { profileId },
-    });
-
-    if (!socialLink) {
-      throw new NotFoundException(
-        `Social links not found for profile ID ${profileId}`,
-      );
-    }
+  async remove({ profileId }: { profileId: number }) {
+    await this.findOne({ profileId }); // Ensure the social link exists
 
     return await this.prisma.socialLink.delete({
       where: { profileId },
       include: {
         profile: {
           include: {
-            user: true,
+            user: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
           },
         },
       },

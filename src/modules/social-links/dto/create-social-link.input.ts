@@ -1,10 +1,10 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
 import { IsOptional, IsString, IsUrl } from 'class-validator';
 
 @InputType()
 export class CreateSocialLinkInput {
-  @Field(() => String, { description: 'Profile ID' })
-  profileId: string;
+  @Field(() => Int, { description: 'Profile ID' })
+  profileId: number;
 
   @Field(() => String, { description: 'Facebook profile URL', nullable: true })
   @IsString()

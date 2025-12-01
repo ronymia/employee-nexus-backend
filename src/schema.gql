@@ -809,7 +809,7 @@ input CreateSocialLinkInput {
   linkedin: String
 
   """Profile ID"""
-  profileId: String!
+  profileId: Int!
 
   """Twitter profile URL"""
   twitter: String
@@ -2052,8 +2052,8 @@ type Query {
   recruitmentProcessById(id: Int!): RecruitmentProcessResponse!
   recruitmentProcesses(query: QueryRecruitmentProcessInput): RecruitmentProcessesQueryResponse!
   roles: RoleResponse!
-  socialLinkByProfileId(profileId: Int!): SocialLinkResponse!
-  socialLinks(query: QuerySocialLinkInput): SocialLinksQueryResponse!
+  socialLink(profileId: Int!): SocialLinkResponse!
+  socialLinksByProfileId(profileId: Int): SocialLinkResponse!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
   userById(id: Int!): UserResponse!
@@ -2183,11 +2183,6 @@ input QueryRecruitmentProcessInput {
   pagination: BasePaginationInput
   searchTerm: String
   status: Status
-}
-
-input QuerySocialLinkInput {
-  pagination: BasePaginationInput
-  searchTerm: String
 }
 
 input QuerySubscriptionPlanInput {
@@ -2334,6 +2329,9 @@ type SocialLink {
   """LinkedIn profile URL"""
   linkedin: String
 
+  """Profile associated with these social links"""
+  profile: Profile
+
   """Profile ID (primary key)"""
   profileId: ID!
 
@@ -2346,14 +2344,6 @@ type SocialLink {
 
 type SocialLinkResponse {
   data: SocialLink!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
-type SocialLinksQueryResponse {
-  data: [SocialLink!]!
   message: String!
   meta: PaginationMeta
   statusCode: Float!
@@ -3004,7 +2994,9 @@ input UpdateSocialLinkInput {
 
   """LinkedIn profile URL"""
   linkedin: String
-  profileId: String!
+
+  """Profile ID"""
+  profileId: Int
 
   """Twitter profile URL"""
   twitter: String

@@ -3,11 +3,18 @@ import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
+import { Profile } from 'src/modules/profiles/entities/profile.entity';
 
 @ObjectType()
 export class SocialLink {
   @Field(() => ID, { description: 'Profile ID (primary key)' })
   profileId: number;
+
+  @Field(() => Profile, {
+    nullable: true,
+    description: 'Profile associated with these social links',
+  })
+  profile?: Profile;
 
   @Field(() => String, { description: 'Facebook profile URL', nullable: true })
   facebook: string | null;
