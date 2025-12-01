@@ -76,6 +76,12 @@ enum SubscriptionStatus {
   CANCELLED
 }
 
+enum LeaveDuration {
+  SINGLE_DAY
+  MULTI_DAY
+  HALF_DAY
+}
+
 model User {
   id        Int               @id @default(autoincrement())
   email     String            @unique
@@ -970,23 +976,23 @@ model AttendancePunch {
 }
 
 model Leave {
-  id              Int       @id @default(autoincrement())
-  userId          Int       @map("user_id")
-  user            User      @relation(name: "userLeaves", fields: [userId], references: [id], onDelete: Cascade)
-  leaveTypeId     Int       @map("leave_type_id")
-  leaveType       LeaveType @relation(name: "leaveTypeInLeave", fields: [leaveTypeId], references: [id], onDelete: Restrict)
-  startDate       DateTime  @map("start_date") // Leave start date
-  endDate         DateTime  @map("end_date") // Leave end date
-  totalDays       Float     @map("total_days") // Total leave days (can be decimal for half days)
-  status          String    @default("pending_approve") @map("status") // pending, approved, rejected, cancelled
-  appliedAt       DateTime  @default(now()) @map("applied_at") // When leave was requested
-  reviewedAt      DateTime? @map("reviewed_at") // When leave was approved/rejected
-  reviewedBy      Int?      @map("reviewed_by") // Manager/admin who reviewed
-  reviewer        User?     @relation(name: "leaveReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
-  rejectionReason String?   @map("rejection_reason") // Reason for rejection if rejected
-  attachments     String?   @map("attachments") // Supporting documents (JSON array or comma-separated URLs)
-  isHalfDay       Boolean   @default(false) @map("is_half_day") // Whether it's a half-day leave
-  notes           String?   @map("notes") // Additional notes or comments
+  id              Int           @id @default(autoincrement())
+  userId          Int           @map("user_id")
+  user            User          @relation(name: "userLeaves", fields: [userId], references: [id], onDelete: Cascade)
+  leaveTypeId     Int           @map("leave_type_id")
+  leaveType       LeaveType     @relation(name: "leaveTypeInLeave", fields: [leaveTypeId], references: [id], onDelete: Restrict)
+  leaveYear       Int           @map("leave_year") // Year this leave applies to (e.g., 2025)
+  leaveDuration   LeaveDuration @map("leave_duration") // SINGLE_DAY, MULTI_DAY, HALF_DAY
+  startDate       DateTime      @map("start_date") // Leave start date
+  endDate         DateTime?     @map("end_date") // Leave end date (null for single day)
+  totalHours      Float         @map("total_hours") // Total leave hours deducted from balance
+  status          String        @default("pending") @map("status") // pending, approved, rejected, cancelled
+  reviewedAt      DateTime?     @map("reviewed_at") // When leave was approved/rejected
+  reviewedBy      Int?          @map("reviewed_by") // Manager/admin who reviewed
+  reviewer        User?         @relation(name: "leaveReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  rejectionReason String?       @map("rejection_reason") // Reason for rejection if rejected
+  attachments     String?       @map("attachments") // Supporting documents (JSON array or comma-separated URLs)
+  notes           String?       @map("notes") // Additional notes or comments
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -994,7 +1000,9 @@ model Leave {
   @@index([userId])
   @@index([leaveTypeId])
   @@index([status])
+  @@index([leaveYear])
   @@index([startDate, endDate])
   @@index([userId, status])
+  @@index([userId, leaveYear])
   @@map("leaves")
 }

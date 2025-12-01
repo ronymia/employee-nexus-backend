@@ -129,4 +129,13 @@ export const managerPermissions = [
       PermissionAction.DELETE,
     ],
   },
+  {
+    resource: PermissionResource.LEAVE,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
 ];
