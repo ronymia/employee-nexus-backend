@@ -18,7 +18,6 @@ export class EducationHistoriesService {
     return await this.prisma.educationHistory.create({
       data: {
         ...createEducationHistoryInput,
-        userId: user.userId,
       },
       include: {
         user: {
@@ -31,10 +30,10 @@ export class EducationHistoriesService {
     });
   }
 
-  async findAll({ user }: { user: JwtPayload }) {
+  async findAll({ userId }: { userId: number }) {
     return await this.prisma.educationHistory.findMany({
       where: {
-        userId: user.userId,
+        userId: userId,
       },
       include: {
         user: {
@@ -50,9 +49,9 @@ export class EducationHistoriesService {
     });
   }
 
-  async findOne({ user, id }: { user: JwtPayload; id: number }) {
+  async findOne({ userId, id }: { userId: number; id: number }) {
     const educationHistory = await this.prisma.educationHistory.findUnique({
-      where: { id, userId: user.userId },
+      where: { id, userId },
       include: {
         user: {
           include: {
@@ -71,18 +70,18 @@ export class EducationHistoriesService {
   }
 
   async update({
-    user,
     id,
     updateEducationHistoryInput,
   }: {
-    user: JwtPayload;
     id: number;
     updateEducationHistoryInput: UpdateEducationHistoryInput;
   }) {
-    await this.findOne({ user, id });
+    const userId = updateEducationHistoryInput.userId as number;
+
+    await this.findOne({ userId, id });
 
     return await this.prisma.educationHistory.update({
-      where: { id, userId: user.userId },
+      where: { id, userId },
       data: updateEducationHistoryInput,
       include: {
         user: {
@@ -95,11 +94,11 @@ export class EducationHistoriesService {
     });
   }
 
-  async remove({ user, id }: { user: JwtPayload; id: number }) {
-    await this.findOne({ user, id });
+  async remove({ userId, id }: { userId: number; id: number }) {
+    await this.findOne({ userId, id });
 
     return await this.prisma.educationHistory.delete({
-      where: { id, userId: user.userId },
+      where: { id, userId },
       include: {
         user: {
           include: {

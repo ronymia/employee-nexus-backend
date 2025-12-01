@@ -42,11 +42,14 @@ export class EducationHistoriesResolver {
 
   // FIND ALL EDUCATION HISTORIES
   @Query(() => EducationHistoriesQueryResponse, {
-    name: 'educationHistories',
+    name: 'educationHistoryByUserId',
   })
   @UseGuards(GqlAuthGuard)
-  async findAll(@CurrentUser() user: JwtPayload) {
-    const result = await this.educationHistoriesService.findAll({ user });
+  async findAll(
+    @CurrentUser() user: JwtPayload,
+    @Args('userId', { type: () => Int }) userId: number,
+  ) {
+    const result = await this.educationHistoriesService.findAll({ userId });
     return {
       success: true,
       statusCode: HttpStatus.OK,
@@ -60,9 +63,9 @@ export class EducationHistoriesResolver {
   @UseGuards(GqlAuthGuard)
   async findOne(
     @Args('id', { type: () => Int }) id: number,
-    @CurrentUser() user: JwtPayload,
+    @Args('userId', { type: () => Int }) userId: number,
   ) {
-    const result = await this.educationHistoriesService.findOne({ user, id });
+    const result = await this.educationHistoriesService.findOne({ userId, id });
 
     return {
       success: true,
@@ -78,12 +81,10 @@ export class EducationHistoriesResolver {
   })
   @UseGuards(GqlAuthGuard)
   async updateEducationHistory(
-    @CurrentUser() user: JwtPayload,
     @Args('updateEducationHistoryInput')
     updateEducationHistoryInput: UpdateEducationHistoryInput,
   ) {
     const result = await this.educationHistoriesService.update({
-      user,
       id: updateEducationHistoryInput.id,
       updateEducationHistoryInput,
     });
@@ -102,9 +103,9 @@ export class EducationHistoriesResolver {
   @UseGuards(GqlAuthGuard)
   async removeEducationHistory(
     @Args('id', { type: () => Int }) id: number,
-    @CurrentUser() user: JwtPayload,
+    @Args('userId', { type: () => Int }) userId: number,
   ) {
-    const result = await this.educationHistoriesService.remove({ user, id });
+    const result = await this.educationHistoriesService.remove({ userId, id });
     return {
       success: true,
       statusCode: HttpStatus.OK,

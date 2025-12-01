@@ -557,6 +557,9 @@ input CreateEducationHistoryInput {
 
   """Start date (MM-YYYY or YYYY)"""
   startDate: String!
+
+  """ID of the user"""
+  userId: Int!
 }
 
 input CreateEmergencyContactInput {
@@ -1733,7 +1736,7 @@ type Mutation {
   deleteDepartment(id: Int!): DepartmentResponse!
   deleteDesignation(id: Int!): DesignationResponse!
   deleteDocument(id: Int!): DocumentResponse!
-  deleteEducationHistory(id: Int!): EducationHistoryResponse!
+  deleteEducationHistory(id: Int!, userId: Int!): EducationHistoryResponse!
   deleteEmployee(id: Int!): UserResponse!
   deleteEmployeeScheduleAssignment(id: Int!): EmployeeScheduleAssignmentResponse!
   deleteEmploymentStatus(id: Int!): EmploymentStatusResponse!
@@ -2000,8 +2003,8 @@ type Query {
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
   documentById(id: Int!): DocumentResponse!
   documents(query: QueryDocumentInput): DocumentsQueryResponse!
-  educationHistories: EducationHistoriesQueryResponse!
-  educationHistory(id: Int!): EducationHistoryResponse!
+  educationHistory(id: Int!, userId: Int!): EducationHistoryResponse!
+  educationHistoryByUserId(userId: Int!): EducationHistoriesQueryResponse!
   employeeById(id: Int!): UserResponse!
   employeeScheduleAssignment(id: Int!): EmployeeScheduleAssignmentResponse!
   employeeScheduleAssignments: EmployeeScheduleAssignmentsQueryResponse!
@@ -2663,6 +2666,9 @@ input UpdateEducationHistoryInput {
 
   """Start date (MM-YYYY or YYYY)"""
   startDate: String
+
+  """ID of the user"""
+  userId: Int
 }
 
 input UpdateEmergencyContactInput {
