@@ -65,8 +65,8 @@ export class LeavesResolver {
 
   // CREATE LEAVE
   @Mutation(() => LeaveResponse, { name: 'createLeave' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Leave:create')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Leave:create')
   @UseGuards(GqlAuthGuard)
   async createLeave(
     @Args('createLeaveInput') createLeaveInput: CreateLeaveInput,
@@ -86,8 +86,8 @@ export class LeavesResolver {
 
   // FIND ALL LEAVES
   @Query(() => LeavesQueryResponse, { name: 'leaves' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Leave:read')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Leave:read')
   @UseGuards(GqlAuthGuard)
   async findAll(
     @CurrentUser() user: JwtPayload,
@@ -105,8 +105,8 @@ export class LeavesResolver {
 
   // FIND ONE LEAVE
   @Query(() => LeaveResponse, { name: 'leaveById' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Leave:read')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Leave:read')
   @UseGuards(GqlAuthGuard)
   async findOne(
     @Args('id', { type: () => Int }) id: number,
@@ -124,8 +124,8 @@ export class LeavesResolver {
 
   // UPDATE LEAVE
   @Mutation(() => LeaveResponse, { name: 'updateLeave' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Leave:update')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Leave:update')
   @UseGuards(GqlAuthGuard)
   async updateLeave(
     @CurrentUser() user: JwtPayload,
@@ -146,8 +146,8 @@ export class LeavesResolver {
 
   // REMOVE LEAVE
   @Mutation(() => LeaveResponse, { name: 'deleteLeave' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Leave:delete')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Leave:delete')
   @UseGuards(GqlAuthGuard)
   async removeLeave(
     @Args('id', { type: () => Int }) id: number,
@@ -164,8 +164,8 @@ export class LeavesResolver {
 
   // GET LEAVE BALANCE
   @Query(() => LeaveBalanceResponse, { name: 'leaveBalance' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Leave:read')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Leave:read')
   @UseGuards(GqlAuthGuard)
   async getLeaveBalance(
     @CurrentUser() user: JwtPayload,

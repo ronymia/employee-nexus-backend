@@ -116,7 +116,11 @@ export class LeavesService {
       ? await this.prisma.leave.findMany({
           where: whereCondition,
           include: {
-            user: true,
+            user: {
+              include: {
+                profile: true,
+              },
+            },
             leaveType: true,
             reviewer: true,
           },
@@ -129,7 +133,11 @@ export class LeavesService {
             [sortBy]: sortOrder,
           },
           include: {
-            user: true,
+            user: {
+              include: {
+                profile: true,
+              },
+            },
             leaveType: true,
             reviewer: true,
           },
@@ -157,7 +165,11 @@ export class LeavesService {
     const result = await this.prisma.leave.findUnique({
       where: { id, userId },
       include: {
-        user: true,
+        user: {
+          include: {
+            profile: true,
+          },
+        },
         leaveType: true,
         reviewer: true,
       },
