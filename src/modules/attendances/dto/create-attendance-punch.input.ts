@@ -9,7 +9,11 @@ import {
 
 @InputType()
 export class CreateAttendancePunchInput {
-  @Field(() => Int, { description: 'Attendance ID' })
+  @Field(() => Int, {
+    nullable: true,
+    description: 'Attendance ID (optional for nested creation)',
+  })
+  @IsOptional()
   @IsInt()
   attendanceId: number;
 

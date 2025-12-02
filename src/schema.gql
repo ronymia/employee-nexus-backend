@@ -420,16 +420,22 @@ input CreateAttendanceInput {
   """Date of attendance"""
   date: DateTime!
 
+  """Punch records for this attendance"""
+  punchRecords: [CreateAttendancePunchInput!]
+
   """Attendance status"""
-  status: String! = "present"
+  status: String! = "pending_approve"
 
   """Total working hours for the day"""
   totalHours: Float
+
+  """User ID"""
+  userId: Int!
 }
 
 input CreateAttendancePunchInput {
-  """Attendance ID"""
-  attendanceId: Int!
+  """Attendance ID (optional for nested creation)"""
+  attendanceId: Int
 
   """Break end timestamp"""
   breakEnd: DateTime
@@ -1765,6 +1771,7 @@ type Mutation {
   createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
   createWorkSchedule(createWorkScheduleInput: CreateWorkScheduleInput!): WorkScheduleResponse!
   createWorkSite(createWorkSiteInput: CreateWorkSiteInput!): WorkSiteResponse!
+  deleteAttendance(id: Int!): AttendanceResponse!
   deleteBusiness(id: Int!): Business!
   deleteDepartment(id: Int!): DepartmentResponse!
   deleteDesignation(id: Int!): DesignationResponse!
@@ -1790,7 +1797,6 @@ type Mutation {
   login(loginInput: LoginAuthInput!): Auth!
   removeAsset(id: Int!): AssetResponse!
   removeAssetType(id: Int!): AssetTypeResponse!
-  removeAttendance(id: Int!): AttendanceResponse!
   removeAttendancePunch(id: Int!): AttendancePunch!
   removeProject(id: Int!): ProjectResponse!
   returnAsset(returnAssetInput: ReturnAssetInput!): AssetAssignmentResponse!
@@ -2038,7 +2044,7 @@ type Query {
   assetTypes(query: QueryAssetTypeInput): AssetTypesQueryResponse!
   assets(query: QueryAssetInput): AssetsQueryResponse!
   assetsByUserId(userId: Int!): AssetsQueryResponse!
-  attendance(id: Int!): AttendanceResponse!
+  attendanceById(id: Int!): AttendanceResponse!
   attendanceSettingsByBusiness: AttendanceSettingResponse!
   attendances(query: QueryAttendanceInput): AttendanceQueryResponse!
   businessById(id: Int!): Business!
@@ -2510,15 +2516,21 @@ input UpdateAttendanceInput {
   date: DateTime
   id: Int!
 
+  """Punch records for this attendance"""
+  punchRecords: [CreateAttendancePunchInput!]
+
   """Attendance status"""
-  status: String = "present"
+  status: String = "pending_approve"
 
   """Total working hours for the day"""
   totalHours: Float
+
+  """User ID"""
+  userId: Int!
 }
 
 input UpdateAttendancePunchInput {
-  """Attendance ID"""
+  """Attendance ID (optional for nested creation)"""
   attendanceId: Int
 
   """Break end timestamp"""

@@ -22,24 +22,36 @@ export class AttendancesService {
     user: JwtPayload;
     createAttendanceInput: CreateAttendanceInput;
   }) {
-    return await this.prisma.attendance.create({
-      data: {
-        ...createAttendanceInput,
-        userId: user.userId,
-      },
-      include: {
-        user: {
-          include: {
-            profile: true,
+    const { punchRecords, ...attendanceData } = createAttendanceInput;
+
+    return await this.prisma.$transaction(async (prisma) => {
+      return await prisma.attendance.create({
+        data: {
+          ...attendanceData,
+          userId: user.userId,
+          ...(punchRecords && {
+            punchRecords: {
+              create: punchRecords.map(
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                ({ attendanceId, ...punchData }) => punchData,
+              ),
+            },
+          }),
+        },
+        include: {
+          user: {
+            include: {
+              profile: true,
+            },
+          },
+          punchRecords: {
+            include: {
+              project: true,
+              workSite: true,
+            },
           },
         },
-        punchRecords: {
-          include: {
-            project: true,
-            workSite: true,
-          },
-        },
-      },
+      });
     });
   }
 
@@ -91,8 +103,8 @@ export class AttendancesService {
 
     const result = await this.prisma.attendance.findMany({
       where: whereCondition,
-      skip,
-      take: limit,
+      // skip,
+      // take: limit,
       orderBy: {
         [sortBy]: sortOrder,
       },
@@ -128,11 +140,11 @@ export class AttendancesService {
   }
 
   // FIND ONE ATTENDANCE
-  async findOne({ user, id }: { user: JwtPayload; id: number }) {
-    const result = await this.prisma.attendance.findFirst({
+  async findOne({ id }: { id: number }) {
+    // console.log(user)
+    const result = await this.prisma.attendance.findUnique({
       where: {
         id,
-        userId: user.userId,
       },
       include: {
         user: {
@@ -158,40 +170,73 @@ export class AttendancesService {
 
   // UPDATE ATTENDANCE
   async update({
-    user,
     updateAttendanceInput,
   }: {
-    user: JwtPayload;
     updateAttendanceInput: UpdateAttendanceInput;
   }) {
-    const { id, ...data } = updateAttendanceInput;
+    const { id, punchRecords, ...data } = updateAttendanceInput;
 
     // Check if attendance exists and belongs to user
-    await this.findOne({ user, id });
+    await this.findOne({ id });
 
-    return await this.prisma.attendance.update({
-      where: { id },
-      data,
-      include: {
-        user: {
-          include: {
-            profile: true,
+    return await this.prisma.$transaction(async (prisma) => {
+      // Update attendance without punch records first
+      await prisma.attendance.update({
+        where: { id },
+        data,
+      });
+
+      // Update punch records if provided
+      if (punchRecords && punchRecords.length > 0) {
+        for (const punchRecord of punchRecords) {
+          const {
+            id: punchId,
+            attendanceId,
+            ...punchData
+          } = punchRecord as any;
+
+          if (punchId) {
+            // Update existing punch record
+            await prisma.attendancePunch.update({
+              where: { id: punchId, AND: { attendanceId } },
+              data: punchData,
+            });
+          } else {
+            // Create new punch record
+            await prisma.attendancePunch.create({
+              data: {
+                ...punchData,
+                attendanceId: id,
+              },
+            });
+          }
+        }
+      }
+
+      // Fetch and return the updated attendance with punch records
+      return await prisma.attendance.findUnique({
+        where: { id },
+        include: {
+          user: {
+            include: {
+              profile: true,
+            },
+          },
+          punchRecords: {
+            include: {
+              project: true,
+              workSite: true,
+            },
           },
         },
-        punchRecords: {
-          include: {
-            project: true,
-            workSite: true,
-          },
-        },
-      },
+      });
     });
   }
 
   // DELETE ATTENDANCE
-  async remove({ user, id }: { user: JwtPayload; id: number }) {
+  async remove({ id }: { id: number }) {
     // Check if attendance exists and belongs to user
-    await this.findOne({ user, id });
+    await this.findOne({ id });
 
     return await this.prisma.attendance.delete({
       where: { id },
@@ -200,16 +245,14 @@ export class AttendancesService {
 
   // CREATE PUNCH RECORD
   async createPunch({
-    user,
     createAttendancePunchInput,
   }: {
-    user: JwtPayload;
     createAttendancePunchInput: CreateAttendancePunchInput;
   }) {
     const { attendanceId, ...data } = createAttendancePunchInput;
 
     // Verify attendance belongs to user
-    await this.findOne({ user, id: attendanceId });
+    await this.findOne({ id: attendanceId });
 
     return await this.prisma.attendancePunch.create({
       data: {

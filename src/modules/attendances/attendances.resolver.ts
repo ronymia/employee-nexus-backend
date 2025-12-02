@@ -13,8 +13,6 @@ import { CreateAttendancePunchInput } from './dto/create-attendance-punch.input'
 import { UpdateAttendancePunchInput } from './dto/update-attendance-punch.input';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
-import { PermissionsGuard } from '../permissions/guards/permission.guard';
-import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
 
@@ -24,8 +22,8 @@ export class AttendancesResolver {
 
   // CREATE ATTENDANCE
   @Mutation(() => AttendanceResponse)
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Attendance:create')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Attendance:create')
   @UseGuards(GqlAuthGuard)
   async createAttendance(
     @CurrentUser() user: JwtPayload,
@@ -46,8 +44,8 @@ export class AttendancesResolver {
 
   // QUERY ALL ATTENDANCES
   @Query(() => AttendanceQueryResponse, { name: 'attendances' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Attendance:read')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Attendance:read')
   @UseGuards(GqlAuthGuard)
   async findAll(
     @CurrentUser() user: JwtPayload,
@@ -67,15 +65,15 @@ export class AttendancesResolver {
   }
 
   // QUERY SINGLE ATTENDANCE
-  @Query(() => AttendanceResponse, { name: 'attendance' })
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Attendance:read')
+  @Query(() => AttendanceResponse, { name: 'attendanceById' })
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Attendance:read')
   @UseGuards(GqlAuthGuard)
   async findOne(
-    @CurrentUser() user: JwtPayload,
+    // @CurrentUser() user: JwtPayload,
     @Args('id', { type: () => Int }) id: number,
   ) {
-    const result = await this.attendancesService.findOne({ user, id });
+    const result = await this.attendancesService.findOne({ id });
 
     return {
       success: true,
@@ -87,15 +85,14 @@ export class AttendancesResolver {
 
   // UPDATE ATTENDANCE
   @Mutation(() => AttendanceResponse)
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Attendance:update')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Attendance:update')
   @UseGuards(GqlAuthGuard)
   async updateAttendance(
-    @CurrentUser() user: JwtPayload,
+    // @CurrentUser() user: JwtPayload,
     @Args('updateAttendanceInput') updateAttendanceInput: UpdateAttendanceInput,
   ) {
     const result = await this.attendancesService.update({
-      user,
       updateAttendanceInput,
     });
 
@@ -108,15 +105,15 @@ export class AttendancesResolver {
   }
 
   // DELETE ATTENDANCE
-  @Mutation(() => AttendanceResponse)
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Attendance:delete')
+  @Mutation(() => AttendanceResponse, { name: 'deleteAttendance' })
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Attendance:delete')
   @UseGuards(GqlAuthGuard)
   async removeAttendance(
-    @CurrentUser() user: JwtPayload,
+    // @CurrentUser() user: JwtPayload,
     @Args('id', { type: () => Int }) id: number,
   ) {
-    const result = await this.attendancesService.remove({ user, id });
+    const result = await this.attendancesService.remove({ id });
 
     return {
       success: true,
@@ -128,24 +125,23 @@ export class AttendancesResolver {
 
   // CREATE PUNCH RECORD
   @Mutation(() => AttendancePunch)
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Attendance:create')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Attendance:create')
   @UseGuards(GqlAuthGuard)
   async createAttendancePunch(
-    @CurrentUser() user: JwtPayload,
+    // @CurrentUser() user: JwtPayload,
     @Args('createAttendancePunchInput')
     createAttendancePunchInput: CreateAttendancePunchInput,
   ) {
     return await this.attendancesService.createPunch({
-      user,
       createAttendancePunchInput,
     });
   }
 
   // UPDATE PUNCH RECORD
   @Mutation(() => AttendancePunch)
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Attendance:update')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Attendance:update')
   @UseGuards(GqlAuthGuard)
   async updateAttendancePunch(
     @CurrentUser() user: JwtPayload,
@@ -160,8 +156,8 @@ export class AttendancesResolver {
 
   // DELETE PUNCH RECORD
   @Mutation(() => AttendancePunch)
-  @UseGuards(PermissionsGuard)
-  @RequirePermissions('Attendance:delete')
+  // @UseGuards(PermissionsGuard)
+  // @RequirePermissions('Attendance:delete')
   @UseGuards(GqlAuthGuard)
   async removeAttendancePunch(
     @CurrentUser() user: JwtPayload,
