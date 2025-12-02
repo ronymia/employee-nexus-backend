@@ -38,6 +38,15 @@ import { WorkSchedulesModule } from './modules/work-schedules/work-schedules.mod
 import { AssetTypesModule } from './modules/asset-types/asset-types.module';
 import { AssetsModule } from './modules/assets/assets.module';
 import { ProjectsModule } from './modules/projects/projects.module';
+import { EducationHistoriesModule } from './modules/education-histories/education-histories.module';
+import { JobHistoriesModule } from './modules/job-histories/job-histories.module';
+import { EmployeeScheduleAssignmentsModule } from './modules/employee-schedule-assignments/employee-schedule-assignments.module';
+import { DocumentsModule } from './modules/documents/documents.module';
+import { NotesModule } from './modules/notes/notes.module';
+import { SocialLinksModule } from './modules/social-links/social-links.module';
+import { AttendancesModule } from './modules/attendances/attendances.module';
+import { LeavesModule } from './modules/leaves/leaves.module';
+import { HolidaysModule } from './modules/holidays/holidays.module';
 
 @Module({
   imports: [
@@ -82,6 +91,15 @@ import { ProjectsModule } from './modules/projects/projects.module';
     AssetTypesModule,
     AssetsModule,
     ProjectsModule,
+    EducationHistoriesModule,
+    JobHistoriesModule,
+    EmployeeScheduleAssignmentsModule,
+    DocumentsModule,
+    NotesModule,
+    SocialLinksModule,
+    AttendancesModule,
+    LeavesModule,
+    HolidaysModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

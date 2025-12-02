@@ -60,3 +60,8 @@ export class ProjectsQueryResponse extends BaseQueryResponse(Project) {}
 
 @ObjectType()
 export class ProjectMemberResponse extends BaseResponse(ProjectMember) {}
+
+@ObjectType()
+export class ProjectMembersQueryResponse extends BaseQueryResponse(
+  ProjectMember,
+) {}

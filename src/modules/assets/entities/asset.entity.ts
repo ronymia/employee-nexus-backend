@@ -73,3 +73,8 @@ export class AssetsQueryResponse extends BaseQueryResponse(Asset) {}
 
 @ObjectType()
 export class AssetAssignmentResponse extends BaseResponse(AssetAssignment) {}
+
+@ObjectType()
+export class AssetAssignmentQueryResponse extends BaseQueryResponse(
+  AssetAssignment,
+) {}

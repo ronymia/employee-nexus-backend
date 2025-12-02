@@ -76,6 +76,19 @@ enum SubscriptionStatus {
   CANCELLED
 }
 
+enum LeaveDuration {
+  SINGLE_DAY
+  MULTI_DAY
+  HALF_DAY
+}
+
+enum HolidayType {
+  PUBLIC
+  RELIGIOUS
+  COMPANY_SPECIFIC
+  REGIONAL
+}
+
 model User {
   id        Int               @id @default(autoincrement())
   email     String            @unique
@@ -95,25 +108,36 @@ model User {
   business   Business? @relation(name: "userBusiness", fields: [businessId], references: [id], onDelete: Cascade)
 
   userPermissions           UserPermission[]
-  ownedBusiness             Business?            @relation(name: "businessOwner")
-  subscriptionPlanCreated   SubscriptionPlan[]   @relation(name: "subscriptionPlanCreated")
-  employmentStatusCreated   EmploymentStatus[]   @relation(name: "employmentStatusCreated")
-  designationCreated        Designation[]        @relation(name: "designationCreated")
-  jobTypeCreated            JobType[]            @relation(name: "jobTypeCreated")
-  jobPlatformCreated        JobPlatform[]        @relation(name: "jobPlatformCreated")
-  recruitmentProcessCreated RecruitmentProcess[] @relation(name: "recruitmentProcessCreated")
-  onboardingProcessCreated  OnboardingProcess[]  @relation(name: "onboardingProcessCreated")
-  workSiteCreated           WorkSite[]           @relation(name: "workSiteCreated")
-  workScheduleCreated       WorkSchedule[]       @relation(name: "workScheduleCreated")
-  managedDepartments        Department[]         @relation(name: "managedDepartments")
-  departmentCreated         Department[]         @relation(name: "departmentCreated")
-  leaveTypeCreated          LeaveType[]          @relation(name: "leaveTypeCreated")
-  assetTypes                AssetType[]          @relation(name: "assetTypesCreated")
-  assetAssignments          AssetAssignment[]    @relation(name: "assetAssignmentsAssignedToUser")
-  assetAssignmentsBy        AssetAssignment[]    @relation(name: "assetAssignmentsAssignedByUser")
-  assetCreated              Asset[]              @relation(name: "assetCreated")
-  projectCreated            Project[]            @relation(name: "projectCreated")
-  projects                  ProjectMember[]      @relation(name: "projectMembersInUser")
+  ownedBusiness             Business?                    @relation(name: "businessOwner")
+  subscriptionPlanCreated   SubscriptionPlan[]           @relation(name: "subscriptionPlanCreated")
+  employmentStatusCreated   EmploymentStatus[]           @relation(name: "employmentStatusCreated")
+  designationCreated        Designation[]                @relation(name: "designationCreated")
+  jobTypeCreated            JobType[]                    @relation(name: "jobTypeCreated")
+  jobPlatformCreated        JobPlatform[]                @relation(name: "jobPlatformCreated")
+  recruitmentProcessCreated RecruitmentProcess[]         @relation(name: "recruitmentProcessCreated")
+  onboardingProcessCreated  OnboardingProcess[]          @relation(name: "onboardingProcessCreated")
+  workSiteCreated           WorkSite[]                   @relation(name: "workSiteCreated")
+  workScheduleCreated       WorkSchedule[]               @relation(name: "workScheduleCreated")
+  managedDepartments        Department[]                 @relation(name: "managedDepartments")
+  departmentCreated         Department[]                 @relation(name: "departmentCreated")
+  leaveTypeCreated          LeaveType[]                  @relation(name: "leaveTypeCreated")
+  assetTypes                AssetType[]                  @relation(name: "assetTypesCreated")
+  assetAssignments          AssetAssignment[]            @relation(name: "assetAssignmentsAssignedToUser")
+  assetAssignmentsBy        AssetAssignment[]            @relation(name: "assetAssignmentsAssignedByUser")
+  assetCreated              Asset[]                      @relation(name: "assetCreated")
+  projectCreated            Project[]                    @relation(name: "projectCreated")
+  projects                  ProjectMember[]              @relation(name: "projectMembersInUser")
+  educationHistory          EducationHistory[]           @relation(name: "userEducationHistory")
+  jobHistory                JobHistory[]                 @relation(name: "userJobHistory")
+  scheduleAssignments       EmployeeScheduleAssignment[] @relation(name: "userScheduleAssignments")
+  scheduleAssignmentsBy     EmployeeScheduleAssignment[] @relation(name: "scheduleAssignmentsByUser")
+  documents                 Document[]                   @relation(name: "userDocuments")
+  notes                     Note[]                       @relation(name: "userNotes")
+  notesCreated              Note[]                       @relation(name: "noteCreatedBy")
+  attendances               Attendance[]                 @relation(name: "userAttendance")
+  leaves                    Leave[]                      @relation(name: "userLeaves")
+  reviewedLeaves            Leave[]                      @relation(name: "leaveReviewedBy")
+  holidaysCreated           Holiday[]                    @relation(name: "holidayCreated")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -139,6 +163,7 @@ model Profile {
   userId         Int           @unique @map("user_id")
 
   emergencyContact EmergencyContact? @relation(name: "profileEmergencyContact")
+  socialLinks      SocialLink[]      @relation(name: "profileSocialLinks")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -190,6 +215,7 @@ model Business {
   subscriptions        BusinessSubscription[] @relation(name: "businessSubscriptions")
   assetTypes           AssetType[]            @relation(name: "assetTypesInBusiness")
   projects             Project[]              @relation(name: "projectsInBusiness")
+  holidays             Holiday[]              @relation(name: "holidaysInBusiness")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -504,7 +530,8 @@ model WorkSite {
   createdBy            Int?      @map("created_by")
   creator              User?     @relation(name: "workSiteCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
-  employees Employee[] @relation(name: "employeeWorkSite")
+  employees         Employee[]        @relation(name: "employeeWorkSite")
+  attendancePunches AttendancePunch[] @relation(name: "attendancePunchWorkSite")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -554,7 +581,8 @@ model WorkSchedule {
   creator      User?             @relation(name: "workScheduleCreated", fields: [createdBy], references: [id], onDelete: SetNull)
   schedules    DaySchedule[]     @relation(name: "daySchedule")
 
-  employees Employee[] @relation(name: "employeeWorkSchedule")
+  employees           Employee[]                   @relation(name: "employeeWorkSchedule")
+  scheduleAssignments EmployeeScheduleAssignment[] @relation(name: "workScheduleAssignments")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -562,6 +590,28 @@ model WorkSchedule {
   @@unique([name, businessId])
   @@index([scheduleType, businessId])
   @@map("work_schedules")
+}
+
+model EmployeeScheduleAssignment {
+  id             Int          @id @default(autoincrement())
+  userId         Int          @map("user_id")
+  user           User         @relation(name: "userScheduleAssignments", fields: [userId], references: [id], onDelete: Cascade)
+  workScheduleId Int          @map("work_schedule_id")
+  workSchedule   WorkSchedule @relation(name: "workScheduleAssignments", fields: [workScheduleId], references: [id], onDelete: Restrict)
+  startDate      DateTime     @map("start_date") // When the assignment becomes effective
+  endDate        DateTime?    @map("end_date") // When the assignment ends, null if current
+  isActive       Boolean      @default(true) @map("is_active") // Whether this is the active schedule
+  assignedBy     Int          @map("assigned_by")
+  assignedByUser User         @relation(name: "scheduleAssignmentsByUser", fields: [assignedBy], references: [id], onDelete: SetNull)
+  notes          String? // Optional notes about the assignment
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([workScheduleId])
+  @@index([userId, isActive])
+  @@map("employee_schedule_assignments")
 }
 
 model DaySchedule {
@@ -633,6 +683,7 @@ model LeaveType {
   business           Business?                   @relation(name: "leaveTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy          Int?                        @map("created_by")
   creator            User?                       @relation(name: "leaveTypeCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  leaves             Leave[]                     @relation(name: "leaveTypeInLeave")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -696,6 +747,7 @@ model AssetAssignment {
   assignedAt     DateTime  @default(now()) @map("assigned_at")
   returnedAt     DateTime? @map("returned_at")
   status         String    @default("assigned")
+  note           String?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -707,18 +759,19 @@ model AssetAssignment {
 }
 
 model Project {
-  id             Int             @id @default(autoincrement())
-  name           String
-  description    String?
-  cover          String
-  status         String
-  startDate      String?         @map("start_date")
-  endDate        String?         @map("end_date")
-  businessId     Int?            @map("business_id")
-  business       Business?       @relation(name: "projectsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  createdBy      Int?            @map("created_by")
-  creator        User?           @relation(name: "projectCreated", fields: [createdBy], references: [id], onDelete: SetNull)
-  projectMembers ProjectMember[] @relation(name: "projectMembersInProject")
+  id                Int               @id @default(autoincrement())
+  name              String
+  description       String?
+  cover             String
+  status            String
+  startDate         String?           @map("start_date")
+  endDate           String?           @map("end_date")
+  businessId        Int               @map("business_id")
+  business          Business?         @relation(name: "projectsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  createdBy         Int?              @map("created_by")
+  creator           User?             @relation(name: "projectCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  projectMembers    ProjectMember[]   @relation(name: "projectMembersInProject")
+  attendancePunches AttendancePunch[] @relation(name: "attendancePunchProject")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -784,4 +837,205 @@ model EmergencyContact {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("emergency_contacts")
+}
+
+model EducationHistory {
+  id                  Int     @id @default(autoincrement())
+  userId              Int     @map("user_id")
+  user                User    @relation(name: "userEducationHistory", fields: [userId], references: [id], onDelete: Cascade)
+  degree              String // e.g., "Bachelor of Science", "Master of Arts", "High School Diploma"
+  fieldOfStudy        String  @map("field_of_study") // e.g., "Computer Science", "Business Administration"
+  institution         String // Name of school/university
+  country             String // Country where institution is located
+  city                String? // City where institution is located
+  startDate           String  @map("start_date") // Format: "MM-YYYY" or "YYYY"
+  endDate             String? @map("end_date") // Format: "MM-YYYY" or "YYYY", null if currently studying
+  isCurrentlyStudying Boolean @default(false) @map("is_currently_studying")
+  grade               String? // GPA, percentage, or grade classification
+  description         String? // Additional details, achievements, or relevant coursework
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("education_history")
+}
+
+model JobHistory {
+  id               Int     @id @default(autoincrement())
+  userId           Int     @map("user_id")
+  user             User    @relation(name: "userJobHistory", fields: [userId], references: [id], onDelete: Cascade)
+  jobTitle         String  @map("job_title") // e.g., "Software Engineer", "Project Manager"
+  companyName      String  @map("company_name") // Name of the company/organization
+  employmentType   String  @map("employment_type") // e.g., "Full-time", "Part-time", "Contract", "Freelance"
+  country          String // Country where job was located
+  city             String? // City where job was located
+  startDate        String  @map("start_date") // Format: "MM-YYYY" or "YYYY"
+  endDate          String? @map("end_date") // Format: "MM-YYYY" or "YYYY", null if currently working
+  responsibilities String? // Job responsibilities and duties
+  achievements     String? // Key achievements and accomplishments
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("job_history")
+}
+
+model Document {
+  id          Int     @id @default(autoincrement())
+  userId      Int     @map("user_id")
+  user        User    @relation(name: "userDocuments", fields: [userId], references: [id], onDelete: Cascade)
+  title       String  @map("title")
+  description String? @map("description")
+  attachment  String  @map("attachment")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("documents")
+}
+
+model Note {
+  id        Int     @id @default(autoincrement())
+  userId    Int     @map("user_id")
+  user      User    @relation(name: "userNotes", fields: [userId], references: [id], onDelete: Cascade)
+  createdBy Int     @map("created_by")
+  creator   User    @relation(name: "noteCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  title     String  @map("title")
+  content   String  @map("content")
+  category  String? @map("category") // e.g., "Performance", "Incident", "General", "Feedback"
+  isPrivate Boolean @default(true) @map("is_private")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([createdBy])
+  @@map("notes")
+}
+
+model SocialLink {
+  profileId Int     @id @map("profile_id")
+  profile   Profile @relation(name: "profileSocialLinks", fields: [profileId], references: [id], onDelete: Cascade)
+  facebook  String? @map("facebook")
+  twitter   String? @map("twitter")
+  linkedin  String? @map("linkedin")
+  instagram String? @map("instagram")
+  github    String? @map("github")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("social_links")
+}
+
+model Attendance {
+  id           Int               @id @default(autoincrement())
+  userId       Int               @map("user_id")
+  user         User              @relation(name: "userAttendance", fields: [userId], references: [id], onDelete: Cascade)
+  date         DateTime          @map("date") // Date of attendance (stored as date only for grouping)
+  totalHours   Float?            @map("total_hours") // Calculated total working hours for the day
+  breakHours   Float?            @map("break_hours") // Calculated total break hours for the day
+  status       String            @default("pending_approve") @map("status") // present, absent, late, half_day, on_leave
+  punchRecords AttendancePunch[] @relation(name: "attendancePunchRecords")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+  @@index([userId, date])
+  @@map("attendances")
+}
+
+model AttendancePunch {
+  id             Int        @id @default(autoincrement())
+  attendanceId   Int        @map("attendance_id")
+  attendance     Attendance @relation(name: "attendancePunchRecords", fields: [attendanceId], references: [id], onDelete: Cascade)
+  projectId      Int?       @map("project_id")
+  project        Project?   @relation(name: "attendancePunchProject", fields: [projectId], references: [id], onDelete: SetNull)
+  workSiteId     Int?       @map("work_site_id")
+  workSite       WorkSite?  @relation(name: "attendancePunchWorkSite", fields: [workSiteId], references: [id], onDelete: SetNull)
+  punchIn        DateTime   @map("punch_in") // Clock in timestamp
+  punchOut       DateTime?  @map("punch_out") // Clock out timestamp (null if not clocked out yet)
+  breakStart     DateTime?  @map("break_start") // Break start timestamp
+  breakEnd       DateTime?  @map("break_end") // Break end timestamp
+  workHours      Float?     @map("work_hours") // Calculated hours for this punch session
+  breakHours     Float?     @map("break_hours") // Calculated break hours for this punch session
+  punchInIp      String?    @map("punch_in_ip") // IP address used for punch in
+  punchOutIp     String?    @map("punch_out_ip") // IP address used for punch out
+  punchInLat     Float?     @map("punch_in_lat") // Punch in latitude
+  punchInLng     Float?     @map("punch_in_lng") // Punch in longitude
+  punchOutLat    Float?     @map("punch_out_lat") // Punch out latitude
+  punchOutLng    Float?     @map("punch_out_lng") // Punch out longitude
+  punchInDevice  String?    @map("punch_in_device") // Device info for punch in
+  punchOutDevice String?    @map("punch_out_device") // Device info for punch out
+  notes          String?    @map("notes") // Notes for this specific punch session
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([attendanceId])
+  @@index([projectId])
+  @@index([workSiteId])
+  @@index([punchIn])
+  @@map("attendance_punches")
+}
+
+model Leave {
+  id              Int           @id @default(autoincrement())
+  userId          Int           @map("user_id")
+  user            User          @relation(name: "userLeaves", fields: [userId], references: [id], onDelete: Cascade)
+  leaveTypeId     Int           @map("leave_type_id")
+  leaveType       LeaveType     @relation(name: "leaveTypeInLeave", fields: [leaveTypeId], references: [id], onDelete: Restrict)
+  leaveYear       Int           @map("leave_year") // Year this leave applies to (e.g., 2025)
+  leaveDuration   LeaveDuration @map("leave_duration") // SINGLE_DAY, MULTI_DAY, HALF_DAY
+  startDate       DateTime      @map("start_date") // Leave start date
+  endDate         DateTime?     @map("end_date") // Leave end date (null for single day)
+  totalHours      Float         @map("total_hours") // Total leave hours deducted from balance
+  status          String        @default("pending_approve") @map("status") // pending, approved, rejected, cancelled
+  reviewedAt      DateTime?     @map("reviewed_at") // When leave was approved/rejected
+  reviewedBy      Int?          @map("reviewed_by") // Manager/admin who reviewed
+  reviewer        User?         @relation(name: "leaveReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  rejectionReason String?       @map("rejection_reason") // Reason for rejection if rejected
+  attachments     String?       @map("attachments") // Supporting documents (JSON array or comma-separated URLs)
+  notes           String?       @map("notes") // Additional notes or comments
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([leaveTypeId])
+  @@index([status])
+  @@index([leaveYear])
+  @@index([startDate, endDate])
+  @@index([userId, status])
+  @@index([userId, leaveYear])
+  @@map("leaves")
+}
+
+model Holiday {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String?
+  startDate   DateTime    @map("start_date") // Holiday start date
+  endDate     DateTime    @map("end_date") // Holiday end date (same as startDate for single-day)
+  isRecurring Boolean     @default(false) @map("is_recurring") // Annual recurring holiday
+  isPaid      Boolean     @default(true) @map("is_paid") // Paid holiday or unpaid
+  holidayType HolidayType @map("holiday_type") // PUBLIC, RELIGIOUS, COMPANY_SPECIFIC, REGIONAL
+  businessId  Int?        @map("business_id")
+  business    Business?   @relation(name: "holidaysInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  createdBy   Int?        @map("created_by")
+  creator     User?       @relation(name: "holidayCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([businessId])
+  @@index([startDate, endDate])
+  @@index([businessId, startDate])
+  @@map("holidays")
 }

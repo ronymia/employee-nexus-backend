@@ -34,6 +34,9 @@ export class AssetAssignment {
   @Field()
   status: string;
 
+  @Field({ nullable: true })
+  note?: string;
+
   @Field()
   createdAt: Date;
 

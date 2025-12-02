@@ -5,6 +5,7 @@ import { UpdateAssetInput } from './dto/update-asset.input';
 import { AssignAssetInput } from './dto/assign-asset.input';
 import { ReturnAssetInput } from './dto/return-asset.input';
 import { JwtPayload } from '../auth/jwt.strategy';
+import { QueryAssetInput } from './dto/query-asset.input';
 
 @Injectable()
 export class AssetsService {
@@ -80,15 +81,21 @@ export class AssetsService {
 
   async findAll({
     user,
-    businessId,
+    query,
   }: {
     user: JwtPayload;
-    businessId?: number;
+    query?: QueryAssetInput;
   }) {
-    const filterBusinessId = businessId || user.businessId;
+    const filterBusinessId = query?.businessId || user.businessId;
+
+    const whereCondition: any = { businessId: filterBusinessId };
+
+    if (query?.status) {
+      whereCondition.status = query.status;
+    }
 
     return this.prisma.asset.findMany({
-      where: { businessId: filterBusinessId },
+      where: whereCondition,
       include: {
         assetType: true,
         business: true,
@@ -101,6 +108,89 @@ export class AssetsService {
         },
       },
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async findByUserId({ userId }: { userId: number }) {
+    // Find all active asset assignments for the user
+    const assignments = await this.prisma.assetAssignment.findMany({
+      where: {
+        assignedTo: userId,
+        returnedAt: null, // Only active assignments
+      },
+      include: {
+        asset: {
+          include: {
+            assetType: true,
+            business: true,
+            creator: true,
+            assetAssignments: {
+              include: {
+                assignedToUser: {
+                  include: {
+                    profile: true,
+                  },
+                },
+                assignedByUser: {
+                  include: {
+                    profile: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        assignedToUser: {
+          include: {
+            profile: true,
+          },
+        },
+        assignedByUser: {
+          include: {
+            profile: true,
+          },
+        },
+      },
+      orderBy: { assignedAt: 'desc' },
+    });
+
+    // Extract assets from assignments
+    return assignments.map((assignment) => assignment.asset);
+  }
+
+  async getUserAssetAssignments({ userId }: { userId: number }) {
+    return this.prisma.assetAssignment.findMany({
+      where: {
+        assignedTo: userId,
+        returnedAt: null, // Only active assignments
+      },
+      include: {
+        asset: {
+          include: {
+            assetType: true,
+            business: true,
+            creator: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
+          },
+        },
+        assignedToUser: {
+          include: {
+            profile: true,
+            role: true,
+          },
+        },
+        assignedByUser: {
+          include: {
+            profile: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: { assignedAt: 'desc' },
     });
   }
 
@@ -130,11 +220,9 @@ export class AssetsService {
 
   async update({
     user,
-    id,
     updateAssetInput,
   }: {
     user: JwtPayload;
-    id: number;
     updateAssetInput: UpdateAssetInput;
   }) {
     const { id: assetId, ...updateData } = updateAssetInput;
