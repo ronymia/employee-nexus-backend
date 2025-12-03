@@ -1903,6 +1903,7 @@ type Mutation {
   deleteNotification(id: Int!): NotificationResponse!
   deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
   deletePayrollComponent(id: Int!): PayrollComponentResponse!
+  deleteProject(id: Int!): ProjectResponse!
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
   deleteSocialLink(profileId: Int!): SocialLinkResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
@@ -1919,7 +1920,6 @@ type Mutation {
   removeAsset(id: Int!): AssetResponse!
   removeAssetType(id: Int!): AssetTypeResponse!
   removeAttendancePunch(id: Int!): AttendancePunch!
-  removeProject(id: Int!): ProjectResponse!
   returnAsset(returnAssetInput: ReturnAssetInput!): AssetAssignmentResponse!
   unassignProjectMember(unassignProjectMemberInput: UnassignProjectMemberInput!): ProjectMemberResponse!
   updateAsset(updateAssetInput: UpdateAssetInput!): AssetResponse!
@@ -2409,7 +2409,7 @@ type Project {
   endDate: String
   id: Int!
   name: String!
-  projectMembers: [ProjectMember!]!
+  projectMembers: [ProjectMember!]
   startDate: String
   status: String!
   updatedAt: DateTime!
@@ -2536,7 +2536,7 @@ type Query {
   userAssetAssignments(userId: Int!): AssetAssignmentQueryResponse!
   userById(id: Int!): UserResponse!
   userProjects(userId: Int!): ProjectMembersQueryResponse!
-  users: [User!]!
+  users(query: QueryUserInput): UsersQueryResponse!
   workScheduleById(id: Int!): WorkScheduleResponse!
   workSchedules(query: QueryWorkScheduleInput): WorkSchedulesQueryResponse!
   workSiteById(id: Int!): WorkSiteResponse!

@@ -6,6 +6,7 @@ import {
   BaseQueryResponse,
   BaseResponse,
 } from '../../../common/dto/base-response.type';
+import { IsOptional } from 'class-validator';
 
 @ObjectType()
 export class Project {
@@ -42,8 +43,9 @@ export class Project {
   @Field(() => User, { nullable: true })
   creator?: User;
 
-  @Field(() => [ProjectMember])
-  projectMembers: ProjectMember[];
+  @Field(() => [ProjectMember], { nullable: true, defaultValue: [] })
+  @IsOptional()
+  projectMembers?: ProjectMember[];
 
   @Field()
   createdAt: Date;

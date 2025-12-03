@@ -107,7 +107,7 @@ export class ProjectsResolver {
     };
   }
 
-  @Mutation(() => ProjectResponse)
+  @Mutation(() => ProjectResponse, { name: 'deleteProject' })
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Project:delete')
   @UseGuards(GqlAuthGuard)

@@ -22,6 +22,7 @@ import { defaultLeaveTypes } from './Database/leave-type';
 import { defaultRecruitmentProcesses } from './Database/recruitment-process';
 import { defaultOnboardingProcesses } from './Database/onboarding-process';
 import { features } from './Database/features';
+import { seedNotificationTemplates } from './Database/notification-templates';
 
 @Injectable()
 export class AppService {
@@ -90,6 +91,7 @@ export class AppService {
           where: { roleId: role?.id },
         });
 
+        // 3. Create Super Admin
         if (!isSuperAdminExist) {
           const password = await PasswordHelpers.passwordHash(
             configuration().default_password.super_admin as string,
@@ -105,6 +107,9 @@ export class AppService {
             },
           });
         }
+
+        // Seed notification templates
+        // await seedNotificationTemplates();
       },
     );
   }

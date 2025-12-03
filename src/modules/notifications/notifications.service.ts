@@ -258,6 +258,9 @@ export class NotificationsService {
     const title = this.renderTemplate(template.title, variables);
     const message = this.renderTemplate(template.message, variables);
 
+    // Extract only valid Notification fields from variables
+    const { entityType, entityId, actionUrl, expiresAt } = variables;
+
     return await this.create({
       type: template.type,
       title,
@@ -268,7 +271,10 @@ export class NotificationsService {
       userId,
       businessId,
       metadata: JSON.stringify(variables),
-      ...variables, // Include entityType, entityId, actionUrl if present
+      ...(entityType && { entityType }),
+      ...(entityId && { entityId }),
+      ...(actionUrl && { actionUrl }),
+      ...(expiresAt && { expiresAt }),
     });
   }
 }

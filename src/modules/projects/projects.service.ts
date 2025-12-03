@@ -28,7 +28,12 @@ export class ProjectsService {
         creator: true,
         projectMembers: {
           include: {
-            user: true,
+            user: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
           },
         },
       },
@@ -51,7 +56,12 @@ export class ProjectsService {
         creator: true,
         projectMembers: {
           include: {
-            user: true,
+            user: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
           },
         },
       },
@@ -64,10 +74,20 @@ export class ProjectsService {
       where: { id, businessId: user.businessId },
       include: {
         business: true,
-        creator: true,
+        creator: {
+          include: {
+            profile: true,
+            role: true,
+          },
+        },
         projectMembers: {
           include: {
-            user: true,
+            user: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
           },
           orderBy: { createdAt: 'desc' },
         },
@@ -100,7 +120,12 @@ export class ProjectsService {
         creator: true,
         projectMembers: {
           include: {
-            user: true,
+            user: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
           },
         },
       },
@@ -117,7 +142,12 @@ export class ProjectsService {
         creator: true,
         projectMembers: {
           include: {
-            user: true,
+            user: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
           },
         },
       },

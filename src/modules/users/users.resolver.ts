@@ -39,10 +39,20 @@ export class UsersResolver {
   //   return this.usersService.create(createUserInput);
   // }
 
-  @Query(() => [User], { name: 'users' })
+  @Query(() => UsersQueryResponse, { name: 'users' })
   @RequirePermissions('User:read')
-  users() {
-    return this.usersService.findAll();
+  async users(
+    @CurrentUser() user: JwtPayload,
+    @Args('query', { nullable: true }) query: QueryUserInput,
+  ) {
+    const result = await this.usersService.findAll({ user, query });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Users retrieved successfully',
+      meta: result?.meta,
+      data: result?.data,
+    };
   }
 
   @Query(() => UserResponse, { name: 'userById' })

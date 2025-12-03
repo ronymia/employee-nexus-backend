@@ -93,27 +93,75 @@ export class UsersService {
   }
 
   // GET ALL
-  findAll() {
-    return this.prisma.user.findMany({
-      include: {
-        profile: true,
-        business: true,
-        userPermissions: {
-          include: {
-            permission: { select: { resource: true, action: true } },
-          },
-        },
+  async findAll({ user, query }: { user: JwtPayload; query?: QueryUserInput }) {
+    // BUSINESS ID
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+    // QUERY BUILDER
+    const andCondition: Prisma.UserWhereInput[] = [];
+
+    // Filter by business (via role)
+    if (businessId) {
+      andCondition.push({
+        businessId,
         role: {
-          include: {
-            rolePermissions: {
-              include: {
-                permission: { select: { resource: true, action: true } },
-              },
-            },
-          },
+          businessId,
         },
+      });
+    }
+
+    // Only include users who have employee records
+    andCondition.push({
+      employee: {
+        isNot: null,
       },
     });
+
+    const whereCondition: Prisma.UserWhereInput =
+      andCondition.length > 0 ? { AND: andCondition } : {};
+
+    // Get total count for pagination
+    const total = await this.prisma.user.count({
+      where: {
+        businessId,
+      },
+    });
+
+    // GET ALL
+    const result = await this.prisma.user.findMany({
+      where: whereCondition,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        profile: {
+          include: {
+            emergencyContact: true,
+          },
+        },
+        employee: {
+          include: {
+            designation: true,
+            employmentStatus: true,
+            department: true,
+            workSite: true,
+            workSchedule: true,
+          },
+        },
+        role: true,
+      },
+    });
+
+    return {
+      meta: {
+        page: 0,
+        limit: 0,
+        skip: 0,
+        total: total || 0,
+        totalPages: Math.ceil(total / 1),
+      },
+      data: result,
+    };
   }
 
   // GET ONE
