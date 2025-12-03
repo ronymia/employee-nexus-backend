@@ -8,11 +8,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
-import { ATTENDANCE_SEARCHABLE_FIELDS } from './attendance.constant';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class AttendancesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   // CREATE ATTENDANCE
   async create({
@@ -25,10 +28,9 @@ export class AttendancesService {
     const { punchRecords, ...attendanceData } = createAttendanceInput;
 
     return await this.prisma.$transaction(async (prisma) => {
-      return await prisma.attendance.create({
+      const attendance = await prisma.attendance.create({
         data: {
           ...attendanceData,
-          userId: user.userId,
           ...(punchRecords && {
             punchRecords: {
               create: punchRecords.map(
@@ -52,6 +54,25 @@ export class AttendancesService {
           },
         },
       });
+
+      // Send notification to user
+      try {
+        await this.notificationsService.create({
+          type: 'ATTENDANCE',
+          title: 'Attendance Recorded',
+          message: `Your attendance for ${new Date(attendance.date).toLocaleDateString()} has been recorded successfully.`,
+          priority: 'LOW' as any,
+          userId: attendanceData.userId,
+          channels: ['IN_APP'],
+          businessId: user.businessId,
+          entityType: 'attendance',
+          entityId: attendance.id,
+        });
+      } catch (error) {
+        console.error('Failed to send attendance notification:', error);
+      }
+
+      return attendance;
     });
   }
 

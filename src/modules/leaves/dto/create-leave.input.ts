@@ -22,6 +22,10 @@ registerEnumType(LeaveDuration, {
 
 @InputType()
 export class CreateLeaveInput {
+  @Field(() => Int, { description: 'User ID' })
+  @IsInt()
+  userId: number;
+
   @Field(() => Int, { description: 'ID of the leave type' })
   @IsInt()
   leaveTypeId: number;
