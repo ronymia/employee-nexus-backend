@@ -46,7 +46,7 @@ export class NotificationsResolver {
   }
 
   @Query(() => NotificationsQueryResponse, { name: 'notifications' })
-  @RequirePermissions('Notification:read')
+  // @RequirePermissions('Notification:read')
   async notifications(
     @CurrentUser() user: JwtPayload,
     @Args('query', { nullable: true }) query?: QueryNotificationInput,
@@ -56,7 +56,8 @@ export class NotificationsResolver {
       success: true,
       statusCode: HttpStatus.OK,
       message: 'Notifications retrieved successfully',
-      ...result,
+      meta: result.meta,
+      data: result.data,
     };
   }
 
