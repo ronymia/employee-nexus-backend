@@ -183,4 +183,16 @@ export class UsersResolver {
       data: result,
     };
   }
+
+  @Query(() => UserResponse, { name: 'getMyProfile' })
+  @RequirePermissions('User:read')
+  async getMyProfile(@CurrentUser() user: JwtPayload) {
+    const result = await this.usersService.findOne(user.userId);
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'User retrieved successfully',
+      data: result,
+    };
+  }
 }

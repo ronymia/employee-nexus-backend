@@ -2508,6 +2508,7 @@ type Query {
   employmentStatusById(id: Int!): EmploymentStatusResponse!
   employmentStatuses(query: QueryEmploymentStatusInput): EmploymentStatusesQueryResponse!
   generateEmployeeId: String!
+  getMyProfile: UserResponse!
   holidayById(id: Int!): HolidayResponse!
   holidays(query: QueryHolidayInput): HolidaysQueryResponse!
   jobHistory(id: Int!, userId: Int!): JobHistoryResponse!
