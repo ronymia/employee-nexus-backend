@@ -50,6 +50,7 @@ import { HolidaysModule } from './modules/holidays/holidays.module';
 import { PayrollComponentsModule } from './modules/payroll-components/payroll-components.module';
 import { PayrollCyclesModule } from './modules/payroll-cycles/payroll-cycles.module';
 import { PayrollItemsModule } from './modules/payroll-items/payroll-items.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -106,6 +107,7 @@ import { PayrollItemsModule } from './modules/payroll-items/payroll-items.module
     PayrollComponentsModule,
     PayrollCyclesModule,
     PayrollItemsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

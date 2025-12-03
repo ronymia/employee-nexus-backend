@@ -763,6 +763,9 @@ input CreateLeaveInput {
 
   """Total leave hours deducted from balance"""
   totalHours: Float!
+
+  """User ID"""
+  userId: Int!
 }
 
 input CreateLeaveTypeInput {
@@ -800,6 +803,33 @@ input CreateNoteInput {
 
   """ID of the user this note is about"""
   userId: Int!
+}
+
+input CreateNotificationInput {
+  actionUrl: String
+  businessId: Int
+  channels: [NotificationChannel!]!
+  entityId: Int
+  entityType: String
+  expiresAt: DateTime
+  message: String!
+  metadata: String
+  notificationTemplateId: Int
+  priority: NotificationPriority
+  title: String!
+  type: NotificationType!
+  userId: Int!
+}
+
+input CreateNotificationTemplateInput {
+  businessId: Int
+  channels: [NotificationChannel!]!
+  isActive: Boolean
+  message: String!
+  name: String!
+  priority: NotificationPriority
+  title: String!
+  type: NotificationType!
 }
 
 input CreateOnboardingProcessInput {
@@ -1841,6 +1871,8 @@ type Mutation {
   createLeave(createLeaveInput: CreateLeaveInput!): LeaveResponse!
   createLeaveType(createLeaveTypeInput: CreateLeaveTypeInput!): LeaveTypeResponse!
   createNote(createNoteInput: CreateNoteInput!): NoteResponse!
+  createNotification(createNotificationInput: CreateNotificationInput!): NotificationResponse!
+  createNotificationTemplate(createNotificationTemplateInput: CreateNotificationTemplateInput!): NotificationTemplateResponse!
   createOnboardingProcess(createOnboardingProcessInput: CreateOnboardingProcessInput!): OnboardingProcessResponse!
   createPayrollComponent(createPayrollComponentInput: CreatePayrollComponentInput!): PayrollComponentResponse!
   createPayrollCycle(createPayrollCycleInput: CreatePayrollCycleInput!): PayrollCycleResponse!
@@ -1868,6 +1900,7 @@ type Mutation {
   deleteLeave(id: Int!): LeaveResponse!
   deleteLeaveType(id: Int!): LeaveTypeResponse!
   deleteNote(id: Int!, userId: Int!): NoteResponse!
+  deleteNotification(id: Int!): NotificationResponse!
   deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
   deletePayrollComponent(id: Int!): PayrollComponentResponse!
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
@@ -1878,6 +1911,8 @@ type Mutation {
   deleteWorkSite(id: Int!): WorkSiteResponse!
   generatePayrollItems(generatePayrollItemsInput: GeneratePayrollItemsInput!): PayrollItemResponse!
   login(loginInput: LoginAuthInput!): Auth!
+  markAllNotificationsAsRead: NotificationResponse!
+  markNotificationAsRead(id: Int!): NotificationResponse!
   markPayrollCycleAsPaid(id: Int!): PayrollCycleResponse!
   markPayrollItemAsPaid(id: Int!, paymentMethod: String!, transactionRef: String): PayrollItemResponse!
   processPayrollCycle(processPayrollCycleInput: ProcessPayrollCycleInput!): PayrollCycleResponse!
@@ -1912,6 +1947,8 @@ type Mutation {
   updateLeaveSetting(updateLeaveSettingInput: UpdateLeaveSettingInput!): LeaveSettingResponse!
   updateLeaveType(updateLeaveTypeInput: UpdateLeaveTypeInput!): LeaveTypeResponse!
   updateNote(updateNoteInput: UpdateNoteInput!): NoteResponse!
+  updateNotificationPreferences(updateNotificationPreferenceInput: UpdateNotificationPreferenceInput!): NotificationPreferenceResponse!
+  updateNotificationTemplate(updateNotificationTemplateInput: UpdateNotificationTemplateInput!): NotificationTemplateResponse!
   updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
   updatePayrollComponent(updatePayrollComponentInput: UpdatePayrollComponentInput!): PayrollComponentResponse!
   updateProfile(updateProfileInput: UpdateProfileInput!): ProfileResponse!
@@ -1968,6 +2005,121 @@ type NoteResponse {
 
 type NotesQueryResponse {
   data: [Note!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type Notification {
+  actionUrl: String
+  businessId: Int
+  channels: [NotificationChannel!]!
+  createdAt: DateTime!
+  entityId: Int
+  entityType: String
+  expiresAt: DateTime
+  id: Int!
+  isRead: Boolean!
+  message: String!
+  metadata: String
+  notificationTemplateId: Int
+  priority: NotificationPriority!
+  readAt: DateTime
+  sentVia: [NotificationChannel!]!
+  title: String!
+  type: NotificationType!
+  updatedAt: DateTime!
+  userId: Int!
+}
+
+enum NotificationChannel {
+  EMAIL
+  IN_APP
+  PUSH
+  SMS
+}
+
+type NotificationPreference {
+  createdAt: DateTime!
+  id: Int!
+  muteAll: Boolean!
+  mutedUntil: DateTime
+  preferences: String!
+  updatedAt: DateTime!
+  userId: Int!
+}
+
+type NotificationPreferenceResponse {
+  data: NotificationPreference!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+enum NotificationPriority {
+  HIGH
+  LOW
+  MEDIUM
+  NORMAL
+  URGENT
+}
+
+type NotificationResponse {
+  data: Notification!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type NotificationTemplate {
+  businessId: Int
+  channels: [NotificationChannel!]!
+  createdAt: DateTime!
+  id: Int!
+  isActive: Boolean!
+  message: String!
+  name: String!
+  priority: NotificationPriority!
+  title: String!
+  type: NotificationType!
+  updatedAt: DateTime!
+}
+
+type NotificationTemplateResponse {
+  data: NotificationTemplate!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type NotificationTemplatesQueryResponse {
+  data: [NotificationTemplate!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+enum NotificationType {
+  ANNOUNCEMENT
+  ASSET
+  ATTENDANCE
+  DOCUMENT
+  HOLIDAY
+  LEAVE
+  PAYROLL
+  PROJECT
+  REMINDER
+  SCHEDULE
+  SYSTEM
+}
+
+type NotificationsQueryResponse {
+  data: [Notification!]!
   message: String!
   meta: PaginationMeta
   statusCode: Float!
@@ -2338,6 +2490,7 @@ type Query {
   employees(query: QueryUserInput): UsersQueryResponse!
   employmentStatusById(id: Int!): EmploymentStatusResponse!
   employmentStatuses(query: QueryEmploymentStatusInput): EmploymentStatusesQueryResponse!
+  generateEmployeeId: String!
   holidayById(id: Int!): HolidayResponse!
   holidays(query: QueryHolidayInput): HolidaysQueryResponse!
   jobHistory(id: Int!, userId: Int!): JobHistoryResponse!
@@ -2354,6 +2507,10 @@ type Query {
   leaves(query: QueryLeaveInput): LeavesQueryResponse!
   note(id: Int!, userId: Int!): NoteResponse!
   notesByUserId(query: QueryNoteInput, userId: Int!): NotesQueryResponse!
+  notificationById(id: Int!): NotificationResponse!
+  notificationPreferences: NotificationPreferenceResponse!
+  notificationTemplates: NotificationTemplatesQueryResponse!
+  notifications(query: QueryNotificationInput): NotificationsQueryResponse!
   onboardingProcessById(id: Int!): OnboardingProcessResponse!
   onboardingProcesses(query: QueryOnboardingProcessInput): OnboardingProcessesQueryResponse!
   payrollComponentByCode(businessId: Int!, code: String!): PayrollComponentResponse!
@@ -2375,6 +2532,7 @@ type Query {
   socialLinksByProfileId(profileId: Int): SocialLinkResponse!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
+  unreadNotificationCount: Int!
   userAssetAssignments(userId: Int!): AssetAssignmentQueryResponse!
   userById(id: Int!): UserResponse!
   userProjects(userId: Int!): ProjectMembersQueryResponse!
@@ -2493,6 +2651,15 @@ input QueryNoteInput {
   pagination: BasePaginationInput
   searchTerm: String
   title: String
+}
+
+input QueryNotificationInput {
+  businessId: Int
+  isRead: Boolean
+  limit: Int
+  page: Int
+  type: NotificationType
+  userId: Int
 }
 
 input QueryOnboardingProcessInput {
@@ -3235,6 +3402,9 @@ input UpdateLeaveInput {
 
   """Total leave hours deducted from balance"""
   totalHours: Float
+
+  """User ID"""
+  userId: Int
 }
 
 input UpdateLeaveSettingInput {
@@ -3282,6 +3452,24 @@ input UpdateNoteInput {
 
   """ID of the user this note is about"""
   userId: Int
+}
+
+input UpdateNotificationPreferenceInput {
+  muteAll: Boolean
+  mutedUntil: DateTime
+  preferences: String
+}
+
+input UpdateNotificationTemplateInput {
+  businessId: Int
+  channels: [NotificationChannel!]!
+  id: Int!
+  isActive: Boolean
+  message: String!
+  name: String!
+  priority: NotificationPriority
+  title: String!
+  type: NotificationType!
 }
 
 input UpdateOnboardingProcessInput {

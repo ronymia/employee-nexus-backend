@@ -43,4 +43,6 @@ export enum PermissionResource {
   JOB_HISTORY = 'Job History',
   EMERGENCY_CONTACT = 'Emergency Contact',
   EMPLOYMENT_DETAILS = 'Employment Details',
+  NOTIFICATION = 'Notification',
+  NOTIFICATION_TEMPLATE = 'Notification Template',
 }
