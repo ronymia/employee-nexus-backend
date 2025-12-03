@@ -57,6 +57,15 @@ export class UsersResolver {
     };
   }
 
+  @Query(() => String, { name: 'generateEmployeeId' })
+  @RequirePermissions('User:read')
+  async generateEmployeeId(@CurrentUser() user: JwtPayload): Promise<string> {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    return await this.usersService.generateEmployeeId(businessId);
+  }
+
   // @Mutation(() => User)
   // updateUser(@Args('updateUserInput') updateUserInput: UpdateUserInput) {
   //   return this.usersService.update(updateUserInput.id, updateUserInput);
