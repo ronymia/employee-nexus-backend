@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { BusinessStatus } from 'generated/prisma';
 import {
@@ -5,6 +6,7 @@ import {
   BaseResponse,
 } from 'src/common/dto/base-response.type';
 import { BusinessSchedule } from 'src/modules/business-schedules/entities/business-schedule.entity';
+import { SubscriptionPlan } from 'src/modules/subscription-plans/entities/subscription-plan.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 
 @ObjectType()
@@ -63,6 +65,8 @@ export class Business {
   @Field(() => Int)
   subscriptionPlanId: number;
 
+  @Field(() => SubscriptionPlan, { nullable: true })
+  subscriptionPlan?: SubscriptionPlan;
   @Field()
   createdAt: Date;
 

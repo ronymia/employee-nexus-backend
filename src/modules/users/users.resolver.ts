@@ -39,10 +39,20 @@ export class UsersResolver {
   //   return this.usersService.create(createUserInput);
   // }
 
-  @Query(() => [User], { name: 'users' })
+  @Query(() => UsersQueryResponse, { name: 'users' })
   @RequirePermissions('User:read')
-  users() {
-    return this.usersService.findAll();
+  async users(
+    @CurrentUser() user: JwtPayload,
+    @Args('query', { nullable: true }) query: QueryUserInput,
+  ) {
+    const result = await this.usersService.findAll({ user, query });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Users retrieved successfully',
+      meta: result?.meta,
+      data: result?.data,
+    };
   }
 
   @Query(() => UserResponse, { name: 'userById' })
@@ -170,6 +180,18 @@ export class UsersResolver {
       success: true,
       statusCode: HttpStatus.OK,
       message: 'Employee deleted successfully',
+      data: result,
+    };
+  }
+
+  @Query(() => UserResponse, { name: 'getMyProfile' })
+  @RequirePermissions('User:read')
+  async getMyProfile(@CurrentUser() user: JwtPayload) {
+    const result = await this.usersService.findOne(user.userId);
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'User retrieved successfully',
       data: result,
     };
   }

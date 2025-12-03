@@ -52,4 +52,9 @@ export class QueryLeaveInput {
   @IsDateString()
   @IsOptional()
   endDate?: string;
+
+  @Field(() => Int, { nullable: true, description: 'User ID' })
+  @IsInt()
+  @IsOptional()
+  userId?: number;
 }

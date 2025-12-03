@@ -7,10 +7,14 @@ import { QueryHolidayInput } from './dto/query-holiday.input';
 import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { holidaySearchableFields } from './holiday.constant';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class HolidaysService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   async create({
     user,
@@ -19,7 +23,7 @@ export class HolidaysService {
     user: JwtPayload;
     createHolidayInput: CreateHolidayInput;
   }) {
-    return await this.prisma.holiday.create({
+    const holiday = await this.prisma.holiday.create({
       data: {
         ...createHolidayInput,
         startDate: new Date(createHolidayInput.startDate),
@@ -28,6 +32,39 @@ export class HolidaysService {
         businessId: user.businessId,
       },
     });
+
+    // Send notification to all users in the business
+    try {
+      const businessUsers = await this.prisma.user.findMany({
+        where: { businessId: user.businessId },
+        select: { id: true },
+      });
+
+      const startDate = new Date(holiday.startDate).toLocaleDateString();
+      const endDate = new Date(holiday.endDate).toLocaleDateString();
+      const dateDisplay =
+        startDate === endDate ? startDate : `${startDate} to ${endDate}`;
+
+      // Send notification to each user
+      for (const businessUser of businessUsers) {
+        await this.notificationsService.sendFromTemplate(
+          'holiday_announced',
+          businessUser.id,
+          {
+            date: dateDisplay,
+            holidayName: holiday.name,
+            description: holiday.description || '',
+            entityType: 'holiday',
+            entityId: holiday.id,
+          },
+          user.businessId,
+        );
+      }
+    } catch (error) {
+      console.error('Failed to send holiday notifications:', error);
+    }
+
+    return holiday;
   }
 
   async findAll({
@@ -158,22 +195,14 @@ export class HolidaysService {
 
   async update({
     user,
-    id,
     updateHolidayInput,
   }: {
     user: JwtPayload;
-    id: number;
     updateHolidayInput: UpdateHolidayInput;
   }) {
-    await this.findOne({ user, id }); // Ensure the holiday exists
+    const { id, ...updateData } = updateHolidayInput;
 
-    const updateData: any = { ...updateHolidayInput };
-    if (updateHolidayInput.startDate) {
-      updateData.startDate = new Date(updateHolidayInput.startDate);
-    }
-    if (updateHolidayInput.endDate) {
-      updateData.endDate = new Date(updateHolidayInput.endDate);
-    }
+    await this.findOne({ user, id }); // Ensure the holiday exists
 
     return await this.prisma.holiday.update({
       where: { id, businessId: user.businessId },

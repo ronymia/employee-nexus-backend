@@ -336,6 +336,7 @@ type Business {
   postcode: String!
   registrationDate: String!
   status: String!
+  subscriptionPlan: SubscriptionPlan
   subscriptionPlanId: Int!
   updatedAt: DateTime!
   userId: Int!
@@ -350,6 +351,14 @@ type BusinessQueryResponse {
   success: Boolean!
 }
 
+type BusinessResponse {
+  data: Business!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type BusinessSchedule {
   businessId: Int!
   day: Int!
@@ -357,6 +366,14 @@ type BusinessSchedule {
   id: Int!
   isWeekend: Boolean!
   startTime: String!
+}
+
+type BusinessScheduleResponse {
+  data: BusinessSchedule!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type BusinessSetting {
@@ -1885,7 +1902,7 @@ type Mutation {
   createWorkSchedule(createWorkScheduleInput: CreateWorkScheduleInput!): WorkScheduleResponse!
   createWorkSite(createWorkSiteInput: CreateWorkSiteInput!): WorkSiteResponse!
   deleteAttendance(id: Int!): AttendanceResponse!
-  deleteBusiness(id: Int!): Business!
+  deleteBusiness(id: Int!): BusinessResponse!
   deleteDepartment(id: Int!): DepartmentResponse!
   deleteDesignation(id: Int!): DesignationResponse!
   deleteDocument(id: Int!, userId: Int!): DocumentResponse!
@@ -1903,6 +1920,7 @@ type Mutation {
   deleteNotification(id: Int!): NotificationResponse!
   deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
   deletePayrollComponent(id: Int!): PayrollComponentResponse!
+  deleteProject(id: Int!): ProjectResponse!
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
   deleteSocialLink(profileId: Int!): SocialLinkResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
@@ -1919,7 +1937,6 @@ type Mutation {
   removeAsset(id: Int!): AssetResponse!
   removeAssetType(id: Int!): AssetTypeResponse!
   removeAttendancePunch(id: Int!): AttendancePunch!
-  removeProject(id: Int!): ProjectResponse!
   returnAsset(returnAssetInput: ReturnAssetInput!): AssetAssignmentResponse!
   unassignProjectMember(unassignProjectMemberInput: UnassignProjectMemberInput!): ProjectMemberResponse!
   updateAsset(updateAssetInput: UpdateAssetInput!): AssetResponse!
@@ -1927,8 +1944,8 @@ type Mutation {
   updateAttendance(updateAttendanceInput: UpdateAttendanceInput!): AttendanceResponse!
   updateAttendancePunch(updateAttendancePunchInput: UpdateAttendancePunchInput!): AttendancePunch!
   updateAttendanceSetting(updateAttendanceSettingInput: UpdateAttendanceSettingInput!): AttendanceSettingResponse!
-  updateBusiness(updateBusinessInput: UpdateBusinessInput!): Business!
-  updateBusinessSchedule(data: UpdateBusinessScheduleInput!): BusinessSchedule!
+  updateBusiness(updateBusinessInput: UpdateBusinessInput!): BusinessResponse!
+  updateBusinessSchedule(updateBusinessScheduleInput: UpdateBusinessScheduleInput!): BusinessScheduleResponse!
   updateBusinessSetting(updateBusinessSettingInput: UpdateBusinessSettingInput!): BusinessSettingResponse!
   updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): DepartmentResponse!
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
@@ -2409,7 +2426,7 @@ type Project {
   endDate: String
   id: Int!
   name: String!
-  projectMembers: [ProjectMember!]!
+  projectMembers: [ProjectMember!]
   startDate: String
   status: String!
   updatedAt: DateTime!
@@ -2471,7 +2488,7 @@ type Query {
   attendanceById(id: Int!): AttendanceResponse!
   attendanceSettingsByBusiness: AttendanceSettingResponse!
   attendances(query: QueryAttendanceInput): AttendanceQueryResponse!
-  businessById(id: Int!): Business!
+  businessById(id: Int!): BusinessResponse!
   businessScheduleByBusinessId(id: Int!): BusinessSchedule!
   businessSettingByBusinessId: BusinessSettingResponse!
   businesses(query: QueryBusinessInput): BusinessQueryResponse!
@@ -2491,6 +2508,7 @@ type Query {
   employmentStatusById(id: Int!): EmploymentStatusResponse!
   employmentStatuses(query: QueryEmploymentStatusInput): EmploymentStatusesQueryResponse!
   generateEmployeeId: String!
+  getMyProfile: UserResponse!
   holidayById(id: Int!): HolidayResponse!
   holidays(query: QueryHolidayInput): HolidaysQueryResponse!
   jobHistory(id: Int!, userId: Int!): JobHistoryResponse!
@@ -2536,7 +2554,7 @@ type Query {
   userAssetAssignments(userId: Int!): AssetAssignmentQueryResponse!
   userById(id: Int!): UserResponse!
   userProjects(userId: Int!): ProjectMembersQueryResponse!
-  users: [User!]!
+  users(query: QueryUserInput): UsersQueryResponse!
   workScheduleById(id: Int!): WorkScheduleResponse!
   workSchedules(query: QueryWorkScheduleInput): WorkSchedulesQueryResponse!
   workSiteById(id: Int!): WorkSiteResponse!
@@ -2560,6 +2578,9 @@ input QueryAttendanceInput {
   pagination: BasePaginationInput
   startDate: DateTime
   status: String
+
+  """User ID"""
+  userId: Int
 }
 
 input QueryBusinessInput {
@@ -2636,6 +2657,9 @@ input QueryLeaveInput {
   """Filter leaves starting from this date"""
   startDate: String
   status: String
+
+  """User ID"""
+  userId: Int
 }
 
 input QueryLeaveTypeInput {
@@ -3088,7 +3112,6 @@ input UpdateBusinessInput {
 }
 
 input UpdateBusinessScheduleInput {
-  businessId: Int
   day: Int
 
   """HH:MM:SS"""
@@ -3112,6 +3135,7 @@ input UpdateBusinessSettingInput {
 
   """Delete read notifications setting"""
   deleteReadNotifications: String
+  id: Int!
 
   """Prefix for business identifiers"""
   identifierPrefix: String

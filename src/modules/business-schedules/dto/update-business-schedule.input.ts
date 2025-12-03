@@ -41,8 +41,8 @@ export class UpdateBusinessScheduleInput extends PartialType(
   @Matches(TIME_RE, { message: 'endTime must be HH:MM:SS' })
   endTime?: string;
 
-  @Field(() => Int, { nullable: true })
-  @IsOptional()
-  @IsInt()
-  businessId?: number;
+  // @Field(() => Int, { nullable: true })
+  // @IsOptional()
+  // @IsInt()
+  // businessId?: number;
 }

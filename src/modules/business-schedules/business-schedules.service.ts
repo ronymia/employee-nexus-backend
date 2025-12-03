@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateBusinessScheduleInput } from './dto/update-business-schedule.input';
+import { JwtPayload } from '../auth/jwt.strategy';
 
 /** Convert "HH:MM:SS" to Date at epoch in UTC (works with @db.Time(0)) */
 // function timeToDate(hms: string): Date {
@@ -39,25 +40,38 @@ export class BusinessSchedulesService {
   }
 
   // UPDATE BUSINESS SCHEDULE
-  async update(data: UpdateBusinessScheduleInput) {
+  async update({
+    user,
+    updateBusinessScheduleInput,
+  }: {
+    user: JwtPayload;
+    updateBusinessScheduleInput: UpdateBusinessScheduleInput;
+  }) {
     // Fetch current to compare / fill defaults
-    const current = await this.prisma.businessSchedule.findFirst({
-      where: { businessId: data.businessId },
-    });
-    if (!current) throw new NotFoundException('BusinessSchedule not found');
+    // const current = await this.prisma.businessSchedule.findFirst({
+    //   where: { businessId: user.businessId },
+    // });
+    // if (!current) throw new NotFoundException('BusinessSchedule not found');
 
     // const startHMS = data.startTime ?? dateToHMS(current.startTime);
     // const endHMS = data.endTime ?? dateToHMS(current.endTime);
     // assertRange(startHMS, endHMS);
 
-    const updated = await this.prisma.businessSchedule.update({
-      where: { id: data.id },
-      data: {
-        day: data.day ?? current.day,
-        isWeekend: data.isWeekend ?? current.isWeekend,
-        startTime: data.startTime,
-        endTime: data.endTime,
-        businessId: data.businessId,
+    const updated = await this.prisma.businessSchedule.upsert({
+      where: { id: updateBusinessScheduleInput.id },
+      create: {
+        day: updateBusinessScheduleInput.day || 0,
+        isWeekend: updateBusinessScheduleInput.isWeekend || false,
+        startTime: updateBusinessScheduleInput.startTime || '09:00:00',
+        endTime: updateBusinessScheduleInput.endTime || '17:00:00',
+        businessId: user.businessId,
+      },
+      update: {
+        day: updateBusinessScheduleInput.day ?? 0,
+        isWeekend: updateBusinessScheduleInput.isWeekend ?? false,
+        startTime: updateBusinessScheduleInput.startTime,
+        endTime: updateBusinessScheduleInput.endTime,
+        businessId: user.businessId,
       },
     });
     return updated;

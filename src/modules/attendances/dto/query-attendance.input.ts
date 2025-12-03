@@ -1,5 +1,5 @@
-import { Field, InputType } from '@nestjs/graphql';
-import { IsOptional, IsString, IsDateString } from 'class-validator';
+import { Field, InputType, Int } from '@nestjs/graphql';
+import { IsOptional, IsString, IsDateString, IsInt } from 'class-validator';
 import { BasePaginationInput } from 'src/common/dto/base-pagination.type';
 
 @InputType()
@@ -21,4 +21,9 @@ export class QueryAttendanceInput {
   @IsOptional()
   @IsDateString()
   endDate?: Date;
+
+  @Field(() => Int, { nullable: true, description: 'User ID' })
+  @IsInt()
+  @IsOptional()
+  userId?: number;
 }

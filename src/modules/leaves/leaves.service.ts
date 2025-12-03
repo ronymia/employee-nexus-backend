@@ -54,7 +54,7 @@ export class LeavesService {
         title: 'Leave Recorded',
         message: `Your leave request from ${startDate} to ${endDate} has been submitted successfully and is pending review.`,
         priority: 'NORMAL' as any,
-        userId: user.userId,
+        userId: createLeaveInput.userId,
         channels: ['IN_APP'],
         businessId: user.businessId,
         entityType: 'leave',
@@ -68,7 +68,8 @@ export class LeavesService {
   }
 
   async findAll({ user, query }: { user: JwtPayload; query: QueryLeaveInput }) {
-    const userId = user.userId;
+    console.log(user);
+    const userId = query?.userId;
     const { pagination, ...filters } = query ?? {};
 
     // PAGINATION
@@ -191,10 +192,9 @@ export class LeavesService {
     };
   }
 
-  async findOne({ user, id }: { user: JwtPayload; id: number }) {
-    const userId = user.userId;
+  async findOne({ id }: { id: number }) {
     const result = await this.prisma.leave.findUnique({
-      where: { id, userId },
+      where: { id },
       include: {
         user: {
           include: {
@@ -212,27 +212,14 @@ export class LeavesService {
     return result;
   }
 
-  async update({
-    user,
-    id,
-    updateLeaveInput,
-  }: {
-    user: JwtPayload;
-    id: number;
-    updateLeaveInput: UpdateLeaveInput;
-  }) {
-    await this.findOne({ user, id }); // Ensure the leave exists
+  async update({ updateLeaveInput }: { updateLeaveInput: UpdateLeaveInput }) {
+    const { id, ...updateData } = updateLeaveInput;
 
-    const updateData: any = { ...updateLeaveInput };
-    if (updateLeaveInput.startDate) {
-      updateData.startDate = new Date(updateLeaveInput.startDate);
-    }
-    if (updateLeaveInput.endDate) {
-      updateData.endDate = new Date(updateLeaveInput.endDate);
-    }
+    // Ensure the leave exists
+    await this.findOne({ id }); // Ensure the leave exists
 
     return await this.prisma.leave.update({
-      where: { id, userId: user.userId },
+      where: { id },
       data: updateData,
       include: {
         user: true,
@@ -242,10 +229,10 @@ export class LeavesService {
     });
   }
 
-  async remove({ user, id }: { user: JwtPayload; id: number }) {
-    await this.findOne({ user, id }); // Ensure the leave exists
+  async remove({ id }: { id: number }) {
+    await this.findOne({ id }); // Ensure the leave exists
     return await this.prisma.leave.delete({
-      where: { id, userId: user.userId },
+      where: { id },
     });
   }
 

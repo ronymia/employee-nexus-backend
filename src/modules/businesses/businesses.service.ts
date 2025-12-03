@@ -496,11 +496,17 @@ export class BusinessesService {
         owner: {
           include: {
             role: true,
-            profile: true,
+            profile: {
+              include: {
+                emergencyContact: true,
+                socialLinks: true,
+              },
+            },
           },
         },
         businessSchedules: true,
         businessSettings: true,
+        subscriptionPlan: true,
       },
     });
     return business;
@@ -508,11 +514,11 @@ export class BusinessesService {
 
   // UPDATE BUSINESS
   async update(
-    id: number,
     updateBusinessInput: UpdateBusinessInput,
     // userInput: UpdateUserInput,
     // profileInput: UpdateProfileInput,
   ) {
+    const { id, ...restData } = updateBusinessInput;
     // CHECK IF BUSINESS EXISTS
     await this.findOne(id);
 
@@ -522,7 +528,7 @@ export class BusinessesService {
         // step 1 : check service plan
         const servicePlan = await prismaTransaction.subscriptionPlan.findFirst({
           where: {
-            id: updateBusinessInput.subscriptionPlanId,
+            id: restData.subscriptionPlanId,
           },
         });
         if (!servicePlan) {
@@ -531,8 +537,8 @@ export class BusinessesService {
 
         // Step 2: update the business
         const updateBusiness = await prismaTransaction.business.update({
-          where: { id: updateBusinessInput.id },
-          data: { ...updateBusinessInput },
+          where: { id },
+          data: restData,
           include: {
             owner: {
               include: {
@@ -542,6 +548,7 @@ export class BusinessesService {
             },
             businessSchedules: true,
             businessSettings: true,
+            subscriptionPlan: true,
           },
         });
 

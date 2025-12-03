@@ -860,6 +860,7 @@ model ProjectMember {
   userId    Int     @map("user_id")
   user      User    @relation(name: "projectMembersInUser", fields: [userId], references: [id], onDelete: Cascade)
   role      String?
+  // joinedAt  DateTime @default(now()) @map("joined_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1010,7 +1011,7 @@ model Attendance {
   date         DateTime          @map("date") // Date of attendance (stored as date only for grouping)
   totalHours   Float?            @map("total_hours") // Calculated total working hours for the day
   breakHours   Float?            @map("break_hours") // Calculated total break hours for the day
-  status       String            @default("pending_approve") @map("status") // present, absent, late, half_day, on_leave
+  status       String            @default("pending") @map("status") // present, absent, late, half_day, on_leave
   punchRecords AttendancePunch[] @relation(name: "attendancePunchRecords")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -1068,7 +1069,7 @@ model Leave {
   startDate       DateTime      @map("start_date") // Leave start date
   endDate         DateTime?     @map("end_date") // Leave end date (null for single day)
   totalHours      Float         @map("total_hours") // Total leave hours deducted from balance
-  status          String        @default("pending_approve") @map("status") // pending, approved, rejected, cancelled
+  status          String        @default("pending") @map("status") // pending, approved, rejected, cancelled
   reviewedAt      DateTime?     @map("reviewed_at") // When leave was approved/rejected
   reviewedBy      Int?          @map("reviewed_by") // Manager/admin who reviewed
   reviewer        User?         @relation(name: "leaveReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
