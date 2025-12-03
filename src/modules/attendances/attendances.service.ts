@@ -84,15 +84,19 @@ export class AttendancesService {
     user: JwtPayload;
     query: QueryAttendanceInput;
   }) {
+    console.log(user);
     const { pagination, startDate, endDate, status } = query ?? {};
 
     const { page, skip, limit, sortBy, sortOrder } =
       paginationHelpers.calculatePagination(pagination || {});
 
-    const andCondition: any[] = [{ userId: user.userId }];
+    const andCondition: any[] = [];
 
-    // Filter by status
+    if (query?.userId) {
+      andCondition.push({ userId: query.userId });
+    }
     if (status) {
+      // Filter by status
       andCondition.push({ status });
     }
 

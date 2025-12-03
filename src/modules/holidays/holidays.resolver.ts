@@ -82,7 +82,6 @@ export class HolidaysResolver {
   ) {
     const result = await this.holidaysService.update({
       user,
-      id: updateHolidayInput.id,
       updateHolidayInput,
     });
     return {

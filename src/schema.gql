@@ -2560,6 +2560,9 @@ input QueryAttendanceInput {
   pagination: BasePaginationInput
   startDate: DateTime
   status: String
+
+  """User ID"""
+  userId: Int
 }
 
 input QueryBusinessInput {
@@ -2636,6 +2639,9 @@ input QueryLeaveInput {
   """Filter leaves starting from this date"""
   startDate: String
   status: String
+
+  """User ID"""
+  userId: Int
 }
 
 input QueryLeaveTypeInput {

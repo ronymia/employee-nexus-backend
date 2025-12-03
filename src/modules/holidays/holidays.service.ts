@@ -158,22 +158,14 @@ export class HolidaysService {
 
   async update({
     user,
-    id,
     updateHolidayInput,
   }: {
     user: JwtPayload;
-    id: number;
     updateHolidayInput: UpdateHolidayInput;
   }) {
-    await this.findOne({ user, id }); // Ensure the holiday exists
+    const { id, ...updateData } = updateHolidayInput;
 
-    const updateData: any = { ...updateHolidayInput };
-    if (updateHolidayInput.startDate) {
-      updateData.startDate = new Date(updateHolidayInput.startDate);
-    }
-    if (updateHolidayInput.endDate) {
-      updateData.endDate = new Date(updateHolidayInput.endDate);
-    }
+    await this.findOne({ user, id }); // Ensure the holiday exists
 
     return await this.prisma.holiday.update({
       where: { id, businessId: user.businessId },
