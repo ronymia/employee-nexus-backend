@@ -1,0 +1,111 @@
+import { InputType, Field, Int, Float } from '@nestjs/graphql';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
+
+@InputType()
+export class PayrollItemComponentInput {
+  @Field(() => Int)
+  @IsNumber()
+  componentId: number;
+
+  @Field(() => Float)
+  @IsNumber()
+  amount: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  calculationBase?: number;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  notes?: string;
+}
+@InputType()
+export class PayslipAdjustmentInput {
+  @Field()
+  @IsString()
+  type: string;
+
+  @Field()
+  @IsString()
+  description: string;
+
+  @Field(() => Float)
+  @IsNumber()
+  amount: number;
+
+  @Field({ defaultValue: false })
+  @IsBoolean()
+  @IsOptional()
+  isRecurring?: boolean;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  notes?: string;
+}
+
+@InputType()
+export class CreatePayrollItemInput {
+  @Field(() => Int)
+  @IsNumber()
+  payrollCycleId: number;
+
+  @Field(() => Int)
+  @IsNumber()
+  userId: number;
+
+  @Field(() => Float)
+  @IsNumber()
+  basicSalary: number;
+
+  @Field(() => Int)
+  @IsNumber()
+  workingDays: number;
+
+  @Field(() => Float)
+  @IsNumber()
+  presentDays: number;
+
+  @Field(() => Float)
+  @IsNumber()
+  absentDays: number;
+
+  @Field(() => Float)
+  @IsNumber()
+  leaveDays: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsNumber()
+  @IsOptional()
+  overtimeHours?: number;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  notes?: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  paymentMethod?: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  bankAccount?: string;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  transactionRef?: string;
+
+  @Field(() => [PayrollItemComponentInput], { nullable: true })
+  @IsOptional()
+  components?: PayrollItemComponentInput[];
+
+  @Field(() => [PayslipAdjustmentInput], { nullable: true })
+  @IsOptional()
+  adjustments?: PayslipAdjustmentInput[];
+}
