@@ -199,4 +199,16 @@ export const managerPermissions = [
       PermissionAction.DELETE,
     ],
   },
+  {
+    resource: PermissionResource.NOTIFICATION,
+    action: [
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
+  {
+    resource: PermissionResource.NOTIFICATION_TEMPLATE,
+    action: [PermissionAction.READ],
+  },
 ];

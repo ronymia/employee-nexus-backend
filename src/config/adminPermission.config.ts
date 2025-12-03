@@ -290,4 +290,22 @@ export const adminPermissions = [
       PermissionAction.DELETE,
     ],
   },
+  {
+    resource: PermissionResource.NOTIFICATION,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
+  {
+    resource: PermissionResource.NOTIFICATION_TEMPLATE,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
 ];

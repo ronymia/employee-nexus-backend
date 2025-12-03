@@ -8,6 +8,7 @@ import {
 import configuration from 'src/config/configuration';
 import { ROLE } from 'src/enums';
 import { PasswordHelpers } from 'src/helpers/passwordHelpers';
+import { seedNotificationTemplates } from './notification-templates';
 
 const prisma = new PrismaClient();
 
@@ -72,4 +73,7 @@ export const seedSuperAdmin = async () => {
       },
     );
   }
+
+  // Seed notification templates
+  await seedNotificationTemplates();
 };

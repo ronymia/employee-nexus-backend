@@ -125,6 +125,35 @@ enum PayrollItemStatus {
   CANCELLED
 }
 
+enum NotificationType {
+  SYSTEM
+  ATTENDANCE
+  LEAVE
+  PAYROLL
+  ASSET
+  PROJECT
+  DOCUMENT
+  HOLIDAY
+  SCHEDULE
+  ANNOUNCEMENT
+  REMINDER
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  MEDIUM
+  HIGH
+  URGENT
+}
+
 model User {
   id        Int               @id @default(autoincrement())
   email     String            @unique
@@ -175,6 +204,8 @@ model User {
   reviewedLeaves            Leave[]                      @relation(name: "leaveReviewedBy")
   holidaysCreated           Holiday[]                    @relation(name: "holidayCreated")
   payrollItems              PayrollItem[]                @relation(name: "userPayrollItems")
+  notifications             Notification[]               @relation(name: "userNotifications")
+  notificationPreferences   NotificationPreference?      @relation(name: "userNotificationPreferences")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -232,29 +263,31 @@ model Business {
   // Features via join table
   features BusinessFeature[] @relation(name: "businessToFeatures")
 
-  users                User[]                 @relation(name: "userBusiness")
-  roles                Role[]                 @relation(name: "rolesInBusiness")
-  businessSettings     BusinessSettings?      @relation(name: "businessSettings")
-  leaveSettings        LeaveSettings?         @relation(name: "leaveSettings")
-  attendanceSettings   AttendanceSettings?    @relation(name: "attendanceSettings")
-  paymentSettings      PaymentSettings?       @relation(name: "paymentSettings")
-  employmentStatuses   EmploymentStatus[]     @relation(name: "employmentStatusesInBusiness")
-  designations         Designation[]          @relation(name: "designationsInBusiness")
-  jobTypes             JobType[]              @relation(name: "jobTypesInBusiness")
-  jobPlatforms         JobPlatform[]          @relation(name: "jobPlatformsInBusiness")
-  recruitmentProcesses RecruitmentProcess[]   @relation(name: "recruitmentProcessesInBusiness")
-  onboardingProcesses  OnboardingProcess[]    @relation(name: "onboardingProcessesInBusiness")
-  workSites            WorkSite[]             @relation(name: "workSitesInBusiness")
-  departments          Department[]           @relation(name: "departmentsInBusiness")
-  workSchedules        WorkSchedule[]         @relation(name: "workSchedulesInBusiness")
-  businessSchedules    BusinessSchedule[]     @relation(name: "businessSchedules")
-  leaveTypes           LeaveType[]            @relation(name: "leaveTypesInBusiness")
-  subscriptions        BusinessSubscription[] @relation(name: "businessSubscriptions")
-  assetTypes           AssetType[]            @relation(name: "assetTypesInBusiness")
-  projects             Project[]              @relation(name: "projectsInBusiness")
-  holidays             Holiday[]              @relation(name: "holidaysInBusiness")
-  payrollComponents    PayrollComponent[]     @relation(name: "payrollComponentsInBusiness")
-  payrollCycles        PayrollCycle[]         @relation(name: "payrollCyclesInBusiness")
+  users                 User[]                 @relation(name: "userBusiness")
+  roles                 Role[]                 @relation(name: "rolesInBusiness")
+  businessSettings      BusinessSettings?      @relation(name: "businessSettings")
+  leaveSettings         LeaveSettings?         @relation(name: "leaveSettings")
+  attendanceSettings    AttendanceSettings?    @relation(name: "attendanceSettings")
+  paymentSettings       PaymentSettings?       @relation(name: "paymentSettings")
+  employmentStatuses    EmploymentStatus[]     @relation(name: "employmentStatusesInBusiness")
+  designations          Designation[]          @relation(name: "designationsInBusiness")
+  jobTypes              JobType[]              @relation(name: "jobTypesInBusiness")
+  jobPlatforms          JobPlatform[]          @relation(name: "jobPlatformsInBusiness")
+  recruitmentProcesses  RecruitmentProcess[]   @relation(name: "recruitmentProcessesInBusiness")
+  onboardingProcesses   OnboardingProcess[]    @relation(name: "onboardingProcessesInBusiness")
+  workSites             WorkSite[]             @relation(name: "workSitesInBusiness")
+  departments           Department[]           @relation(name: "departmentsInBusiness")
+  workSchedules         WorkSchedule[]         @relation(name: "workSchedulesInBusiness")
+  businessSchedules     BusinessSchedule[]     @relation(name: "businessSchedules")
+  leaveTypes            LeaveType[]            @relation(name: "leaveTypesInBusiness")
+  subscriptions         BusinessSubscription[] @relation(name: "businessSubscriptions")
+  assetTypes            AssetType[]            @relation(name: "assetTypesInBusiness")
+  projects              Project[]              @relation(name: "projectsInBusiness")
+  holidays              Holiday[]              @relation(name: "holidaysInBusiness")
+  payrollComponents     PayrollComponent[]     @relation(name: "payrollComponentsInBusiness")
+  payrollCycles         PayrollCycle[]         @relation(name: "payrollCyclesInBusiness")
+  notifications         Notification[]         @relation(name: "businessNotifications")
+  notificationTemplates NotificationTemplate[] @relation(name: "notificationTemplates")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1207,4 +1240,96 @@ model PayslipAdjustment {
 
   @@index([payrollItemId])
   @@map("payslip_adjustments")
+}
+
+// ============ NOTIFICATION MANAGEMENT ============
+
+model NotificationTemplate {
+  id         Int                   @id @default(autoincrement())
+  name       String // "leave_approved", "payslip_generated", "attendance_late"
+  type       NotificationType
+  title      String // "Leave Request {{status}}"
+  message    String // "Your leave from {{startDate}} to {{endDate}} has been {{status}}"
+  priority   NotificationPriority  @default(NORMAL)
+  channels   NotificationChannel[] // Default channels for this template
+  isActive   Boolean               @default(true) @map("is_active")
+  businessId Int?                  @map("business_id")
+  business   Business?             @relation(name: "notificationTemplates", fields: [businessId], references: [id], onDelete: Cascade)
+
+  notifications Notification[] @relation(name: "templateNotifications")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([name, businessId])
+  @@index([businessId])
+  @@index([type])
+  @@map("notification_templates")
+}
+
+model Notification {
+  id       Int                  @id @default(autoincrement())
+  type     NotificationType // What kind of notification
+  title    String // Notification title (rendered from template or custom)
+  message  String // Notification content (rendered from template or custom)
+  priority NotificationPriority @default(NORMAL)
+
+  // Template relationship (optional - can be null for ad-hoc notifications)
+  notificationTemplateId Int?                  @map("notification_template_id")
+  notificationTemplate   NotificationTemplate? @relation(name: "templateNotifications", fields: [notificationTemplateId], references: [id], onDelete: SetNull)
+
+  // Related entity (optional - for deep linking)
+  entityType String? @map("entity_type") // "Leave", "Attendance", "Payroll"
+  entityId   Int?    @map("entity_id") // ID of the related entity
+  actionUrl  String? @map("action_url") // Deep link URL
+
+  // Recipient
+  userId Int  @map("user_id")
+  user   User @relation(name: "userNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Status tracking
+  isRead Boolean   @default(false) @map("is_read")
+  readAt DateTime? @map("read_at")
+
+  // Multi-channel delivery
+  channels NotificationChannel[] // Which channels to send on
+  sentVia  NotificationChannel[] @map("sent_via") // Which channels were actually sent
+
+  // Business context
+  businessId Int?      @map("business_id")
+  business   Business? @relation(name: "businessNotifications", fields: [businessId], references: [id], onDelete: Cascade)
+
+  // Metadata
+  metadata  Json? // Additional data (JSON) - template variables, extra info
+  expiresAt DateTime? @map("expires_at") // Optional expiry
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@index([businessId])
+  @@index([type])
+  @@index([notificationTemplateId])
+  @@index([expiresAt])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id     Int  @id @default(autoincrement())
+  userId Int  @unique @map("user_id")
+  user   User @relation(name: "userNotificationPreferences", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Channel preferences per notification type
+  // Example: { "LEAVE": ["IN_APP", "EMAIL"], "PAYROLL": ["IN_APP", "EMAIL", "SMS"] }
+  preferences Json
+
+  // Global settings
+  muteAll    Boolean   @default(false) @map("mute_all")
+  mutedUntil DateTime? @map("muted_until") // Temporary mute
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("notification_preferences")
 }
