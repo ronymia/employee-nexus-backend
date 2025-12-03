@@ -16,14 +16,13 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { QueryHolidayInput } from './dto/query-holiday.input';
 
 @Resolver(() => Holiday)
+@UseGuards(GqlAuthGuard, PermissionsGuard)
 export class HolidaysResolver {
   constructor(private readonly holidaysService: HolidaysService) {}
 
   // CREATE HOLIDAY
   @Mutation(() => HolidayResponse, { name: 'createHoliday' })
-  // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Holiday:create')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Holiday:create')
   async createHoliday(
     @Args('createHolidayInput') createHolidayInput: CreateHolidayInput,
     @CurrentUser() user: JwtPayload,
@@ -42,9 +41,7 @@ export class HolidaysResolver {
 
   // FIND ALL HOLIDAYS
   @Query(() => HolidaysQueryResponse, { name: 'holidays' })
-  // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Holiday:read')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Holiday:read')
   async findAll(
     @CurrentUser() user: JwtPayload,
     @Args('query', { nullable: true }) query: QueryHolidayInput,
@@ -61,9 +58,7 @@ export class HolidaysResolver {
 
   // FIND ONE HOLIDAY
   @Query(() => HolidayResponse, { name: 'holidayById' })
-  // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Holiday:read')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Holiday:read')
   async findOne(
     @Args('id', { type: () => Int }) id: number,
     @CurrentUser() user: JwtPayload,
@@ -80,9 +75,7 @@ export class HolidaysResolver {
 
   // UPDATE HOLIDAY
   @Mutation(() => HolidayResponse, { name: 'updateHoliday' })
-  // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Holiday:update')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Holiday:update')
   async updateHoliday(
     @CurrentUser() user: JwtPayload,
     @Args('updateHolidayInput') updateHolidayInput: UpdateHolidayInput,
@@ -102,9 +95,7 @@ export class HolidaysResolver {
 
   // REMOVE HOLIDAY
   @Mutation(() => HolidayResponse, { name: 'deleteHoliday' })
-  // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Holiday:delete')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Holiday:delete')
   async removeHoliday(
     @Args('id', { type: () => Int }) id: number,
     @CurrentUser() user: JwtPayload,

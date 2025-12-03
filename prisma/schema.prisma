@@ -89,6 +89,42 @@ enum HolidayType {
   REGIONAL
 }
 
+enum PayrollCycleStatus {
+  DRAFT
+  PROCESSING
+  APPROVED
+  PAID
+  CANCELLED
+}
+
+enum PayrollFrequency {
+  WEEKLY
+  BI_WEEKLY
+  SEMI_MONTHLY
+  MONTHLY
+}
+
+enum ComponentType {
+  EARNING
+  DEDUCTION
+  EMPLOYER_COST
+}
+
+enum CalculationType {
+  FIXED_AMOUNT
+  PERCENTAGE_OF_BASIC
+  PERCENTAGE_OF_GROSS
+  HOURLY_RATE
+}
+
+enum PayrollItemStatus {
+  PENDING
+  APPROVED
+  PAID
+  ON_HOLD
+  CANCELLED
+}
+
 model User {
   id        Int               @id @default(autoincrement())
   email     String            @unique
@@ -138,6 +174,7 @@ model User {
   leaves                    Leave[]                      @relation(name: "userLeaves")
   reviewedLeaves            Leave[]                      @relation(name: "leaveReviewedBy")
   holidaysCreated           Holiday[]                    @relation(name: "holidayCreated")
+  payrollItems              PayrollItem[]                @relation(name: "userPayrollItems")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -216,6 +253,8 @@ model Business {
   assetTypes           AssetType[]            @relation(name: "assetTypesInBusiness")
   projects             Project[]              @relation(name: "projectsInBusiness")
   holidays             Holiday[]              @relation(name: "holidaysInBusiness")
+  payrollComponents    PayrollComponent[]     @relation(name: "payrollComponentsInBusiness")
+  payrollCycles        PayrollCycle[]         @relation(name: "payrollCyclesInBusiness")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1038,4 +1077,134 @@ model Holiday {
   @@index([startDate, endDate])
   @@index([businessId, startDate])
   @@map("holidays")
+}
+
+model PayrollComponent {
+  id              Int             @id @default(autoincrement())
+  name            String
+  code            String
+  description     String?
+  componentType   ComponentType   @map("component_type")
+  calculationType CalculationType @map("calculation_type")
+  defaultValue    Float?          @map("default_value")
+  isActive        Boolean         @default(true) @map("is_active")
+  isTaxable       Boolean         @default(true) @map("is_taxable")
+  isStatutory     Boolean         @default(false) @map("is_statutory")
+  displayOrder    Int?            @map("display_order")
+  businessId      Int?            @map("business_id")
+  business        Business?       @relation(name: "payrollComponentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+
+  payrollItemComponents PayrollItemComponent[] @relation(name: "componentInPayrollItem")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([code, businessId])
+  @@index([businessId])
+  @@index([componentType])
+  @@map("payroll_components")
+}
+
+model PayrollCycle {
+  id              Int                @id @default(autoincrement())
+  name            String
+  frequency       PayrollFrequency
+  periodStart     DateTime           @map("period_start")
+  periodEnd       DateTime           @map("period_end")
+  paymentDate     DateTime           @map("payment_date")
+  status          PayrollCycleStatus @default(DRAFT)
+  totalGrossPay   Float              @default(0) @map("total_gross_pay")
+  totalDeductions Float              @default(0) @map("total_deductions")
+  totalNetPay     Float              @default(0) @map("total_net_pay")
+  totalEmployees  Int                @default(0) @map("total_employees")
+  approvedBy      Int?               @map("approved_by")
+  approvedAt      DateTime?          @map("approved_at")
+  processedBy     Int?               @map("processed_by")
+  processedAt     DateTime?          @map("processed_at")
+  notes           String?
+  businessId      Int                @map("business_id")
+  business        Business           @relation(name: "payrollCyclesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+
+  payrollItems PayrollItem[] @relation(name: "payrollItemsInCycle")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([name, businessId])
+  @@index([businessId])
+  @@index([status])
+  @@index([periodStart, periodEnd])
+  @@map("payroll_cycles")
+}
+
+model PayrollItem {
+  id              Int               @id @default(autoincrement())
+  payrollCycleId  Int               @map("payroll_cycle_id")
+  payrollCycle    PayrollCycle      @relation(name: "payrollItemsInCycle", fields: [payrollCycleId], references: [id], onDelete: Cascade)
+  userId          Int               @map("user_id")
+  user            User              @relation(name: "userPayrollItems", fields: [userId], references: [id], onDelete: Cascade)
+  basicSalary     Float             @map("basic_salary")
+  grossPay        Float             @map("gross_pay")
+  totalDeductions Float             @map("total_deductions")
+  netPay          Float             @map("net_pay")
+  workingDays     Int               @map("working_days")
+  presentDays     Float             @map("present_days")
+  absentDays      Float             @map("absent_days")
+  leaveDays       Float             @map("leave_days")
+  overtimeHours   Float?            @map("overtime_hours")
+  status          PayrollItemStatus @default(PENDING)
+  paymentMethod   String?           @map("payment_method")
+  bankAccount     String?           @map("bank_account")
+  transactionRef  String?           @map("transaction_ref")
+  paidAt          DateTime?         @map("paid_at")
+  notes           String?
+
+  components  PayrollItemComponent[] @relation(name: "payrollItemComponents")
+  adjustments PayslipAdjustment[]    @relation(name: "payslipAdjustments")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([payrollCycleId, userId])
+  @@index([payrollCycleId])
+  @@index([userId])
+  @@index([status])
+  @@map("payroll_items")
+}
+
+model PayrollItemComponent {
+  id              Int              @id @default(autoincrement())
+  payrollItemId   Int              @map("payroll_item_id")
+  payrollItem     PayrollItem      @relation(name: "payrollItemComponents", fields: [payrollItemId], references: [id], onDelete: Cascade)
+  componentId     Int              @map("component_id")
+  component       PayrollComponent @relation(name: "componentInPayrollItem", fields: [componentId], references: [id], onDelete: Restrict)
+  amount          Float
+  calculationBase Float?           @map("calculation_base")
+  notes           String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([payrollItemId, componentId])
+  @@index([payrollItemId])
+  @@index([componentId])
+  @@map("payroll_item_components")
+}
+
+model PayslipAdjustment {
+  id            Int         @id @default(autoincrement())
+  payrollItemId Int         @map("payroll_item_id")
+  payrollItem   PayrollItem @relation(name: "payslipAdjustments", fields: [payrollItemId], references: [id], onDelete: Cascade)
+  type          String
+  description   String
+  amount        Float
+  isRecurring   Boolean     @default(false) @map("is_recurring")
+  createdBy     Int         @map("created_by")
+  notes         String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([payrollItemId])
+  @@map("payslip_adjustments")
 }

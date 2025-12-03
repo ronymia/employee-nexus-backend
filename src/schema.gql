@@ -2,6 +2,18 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddPayslipAdjustmentInput {
+  amount: Float!
+  description: String!
+  payrollItemId: Int!
+  type: String!
+}
+
+input ApprovePayrollCycleInput {
+  approvedBy: Int!
+  id: Int!
+}
+
 type Asset {
   assetAssignments: [AssetAssignment!]!
   assetType: AssetType
@@ -395,6 +407,21 @@ enum BusinessStatus {
   TRIAL_EXPIRED
 }
 
+"""Calculation method for payroll component"""
+enum CalculationType {
+  FIXED_AMOUNT
+  HOURLY_RATE
+  PERCENTAGE_OF_BASIC
+  PERCENTAGE_OF_GROSS
+}
+
+"""Type of payroll component"""
+enum ComponentType {
+  DEDUCTION
+  EARNING
+  EMPLOYER_COST
+}
+
 input CreateAssetInput {
   assetTypeId: Int
   assignedTo: Int
@@ -784,6 +811,48 @@ input CreateOnboardingProcessInput {
 
   """Name of the onboarding process"""
   name: String!
+}
+
+input CreatePayrollComponentInput {
+  businessId: Int
+  calculationType: CalculationType!
+  code: String!
+  componentType: ComponentType!
+  defaultValue: Float
+  description: String
+  displayOrder: Int
+  isActive: Boolean! = true
+  isStatutory: Boolean! = false
+  isTaxable: Boolean! = true
+  name: String!
+}
+
+input CreatePayrollCycleInput {
+  """Business ID for the payroll cycle"""
+  businessId: Int
+  frequency: PayrollFrequency!
+  name: String!
+  notes: String
+  paymentDate: String!
+  periodEnd: String!
+  periodStart: String!
+}
+
+input CreatePayrollItemInput {
+  absentDays: Float!
+  adjustments: [PayslipAdjustmentInput!]
+  bankAccount: String
+  basicSalary: Float!
+  components: [PayrollItemComponentInput!]
+  leaveDays: Float!
+  notes: String
+  overtimeHours: Float
+  paymentMethod: String
+  payrollCycleId: Int!
+  presentDays: Float!
+  transactionRef: String
+  userId: Int!
+  workingDays: Int!
 }
 
 input CreateProfileInput {
@@ -1328,6 +1397,11 @@ enum GENDER {
   MALE
 }
 
+input GeneratePayrollItemsInput {
+  businessId: Int!
+  payrollCycleId: Int!
+}
+
 type Holiday {
   """Business associated with the holiday"""
   business: Business!
@@ -1743,8 +1817,12 @@ enum MARITAL_STATUS {
 }
 
 type Mutation {
+  addPayslipAdjustment(addPayslipAdjustmentInput: AddPayslipAdjustmentInput!): PayrollItemResponse!
+  approvePayrollCycle(approvePayrollCycleInput: ApprovePayrollCycleInput!): PayrollCycleResponse!
+  approvePayrollItem(id: Int!): PayrollItemResponse!
   assignAsset(assignAssetInput: AssignAssetInput!): AssetAssignmentResponse!
   assignProjectMember(assignProjectMemberInput: AssignProjectMemberInput!): ProjectMemberResponse!
+  cancelPayrollCycle(id: Int!): PayrollCycleResponse!
   createAsset(createAssetInput: CreateAssetInput!): AssetResponse!
   createAssetType(createAssetTypeInput: CreateAssetTypeInput!): AssetTypeResponse!
   createAttendance(createAttendanceInput: CreateAttendanceInput!): AttendanceResponse!
@@ -1764,6 +1842,9 @@ type Mutation {
   createLeaveType(createLeaveTypeInput: CreateLeaveTypeInput!): LeaveTypeResponse!
   createNote(createNoteInput: CreateNoteInput!): NoteResponse!
   createOnboardingProcess(createOnboardingProcessInput: CreateOnboardingProcessInput!): OnboardingProcessResponse!
+  createPayrollComponent(createPayrollComponentInput: CreatePayrollComponentInput!): PayrollComponentResponse!
+  createPayrollCycle(createPayrollCycleInput: CreatePayrollCycleInput!): PayrollCycleResponse!
+  createPayrollItem(createPayrollItemInput: CreatePayrollItemInput!): PayrollItemResponse!
   createProject(createProjectInput: CreateProjectInput!): ProjectResponse!
   createRecruitmentProcess(createRecruitmentProcessInput: CreateRecruitmentProcessInput!): RecruitmentProcessResponse!
   createSocialLink(createSocialLinkInput: CreateSocialLinkInput!): SocialLinkResponse!
@@ -1788,13 +1869,18 @@ type Mutation {
   deleteLeaveType(id: Int!): LeaveTypeResponse!
   deleteNote(id: Int!, userId: Int!): NoteResponse!
   deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
+  deletePayrollComponent(id: Int!): PayrollComponentResponse!
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
   deleteSocialLink(profileId: Int!): SocialLinkResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
   deleteUser(id: Int!): UserResponse!
   deleteWorkSchedule(id: Int!): WorkScheduleResponse!
   deleteWorkSite(id: Int!): WorkSiteResponse!
+  generatePayrollItems(generatePayrollItemsInput: GeneratePayrollItemsInput!): PayrollItemsQueryResponse!
   login(loginInput: LoginAuthInput!): Auth!
+  markPayrollCycleAsPaid(id: Int!): PayrollCycleResponse!
+  markPayrollItemAsPaid(id: Int!, paymentMethod: String!, transactionRef: String): PayrollItemResponse!
+  processPayrollCycle(processPayrollCycleInput: ProcessPayrollCycleInput!): PayrollCycleResponse!
   removeAsset(id: Int!): AssetResponse!
   removeAssetType(id: Int!): AssetTypeResponse!
   removeAttendancePunch(id: Int!): AttendancePunch!
@@ -1827,6 +1913,7 @@ type Mutation {
   updateLeaveType(updateLeaveTypeInput: UpdateLeaveTypeInput!): LeaveTypeResponse!
   updateNote(updateNoteInput: UpdateNoteInput!): NoteResponse!
   updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
+  updatePayrollComponent(updatePayrollComponentInput: UpdatePayrollComponentInput!): PayrollComponentResponse!
   updateProfile(updateProfileInput: UpdateProfileInput!): ProfileResponse!
   updateProject(updateProjectInput: UpdateProjectInput!): ProjectResponse!
   updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
@@ -1940,6 +2027,185 @@ type PaginationMeta {
   totalPages: Int!
 }
 
+type PayrollComponent {
+  businessId: Int
+  calculationType: CalculationType!
+  code: String!
+  componentType: ComponentType!
+  createdAt: DateTime!
+  defaultValue: Float
+  description: String
+  displayOrder: Int
+  id: Int!
+  isActive: Boolean!
+  isStatutory: Boolean!
+  isTaxable: Boolean!
+  name: String!
+  updatedAt: DateTime!
+}
+
+type PayrollComponentResponse {
+  data: PayrollComponent!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type PayrollComponentsQueryResponse {
+  data: [PayrollComponent!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type PayrollCycle {
+  approvedAt: DateTime
+  approvedBy: Int
+  businessId: Int!
+  createdAt: DateTime!
+  frequency: PayrollFrequency!
+  id: Int!
+  name: String!
+  notes: String
+  paymentDate: DateTime!
+  periodEnd: DateTime!
+  periodStart: DateTime!
+  processedAt: DateTime
+  processedBy: Int
+  status: PayrollCycleStatus!
+  totalDeductions: Float!
+  totalEmployees: Int!
+  totalGrossPay: Float!
+  totalNetPay: Float!
+  updatedAt: DateTime!
+}
+
+type PayrollCycleResponse {
+  data: PayrollCycle!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+"""Status of payroll cycle"""
+enum PayrollCycleStatus {
+  APPROVED
+  CANCELLED
+  DRAFT
+  PAID
+  PROCESSING
+}
+
+type PayrollCyclesQueryResponse {
+  data: [PayrollCycle!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+"""Frequency of payroll cycles"""
+enum PayrollFrequency {
+  BI_WEEKLY
+  MONTHLY
+  SEMI_MONTHLY
+  WEEKLY
+}
+
+type PayrollItem {
+  absentDays: Float!
+  adjustments: [PayslipAdjustment!]
+  bankAccount: String
+  basicSalary: Float!
+  components: [PayrollItemComponent!]
+  createdAt: DateTime!
+  grossPay: Float!
+  id: Int!
+  leaveDays: Float!
+  netPay: Float!
+  notes: String
+  overtimeHours: Float
+  paidAt: DateTime
+  paymentMethod: String
+  payrollCycleId: Int!
+  presentDays: Float!
+  status: PayrollItemStatus!
+  totalDeductions: Float!
+  transactionRef: String
+  updatedAt: DateTime!
+
+  """User"""
+  user: User!
+  userId: Int!
+  workingDays: Int!
+}
+
+type PayrollItemComponent {
+  amount: Float!
+  calculationBase: Float
+
+  """Payroll Component"""
+  component: PayrollComponent!
+  componentId: Int!
+  id: Int!
+  notes: String
+  payrollItemId: Int!
+}
+
+input PayrollItemComponentInput {
+  amount: Float!
+  calculationBase: Float
+  componentId: Int!
+  notes: String
+}
+
+type PayrollItemResponse {
+  data: PayrollItem!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+"""Status of payroll item"""
+enum PayrollItemStatus {
+  APPROVED
+  CANCELLED
+  ON_HOLD
+  PAID
+  PENDING
+}
+
+type PayrollItemsQueryResponse {
+  data: [PayrollItem!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type PayslipAdjustment {
+  amount: Float!
+  createdBy: Int!
+  description: String!
+  id: Int!
+  isRecurring: Boolean!
+  notes: String
+  payrollItemId: Int!
+  type: String!
+}
+
+input PayslipAdjustmentInput {
+  amount: Float!
+  description: String!
+  isRecurring: Boolean! = false
+  notes: String
+  type: String!
+}
+
 type Permission {
   action: String!
   createdAt: DateTime!
@@ -1948,6 +2214,11 @@ type Permission {
   id: ID!
   resource: String!
   updatedAt: DateTime!
+}
+
+input ProcessPayrollCycleInput {
+  id: Int!
+  processedBy: Int!
 }
 
 type Profile {
@@ -2038,6 +2309,7 @@ type ProjectsQueryResponse {
 type Query {
   FeatureById(id: Int!): FeatureResponse!
   activeEmployeeScheduleAssignment(userId: Int!): EmployeeScheduleAssignmentResponse!
+  activePayrollComponents(businessId: Int!): PayrollComponentsQueryResponse!
   allFeatures: FeatureQueryResponse!
   asset(id: Int!): AssetResponse!
   assetType(id: Int!): AssetTypeResponse!
@@ -2084,6 +2356,14 @@ type Query {
   notesByUserId(query: QueryNoteInput, userId: Int!): NotesQueryResponse!
   onboardingProcessById(id: Int!): OnboardingProcessResponse!
   onboardingProcesses(query: QueryOnboardingProcessInput): OnboardingProcessesQueryResponse!
+  payrollComponentByCode(businessId: Int!, code: String!): PayrollComponentResponse!
+  payrollComponentById(id: Int!): PayrollComponentResponse!
+  payrollComponents(query: QueryPayrollComponentInput): PayrollComponentsQueryResponse!
+  payrollCycleById(id: Int!): PayrollCycleResponse!
+  payrollCycles(query: QueryPayrollCycleInput): PayrollCyclesQueryResponse!
+  payrollItemById(id: Int!): PayrollItemResponse!
+  payrollItemByUserId(payrollCycleId: Int!, userId: Int!): PayrollItemResponse!
+  payrollItems(query: QueryPayrollItemInput!): PayrollItemsQueryResponse!
   permissionById(id: Int!): Permission!
   permissions: [Permission!]!
   projectById(id: Int!): ProjectResponse!
@@ -2221,6 +2501,23 @@ input QueryOnboardingProcessInput {
   pagination: BasePaginationInput
   searchTerm: String
   status: Status
+}
+
+input QueryPayrollComponentInput {
+  businessId: Int
+  componentType: ComponentType
+}
+
+input QueryPayrollCycleInput {
+  """Business ID to filter payroll cycles"""
+  businessId: Int
+  status: PayrollCycleStatus
+}
+
+input QueryPayrollItemInput {
+  payrollCycleId: Int!
+  status: PayrollItemStatus
+  userId: Int
 }
 
 input QueryRecruitmentProcessInput {
@@ -2996,6 +3293,21 @@ input UpdateOnboardingProcessInput {
   isRequired: Boolean
 
   """Name of the onboarding process"""
+  name: String
+}
+
+input UpdatePayrollComponentInput {
+  businessId: Int
+  calculationType: CalculationType
+  code: String
+  componentType: ComponentType
+  defaultValue: Float
+  description: String
+  displayOrder: Int
+  id: Int!
+  isActive: Boolean = true
+  isStatutory: Boolean = false
+  isTaxable: Boolean = true
   name: String
 }
 

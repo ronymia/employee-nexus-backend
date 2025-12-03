@@ -47,6 +47,9 @@ import { SocialLinksModule } from './modules/social-links/social-links.module';
 import { AttendancesModule } from './modules/attendances/attendances.module';
 import { LeavesModule } from './modules/leaves/leaves.module';
 import { HolidaysModule } from './modules/holidays/holidays.module';
+import { PayrollComponentsModule } from './modules/payroll-components/payroll-components.module';
+import { PayrollCyclesModule } from './modules/payroll-cycles/payroll-cycles.module';
+import { PayrollItemsModule } from './modules/payroll-items/payroll-items.module';
 
 @Module({
   imports: [
@@ -100,6 +103,9 @@ import { HolidaysModule } from './modules/holidays/holidays.module';
     AttendancesModule,
     LeavesModule,
     HolidaysModule,
+    PayrollComponentsModule,
+    PayrollCyclesModule,
+    PayrollItemsModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],
