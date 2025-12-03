@@ -13,6 +13,7 @@ import {
   GeneratePayrollItemsInput,
 } from './dto';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
+import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
@@ -23,7 +24,7 @@ export class PayrollItemsResolver {
   constructor(private readonly payrollItemsService: PayrollItemsService) {}
 
   @Mutation(() => PayrollItemResponse, { name: 'createPayrollItem' })
-  // @RequirePermissions('PayrollItem:create')
+  @RequirePermissions('Payroll Item:create')
   async createPayrollItem(
     @CurrentUser() user: JwtPayload,
     @Args('createPayrollItemInput') input: CreatePayrollItemInput,
@@ -37,8 +38,8 @@ export class PayrollItemsResolver {
     };
   }
 
-  @Mutation(() => PayrollItemsQueryResponse, { name: 'generatePayrollItems' })
-  // @RequirePermissions('PayrollItem:create')
+  @Mutation(() => PayrollItemResponse, { name: 'generatePayrollItems' })
+  @RequirePermissions('Payroll Item:create')
   async generatePayrollItems(
     @CurrentUser() user: JwtPayload,
     @Args('generatePayrollItemsInput') input: GeneratePayrollItemsInput,
@@ -56,7 +57,7 @@ export class PayrollItemsResolver {
   }
 
   @Query(() => PayrollItemsQueryResponse, { name: 'payrollItems' })
-  // @RequirePermissions('PayrollItem:read')
+  @RequirePermissions('Payroll Item:read')
   async payrollItems(@Args('query') query: QueryPayrollItemInput) {
     const items = await this.payrollItemsService.findAll(query);
     return {
@@ -68,7 +69,7 @@ export class PayrollItemsResolver {
   }
 
   @Query(() => PayrollItemResponse, { name: 'payrollItemById' })
-  // @RequirePermissions('PayrollItem:read')
+  @RequirePermissions('Payroll Item:read')
   async payrollItem(@Args('id', { type: () => Int }) id: number) {
     const item = await this.payrollItemsService.findOne(id);
     return {
@@ -79,8 +80,8 @@ export class PayrollItemsResolver {
     };
   }
 
-  @Query(() => PayrollItemResponse, { name: 'payrollItemByUserId' })
-  // @RequirePermissions('PayrollItem:read')
+  @Query(() => PayrollItemsQueryResponse, { name: 'payrollItemByUserId' })
+  @RequirePermissions('Payroll Item:read')
   async payrollItemByUserId(
     @Args('payrollCycleId', { type: () => Int }) payrollCycleId: number,
     @Args('userId', { type: () => Int }) userId: number,
@@ -98,7 +99,7 @@ export class PayrollItemsResolver {
   }
 
   @Mutation(() => PayrollItemResponse, { name: 'addPayslipAdjustment' })
-  // @RequirePermissions('PayrollItem:update')
+  @RequirePermissions('Payroll Item:update')
   async addPayslipAdjustment(
     @CurrentUser() user: JwtPayload,
     @Args('addPayslipAdjustmentInput') input: AddPayslipAdjustmentInput,
@@ -114,7 +115,7 @@ export class PayrollItemsResolver {
   }
 
   @Mutation(() => PayrollItemResponse, { name: 'approvePayrollItem' })
-  // @RequirePermissions('PayrollItem:approve')
+  @RequirePermissions('Payroll Item:update')
   async approvePayrollItem(@Args('id', { type: () => Int }) id: number) {
     const item = await this.payrollItemsService.approve(id);
     return {

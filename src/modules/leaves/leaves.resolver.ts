@@ -60,14 +60,13 @@ class LeaveBalanceResponse {
 }
 
 @Resolver(() => Leave)
+@UseGuards(GqlAuthGuard, PermissionsGuard)
 export class LeavesResolver {
   constructor(private readonly leavesService: LeavesService) {}
 
   // CREATE LEAVE
   @Mutation(() => LeaveResponse, { name: 'createLeave' })
-  // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Leave:create')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Leave:create')
   async createLeave(
     @Args('createLeaveInput') createLeaveInput: CreateLeaveInput,
     @CurrentUser() user: JwtPayload,
@@ -86,9 +85,7 @@ export class LeavesResolver {
 
   // FIND ALL LEAVES
   @Query(() => LeavesQueryResponse, { name: 'leaves' })
-  // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Leave:read')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Leave:read')
   async findAll(
     @CurrentUser() user: JwtPayload,
     @Args('query', { nullable: true }) query: QueryLeaveInput,
@@ -105,9 +102,7 @@ export class LeavesResolver {
 
   // FIND ONE LEAVE
   @Query(() => LeaveResponse, { name: 'leaveById' })
-  // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Leave:read')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Leave:read')
   async findOne(
     @Args('id', { type: () => Int }) id: number,
     @CurrentUser() user: JwtPayload,
@@ -124,9 +119,7 @@ export class LeavesResolver {
 
   // UPDATE LEAVE
   @Mutation(() => LeaveResponse, { name: 'updateLeave' })
-  // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Leave:update')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Leave:update')
   async updateLeave(
     @CurrentUser() user: JwtPayload,
     @Args('updateLeaveInput') updateLeaveInput: UpdateLeaveInput,
@@ -146,9 +139,7 @@ export class LeavesResolver {
 
   // REMOVE LEAVE
   @Mutation(() => LeaveResponse, { name: 'deleteLeave' })
-  // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Leave:delete')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Leave:delete')
   async removeLeave(
     @Args('id', { type: () => Int }) id: number,
     @CurrentUser() user: JwtPayload,
@@ -164,9 +155,7 @@ export class LeavesResolver {
 
   // GET LEAVE BALANCE
   @Query(() => LeaveBalanceResponse, { name: 'leaveBalance' })
-  // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Leave:read')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Leave:read')
   async getLeaveBalance(
     @CurrentUser() user: JwtPayload,
     @Args('leaveTypeId', { type: () => Int }) leaveTypeId: number,

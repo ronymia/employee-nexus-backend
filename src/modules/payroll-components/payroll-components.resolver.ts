@@ -12,6 +12,7 @@ import {
   QueryPayrollComponentInput,
 } from './dto';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
+import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
@@ -24,9 +25,7 @@ export class PayrollComponentsResolver {
   ) {}
 
   @Mutation(() => PayrollComponentResponse, { name: 'createPayrollComponent' })
-  // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('PayrollComponent:create')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Payroll Component:create')
   async createPayrollComponent(
     @CurrentUser() user: JwtPayload,
     @Args('createPayrollComponentInput') input: CreatePayrollComponentInput,
@@ -41,9 +40,7 @@ export class PayrollComponentsResolver {
   }
 
   @Query(() => PayrollComponentsQueryResponse, { name: 'payrollComponents' })
-  // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('PayrollComponent:read')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Payroll Component:read')
   async payrollComponents(
     @CurrentUser() user: JwtPayload,
     @Args('query', { nullable: true }) query: QueryPayrollComponentInput,
@@ -58,9 +55,7 @@ export class PayrollComponentsResolver {
   }
 
   @Query(() => PayrollComponentsQueryResponse)
-  @UseGuards(PermissionsGuard)
-  // @RequirePermissions('PayrollComponent:read')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Payroll Component:read')
   async activePayrollComponents(
     @Args('businessId', { type: () => Int }) businessId: number,
   ) {
@@ -75,9 +70,7 @@ export class PayrollComponentsResolver {
   }
 
   @Query(() => PayrollComponentResponse, { name: 'payrollComponentById' })
-  @UseGuards(PermissionsGuard)
-  // @RequirePermissions('PayrollComponent:read')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Payroll Component:read')
   async payrollComponent(
     @CurrentUser() user: JwtPayload,
     @Args('id', { type: () => Int }) id: number,
@@ -92,9 +85,7 @@ export class PayrollComponentsResolver {
   }
 
   @Query(() => PayrollComponentResponse)
-  // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('PayrollComponent:read')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Payroll Component:read')
   async payrollComponentByCode(
     @Args('code') code: string,
     @Args('businessId', { type: () => Int }) businessId: number,
@@ -112,9 +103,7 @@ export class PayrollComponentsResolver {
   }
 
   @Mutation(() => PayrollComponentResponse)
-  // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('PayrollComponent:update')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Payroll Component:update')
   async updatePayrollComponent(
     @Args('updatePayrollComponentInput') input: UpdatePayrollComponentInput,
   ) {
@@ -128,9 +117,7 @@ export class PayrollComponentsResolver {
   }
 
   @Mutation(() => PayrollComponentResponse, { name: 'deletePayrollComponent' })
-  // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('PayrollComponent:delete')
-  @UseGuards(GqlAuthGuard)
+  @RequirePermissions('Payroll Component:delete')
   async removePayrollComponent(@Args('id', { type: () => Int }) id: number) {
     const result = await this.payrollComponentsService.remove(id);
     return {

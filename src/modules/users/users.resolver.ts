@@ -17,8 +17,11 @@ import { PermissionUtils } from 'src/utils/permission.utils';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
+import { PermissionsGuard } from '../permissions/guards/permission.guard';
+import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 
 @Resolver(() => User)
+@UseGuards(GqlAuthGuard, PermissionsGuard)
 export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
 
@@ -37,11 +40,13 @@ export class UsersResolver {
   // }
 
   @Query(() => [User], { name: 'users' })
+  @RequirePermissions('User:read')
   users() {
     return this.usersService.findAll();
   }
 
   @Query(() => UserResponse, { name: 'userById' })
+  @RequirePermissions('User:read')
   async userById(@Args('id', { type: () => Int }) id: number) {
     const result = await this.usersService.findOne(id);
     return {
@@ -58,6 +63,7 @@ export class UsersResolver {
   // }
 
   @Mutation(() => UserResponse, { name: 'deleteUser' })
+  @RequirePermissions('User:delete')
   async deleteUser(@Args('id', { type: () => Int }) id: number) {
     const result = await this.usersService.remove(id);
     return {
@@ -70,8 +76,8 @@ export class UsersResolver {
 
   // ============ EMPLOYEE OPERATIONS ============
 
-  @UseGuards(GqlAuthGuard)
   @Mutation(() => UserResponse, { name: 'createEmployee' })
+  @RequirePermissions('User:create')
   createEmployee(
     @Args('createEmployeeInput') createEmployeeInput: CreateEmployeeInput,
     @CurrentUser() user: JwtPayload,
@@ -93,8 +99,8 @@ export class UsersResolver {
     };
   }
 
-  @UseGuards(GqlAuthGuard)
   @Query(() => UsersQueryResponse, { name: 'employees' })
+  @RequirePermissions('User:read')
   async employees(
     @CurrentUser() user: JwtPayload,
     @Args('query', { nullable: true }) query: QueryUserInput,
@@ -109,8 +115,8 @@ export class UsersResolver {
     };
   }
 
-  @UseGuards(GqlAuthGuard)
   @Query(() => UserResponse, { name: 'employeeById' })
+  @RequirePermissions('User:read')
   async employee(@Args('id', { type: () => Int }) id: number) {
     const result = await this.usersService.findOneEmployee(id);
 
@@ -122,8 +128,8 @@ export class UsersResolver {
     };
   }
 
-  @UseGuards(GqlAuthGuard)
   @Mutation(() => UserResponse, { name: 'updateEmployee' })
+  @RequirePermissions('User:update')
   async updateEmployee(
     @Args('updateEmployeeInput') updateEmployeeInput: UpdateEmployeeInput,
     @CurrentUser() user: JwtPayload,
@@ -142,8 +148,8 @@ export class UsersResolver {
     };
   }
 
-  @UseGuards(GqlAuthGuard)
   @Mutation(() => UserResponse, { name: 'deleteEmployee' })
+  @RequirePermissions('User:delete')
   async deleteEmployee(
     @Args('id', { type: () => Int }) id: number,
     @CurrentUser() user: JwtPayload,

@@ -13,6 +13,7 @@ import {
   ProcessPayrollCycleInput,
 } from './dto';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
+import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
@@ -23,7 +24,7 @@ export class PayrollCyclesResolver {
   constructor(private readonly payrollCyclesService: PayrollCyclesService) {}
 
   @Mutation(() => PayrollCycleResponse, { name: 'createPayrollCycle' })
-  // @RequirePermissions('PayrollCycle:create')
+  @RequirePermissions('Payroll Cycle:create')
   async createPayrollCycle(
     @CurrentUser() user: JwtPayload,
     @Args('createPayrollCycleInput') input: CreatePayrollCycleInput,
@@ -38,7 +39,7 @@ export class PayrollCyclesResolver {
   }
 
   @Query(() => PayrollCyclesQueryResponse, { name: 'payrollCycles' })
-  // @RequirePermissions('PayrollCycle:read')
+  @RequirePermissions('Payroll Cycle:read')
   async payrollCycles(
     @CurrentUser() user: JwtPayload,
     @Args('query', { nullable: true }) query: QueryPayrollCycleInput,
@@ -52,8 +53,8 @@ export class PayrollCyclesResolver {
     };
   }
 
-  @Query(() => PayrollCycleResponse, { name: 'payrollCycleById' })
-  // @RequirePermissions('PayrollCycle:read')
+  @Query(() => PayrollCycleResponse, { name: 'payrollCycle' })
+  @RequirePermissions('Payroll Cycle:read')
   async payrollCycle(@Args('id', { type: () => Int }) id: number) {
     const cycle = await this.payrollCyclesService.findOne(id);
     return {
@@ -65,7 +66,7 @@ export class PayrollCyclesResolver {
   }
 
   @Mutation(() => PayrollCycleResponse, { name: 'approvePayrollCycle' })
-  // @RequirePermissions('PayrollCycle:approve')
+  @RequirePermissions('Payroll Cycle:update')
   async approvePayrollCycle(
     @Args('approvePayrollCycleInput') input: ApprovePayrollCycleInput,
   ) {
@@ -79,7 +80,7 @@ export class PayrollCyclesResolver {
   }
 
   @Mutation(() => PayrollCycleResponse, { name: 'processPayrollCycle' })
-  // @RequirePermissions('PayrollCycle:process')
+  @RequirePermissions('Payroll Cycle:update')
   async processPayrollCycle(
     @Args('processPayrollCycleInput') input: ProcessPayrollCycleInput,
   ) {
@@ -93,7 +94,7 @@ export class PayrollCyclesResolver {
   }
 
   @Mutation(() => PayrollCycleResponse, { name: 'markPayrollCycleAsPaid' })
-  // @RequirePermissions('PayrollCycle:update')
+  @RequirePermissions('Payroll Cycle:update')
   async markPayrollCycleAsPaid(@Args('id', { type: () => Int }) id: number) {
     const cycle = await this.payrollCyclesService.markAsPaid(id);
     return {
@@ -105,7 +106,7 @@ export class PayrollCyclesResolver {
   }
 
   @Mutation(() => PayrollCycleResponse, { name: 'cancelPayrollCycle' })
-  // @RequirePermissions('PayrollCycle:delete')
+  @RequirePermissions('Payroll Cycle:delete')
   async cancelPayrollCycle(@Args('id', { type: () => Int }) id: number) {
     const cycle = await this.payrollCyclesService.cancel(id);
     return {

@@ -142,4 +142,61 @@ export const managerPermissions = [
     resource: PermissionResource.HOLIDAY,
     action: [PermissionAction.READ],
   },
+  {
+    resource: PermissionResource.PAYROLL_COMPONENT,
+    action: [PermissionAction.READ],
+  },
+  {
+    resource: PermissionResource.PAYROLL_CYCLE,
+    action: [PermissionAction.READ, PermissionAction.UPDATE],
+  },
+  {
+    resource: PermissionResource.PAYROLL_ITEM,
+    action: [PermissionAction.READ, PermissionAction.UPDATE],
+  },
+  {
+    resource: PermissionResource.PROFILE,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
+  {
+    resource: PermissionResource.EDUCATION_HISTORY,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
+  {
+    resource: PermissionResource.JOB_HISTORY,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
+  {
+    resource: PermissionResource.EMERGENCY_CONTACT,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
+  {
+    resource: PermissionResource.EMPLOYMENT_DETAILS,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
 ];
