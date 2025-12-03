@@ -1,6 +1,10 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { BusinessesService } from './businesses.service';
-import { Business, BusinessQueryResponse } from './entities/business.entity';
+import {
+  Business,
+  BusinessQueryResponse,
+  BusinessResponse,
+} from './entities/business.entity';
 import { CreateBusinessInput } from './dto/create-business.input';
 import { UpdateBusinessInput } from './dto/update-business.input';
 import { CreateUserInput } from '../users/dto/create-user.input';
@@ -62,36 +66,49 @@ export class BusinessesResolver {
   }
 
   // FIND ONE BUSINESS
-  @Query(() => Business, { name: 'businessById' })
+  @Query(() => BusinessResponse, { name: 'businessById' })
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Business:read')
   @UseGuards(GqlAuthGuard)
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.businessesService.findOne(id);
+  async findOne(@Args('id', { type: () => Int }) id: number) {
+    const result = await this.businessesService.findOne(id);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `Business retrieved successfully`,
+      data: result,
+    };
   }
 
-  @Mutation(() => Business, { name: 'updateBusiness' })
+  @Mutation(() => BusinessResponse, { name: 'updateBusiness' })
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Business:update')
   @UseGuards(GqlAuthGuard)
-  updateBusiness(
-    // @Args('updateUserInput') updateUserInput: UpdateUserInput,
-    // @Args('updateProfileInput') updateProfileInput: UpdateProfileInput,
+  async updateBusiness(
     @Args('updateBusinessInput') updateBusinessInput: UpdateBusinessInput,
   ) {
-    return this.businessesService.update(
-      updateBusinessInput.id,
-      updateBusinessInput,
-      // updateUserInput,
-      // updateProfileInput,
-    );
+    const result = await this.businessesService.update(updateBusinessInput);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `Business updated successfully`,
+      data: result,
+    };
   }
 
-  @Mutation(() => Business, { name: 'deleteBusiness' })
+  @Mutation(() => BusinessResponse, { name: 'deleteBusiness' })
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Business:delete')
   @UseGuards(GqlAuthGuard)
-  removeBusiness(@Args('id', { type: () => Int }) id: number) {
-    return this.businessesService.remove(id);
+  async removeBusiness(@Args('id', { type: () => Int }) id: number) {
+    const result = await this.businessesService.remove(id);
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `Business deleted successfully`,
+      data: result,
+    };
   }
 }

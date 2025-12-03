@@ -1,4 +1,8 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
+import {
+  BaseQueryResponse,
+  BaseResponse,
+} from 'src/common/dto/base-response.type';
 
 @ObjectType()
 export class BusinessSchedule {
@@ -23,3 +27,10 @@ export class BusinessSchedule {
   @Field(() => Int)
   businessId: number;
 }
+@ObjectType()
+export class BusinessScheduleResponse extends BaseResponse(BusinessSchedule) {}
+
+@ObjectType()
+export class BusinessScheduleQueryResponse extends BaseQueryResponse(
+  BusinessSchedule,
+) {}

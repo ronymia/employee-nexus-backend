@@ -336,6 +336,7 @@ type Business {
   postcode: String!
   registrationDate: String!
   status: String!
+  subscriptionPlan: SubscriptionPlan
   subscriptionPlanId: Int!
   updatedAt: DateTime!
   userId: Int!
@@ -350,6 +351,14 @@ type BusinessQueryResponse {
   success: Boolean!
 }
 
+type BusinessResponse {
+  data: Business!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type BusinessSchedule {
   businessId: Int!
   day: Int!
@@ -357,6 +366,14 @@ type BusinessSchedule {
   id: Int!
   isWeekend: Boolean!
   startTime: String!
+}
+
+type BusinessScheduleResponse {
+  data: BusinessSchedule!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type BusinessSetting {
@@ -1885,7 +1902,7 @@ type Mutation {
   createWorkSchedule(createWorkScheduleInput: CreateWorkScheduleInput!): WorkScheduleResponse!
   createWorkSite(createWorkSiteInput: CreateWorkSiteInput!): WorkSiteResponse!
   deleteAttendance(id: Int!): AttendanceResponse!
-  deleteBusiness(id: Int!): Business!
+  deleteBusiness(id: Int!): BusinessResponse!
   deleteDepartment(id: Int!): DepartmentResponse!
   deleteDesignation(id: Int!): DesignationResponse!
   deleteDocument(id: Int!, userId: Int!): DocumentResponse!
@@ -1927,8 +1944,8 @@ type Mutation {
   updateAttendance(updateAttendanceInput: UpdateAttendanceInput!): AttendanceResponse!
   updateAttendancePunch(updateAttendancePunchInput: UpdateAttendancePunchInput!): AttendancePunch!
   updateAttendanceSetting(updateAttendanceSettingInput: UpdateAttendanceSettingInput!): AttendanceSettingResponse!
-  updateBusiness(updateBusinessInput: UpdateBusinessInput!): Business!
-  updateBusinessSchedule(data: UpdateBusinessScheduleInput!): BusinessSchedule!
+  updateBusiness(updateBusinessInput: UpdateBusinessInput!): BusinessResponse!
+  updateBusinessSchedule(updateBusinessScheduleInput: UpdateBusinessScheduleInput!): BusinessScheduleResponse!
   updateBusinessSetting(updateBusinessSettingInput: UpdateBusinessSettingInput!): BusinessSettingResponse!
   updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): DepartmentResponse!
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
@@ -2471,7 +2488,7 @@ type Query {
   attendanceById(id: Int!): AttendanceResponse!
   attendanceSettingsByBusiness: AttendanceSettingResponse!
   attendances(query: QueryAttendanceInput): AttendanceQueryResponse!
-  businessById(id: Int!): Business!
+  businessById(id: Int!): BusinessResponse!
   businessScheduleByBusinessId(id: Int!): BusinessSchedule!
   businessSettingByBusinessId: BusinessSettingResponse!
   businesses(query: QueryBusinessInput): BusinessQueryResponse!
@@ -3094,7 +3111,6 @@ input UpdateBusinessInput {
 }
 
 input UpdateBusinessScheduleInput {
-  businessId: Int
   day: Int
 
   """HH:MM:SS"""
@@ -3118,6 +3134,7 @@ input UpdateBusinessSettingInput {
 
   """Delete read notifications setting"""
   deleteReadNotifications: String
+  id: Int!
 
   """Prefix for business identifiers"""
   identifierPrefix: String

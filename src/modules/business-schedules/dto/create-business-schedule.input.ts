@@ -23,7 +23,7 @@ export class CreateBusinessScheduleInput {
   @Matches(TIME_RE, { message: 'endTime must be HH:MM:SS' })
   endTime: string;
 
-  @Field(() => Int)
-  @IsInt()
-  businessId: number;
+  // @Field(() => Int)
+  // @IsInt()
+  // businessId: number;
 }
