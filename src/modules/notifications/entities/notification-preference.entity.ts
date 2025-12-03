@@ -25,9 +25,7 @@ export class NotificationPreference {
   updatedAt: Date;
 }
 
-export const NotificationPreferenceResponse = BaseResponse(
+@ObjectType()
+export class NotificationPreferenceResponse extends BaseResponse(
   NotificationPreference,
-);
-export type NotificationPreferenceResponse = InstanceType<
-  typeof NotificationPreferenceResponse
->;
+) {}

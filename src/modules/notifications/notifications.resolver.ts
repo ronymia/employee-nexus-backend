@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { HttpStatus, UseGuards } from '@nestjs/common';
@@ -74,7 +75,7 @@ export class NotificationsResolver {
   @Query(() => Int, { name: 'unreadNotificationCount' })
   @RequirePermissions('Notification:read')
   async unreadCount(@CurrentUser() user: JwtPayload): Promise<number> {
-    return await this.notificationsService.getUnreadCount(user.id);
+    return await this.notificationsService.getUnreadCount(user.userId);
   }
 
   @Mutation(() => NotificationResponse)
@@ -92,11 +93,11 @@ export class NotificationsResolver {
   @Mutation(() => NotificationResponse)
   @RequirePermissions('Notification:update')
   async markAllNotificationsAsRead(@CurrentUser() user: JwtPayload) {
-    const result = await this.notificationsService.markAllAsRead(user.id);
+    const result = await this.notificationsService.markAllAsRead(user.userId);
     return {
       success: true,
       statusCode: HttpStatus.OK,
-      message: `${result.count} notifications marked as read`,
+      message: `${result?.count ?? ''} notifications marked as read`,
       data: null,
     };
   }
@@ -161,19 +162,19 @@ export class NotificationsResolver {
     };
   }
 
-  @Mutation(() => NotificationTemplateResponse)
-  @RequirePermissions('Notification Template:delete')
-  async deleteNotificationTemplate(
-    @Args('id', { type: () => Int }) id: number,
-  ) {
-    const template = await this.notificationsService.deleteTemplate(id);
-    return {
-      success: true,
-      statusCode: HttpStatus.OK,
-      message: 'Notification template deleted successfully',
-      data: template,
-    };
-  }
+  //   @Mutation(() => NotificationTemplateResponse)
+  //   @RequirePermissions('Notification Template:delete')
+  //   async deleteNotificationTemplate(
+  //     @Args('id', { type: () => Int }) id: number,
+  //   ) {
+  //     const template = await this.notificationsService.deleteTemplate(id);
+  //     return {
+  //       success: true,
+  //       statusCode: HttpStatus.OK,
+  //       message: 'Notification template deleted successfully',
+  //       data: template,
+  //     };
+  //   }
 
   // ============ NOTIFICATION PREFERENCE OPERATIONS ============
 
@@ -182,7 +183,9 @@ export class NotificationsResolver {
   })
   @RequirePermissions('Notification:read')
   async notificationPreferences(@CurrentUser() user: JwtPayload) {
-    const preferences = await this.notificationsService.getPreferences(user.id);
+    const preferences = await this.notificationsService.getPreferences(
+      user.userId,
+    );
     return {
       success: true,
       statusCode: HttpStatus.OK,
@@ -199,7 +202,7 @@ export class NotificationsResolver {
     input: UpdateNotificationPreferenceInput,
   ) {
     const preferences = await this.notificationsService.updatePreferences(
-      user.id,
+      user.userId,
       input,
     );
     return {

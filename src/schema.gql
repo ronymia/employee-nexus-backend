@@ -76,44 +76,28 @@ type AssetResponse {
 }
 
 type AssetType {
-  """
-  ID of the business
-  """
+  """ID of the business"""
   businessId: Int!
 
-  """
-  Date when the asset type was created
-  """
+  """Date when the asset type was created"""
   createdAt: DateTime!
 
-  """
-  ID of the creator
-  """
+  """ID of the creator"""
   createdBy: Int!
 
-  """
-  Description of the asset type
-  """
+  """Description of the asset type"""
   description: String!
 
-  """
-  Unique identifier for the asset type
-  """
+  """Unique identifier for the asset type"""
   id: ID!
 
-  """
-  Name of the asset type
-  """
+  """Name of the asset type"""
   name: String!
 
-  """
-  Status of the asset type
-  """
+  """Status of the asset type"""
   status: Status!
 
-  """
-  Date when the asset type was last updated
-  """
+  """Date when the asset type was last updated"""
   updatedAt: DateTime!
 }
 
@@ -142,24 +126,16 @@ type AssetsQueryResponse {
 }
 
 input AssignAssetInput {
-  """
-  ID of the asset to be assigned
-  """
+  """ID of the asset to be assigned"""
   assetId: Int!
 
-  """
-  Date when the asset was assigned
-  """
+  """Date when the asset was assigned"""
   assignedAt: DateTime!
 
-  """
-  ID of the user to whom the asset is assigned
-  """
+  """ID of the user to whom the asset is assigned"""
   assignedTo: Int!
 
-  """
-  Optional note for the asset assignment
-  """
+  """Optional note for the asset assignment"""
   note: String
 }
 
@@ -170,176 +146,108 @@ input AssignProjectMemberInput {
 }
 
 type Attendance {
-  """
-  Total break hours for the day
-  """
+  """Total break hours for the day"""
   breakHours: Float
 
-  """
-  Creation timestamp
-  """
+  """Creation timestamp"""
   createdAt: DateTime!
 
-  """
-  Date of attendance
-  """
+  """Date of attendance"""
   date: DateTime!
 
-  """
-  Unique identifier for the attendance
-  """
+  """Unique identifier for the attendance"""
   id: ID!
 
-  """
-  Punch records for this attendance
-  """
+  """Punch records for this attendance"""
   punchRecords: [AttendancePunch!]
 
-  """
-  Attendance status
-  """
+  """Attendance status"""
   status: String!
 
-  """
-  Total working hours for the day
-  """
+  """Total working hours for the day"""
   totalHours: Float
 
-  """
-  Last update timestamp
-  """
+  """Last update timestamp"""
   updatedAt: DateTime!
 
-  """
-  User associated with this attendance
-  """
+  """User associated with this attendance"""
   user: User!
 
-  """
-  User ID
-  """
+  """User ID"""
   userId: Int!
 }
 
 type AttendancePunch {
-  """
-  Attendance associated with this punch
-  """
+  """Attendance associated with this punch"""
   attendance: Attendance!
 
-  """
-  Attendance ID
-  """
+  """Attendance ID"""
   attendanceId: Int!
 
-  """
-  Break end timestamp
-  """
+  """Break end timestamp"""
   breakEnd: DateTime
 
-  """
-  Calculated break hours for this session
-  """
+  """Calculated break hours for this session"""
   breakHours: Float
 
-  """
-  Break start timestamp
-  """
+  """Break start timestamp"""
   breakStart: DateTime
 
-  """
-  Creation timestamp
-  """
+  """Creation timestamp"""
   createdAt: DateTime!
 
-  """
-  Unique identifier for the punch record
-  """
+  """Unique identifier for the punch record"""
   id: ID!
 
-  """
-  Notes for this punch session
-  """
+  """Notes for this punch session"""
   notes: String
 
-  """
-  Project associated with this punch
-  """
+  """Project associated with this punch"""
   project: Project
 
-  """
-  Project ID if working on a project
-  """
+  """Project ID if working on a project"""
   projectId: Int
 
-  """
-  Clock in timestamp
-  """
+  """Clock in timestamp"""
   punchIn: DateTime!
 
-  """
-  Punch in device information
-  """
+  """Punch in device information"""
   punchInDevice: String
 
-  """
-  Punch in IP address
-  """
+  """Punch in IP address"""
   punchInIp: String
 
-  """
-  Punch in latitude
-  """
+  """Punch in latitude"""
   punchInLat: Float
 
-  """
-  Punch in longitude
-  """
+  """Punch in longitude"""
   punchInLng: Float
 
-  """
-  Clock out timestamp
-  """
+  """Clock out timestamp"""
   punchOut: DateTime
 
-  """
-  Punch out device information
-  """
+  """Punch out device information"""
   punchOutDevice: String
 
-  """
-  Punch out IP address
-  """
+  """Punch out IP address"""
   punchOutIp: String
 
-  """
-  Punch out latitude
-  """
+  """Punch out latitude"""
   punchOutLat: Float
 
-  """
-  Punch out longitude
-  """
+  """Punch out longitude"""
   punchOutLng: Float
 
-  """
-  Last update timestamp
-  """
+  """Last update timestamp"""
   updatedAt: DateTime!
 
-  """
-  Calculated work hours for this session
-  """
+  """Calculated work hours for this session"""
   workHours: Float
 
-  """
-  Work site associated with this punch
-  """
+  """Work site associated with this punch"""
   workSite: WorkSite
 
-  """
-  Work site ID
-  """
+  """Work site ID"""
   workSiteId: Int
 }
 
@@ -360,49 +268,31 @@ type AttendanceResponse {
 }
 
 type AttendanceSetting {
-  """
-  Whether auto approval is enabled
-  """
+  """Whether auto approval is enabled"""
   autoApproval: Boolean!
 
-  """
-  Business this attendance setting belongs to
-  """
+  """Business this attendance setting belongs to"""
   business: Business!
 
-  """
-  ID of the business
-  """
+  """ID of the business"""
   businessId: Int!
 
-  """
-  Unique identifier for the attendance setting
-  """
+  """Unique identifier for the attendance setting"""
   id: ID!
 
-  """
-  Whether geo location is enabled
-  """
+  """Whether geo location is enabled"""
   isGeoLocationEnabled: Boolean!
 
-  """
-  Whether punch in/out alerts are enabled
-  """
+  """Whether punch in/out alerts are enabled"""
   punchInOutAlert: Boolean!
 
-  """
-  Punch in/out interval in hours
-  """
+  """Punch in/out interval in hours"""
   punchInOutInterval: Int!
 
-  """
-  Punch in time tolerance in minutes
-  """
+  """Punch in time tolerance in minutes"""
   punchInTimeTolerance: Int!
 
-  """
-  Work availability definition percentage
-  """
+  """Work availability definition percentage"""
   workAvailabilityDefinition: Int!
 }
 
@@ -415,14 +305,10 @@ type AttendanceSettingResponse {
 }
 
 type Auth {
-  """
-  JWT access token
-  """
+  """JWT access token"""
   accessToken: String!
 
-  """
-  User associated with the auth
-  """
+  """User associated with the auth"""
   user: User!
 }
 
@@ -474,54 +360,34 @@ type BusinessSchedule {
 }
 
 type BusinessSetting {
-  """
-  Business this setting belongs to
-  """
+  """Business this setting belongs to"""
   business: Business!
 
-  """
-  ID of the business
-  """
+  """ID of the business"""
   businessId: Int!
 
-  """
-  Business start day of the week (0-6, where 0=Sunday)
-  """
+  """Business start day of the week (0-6, where 0=Sunday)"""
   businessStartDay: Int!
 
-  """
-  Business time zone
-  """
+  """Business time zone"""
   businessTimeZone: String
 
-  """
-  Business currency code
-  """
+  """Business currency code"""
   currency: String!
 
-  """
-  Delete read notifications setting
-  """
+  """Delete read notifications setting"""
   deleteReadNotifications: String!
 
-  """
-  Unique identifier for the business setting
-  """
+  """Unique identifier for the business setting"""
   id: ID!
 
-  """
-  Prefix for business identifiers
-  """
+  """Prefix for business identifiers"""
   identifierPrefix: String!
 
-  """
-  Whether self-registration is enabled
-  """
+  """Whether self-registration is enabled"""
   isSelfRegistered: Boolean!
 
-  """
-  Business theme
-  """
+  """Business theme"""
   theme: String
 }
 
@@ -533,9 +399,7 @@ type BusinessSettingResponse {
   success: Boolean!
 }
 
-"""
-Business Status of Business
-"""
+"""Business Status of Business"""
 enum BusinessStatus {
   ACTIVE
   INACTIVE
@@ -543,9 +407,7 @@ enum BusinessStatus {
   TRIAL_EXPIRED
 }
 
-"""
-Calculation method for payroll component
-"""
+"""Calculation method for payroll component"""
 enum CalculationType {
   FIXED_AMOUNT
   HOURLY_RATE
@@ -553,9 +415,7 @@ enum CalculationType {
   PERCENTAGE_OF_GROSS
 }
 
-"""
-Type of payroll component
-"""
+"""Type of payroll component"""
 enum ComponentType {
   DEDUCTION
   EARNING
@@ -573,138 +433,86 @@ input CreateAssetInput {
 }
 
 input CreateAssetTypeInput {
-  """
-  Description of the asset type
-  """
+  """Description of the asset type"""
   description: String!
 
-  """
-  Name of the asset type
-  """
+  """Name of the asset type"""
   name: String!
 }
 
 input CreateAttendanceInput {
-  """
-  Total break hours for the day
-  """
+  """Total break hours for the day"""
   breakHours: Float
 
-  """
-  Date of attendance
-  """
+  """Date of attendance"""
   date: DateTime!
 
-  """
-  Punch records for this attendance
-  """
+  """Punch records for this attendance"""
   punchRecords: [CreateAttendancePunchInput!]
 
-  """
-  Attendance status
-  """
+  """Attendance status"""
   status: String! = "pending_approve"
 
-  """
-  Total working hours for the day
-  """
+  """Total working hours for the day"""
   totalHours: Float
 
-  """
-  User ID
-  """
+  """User ID"""
   userId: Int!
 }
 
 input CreateAttendancePunchInput {
-  """
-  Attendance ID (optional for nested creation)
-  """
+  """Attendance ID (optional for nested creation)"""
   attendanceId: Int
 
-  """
-  Break end timestamp
-  """
+  """Break end timestamp"""
   breakEnd: DateTime
 
-  """
-  Break hours for this session
-  """
+  """Break hours for this session"""
   breakHours: Float
 
-  """
-  Break start timestamp
-  """
+  """Break start timestamp"""
   breakStart: DateTime
 
-  """
-  Notes for this punch session
-  """
+  """Notes for this punch session"""
   notes: String
 
-  """
-  Project ID if working on a project
-  """
+  """Project ID if working on a project"""
   projectId: Int
 
-  """
-  Clock in timestamp
-  """
+  """Clock in timestamp"""
   punchIn: DateTime!
 
-  """
-  Punch in device information
-  """
+  """Punch in device information"""
   punchInDevice: String
 
-  """
-  Punch in IP address
-  """
+  """Punch in IP address"""
   punchInIp: String
 
-  """
-  Punch in latitude
-  """
+  """Punch in latitude"""
   punchInLat: Float
 
-  """
-  Punch in longitude
-  """
+  """Punch in longitude"""
   punchInLng: Float
 
-  """
-  Clock out timestamp
-  """
+  """Clock out timestamp"""
   punchOut: DateTime
 
-  """
-  Punch out device information
-  """
+  """Punch out device information"""
   punchOutDevice: String
 
-  """
-  Punch out IP address
-  """
+  """Punch out IP address"""
   punchOutIp: String
 
-  """
-  Punch out latitude
-  """
+  """Punch out latitude"""
   punchOutLat: Float
 
-  """
-  Punch out longitude
-  """
+  """Punch out longitude"""
   punchOutLng: Float
 
-  """
-  Work hours for this session
-  """
+  """Work hours for this session"""
   workHours: Float
 
-  """
-  Work site ID
-  """
+  """Work site ID"""
   workSiteId: Int
 }
 
@@ -725,14 +533,10 @@ input CreateBusinessInput {
 }
 
 input CreateDayScheduleInput {
-  """
-  Day of the week (0-6, where 0 is Sunday)
-  """
+  """Day of the week (0-6, where 0 is Sunday)"""
   day: Int!
 
-  """
-  Whether this day is a weekend
-  """
+  """Whether this day is a weekend"""
   isWeekend: Boolean!
 
   """
@@ -742,115 +546,73 @@ input CreateDayScheduleInput {
 }
 
 input CreateDepartmentInput {
-  """
-  Description of the department
-  """
+  """Description of the department"""
   description: String!
 
-  """
-  ID of the manager
-  """
+  """ID of the manager"""
   managerId: Int
 
-  """
-  Name of the department
-  """
+  """Name of the department"""
   name: String!
 
-  """
-  ID of the parent department
-  """
+  """ID of the parent department"""
   parentId: Int
 }
 
 input CreateDesignationInput {
-  """
-  Description of the designation
-  """
+  """Description of the designation"""
   description: String!
 
-  """
-  Name of the designation
-  """
+  """Name of the designation"""
   name: String!
 }
 
 input CreateDocumentInput {
-  """
-  Attachment URL or path
-  """
+  """Attachment URL or path"""
   attachment: String!
 
-  """
-  Description of the document
-  """
+  """Description of the document"""
   description: String
 
-  """
-  Title of the document
-  """
+  """Title of the document"""
   title: String!
 
-  """
-  ID of the user
-  """
+  """ID of the user"""
   userId: Int!
 }
 
 input CreateEducationHistoryInput {
-  """
-  City where institution is located
-  """
+  """City where institution is located"""
   city: String
 
-  """
-  Country where institution is located
-  """
+  """Country where institution is located"""
   country: String!
 
-  """
-  Degree or qualification
-  """
+  """Degree or qualification"""
   degree: String!
 
-  """
-  Additional details or achievements
-  """
+  """Additional details or achievements"""
   description: String
 
-  """
-  End/graduation date (MM-YYYY or YYYY)
-  """
+  """End/graduation date (MM-YYYY or YYYY)"""
   endDate: String
 
-  """
-  Field of study or major
-  """
+  """Field of study or major"""
   fieldOfStudy: String!
 
-  """
-  Grade, GPA, or percentage
-  """
+  """Grade, GPA, or percentage"""
   grade: String
 
-  """
-  Institution or university name
-  """
+  """Institution or university name"""
   institution: String!
 
-  """
-  Whether currently studying
-  """
+  """Whether currently studying"""
   isCurrentlyStudying: Boolean! = false
 
-  """
-  Start date (MM-YYYY or YYYY)
-  """
+  """Start date (MM-YYYY or YYYY)"""
   startDate: String!
 
-  """
-  ID of the user
-  """
+  """ID of the user"""
   userId: Int!
 }
 
@@ -879,277 +641,202 @@ input CreateEmployeeInput {
 }
 
 input CreateEmployeeScheduleAssignmentInput {
-  """
-  Assignment end date (ISO 8601)
-  """
+  """Assignment end date (ISO 8601)"""
   endDate: String
 
-  """
-  Whether this is the active schedule
-  """
+  """Whether this is the active schedule"""
   isActive: Boolean! = true
 
-  """
-  Optional notes about assignment
-  """
+  """Optional notes about assignment"""
   notes: String
 
-  """
-  Assignment start date (ISO 8601)
-  """
+  """Assignment start date (ISO 8601)"""
   startDate: String!
 
-  """
-  ID of the user/employee
-  """
+  """ID of the user/employee"""
   userId: Int!
 
-  """
-  ID of the work schedule
-  """
+  """ID of the work schedule"""
   workScheduleId: Int!
 }
 
 input CreateEmploymentStatusInput {
-  """
-  Description of the employment status
-  """
+  """Description of the employment status"""
   description: String!
 
-  """
-  Name of the employment status
-  """
+  """Name of the employment status"""
   name: String!
 }
 
 input CreateHolidayInput {
-  """
-  Description of the holiday
-  """
+  """Description of the holiday"""
   description: String
 
-  """
-  Holiday end date
-  """
+  """Holiday end date"""
   endDate: String!
 
-  """
-  Type of holiday
-  """
+  """Type of holiday"""
   holidayType: HolidayType!
 
-  """
-  Is this a paid holiday
-  """
+  """Is this a paid holiday"""
   isPaid: Boolean! = true
 
-  """
-  Is this a recurring annual holiday
-  """
+  """Is this a recurring annual holiday"""
   isRecurring: Boolean! = false
 
-  """
-  Name of the holiday
-  """
+  """Name of the holiday"""
   name: String!
 
-  """
-  Holiday start date
-  """
+  """Holiday start date"""
   startDate: String!
 }
 
 input CreateJobHistoryInput {
-  """
-  Key achievements and accomplishments
-  """
+  """Key achievements and accomplishments"""
   achievements: String
 
-  """
-  City where job was located
-  """
+  """City where job was located"""
   city: String
 
-  """
-  Company or organization name
-  """
+  """Company or organization name"""
   companyName: String!
 
-  """
-  Country where job was located
-  """
+  """Country where job was located"""
   country: String!
 
-  """
-  Employment type
-  """
+  """Employment type"""
   employmentType: String!
 
-  """
-  End date (MM-YYYY or YYYY)
-  """
+  """End date (MM-YYYY or YYYY)"""
   endDate: String
 
-  """
-  Job title or position
-  """
+  """Job title or position"""
   jobTitle: String!
 
-  """
-  Job responsibilities and duties
-  """
+  """Job responsibilities and duties"""
   responsibilities: String
 
-  """
-  Start date (MM-YYYY or YYYY)
-  """
+  """Start date (MM-YYYY or YYYY)"""
   startDate: String!
 
-  """
-  ID of the user
-  """
+  """ID of the user"""
   userId: Int!
 }
 
 input CreateJobPlatformInput {
-  """
-  Description of the job platform
-  """
+  """Description of the job platform"""
   description: String!
 
-  """
-  Name of the job platform
-  """
+  """Name of the job platform"""
   name: String!
 }
 
 input CreateJobTypeInput {
-  """
-  Description of the job type
-  """
+  """Description of the job type"""
   description: String!
 
-  """
-  Name of the job type
-  """
+  """Name of the job type"""
   name: String!
 }
 
 input CreateLeaveInput {
-  """
-  Supporting documents (JSON array or URLs)
-  """
+  """Supporting documents (JSON array or URLs)"""
   attachments: String
 
-  """
-  Leave end date (required for MULTI_DAY)
-  """
+  """Leave end date (required for MULTI_DAY)"""
   endDate: String
 
-  """
-  Leave duration type (SINGLE_DAY, MULTI_DAY, HALF_DAY)
-  """
+  """Leave duration type (SINGLE_DAY, MULTI_DAY, HALF_DAY)"""
   leaveDuration: LeaveDuration!
 
-  """
-  ID of the leave type
-  """
+  """ID of the leave type"""
   leaveTypeId: Int!
 
-  """
-  Year this leave applies to (e.g., 2025)
-  """
+  """Year this leave applies to (e.g., 2025)"""
   leaveYear: Int!
 
-  """
-  Additional notes or comments
-  """
+  """Additional notes or comments"""
   notes: String
 
-  """
-  Leave start date
-  """
+  """Leave start date"""
   startDate: String!
 
-  """
-  Total leave hours deducted from balance
-  """
+  """Total leave hours deducted from balance"""
   totalHours: Float!
 }
 
 input CreateLeaveTypeInput {
-  """
-  Maximum carry over limit
-  """
+  """Maximum carry over limit"""
   carryOverLimit: Int
 
-  """
-  Array of employment status IDs to associate with this leave type
-  """
+  """Array of employment status IDs to associate with this leave type"""
   employmentStatuses: [Int!] = []
 
-  """
-  Number of leave hours allocated
-  """
+  """Number of leave hours allocated"""
   leaveHours: Int! = 0
 
-  """
-  Leave rollover policy type
-  """
+  """Leave rollover policy type"""
   leaveRolloverType: LeaveRolloverType! = NONE
 
-  """
-  Type of leave (PAID or UNPAID)
-  """
+  """Type of leave (PAID or UNPAID)"""
   leaveType: LeaveTypeEnum!
 
-  """
-  Name of the leave type
-  """
+  """Name of the leave type"""
   name: String!
 }
 
 input CreateNoteInput {
-  """
-  Category of the note
-  """
+  """Category of the note"""
   category: String
 
-  """
-  Content of the note
-  """
+  """Content of the note"""
   content: String!
 
-  """
-  Whether the note is private
-  """
+  """Whether the note is private"""
   isPrivate: Boolean
 
-  """
-  Title of the note
-  """
+  """Title of the note"""
   title: String!
 
-  """
-  ID of the user this note is about
-  """
+  """ID of the user this note is about"""
   userId: Int!
 }
 
+input CreateNotificationInput {
+  actionUrl: String
+  businessId: Int
+  channels: [NotificationChannel!]!
+  entityId: Int
+  entityType: String
+  expiresAt: DateTime
+  message: String!
+  metadata: String
+  notificationTemplateId: Int
+  priority: NotificationPriority
+  title: String!
+  type: NotificationType!
+  userId: Int!
+}
+
+input CreateNotificationTemplateInput {
+  businessId: Int
+  channels: [NotificationChannel!]!
+  isActive: Boolean
+  message: String!
+  name: String!
+  priority: NotificationPriority
+  title: String!
+  type: NotificationType!
+}
+
 input CreateOnboardingProcessInput {
-  """
-  Description of the onboarding process
-  """
+  """Description of the onboarding process"""
   description: String!
 
-  """
-  Whether the onboarding process is required
-  """
+  """Whether the onboarding process is required"""
   isRequired: Boolean!
 
-  """
-  Name of the onboarding process
-  """
+  """Name of the onboarding process"""
   name: String!
 }
 
@@ -1168,9 +855,7 @@ input CreatePayrollComponentInput {
 }
 
 input CreatePayrollCycleInput {
-  """
-  Business ID for the payroll cycle
-  """
+  """Business ID for the payroll cycle"""
   businessId: Int
   frequency: PayrollFrequency!
   name: String!
@@ -1220,90 +905,58 @@ input CreateProjectInput {
 }
 
 input CreateRecruitmentProcessInput {
-  """
-  Description of the recruitment process
-  """
+  """Description of the recruitment process"""
   description: String!
 
-  """
-  Whether the recruitment process is required
-  """
+  """Whether the recruitment process is required"""
   isRequired: Boolean!
 
-  """
-  Name of the recruitment process
-  """
+  """Name of the recruitment process"""
   name: String!
 }
 
 input CreateSocialLinkInput {
-  """
-  Facebook profile URL
-  """
+  """Facebook profile URL"""
   facebook: String
 
-  """
-  GitHub profile URL
-  """
+  """GitHub profile URL"""
   github: String
 
-  """
-  Instagram profile URL
-  """
+  """Instagram profile URL"""
   instagram: String
 
-  """
-  LinkedIn profile URL
-  """
+  """LinkedIn profile URL"""
   linkedin: String
 
-  """
-  Profile ID
-  """
+  """Profile ID"""
   profileId: Int!
 
-  """
-  Twitter profile URL
-  """
+  """Twitter profile URL"""
   twitter: String
 }
 
 input CreateSubscriptionPlanInput {
-  """
-  Description of the service plan
-  """
+  """Description of the service plan"""
   description: String!
 
-  """
-  Module Ids for the service plan
-  """
+  """Module Ids for the service plan"""
   featureIds: [Int!]!
 
-  """
-  Name of the service plan
-  """
+  """Name of the service plan"""
   name: String!
 
-  """
-  Price of the service plan
-  """
+  """Price of the service plan"""
   price: Int!
 
-  """
-  One-time setup fee for the service plan
-  """
+  """One-time setup fee for the service plan"""
   setupFee: Int!
 }
 
 input CreateTimeSlotInput {
-  """
-  End time in HH:mm format (e.g., 17:00)
-  """
+  """End time in HH:mm format (e.g., 17:00)"""
   endTime: String!
 
-  """
-  Start time in HH:mm format (e.g., 09:00)
-  """
+  """Start time in HH:mm format (e.g., 09:00)"""
   startTime: String!
 }
 
@@ -1315,29 +968,19 @@ input CreateUserInput {
 }
 
 input CreateWorkScheduleInput {
-  """
-  Number of break hours
-  """
+  """Number of break hours"""
   breakHours: Int! = 0
 
-  """
-  Type of break in the schedule
-  """
+  """Type of break in the schedule"""
   breakType: ScheduleBreakType! = UNPAID
 
-  """
-  Description of the work schedule
-  """
+  """Description of the work schedule"""
   description: String!
 
-  """
-  Name of the work schedule
-  """
+  """Name of the work schedule"""
   name: String!
 
-  """
-  Type of the schedule
-  """
+  """Type of the schedule"""
   scheduleType: ScheduleType! = REGULAR
 
   """
@@ -1345,51 +988,33 @@ input CreateWorkScheduleInput {
   """
   schedules: [CreateDayScheduleInput!]!
 
-  """
-  Status of the work schedule
-  """
+  """Status of the work schedule"""
   status: Status! = ACTIVE
 }
 
 input CreateWorkSiteInput {
-  """
-  Address of the work site
-  """
+  """Address of the work site"""
   address: String
 
-  """
-  Description of the work site
-  """
+  """Description of the work site"""
   description: String!
 
-  """
-  IP address
-  """
+  """IP address"""
   ipAddress: String
 
-  """
-  Whether geo location is enabled
-  """
+  """Whether geo location is enabled"""
   isGeoLocationEnabled: Boolean
 
-  """
-  Whether IP is enabled
-  """
+  """Whether IP is enabled"""
   isIpEnabled: Boolean
 
-  """
-  Whether location is enabled
-  """
+  """Whether location is enabled"""
   isLocationEnabled: Boolean
 
-  """
-  Maximum radius for location
-  """
+  """Maximum radius for location"""
   maxRadius: Int
 
-  """
-  Name of the work site
-  """
+  """Name of the work site"""
   name: String!
 }
 
@@ -1399,111 +1024,69 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type DaySchedule {
-  """
-  Day of the week (0-6, where 0=Sunday)
-  """
+  """Day of the week (0-6, where 0=Sunday)"""
   day: Int!
 
-  """
-  Unique identifier for the day schedule
-  """
+  """Unique identifier for the day schedule"""
   id: ID!
 
-  """
-  Whether this day is a weekend
-  """
+  """Whether this day is a weekend"""
   isWeekend: Boolean!
 
-  """
-  Time slots for this day
-  """
+  """Time slots for this day"""
   timeSlots: [TimeSlot!]!
 
-  """
-  Work schedule this day belongs to
-  """
+  """Work schedule this day belongs to"""
   workSchedule: WorkSchedule!
 
-  """
-  ID of the work schedule
-  """
+  """ID of the work schedule"""
   workScheduleId: Int!
 }
 
 type Department {
-  """
-  Business this department belongs to
-  """
+  """Business this department belongs to"""
   business: Business!
 
-  """
-  ID of the business
-  """
+  """ID of the business"""
   businessId: Int!
 
-  """
-  Child departments
-  """
+  """Child departments"""
   children: [Department!]
 
-  """
-  Date when the department was created
-  """
+  """Date when the department was created"""
   createdAt: DateTime!
 
-  """
-  ID of the creator
-  """
+  """ID of the creator"""
   createdBy: Int!
 
-  """
-  Creator of the department
-  """
+  """Creator of the department"""
   creator: User!
 
-  """
-  Description of the department
-  """
+  """Description of the department"""
   description: String!
 
-  """
-  Unique identifier for the department
-  """
+  """Unique identifier for the department"""
   id: ID!
 
-  """
-  Manager of the department
-  """
+  """Manager of the department"""
   manager: User
 
-  """
-  ID of the manager
-  """
+  """ID of the manager"""
   managerId: Int
 
-  """
-  Name of the department
-  """
+  """Name of the department"""
   name: String!
 
-  """
-  Parent department
-  """
+  """Parent department"""
   parent: Department
 
-  """
-  ID of the parent department
-  """
+  """ID of the parent department"""
   parentId: Int
 
-  """
-  Status of the department
-  """
+  """Status of the department"""
   status: Status!
 
-  """
-  Date when the department was last updated
-  """
+  """Date when the department was last updated"""
   updatedAt: DateTime!
 }
 
@@ -1524,44 +1107,28 @@ type DepartmentsQueryResponse {
 }
 
 type Designation {
-  """
-  ID of the business
-  """
+  """ID of the business"""
   businessId: Int!
 
-  """
-  Date when the designation was created
-  """
+  """Date when the designation was created"""
   createdAt: DateTime!
 
-  """
-  ID of the creator
-  """
+  """ID of the creator"""
   createdBy: Int!
 
-  """
-  Description of the designation
-  """
+  """Description of the designation"""
   description: String!
 
-  """
-  Unique identifier for the designation
-  """
+  """Unique identifier for the designation"""
   id: ID!
 
-  """
-  Name of the designation
-  """
+  """Name of the designation"""
   name: String!
 
-  """
-  Status of the designation
-  """
+  """Status of the designation"""
   status: Status!
 
-  """
-  Date when the designation was last updated
-  """
+  """Date when the designation was last updated"""
   updatedAt: DateTime!
 }
 
@@ -1582,44 +1149,28 @@ type DesignationsQueryResponse {
 }
 
 type Document {
-  """
-  Attachment URL or path
-  """
+  """Attachment URL or path"""
   attachment: String!
 
-  """
-  Date when the document was created
-  """
+  """Date when the document was created"""
   createdAt: DateTime!
 
-  """
-  Description of the document
-  """
+  """Description of the document"""
   description: String
 
-  """
-  Unique identifier for the document
-  """
+  """Unique identifier for the document"""
   id: ID!
 
-  """
-  Title of the document
-  """
+  """Title of the document"""
   title: String!
 
-  """
-  Date when the document was last updated
-  """
+  """Date when the document was last updated"""
   updatedAt: DateTime!
 
-  """
-  User who owns this document
-  """
+  """User who owns this document"""
   user: User
 
-  """
-  ID of the user who owns the document
-  """
+  """ID of the user who owns the document"""
   userId: Int!
 }
 
@@ -1648,75 +1199,47 @@ type EducationHistoriesQueryResponse {
 }
 
 type EducationHistory {
-  """
-  City where institution is located
-  """
+  """City where institution is located"""
   city: String
 
-  """
-  Country where institution is located
-  """
+  """Country where institution is located"""
   country: String!
 
-  """
-  Date when the record was created
-  """
+  """Date when the record was created"""
   createdAt: DateTime!
 
-  """
-  Degree or qualification
-  """
+  """Degree or qualification"""
   degree: String!
 
-  """
-  Additional details or achievements
-  """
+  """Additional details or achievements"""
   description: String
 
-  """
-  End/graduation date (MM-YYYY or YYYY)
-  """
+  """End/graduation date (MM-YYYY or YYYY)"""
   endDate: String
 
-  """
-  Field of study or major
-  """
+  """Field of study or major"""
   fieldOfStudy: String!
 
-  """
-  Grade, GPA, or percentage
-  """
+  """Grade, GPA, or percentage"""
   grade: String
   id: ID!
 
-  """
-  Institution or university name
-  """
+  """Institution or university name"""
   institution: String!
 
-  """
-  Whether currently studying
-  """
+  """Whether currently studying"""
   isCurrentlyStudying: Boolean!
 
-  """
-  Start date (MM-YYYY or YYYY)
-  """
+  """Start date (MM-YYYY or YYYY)"""
   startDate: String!
 
-  """
-  Date when the record was last updated
-  """
+  """Date when the record was last updated"""
   updatedAt: DateTime!
 
-  """
-  User who owns this education history
-  """
+  """User who owns this education history"""
   user: User
 
-  """
-  ID of the user
-  """
+  """ID of the user"""
   userId: Int!
 }
 
@@ -1777,65 +1300,41 @@ type EmployeeResponse {
 }
 
 type EmployeeScheduleAssignment {
-  """
-  ID of user who assigned the schedule
-  """
+  """ID of user who assigned the schedule"""
   assignedBy: Int!
 
-  """
-  User who assigned the schedule
-  """
+  """User who assigned the schedule"""
   assignedByUser: User
 
-  """
-  Date when the record was created
-  """
+  """Date when the record was created"""
   createdAt: DateTime!
 
-  """
-  Assignment end date
-  """
+  """Assignment end date"""
   endDate: DateTime
   id: ID!
 
-  """
-  Whether this is the active schedule
-  """
+  """Whether this is the active schedule"""
   isActive: Boolean!
 
-  """
-  Optional notes about assignment
-  """
+  """Optional notes about assignment"""
   notes: String
 
-  """
-  Assignment start date
-  """
+  """Assignment start date"""
   startDate: DateTime!
 
-  """
-  Date when the record was last updated
-  """
+  """Date when the record was last updated"""
   updatedAt: DateTime!
 
-  """
-  User/employee assigned to schedule
-  """
+  """User/employee assigned to schedule"""
   user: User
 
-  """
-  ID of the user/employee
-  """
+  """ID of the user/employee"""
   userId: Int!
 
-  """
-  Assigned work schedule
-  """
+  """Assigned work schedule"""
   workSchedule: WorkSchedule
 
-  """
-  ID of the work schedule
-  """
+  """ID of the work schedule"""
   workScheduleId: Int!
 }
 
@@ -1856,44 +1355,28 @@ type EmployeeScheduleAssignmentsQueryResponse {
 }
 
 type EmploymentStatus {
-  """
-  ID of the business
-  """
+  """ID of the business"""
   businessId: Int!
 
-  """
-  Date when the employment status was created
-  """
+  """Date when the employment status was created"""
   createdAt: DateTime!
 
-  """
-  ID of the creator
-  """
+  """ID of the creator"""
   createdBy: Int!
 
-  """
-  Description of the employment status
-  """
+  """Description of the employment status"""
   description: String!
 
-  """
-  Unique identifier for the employment status
-  """
+  """Unique identifier for the employment status"""
   id: ID!
 
-  """
-  Name of the employment status
-  """
+  """Name of the employment status"""
   name: String!
 
-  """
-  Status of the employment status
-  """
+  """Status of the employment status"""
   status: Status!
 
-  """
-  Date when the employment status was last updated
-  """
+  """Date when the employment status was last updated"""
   updatedAt: DateTime!
 }
 
@@ -1914,14 +1397,10 @@ type EmploymentStatusesQueryResponse {
 }
 
 type Feature {
-  """
-  ID of the module
-  """
+  """ID of the module"""
   id: ID!
 
-  """
-  Name of the module
-  """
+  """Name of the module"""
   name: String!
 }
 
@@ -1939,9 +1418,7 @@ type FeatureResponse {
   success: Boolean!
 }
 
-"""
-Gender of the user
-"""
+"""Gender of the user"""
 enum GENDER {
   FEMALE
   MALE
@@ -1953,74 +1430,46 @@ input GeneratePayrollItemsInput {
 }
 
 type Holiday {
-  """
-  Business associated with the holiday
-  """
+  """Business associated with the holiday"""
   business: Business!
 
-  """
-  ID of the business
-  """
+  """ID of the business"""
   businessId: Int!
 
-  """
-  Date when the holiday was created
-  """
+  """Date when the holiday was created"""
   createdAt: DateTime!
 
-  """
-  ID of the creator
-  """
+  """ID of the creator"""
   createdBy: Int!
 
-  """
-  ID of the updater
-  """
+  """ID of the updater"""
   creator: User!
 
-  """
-  Description of the holiday
-  """
+  """Description of the holiday"""
   description: String
 
-  """
-  Holiday end date
-  """
+  """Holiday end date"""
   endDate: DateTime!
 
-  """
-  Type of holiday
-  """
+  """Type of holiday"""
   holidayType: HolidayType!
 
-  """
-  Unique identifier for the holiday
-  """
+  """Unique identifier for the holiday"""
   id: ID!
 
-  """
-  Is this a paid holiday
-  """
+  """Is this a paid holiday"""
   isPaid: Boolean!
 
-  """
-  Is this a recurring annual holiday
-  """
+  """Is this a recurring annual holiday"""
   isRecurring: Boolean!
 
-  """
-  Name of the holiday
-  """
+  """Name of the holiday"""
   name: String!
 
-  """
-  Holiday start date
-  """
+  """Holiday start date"""
   startDate: DateTime!
 
-  """
-  Date when the holiday was last updated
-  """
+  """Date when the holiday was last updated"""
   updatedAt: DateTime!
 }
 
@@ -2032,9 +1481,7 @@ type HolidayResponse {
   success: Boolean!
 }
 
-"""
-Type of holiday
-"""
+"""Type of holiday"""
 enum HolidayType {
   COMPANY_SPECIFIC
   PUBLIC
@@ -2059,70 +1506,44 @@ type JobHistoriesQueryResponse {
 }
 
 type JobHistory {
-  """
-  Key achievements and accomplishments
-  """
+  """Key achievements and accomplishments"""
   achievements: String
 
-  """
-  City where job was located
-  """
+  """City where job was located"""
   city: String
 
-  """
-  Company or organization name
-  """
+  """Company or organization name"""
   companyName: String!
 
-  """
-  Country where job was located
-  """
+  """Country where job was located"""
   country: String!
 
-  """
-  Date when the record was created
-  """
+  """Date when the record was created"""
   createdAt: DateTime!
 
-  """
-  Employment type
-  """
+  """Employment type"""
   employmentType: String!
 
-  """
-  End date (MM-YYYY or YYYY)
-  """
+  """End date (MM-YYYY or YYYY)"""
   endDate: String
   id: ID!
 
-  """
-  Job title or position
-  """
+  """Job title or position"""
   jobTitle: String!
 
-  """
-  Job responsibilities and duties
-  """
+  """Job responsibilities and duties"""
   responsibilities: String
 
-  """
-  Start date (MM-YYYY or YYYY)
-  """
+  """Start date (MM-YYYY or YYYY)"""
   startDate: String!
 
-  """
-  Date when the record was last updated
-  """
+  """Date when the record was last updated"""
   updatedAt: DateTime!
 
-  """
-  User who owns this job history
-  """
+  """User who owns this job history"""
   user: User
 
-  """
-  ID of the user
-  """
+  """ID of the user"""
   userId: Int!
 }
 
@@ -2135,44 +1556,28 @@ type JobHistoryResponse {
 }
 
 type JobPlatform {
-  """
-  ID of the business
-  """
+  """ID of the business"""
   businessId: Int!
 
-  """
-  Date when the job platform was created
-  """
+  """Date when the job platform was created"""
   createdAt: DateTime!
 
-  """
-  ID of the creator
-  """
+  """ID of the creator"""
   createdBy: Int!
 
-  """
-  Description of the job platform
-  """
+  """Description of the job platform"""
   description: String!
 
-  """
-  Unique identifier for the job platform
-  """
+  """Unique identifier for the job platform"""
   id: ID!
 
-  """
-  Name of the job platform
-  """
+  """Name of the job platform"""
   name: String!
 
-  """
-  Status of the job platform
-  """
+  """Status of the job platform"""
   status: Status!
 
-  """
-  Date when the job platform was last updated
-  """
+  """Date when the job platform was last updated"""
   updatedAt: DateTime!
 }
 
@@ -2193,44 +1598,28 @@ type JobPlatformsQueryResponse {
 }
 
 type JobType {
-  """
-  ID of the business
-  """
+  """ID of the business"""
   businessId: Int!
 
-  """
-  Date when the job type was created
-  """
+  """Date when the job type was created"""
   createdAt: DateTime!
 
-  """
-  ID of the creator
-  """
+  """ID of the creator"""
   createdBy: Int!
 
-  """
-  Description of the job type
-  """
+  """Description of the job type"""
   description: String!
 
-  """
-  Unique identifier for the job type
-  """
+  """Unique identifier for the job type"""
   id: ID!
 
-  """
-  Name of the job type
-  """
+  """Name of the job type"""
   name: String!
 
-  """
-  Status of the job type
-  """
+  """Status of the job type"""
   status: Status!
 
-  """
-  Date when the job type was last updated
-  """
+  """Date when the job type was last updated"""
   updatedAt: DateTime!
 }
 
@@ -2251,99 +1640,61 @@ type JobTypesQueryResponse {
 }
 
 type Leave {
-  """
-  Supporting documents (JSON array or URLs)
-  """
+  """Supporting documents (JSON array or URLs)"""
   attachments: String
 
-  """
-  Date when the leave was created
-  """
+  """Date when the leave was created"""
   createdAt: DateTime!
 
-  """
-  Leave end date (null for single day)
-  """
+  """Leave end date (null for single day)"""
   endDate: DateTime
 
-  """
-  Unique identifier for the leave
-  """
+  """Unique identifier for the leave"""
   id: ID!
 
-  """
-  Leave duration type (SINGLE_DAY, MULTI_DAY, HALF_DAY)
-  """
+  """Leave duration type (SINGLE_DAY, MULTI_DAY, HALF_DAY)"""
   leaveDuration: String!
 
-  """
-  Leave type
-  """
+  """Leave type"""
   leaveType: LeaveType
 
-  """
-  ID of the leave type
-  """
+  """ID of the leave type"""
   leaveTypeId: Int!
 
-  """
-  Year this leave applies to (e.g., 2025)
-  """
+  """Year this leave applies to (e.g., 2025)"""
   leaveYear: Int!
 
-  """
-  Additional notes or comments
-  """
+  """Additional notes or comments"""
   notes: String
 
-  """
-  Reason for rejection if rejected
-  """
+  """Reason for rejection if rejected"""
   rejectionReason: String
 
-  """
-  When leave was approved/rejected
-  """
+  """When leave was approved/rejected"""
   reviewedAt: DateTime
 
-  """
-  ID of manager/admin who reviewed
-  """
+  """ID of manager/admin who reviewed"""
   reviewedBy: Int
 
-  """
-  Manager/admin who reviewed the leave
-  """
+  """Manager/admin who reviewed the leave"""
   reviewer: User
 
-  """
-  Leave start date
-  """
+  """Leave start date"""
   startDate: DateTime!
 
-  """
-  Leave status (pending, approved, rejected, cancelled)
-  """
+  """Leave status (pending, approved, rejected, cancelled)"""
   status: String!
 
-  """
-  Total leave hours deducted from balance
-  """
+  """Total leave hours deducted from balance"""
   totalHours: Float!
 
-  """
-  Date when the leave was last updated
-  """
+  """Date when the leave was last updated"""
   updatedAt: DateTime!
 
-  """
-  User who requested the leave
-  """
+  """User who requested the leave"""
   user: User
 
-  """
-  ID of the user requesting leave
-  """
+  """ID of the user requesting leave"""
   userId: Int!
 }
 
@@ -2363,9 +1714,7 @@ type LeaveBalanceResponse {
   success: Boolean!
 }
 
-"""
-Duration type for leave
-"""
+"""Duration type for leave"""
 enum LeaveDuration {
   HALF_DAY
   MULTI_DAY
@@ -2380,9 +1729,7 @@ type LeaveResponse {
   success: Boolean!
 }
 
-"""
-Type of leave rollover policy
-"""
+"""Type of leave rollover policy"""
 enum LeaveRolloverType {
   FULL_ROLLOVER
   NONE
@@ -2390,29 +1737,19 @@ enum LeaveRolloverType {
 }
 
 type LeaveSetting {
-  """
-  Whether leave requests are auto-approved
-  """
+  """Whether leave requests are auto-approved"""
   autoApproval: Boolean!
 
-  """
-  Business this leave setting belongs to
-  """
+  """Business this leave setting belongs to"""
   business: Business!
 
-  """
-  ID of the business
-  """
+  """ID of the business"""
   businessId: Int!
 
-  """
-  Unique identifier for the leave setting
-  """
+  """Unique identifier for the leave setting"""
   id: ID!
 
-  """
-  Start month for leave cycle (0-11)
-  """
+  """Start month for leave cycle (0-11)"""
   startMonth: Int!
 }
 
@@ -2425,70 +1762,44 @@ type LeaveSettingResponse {
 }
 
 type LeaveType {
-  """
-  ID of the business
-  """
+  """ID of the business"""
   businessId: Int!
 
-  """
-  Maximum carry over limit
-  """
+  """Maximum carry over limit"""
   carryOverLimit: Int
 
-  """
-  Date when the leave type was created
-  """
+  """Date when the leave type was created"""
   createdAt: DateTime!
 
-  """
-  ID of the creator
-  """
+  """ID of the creator"""
   createdBy: Int!
 
-  """
-  Array of employment statuses associated with this leave type
-  """
+  """Array of employment statuses associated with this leave type"""
   employmentStatuses: [EmploymentStatus!]
 
-  """
-  Unique identifier for the leave type
-  """
+  """Unique identifier for the leave type"""
   id: ID!
 
-  """
-  Number of leave hours allocated
-  """
+  """Number of leave hours allocated"""
   leaveHours: Int!
 
-  """
-  Leave rollover policy type
-  """
+  """Leave rollover policy type"""
   leaveRolloverType: LeaveRolloverType!
 
-  """
-  Type of leave (PAID or UNPAID)
-  """
+  """Type of leave (PAID or UNPAID)"""
   leaveType: LeaveTypeEnum!
 
-  """
-  Name of the leave type
-  """
+  """Name of the leave type"""
   name: String!
 
-  """
-  Status of the leave type
-  """
+  """Status of the leave type"""
   status: Status!
 
-  """
-  Date when the leave type was last updated
-  """
+  """Date when the leave type was last updated"""
   updatedAt: DateTime!
 }
 
-"""
-Type of leave - PAID or UNPAID
-"""
+"""Type of leave - PAID or UNPAID"""
 enum LeaveTypeEnum {
   PAID
   UNPAID
@@ -2519,108 +1830,56 @@ type LeavesQueryResponse {
 }
 
 input LoginAuthInput {
-  """
-  User email
-  """
+  """User email"""
   email: String!
 
-  """
-  User password
-  """
+  """User password"""
   password: String!
 }
 
-"""
-Marital status of the user
-"""
+"""Marital status of the user"""
 enum MARITAL_STATUS {
   MARRIED
   SINGLE
 }
 
 type Mutation {
-  addPayslipAdjustment(
-    addPayslipAdjustmentInput: AddPayslipAdjustmentInput!
-  ): PayrollItemResponse!
-  approvePayrollCycle(
-    approvePayrollCycleInput: ApprovePayrollCycleInput!
-  ): PayrollCycleResponse!
+  addPayslipAdjustment(addPayslipAdjustmentInput: AddPayslipAdjustmentInput!): PayrollItemResponse!
+  approvePayrollCycle(approvePayrollCycleInput: ApprovePayrollCycleInput!): PayrollCycleResponse!
   approvePayrollItem(id: Int!): PayrollItemResponse!
   assignAsset(assignAssetInput: AssignAssetInput!): AssetAssignmentResponse!
-  assignProjectMember(
-    assignProjectMemberInput: AssignProjectMemberInput!
-  ): ProjectMemberResponse!
+  assignProjectMember(assignProjectMemberInput: AssignProjectMemberInput!): ProjectMemberResponse!
   cancelPayrollCycle(id: Int!): PayrollCycleResponse!
   createAsset(createAssetInput: CreateAssetInput!): AssetResponse!
-  createAssetType(
-    createAssetTypeInput: CreateAssetTypeInput!
-  ): AssetTypeResponse!
-  createAttendance(
-    createAttendanceInput: CreateAttendanceInput!
-  ): AttendanceResponse!
-  createAttendancePunch(
-    createAttendancePunchInput: CreateAttendancePunchInput!
-  ): AttendancePunch!
-  createDepartment(
-    createDepartmentInput: CreateDepartmentInput!
-  ): DepartmentResponse!
-  createDesignation(
-    createDesignationInput: CreateDesignationInput!
-  ): DesignationResponse!
+  createAssetType(createAssetTypeInput: CreateAssetTypeInput!): AssetTypeResponse!
+  createAttendance(createAttendanceInput: CreateAttendanceInput!): AttendanceResponse!
+  createAttendancePunch(createAttendancePunchInput: CreateAttendancePunchInput!): AttendancePunch!
+  createDepartment(createDepartmentInput: CreateDepartmentInput!): DepartmentResponse!
+  createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
   createDocument(createDocumentInput: CreateDocumentInput!): DocumentResponse!
-  createEducationHistory(
-    createEducationHistoryInput: CreateEducationHistoryInput!
-  ): EducationHistoryResponse!
+  createEducationHistory(createEducationHistoryInput: CreateEducationHistoryInput!): EducationHistoryResponse!
   createEmployee(createEmployeeInput: CreateEmployeeInput!): UserResponse!
-  createEmployeeScheduleAssignment(
-    createEmployeeScheduleAssignmentInput: CreateEmployeeScheduleAssignmentInput!
-  ): EmployeeScheduleAssignmentResponse!
-  createEmploymentStatus(
-    createEmploymentStatusInput: CreateEmploymentStatusInput!
-  ): EmploymentStatusResponse!
+  createEmployeeScheduleAssignment(createEmployeeScheduleAssignmentInput: CreateEmployeeScheduleAssignmentInput!): EmployeeScheduleAssignmentResponse!
+  createEmploymentStatus(createEmploymentStatusInput: CreateEmploymentStatusInput!): EmploymentStatusResponse!
   createHoliday(createHolidayInput: CreateHolidayInput!): HolidayResponse!
-  createJobHistory(
-    createJobHistoryInput: CreateJobHistoryInput!
-  ): JobHistoryResponse!
-  createJobPlatform(
-    createJobPlatformInput: CreateJobPlatformInput!
-  ): JobPlatformResponse!
+  createJobHistory(createJobHistoryInput: CreateJobHistoryInput!): JobHistoryResponse!
+  createJobPlatform(createJobPlatformInput: CreateJobPlatformInput!): JobPlatformResponse!
   createJobType(createJobTypeInput: CreateJobTypeInput!): JobTypeResponse!
   createLeave(createLeaveInput: CreateLeaveInput!): LeaveResponse!
-  createLeaveType(
-    createLeaveTypeInput: CreateLeaveTypeInput!
-  ): LeaveTypeResponse!
+  createLeaveType(createLeaveTypeInput: CreateLeaveTypeInput!): LeaveTypeResponse!
   createNote(createNoteInput: CreateNoteInput!): NoteResponse!
-  createOnboardingProcess(
-    createOnboardingProcessInput: CreateOnboardingProcessInput!
-  ): OnboardingProcessResponse!
-  createPayrollComponent(
-    createPayrollComponentInput: CreatePayrollComponentInput!
-  ): PayrollComponentResponse!
-  createPayrollCycle(
-    createPayrollCycleInput: CreatePayrollCycleInput!
-  ): PayrollCycleResponse!
-  createPayrollItem(
-    createPayrollItemInput: CreatePayrollItemInput!
-  ): PayrollItemResponse!
+  createNotification(createNotificationInput: CreateNotificationInput!): NotificationResponse!
+  createNotificationTemplate(createNotificationTemplateInput: CreateNotificationTemplateInput!): NotificationTemplateResponse!
+  createOnboardingProcess(createOnboardingProcessInput: CreateOnboardingProcessInput!): OnboardingProcessResponse!
+  createPayrollComponent(createPayrollComponentInput: CreatePayrollComponentInput!): PayrollComponentResponse!
+  createPayrollCycle(createPayrollCycleInput: CreatePayrollCycleInput!): PayrollCycleResponse!
+  createPayrollItem(createPayrollItemInput: CreatePayrollItemInput!): PayrollItemResponse!
   createProject(createProjectInput: CreateProjectInput!): ProjectResponse!
-  createRecruitmentProcess(
-    createRecruitmentProcessInput: CreateRecruitmentProcessInput!
-  ): RecruitmentProcessResponse!
-  createSocialLink(
-    createSocialLinkInput: CreateSocialLinkInput!
-  ): SocialLinkResponse!
-  createSubscriptionPlan(
-    createSubscriptionPlanInput: CreateSubscriptionPlanInput!
-  ): SubscriptionPlanResponse!
-  createUserWithBusiness(
-    createBusinessInput: CreateBusinessInput!
-    createProfileInput: CreateProfileInput!
-    createUserInput: CreateUserInput!
-  ): Business!
-  createWorkSchedule(
-    createWorkScheduleInput: CreateWorkScheduleInput!
-  ): WorkScheduleResponse!
+  createRecruitmentProcess(createRecruitmentProcessInput: CreateRecruitmentProcessInput!): RecruitmentProcessResponse!
+  createSocialLink(createSocialLinkInput: CreateSocialLinkInput!): SocialLinkResponse!
+  createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
+  createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
+  createWorkSchedule(createWorkScheduleInput: CreateWorkScheduleInput!): WorkScheduleResponse!
   createWorkSite(createWorkSiteInput: CreateWorkSiteInput!): WorkSiteResponse!
   deleteAttendance(id: Int!): AttendanceResponse!
   deleteBusiness(id: Int!): Business!
@@ -2629,9 +1888,7 @@ type Mutation {
   deleteDocument(id: Int!, userId: Int!): DocumentResponse!
   deleteEducationHistory(id: Int!, userId: Int!): EducationHistoryResponse!
   deleteEmployee(id: Int!): UserResponse!
-  deleteEmployeeScheduleAssignment(
-    id: Int!
-  ): EmployeeScheduleAssignmentResponse!
+  deleteEmployeeScheduleAssignment(id: Int!): EmployeeScheduleAssignmentResponse!
   deleteEmploymentStatus(id: Int!): EmploymentStatusResponse!
   deleteHoliday(id: Int!): HolidayResponse!
   deleteJobHistory(id: Int!, userId: Int!): JobHistoryResponse!
@@ -2640,6 +1897,7 @@ type Mutation {
   deleteLeave(id: Int!): LeaveResponse!
   deleteLeaveType(id: Int!): LeaveTypeResponse!
   deleteNote(id: Int!, userId: Int!): NoteResponse!
+  deleteNotification(id: Int!): NotificationResponse!
   deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
   deletePayrollComponent(id: Int!): PayrollComponentResponse!
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
@@ -2648,162 +1906,89 @@ type Mutation {
   deleteUser(id: Int!): UserResponse!
   deleteWorkSchedule(id: Int!): WorkScheduleResponse!
   deleteWorkSite(id: Int!): WorkSiteResponse!
-  generatePayrollItems(
-    generatePayrollItemsInput: GeneratePayrollItemsInput!
-  ): PayrollItemResponse!
+  generatePayrollItems(generatePayrollItemsInput: GeneratePayrollItemsInput!): PayrollItemResponse!
   login(loginInput: LoginAuthInput!): Auth!
+  markAllNotificationsAsRead: NotificationResponse!
+  markNotificationAsRead(id: Int!): NotificationResponse!
   markPayrollCycleAsPaid(id: Int!): PayrollCycleResponse!
-  markPayrollItemAsPaid(
-    id: Int!
-    paymentMethod: String!
-    transactionRef: String
-  ): PayrollItemResponse!
-  processPayrollCycle(
-    processPayrollCycleInput: ProcessPayrollCycleInput!
-  ): PayrollCycleResponse!
+  markPayrollItemAsPaid(id: Int!, paymentMethod: String!, transactionRef: String): PayrollItemResponse!
+  processPayrollCycle(processPayrollCycleInput: ProcessPayrollCycleInput!): PayrollCycleResponse!
   removeAsset(id: Int!): AssetResponse!
   removeAssetType(id: Int!): AssetTypeResponse!
   removeAttendancePunch(id: Int!): AttendancePunch!
   removeProject(id: Int!): ProjectResponse!
   returnAsset(returnAssetInput: ReturnAssetInput!): AssetAssignmentResponse!
-  unassignProjectMember(
-    unassignProjectMemberInput: UnassignProjectMemberInput!
-  ): ProjectMemberResponse!
+  unassignProjectMember(unassignProjectMemberInput: UnassignProjectMemberInput!): ProjectMemberResponse!
   updateAsset(updateAssetInput: UpdateAssetInput!): AssetResponse!
-  updateAssetType(
-    updateAssetTypeInput: UpdateAssetTypeInput!
-  ): AssetTypeResponse!
-  updateAttendance(
-    updateAttendanceInput: UpdateAttendanceInput!
-  ): AttendanceResponse!
-  updateAttendancePunch(
-    updateAttendancePunchInput: UpdateAttendancePunchInput!
-  ): AttendancePunch!
-  updateAttendanceSetting(
-    updateAttendanceSettingInput: UpdateAttendanceSettingInput!
-  ): AttendanceSettingResponse!
+  updateAssetType(updateAssetTypeInput: UpdateAssetTypeInput!): AssetTypeResponse!
+  updateAttendance(updateAttendanceInput: UpdateAttendanceInput!): AttendanceResponse!
+  updateAttendancePunch(updateAttendancePunchInput: UpdateAttendancePunchInput!): AttendancePunch!
+  updateAttendanceSetting(updateAttendanceSettingInput: UpdateAttendanceSettingInput!): AttendanceSettingResponse!
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): Business!
   updateBusinessSchedule(data: UpdateBusinessScheduleInput!): BusinessSchedule!
-  updateBusinessSetting(
-    updateBusinessSettingInput: UpdateBusinessSettingInput!
-  ): BusinessSettingResponse!
-  updateDepartment(
-    updateDepartmentInput: UpdateDepartmentInput!
-  ): DepartmentResponse!
-  updateDesignation(
-    updateDesignationInput: UpdateDesignationInput!
-  ): DesignationResponse!
+  updateBusinessSetting(updateBusinessSettingInput: UpdateBusinessSettingInput!): BusinessSettingResponse!
+  updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): DepartmentResponse!
+  updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
   updateDocument(updateDocumentInput: UpdateDocumentInput!): DocumentResponse!
-  updateEducationHistory(
-    updateEducationHistoryInput: UpdateEducationHistoryInput!
-  ): EducationHistoryResponse!
-  updateEmergencyContact(
-    updateEmergencyContactInput: UpdateEmergencyContactInput!
-  ): EmergencyContactResponse!
+  updateEducationHistory(updateEducationHistoryInput: UpdateEducationHistoryInput!): EducationHistoryResponse!
+  updateEmergencyContact(updateEmergencyContactInput: UpdateEmergencyContactInput!): EmergencyContactResponse!
   updateEmployee(updateEmployeeInput: UpdateEmployeeInput!): UserResponse!
-  updateEmployeeScheduleAssignment(
-    updateEmployeeScheduleAssignmentInput: UpdateEmployeeScheduleAssignmentInput!
-  ): EmployeeScheduleAssignmentResponse!
-  updateEmploymentDetails(
-    updateEmploymentDetailsInput: UpdateEmploymentDetailsInput!
-  ): EmployeeResponse!
-  updateEmploymentStatus(
-    updateEmploymentStatusInput: UpdateEmploymentStatusInput!
-  ): EmploymentStatusResponse!
+  updateEmployeeScheduleAssignment(updateEmployeeScheduleAssignmentInput: UpdateEmployeeScheduleAssignmentInput!): EmployeeScheduleAssignmentResponse!
+  updateEmploymentDetails(updateEmploymentDetailsInput: UpdateEmploymentDetailsInput!): EmployeeResponse!
+  updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
   updateHoliday(updateHolidayInput: UpdateHolidayInput!): HolidayResponse!
-  updateJobHistory(
-    updateJobHistoryInput: UpdateJobHistoryInput!
-  ): JobHistoryResponse!
-  updateJobPlatform(
-    updateJobPlatformInput: UpdateJobPlatformInput!
-  ): JobPlatformResponse!
+  updateJobHistory(updateJobHistoryInput: UpdateJobHistoryInput!): JobHistoryResponse!
+  updateJobPlatform(updateJobPlatformInput: UpdateJobPlatformInput!): JobPlatformResponse!
   updateJobType(updateJobTypeInput: UpdateJobTypeInput!): JobTypeResponse!
   updateLeave(updateLeaveInput: UpdateLeaveInput!): LeaveResponse!
-  updateLeaveSetting(
-    updateLeaveSettingInput: UpdateLeaveSettingInput!
-  ): LeaveSettingResponse!
-  updateLeaveType(
-    updateLeaveTypeInput: UpdateLeaveTypeInput!
-  ): LeaveTypeResponse!
+  updateLeaveSetting(updateLeaveSettingInput: UpdateLeaveSettingInput!): LeaveSettingResponse!
+  updateLeaveType(updateLeaveTypeInput: UpdateLeaveTypeInput!): LeaveTypeResponse!
   updateNote(updateNoteInput: UpdateNoteInput!): NoteResponse!
-  updateOnboardingProcess(
-    updateOnboardingProcessInput: UpdateOnboardingProcessInput!
-  ): OnboardingProcessResponse!
-  updatePayrollComponent(
-    updatePayrollComponentInput: UpdatePayrollComponentInput!
-  ): PayrollComponentResponse!
+  updateNotificationPreferences(updateNotificationPreferenceInput: UpdateNotificationPreferenceInput!): NotificationPreferenceResponse!
+  updateNotificationTemplate(updateNotificationTemplateInput: UpdateNotificationTemplateInput!): NotificationTemplateResponse!
+  updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
+  updatePayrollComponent(updatePayrollComponentInput: UpdatePayrollComponentInput!): PayrollComponentResponse!
   updateProfile(updateProfileInput: UpdateProfileInput!): ProfileResponse!
   updateProject(updateProjectInput: UpdateProjectInput!): ProjectResponse!
-  updateRecruitmentProcess(
-    updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!
-  ): RecruitmentProcessResponse!
-  updateSocialLink(
-    updateSocialLinkInput: UpdateSocialLinkInput!
-  ): SocialLinkResponse!
-  updateSubscriptionPlan(
-    id: Int!
-    updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!
-  ): SubscriptionPlanResponse!
-  updateWorkSchedule(
-    updateWorkScheduleInput: UpdateWorkScheduleInput!
-  ): WorkScheduleResponse!
+  updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
+  updateSocialLink(updateSocialLinkInput: UpdateSocialLinkInput!): SocialLinkResponse!
+  updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
+  updateWorkSchedule(updateWorkScheduleInput: UpdateWorkScheduleInput!): WorkScheduleResponse!
   updateWorkSite(updateWorkSiteInput: UpdateWorkSiteInput!): WorkSiteResponse!
 }
 
 type Note {
-  """
-  Category of the note
-  """
+  """Category of the note"""
   category: String
 
-  """
-  Content of the note
-  """
+  """Content of the note"""
   content: String!
 
-  """
-  Date when the note was created
-  """
+  """Date when the note was created"""
   createdAt: DateTime!
 
-  """
-  ID of the user who created this note
-  """
+  """ID of the user who created this note"""
   createdBy: Int!
 
-  """
-  User who created this note
-  """
+  """User who created this note"""
   creator: User
 
-  """
-  Unique identifier for the note
-  """
+  """Unique identifier for the note"""
   id: ID!
 
-  """
-  Whether the note is private
-  """
+  """Whether the note is private"""
   isPrivate: Boolean!
 
-  """
-  Title of the note
-  """
+  """Title of the note"""
   title: String!
 
-  """
-  Date when the note was last updated
-  """
+  """Date when the note was last updated"""
   updatedAt: DateTime!
 
-  """
-  User this note is about
-  """
+  """User this note is about"""
   user: User
 
-  """
-  ID of the user this note is about
-  """
+  """ID of the user this note is about"""
   userId: Int!
 }
 
@@ -2823,50 +2008,147 @@ type NotesQueryResponse {
   success: Boolean!
 }
 
+type Notification {
+  actionUrl: String
+  businessId: Int
+  channels: [NotificationChannel!]!
+  createdAt: DateTime!
+  entityId: Int
+  entityType: String
+  expiresAt: DateTime
+  id: Int!
+  isRead: Boolean!
+  message: String!
+  metadata: String
+  notificationTemplateId: Int
+  priority: NotificationPriority!
+  readAt: DateTime
+  sentVia: [NotificationChannel!]!
+  title: String!
+  type: NotificationType!
+  updatedAt: DateTime!
+  userId: Int!
+}
+
+enum NotificationChannel {
+  EMAIL
+  IN_APP
+  PUSH
+  SMS
+}
+
+type NotificationPreference {
+  createdAt: DateTime!
+  id: Int!
+  muteAll: Boolean!
+  mutedUntil: DateTime
+  preferences: String!
+  updatedAt: DateTime!
+  userId: Int!
+}
+
+type NotificationPreferenceResponse {
+  data: NotificationPreference!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+enum NotificationPriority {
+  HIGH
+  LOW
+  MEDIUM
+  NORMAL
+  URGENT
+}
+
+type NotificationResponse {
+  data: Notification!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type NotificationTemplate {
+  businessId: Int
+  channels: [NotificationChannel!]!
+  createdAt: DateTime!
+  id: Int!
+  isActive: Boolean!
+  message: String!
+  name: String!
+  priority: NotificationPriority!
+  title: String!
+  type: NotificationType!
+  updatedAt: DateTime!
+}
+
+type NotificationTemplateResponse {
+  data: NotificationTemplate!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type NotificationTemplatesQueryResponse {
+  data: [NotificationTemplate!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+enum NotificationType {
+  ANNOUNCEMENT
+  ASSET
+  ATTENDANCE
+  DOCUMENT
+  HOLIDAY
+  LEAVE
+  PAYROLL
+  PROJECT
+  REMINDER
+  SCHEDULE
+  SYSTEM
+}
+
+type NotificationsQueryResponse {
+  data: [Notification!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type OnboardingProcess {
-  """
-  ID of the business
-  """
+  """ID of the business"""
   businessId: Int!
 
-  """
-  Date when the onboarding process was created
-  """
+  """Date when the onboarding process was created"""
   createdAt: DateTime!
 
-  """
-  ID of the creator
-  """
+  """ID of the creator"""
   createdBy: Int!
 
-  """
-  Description of the onboarding process
-  """
+  """Description of the onboarding process"""
   description: String!
 
-  """
-  Unique identifier for the onboarding process
-  """
+  """Unique identifier for the onboarding process"""
   id: ID!
 
-  """
-  Whether the onboarding process is required
-  """
+  """Whether the onboarding process is required"""
   isRequired: Boolean!
 
-  """
-  Name of the onboarding process
-  """
+  """Name of the onboarding process"""
   name: String!
 
-  """
-  Status of the onboarding process
-  """
+  """Status of the onboarding process"""
   status: Status!
 
-  """
-  Date when the onboarding process was last updated
-  """
+  """Date when the onboarding process was last updated"""
   updatedAt: DateTime!
 }
 
@@ -2957,9 +2239,7 @@ type PayrollCycleResponse {
   success: Boolean!
 }
 
-"""
-Status of payroll cycle
-"""
+"""Status of payroll cycle"""
 enum PayrollCycleStatus {
   APPROVED
   CANCELLED
@@ -2976,9 +2256,7 @@ type PayrollCyclesQueryResponse {
   success: Boolean!
 }
 
-"""
-Frequency of payroll cycles
-"""
+"""Frequency of payroll cycles"""
 enum PayrollFrequency {
   BI_WEEKLY
   MONTHLY
@@ -3008,9 +2286,7 @@ type PayrollItem {
   transactionRef: String
   updatedAt: DateTime!
 
-  """
-  User
-  """
+  """User"""
   user: User!
   userId: Int!
   workingDays: Int!
@@ -3020,9 +2296,7 @@ type PayrollItemComponent {
   amount: Float!
   calculationBase: Float
 
-  """
-  Payroll Component
-  """
+  """Payroll Component"""
   component: PayrollComponent!
   componentId: Int!
   id: Int!
@@ -3045,9 +2319,7 @@ type PayrollItemResponse {
   success: Boolean!
 }
 
-"""
-Status of payroll item
-"""
+"""Status of payroll item"""
 enum PayrollItemStatus {
   APPROVED
   CANCELLED
@@ -3087,9 +2359,7 @@ type Permission {
   action: String!
   createdAt: DateTime!
 
-  """
-  Unique identifier for the permission
-  """
+  """Unique identifier for the permission"""
   id: ID!
   resource: String!
   updatedAt: DateTime!
@@ -3187,9 +2457,7 @@ type ProjectsQueryResponse {
 
 type Query {
   FeatureById(id: Int!): FeatureResponse!
-  activeEmployeeScheduleAssignment(
-    userId: Int!
-  ): EmployeeScheduleAssignmentResponse!
+  activeEmployeeScheduleAssignment(userId: Int!): EmployeeScheduleAssignmentResponse!
   activePayrollComponents(businessId: Int!): PayrollComponentsQueryResponse!
   allFeatures: FeatureQueryResponse!
   asset(id: Int!): AssetResponse!
@@ -3209,23 +2477,17 @@ type Query {
   designationById(id: Int!): DesignationResponse!
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
   document(id: Int!, userId: Int!): DocumentResponse!
-  documentsByUserId(
-    query: QueryDocumentInput
-    userId: Int!
-  ): DocumentsQueryResponse!
+  documentsByUserId(query: QueryDocumentInput, userId: Int!): DocumentsQueryResponse!
   educationHistory(id: Int!, userId: Int!): EducationHistoryResponse!
   educationHistoryByUserId(userId: Int!): EducationHistoriesQueryResponse!
   employeeById(id: Int!): UserResponse!
   employeeScheduleAssignment(id: Int!): EmployeeScheduleAssignmentResponse!
   employeeScheduleAssignments: EmployeeScheduleAssignmentsQueryResponse!
-  employeeScheduleAssignmentsByUser(
-    userId: Int!
-  ): EmployeeScheduleAssignmentsQueryResponse!
+  employeeScheduleAssignmentsByUser(userId: Int!): EmployeeScheduleAssignmentsQueryResponse!
   employees(query: QueryUserInput): UsersQueryResponse!
   employmentStatusById(id: Int!): EmploymentStatusResponse!
-  employmentStatuses(
-    query: QueryEmploymentStatusInput
-  ): EmploymentStatusesQueryResponse!
+  employmentStatuses(query: QueryEmploymentStatusInput): EmploymentStatusesQueryResponse!
+  generateEmployeeId: String!
   holidayById(id: Int!): HolidayResponse!
   holidays(query: QueryHolidayInput): HolidaysQueryResponse!
   jobHistory(id: Int!, userId: Int!): JobHistoryResponse!
@@ -3234,11 +2496,7 @@ type Query {
   jobPlatforms(query: QueryJobPlatformInput): JobPlatformsQueryResponse!
   jobTypeById(id: Int!): JobTypeResponse!
   jobTypes(query: QueryJobTypeInput): JobTypesQueryResponse!
-  leaveBalance(
-    employmentStatusId: Int!
-    leaveTypeId: Int!
-    year: Int!
-  ): LeaveBalanceResponse!
+  leaveBalance(employmentStatusId: Int!, leaveTypeId: Int!, year: Int!): LeaveBalanceResponse!
   leaveById(id: Int!): LeaveResponse!
   leaveSettingByBusinessId: LeaveSettingResponse!
   leaveTypeById(id: Int!): LeaveTypeResponse!
@@ -3246,41 +2504,32 @@ type Query {
   leaves(query: QueryLeaveInput): LeavesQueryResponse!
   note(id: Int!, userId: Int!): NoteResponse!
   notesByUserId(query: QueryNoteInput, userId: Int!): NotesQueryResponse!
+  notificationById(id: Int!): NotificationResponse!
+  notificationPreferences: NotificationPreferenceResponse!
+  notificationTemplates: NotificationTemplatesQueryResponse!
+  notifications(query: QueryNotificationInput): NotificationsQueryResponse!
   onboardingProcessById(id: Int!): OnboardingProcessResponse!
-  onboardingProcesses(
-    query: QueryOnboardingProcessInput
-  ): OnboardingProcessesQueryResponse!
-  payrollComponentByCode(
-    businessId: Int!
-    code: String!
-  ): PayrollComponentResponse!
+  onboardingProcesses(query: QueryOnboardingProcessInput): OnboardingProcessesQueryResponse!
+  payrollComponentByCode(businessId: Int!, code: String!): PayrollComponentResponse!
   payrollComponentById(id: Int!): PayrollComponentResponse!
-  payrollComponents(
-    query: QueryPayrollComponentInput
-  ): PayrollComponentsQueryResponse!
+  payrollComponents(query: QueryPayrollComponentInput): PayrollComponentsQueryResponse!
   payrollCycle(id: Int!): PayrollCycleResponse!
   payrollCycles(query: QueryPayrollCycleInput): PayrollCyclesQueryResponse!
   payrollItemById(id: Int!): PayrollItemResponse!
-  payrollItemByUserId(
-    payrollCycleId: Int!
-    userId: Int!
-  ): PayrollItemsQueryResponse!
+  payrollItemByUserId(payrollCycleId: Int!, userId: Int!): PayrollItemsQueryResponse!
   payrollItems(query: QueryPayrollItemInput!): PayrollItemsQueryResponse!
   permissionById(id: Int!): Permission!
   permissions: [Permission!]!
   projectById(id: Int!): ProjectResponse!
   projects(businessId: Int): ProjectsQueryResponse!
   recruitmentProcessById(id: Int!): RecruitmentProcessResponse!
-  recruitmentProcesses(
-    query: QueryRecruitmentProcessInput
-  ): RecruitmentProcessesQueryResponse!
+  recruitmentProcesses(query: QueryRecruitmentProcessInput): RecruitmentProcessesQueryResponse!
   roles: RoleResponse!
   socialLink(profileId: Int!): SocialLinkResponse!
   socialLinksByProfileId(profileId: Int): SocialLinkResponse!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
-  subscriptionPlans(
-    query: QuerySubscriptionPlanInput
-  ): SubscriptionPlanQueryResponse!
+  subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
+  unreadNotificationCount: Int!
   userAssetAssignments(userId: Int!): AssetAssignmentQueryResponse!
   userById(id: Int!): UserResponse!
   userProjects(userId: Int!): ProjectMembersQueryResponse!
@@ -3345,9 +2594,7 @@ input QueryEmploymentStatusInput {
 }
 
 input QueryHolidayInput {
-  """
-  Filter holidays ending before this date
-  """
+  """Filter holidays ending before this date"""
   endDate: String
   holidayType: HolidayType
   isPaid: Boolean
@@ -3356,9 +2603,7 @@ input QueryHolidayInput {
   pagination: BasePaginationInput
   searchTerm: String
 
-  """
-  Filter holidays starting from this date
-  """
+  """Filter holidays starting from this date"""
   startDate: String
 }
 
@@ -3377,9 +2622,7 @@ input QueryJobTypeInput {
 }
 
 input QueryLeaveInput {
-  """
-  Filter leaves ending before this date
-  """
+  """Filter leaves ending before this date"""
   endDate: String
   leaveDuration: LeaveDuration
   leaveTypeId: Int
@@ -3387,9 +2630,7 @@ input QueryLeaveInput {
   pagination: BasePaginationInput
   searchTerm: String
 
-  """
-  Filter leaves starting from this date
-  """
+  """Filter leaves starting from this date"""
   startDate: String
   status: String
 }
@@ -3409,6 +2650,15 @@ input QueryNoteInput {
   title: String
 }
 
+input QueryNotificationInput {
+  businessId: Int
+  isRead: Boolean
+  limit: Int
+  page: Int
+  type: NotificationType
+  userId: Int
+}
+
 input QueryOnboardingProcessInput {
   isRequired: Boolean
   name: String
@@ -3423,9 +2673,7 @@ input QueryPayrollComponentInput {
 }
 
 input QueryPayrollCycleInput {
-  """
-  Business ID to filter payroll cycles
-  """
+  """Business ID to filter payroll cycles"""
   businessId: Int
   status: PayrollCycleStatus
 }
@@ -3481,49 +2729,31 @@ input QueryWorkSiteInput {
 }
 
 type RecruitmentProcess {
-  """
-  ID of the business
-  """
+  """ID of the business"""
   businessId: Int!
 
-  """
-  Date when the recruitment process was created
-  """
+  """Date when the recruitment process was created"""
   createdAt: DateTime!
 
-  """
-  ID of the creator
-  """
+  """ID of the creator"""
   createdBy: Int!
 
-  """
-  Description of the recruitment process
-  """
+  """Description of the recruitment process"""
   description: String!
 
-  """
-  Unique identifier for the recruitment process
-  """
+  """Unique identifier for the recruitment process"""
   id: ID!
 
-  """
-  Whether the recruitment process is required
-  """
+  """Whether the recruitment process is required"""
   isRequired: Boolean!
 
-  """
-  Name of the recruitment process
-  """
+  """Name of the recruitment process"""
   name: String!
 
-  """
-  Status of the recruitment process
-  """
+  """Status of the recruitment process"""
   status: Status!
 
-  """
-  Date when the recruitment process was last updated
-  """
+  """Date when the recruitment process was last updated"""
   updatedAt: DateTime!
 }
 
@@ -3546,45 +2776,31 @@ type RecruitmentProcessesQueryResponse {
 input ReturnAssetInput {
   assetId: Int!
 
-  """
-  Optional note for the asset assignment
-  """
+  """Optional note for the asset assignment"""
   note: String
 }
 
 type Role {
-  """
-  ID of the business
-  """
+  """ID of the business"""
   businessId: Int
 
-  """
-  Unique identifier for the role
-  """
+  """Unique identifier for the role"""
   id: ID!
 
-  """
-  Name of the role
-  """
+  """Name of the role"""
   name: String!
   rolePermissions: [RolePermission!]
 }
 
 type RolePermission {
-  """
-  ID of the permission
-  """
+  """ID of the permission"""
   permission: Permission!
 
-  """
-  ID of the permission
-  """
+  """ID of the permission"""
   permissionId: Int!
   role: Role
 
-  """
-  ID of the role
-  """
+  """ID of the role"""
   roleId: Int!
 }
 
@@ -3608,49 +2824,31 @@ enum ScheduleType {
 }
 
 type SocialLink {
-  """
-  Date when the social links were created
-  """
+  """Date when the social links were created"""
   createdAt: DateTime!
 
-  """
-  Facebook profile URL
-  """
+  """Facebook profile URL"""
   facebook: String
 
-  """
-  GitHub profile URL
-  """
+  """GitHub profile URL"""
   github: String
 
-  """
-  Instagram profile URL
-  """
+  """Instagram profile URL"""
   instagram: String
 
-  """
-  LinkedIn profile URL
-  """
+  """LinkedIn profile URL"""
   linkedin: String
 
-  """
-  Profile associated with these social links
-  """
+  """Profile associated with these social links"""
   profile: Profile
 
-  """
-  Profile ID (primary key)
-  """
+  """Profile ID (primary key)"""
   profileId: ID!
 
-  """
-  Twitter profile URL
-  """
+  """Twitter profile URL"""
   twitter: String
 
-  """
-  Date when the social links were last updated
-  """
+  """Date when the social links were last updated"""
   updatedAt: DateTime!
 }
 
@@ -3662,9 +2860,7 @@ type SocialLinkResponse {
   success: Boolean!
 }
 
-"""
-Status of the Asset Type
-"""
+"""Status of the Asset Type"""
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -3672,54 +2868,34 @@ enum Status {
 }
 
 type SubscriptionPlan {
-  """
-  Timestamp when the service plan was created
-  """
+  """Timestamp when the service plan was created"""
   createdAt: DateTime!
 
-  """
-  User who created the service plan
-  """
+  """User who created the service plan"""
   createdBy: Int!
 
-  """
-  Creator of the service plan
-  """
+  """Creator of the service plan"""
   creator: User
 
-  """
-  Description of the service plan
-  """
+  """Description of the service plan"""
   description: String!
 
-  """
-  Unique identifier for the service plan
-  """
+  """Unique identifier for the service plan"""
   id: ID!
 
-  """
-  Name of the service plan
-  """
+  """Name of the service plan"""
   name: String!
 
-  """
-  Price of the service plan
-  """
+  """Price of the service plan"""
   price: Int!
 
-  """
-  One-time setup fee for the service plan
-  """
+  """One-time setup fee for the service plan"""
   setupFee: Int!
 
-  """
-  Status of the service plan
-  """
+  """Status of the service plan"""
   status: String!
 
-  """
-  Timestamp when the service plan was last updated
-  """
+  """Timestamp when the service plan was last updated"""
   updatedAt: DateTime!
 }
 
@@ -3740,30 +2916,20 @@ type SubscriptionPlanResponse {
 }
 
 type TimeSlot {
-  """
-  End time of the slot
-  """
+  """End time of the slot"""
   endTime: String!
 
-  """
-  Day schedule this time slot belongs to
-  """
+  """Day schedule this time slot belongs to"""
   schedule: DaySchedule!
 
-  """
-  ID of the day schedule
-  """
+  """ID of the day schedule"""
   scheduleId: Int!
 
-  """
-  Start time of the slot
-  """
+  """Start time of the slot"""
   startTime: String!
 }
 
-"""
-User account status
-"""
+"""User account status"""
 enum USER_ACCOUNT_STATUS {
   ACTIVE
   BLOCKED
@@ -3795,173 +2961,109 @@ input UpdateAssetInput {
 }
 
 input UpdateAssetTypeInput {
-  """
-  Description of the asset type
-  """
+  """Description of the asset type"""
   description: String
   id: Int!
 
-  """
-  Name of the asset type
-  """
+  """Name of the asset type"""
   name: String
 }
 
 input UpdateAttendanceInput {
-  """
-  Total break hours for the day
-  """
+  """Total break hours for the day"""
   breakHours: Float
 
-  """
-  Date of attendance
-  """
+  """Date of attendance"""
   date: DateTime
   id: Int!
 
-  """
-  Punch records for this attendance
-  """
+  """Punch records for this attendance"""
   punchRecords: [CreateAttendancePunchInput!]
 
-  """
-  Attendance status
-  """
+  """Attendance status"""
   status: String = "pending_approve"
 
-  """
-  Total working hours for the day
-  """
+  """Total working hours for the day"""
   totalHours: Float
 
-  """
-  User ID
-  """
+  """User ID"""
   userId: Int!
 }
 
 input UpdateAttendancePunchInput {
-  """
-  Attendance ID (optional for nested creation)
-  """
+  """Attendance ID (optional for nested creation)"""
   attendanceId: Int
 
-  """
-  Break end timestamp
-  """
+  """Break end timestamp"""
   breakEnd: DateTime
 
-  """
-  Break hours for this session
-  """
+  """Break hours for this session"""
   breakHours: Float
 
-  """
-  Break start timestamp
-  """
+  """Break start timestamp"""
   breakStart: DateTime
   id: Int!
 
-  """
-  Notes for this punch session
-  """
+  """Notes for this punch session"""
   notes: String
 
-  """
-  Project ID if working on a project
-  """
+  """Project ID if working on a project"""
   projectId: Int
 
-  """
-  Clock in timestamp
-  """
+  """Clock in timestamp"""
   punchIn: DateTime
 
-  """
-  Punch in device information
-  """
+  """Punch in device information"""
   punchInDevice: String
 
-  """
-  Punch in IP address
-  """
+  """Punch in IP address"""
   punchInIp: String
 
-  """
-  Punch in latitude
-  """
+  """Punch in latitude"""
   punchInLat: Float
 
-  """
-  Punch in longitude
-  """
+  """Punch in longitude"""
   punchInLng: Float
 
-  """
-  Clock out timestamp
-  """
+  """Clock out timestamp"""
   punchOut: DateTime
 
-  """
-  Punch out device information
-  """
+  """Punch out device information"""
   punchOutDevice: String
 
-  """
-  Punch out IP address
-  """
+  """Punch out IP address"""
   punchOutIp: String
 
-  """
-  Punch out latitude
-  """
+  """Punch out latitude"""
   punchOutLat: Float
 
-  """
-  Punch out longitude
-  """
+  """Punch out longitude"""
   punchOutLng: Float
 
-  """
-  Work hours for this session
-  """
+  """Work hours for this session"""
   workHours: Float
 
-  """
-  Work site ID
-  """
+  """Work site ID"""
   workSiteId: Int
 }
 
 input UpdateAttendanceSettingInput {
-  """
-  Whether auto approval is enabled
-  """
+  """Whether auto approval is enabled"""
   autoApproval: Boolean = false
 
-  """
-  Whether geo location is enabled
-  """
+  """Whether geo location is enabled"""
   isGeoLocationEnabled: Boolean = false
 
-  """
-  Whether punch in/out alerts are enabled
-  """
+  """Whether punch in/out alerts are enabled"""
   punchInOutAlert: Boolean = true
 
-  """
-  Punch in/out interval in hours
-  """
+  """Punch in/out interval in hours"""
   punchInOutInterval: Int = 1
 
-  """
-  Punch in time tolerance in minutes
-  """
+  """Punch in time tolerance in minutes"""
   punchInTimeTolerance: Int = 15
 
-  """
-  Work availability definition percentage
-  """
+  """Work availability definition percentage"""
   workAvailabilityDefinition: Int = 80
 }
 
@@ -3986,192 +3088,124 @@ input UpdateBusinessScheduleInput {
   businessId: Int
   day: Int
 
-  """
-  HH:MM:SS
-  """
+  """HH:MM:SS"""
   endTime: String
   id: Int!
   isWeekend: Boolean
 
-  """
-  HH:MM:SS
-  """
+  """HH:MM:SS"""
   startTime: String
 }
 
 input UpdateBusinessSettingInput {
-  """
-  Business start day of the week (0-6, where 0=Sunday)
-  """
+  """Business start day of the week (0-6, where 0=Sunday)"""
   businessStartDay: Int = 0
 
-  """
-  Business time zone
-  """
+  """Business time zone"""
   businessTimeZone: String = "Asia/Dhaka"
 
-  """
-  Business currency code
-  """
+  """Business currency code"""
   currency: String = "BDT"
 
-  """
-  Delete read notifications setting
-  """
+  """Delete read notifications setting"""
   deleteReadNotifications: String
 
-  """
-  Prefix for business identifiers
-  """
+  """Prefix for business identifiers"""
   identifierPrefix: String
 
-  """
-  Whether self-registration is enabled
-  """
+  """Whether self-registration is enabled"""
   isSelfRegistered: Boolean = false
 
-  """
-  Business theme
-  """
+  """Business theme"""
   theme: String
 }
 
 input UpdateDepartmentInput {
-  """
-  Description of the department
-  """
+  """Description of the department"""
   description: String
   id: Int!
 
-  """
-  ID of the manager
-  """
+  """ID of the manager"""
   managerId: Int
 
-  """
-  Name of the department
-  """
+  """Name of the department"""
   name: String
 
-  """
-  ID of the parent department
-  """
+  """ID of the parent department"""
   parentId: Int
 }
 
 input UpdateDesignationInput {
-  """
-  Description of the designation
-  """
+  """Description of the designation"""
   description: String
   id: Int!
 
-  """
-  Name of the designation
-  """
+  """Name of the designation"""
   name: String
 }
 
 input UpdateDocumentInput {
-  """
-  Attachment URL or path
-  """
+  """Attachment URL or path"""
   attachment: String
 
-  """
-  Description of the document
-  """
+  """Description of the document"""
   description: String
   id: Int!
 
-  """
-  Title of the document
-  """
+  """Title of the document"""
   title: String
 
-  """
-  ID of the user
-  """
+  """ID of the user"""
   userId: Int
 }
 
 input UpdateEducationHistoryInput {
-  """
-  City where institution is located
-  """
+  """City where institution is located"""
   city: String
 
-  """
-  Country where institution is located
-  """
+  """Country where institution is located"""
   country: String
 
-  """
-  Degree or qualification
-  """
+  """Degree or qualification"""
   degree: String
 
-  """
-  Additional details or achievements
-  """
+  """Additional details or achievements"""
   description: String
 
-  """
-  End/graduation date (MM-YYYY or YYYY)
-  """
+  """End/graduation date (MM-YYYY or YYYY)"""
   endDate: String
 
-  """
-  Field of study or major
-  """
+  """Field of study or major"""
   fieldOfStudy: String
 
-  """
-  Grade, GPA, or percentage
-  """
+  """Grade, GPA, or percentage"""
   grade: String
   id: Int!
 
-  """
-  Institution or university name
-  """
+  """Institution or university name"""
   institution: String
 
-  """
-  Whether currently studying
-  """
+  """Whether currently studying"""
   isCurrentlyStudying: Boolean = false
 
-  """
-  Start date (MM-YYYY or YYYY)
-  """
+  """Start date (MM-YYYY or YYYY)"""
   startDate: String
 
-  """
-  ID of the user
-  """
+  """ID of the user"""
   userId: Int
 }
 
 input UpdateEmergencyContactInput {
-  """
-  ID of the profile to update
-  """
+  """ID of the profile to update"""
   id: Int!
 
-  """
-  Emergency contact name
-  """
+  """Emergency contact name"""
   name: String!
 
-  """
-  Emergency contact phone number
-  """
+  """Emergency contact phone number"""
   phone: String!
 
-  """
-  Relationship to the person
-  """
+  """Relationship to the person"""
   relation: String!
 }
 
@@ -4195,366 +3229,252 @@ input UpdateEmployeeInput {
 }
 
 input UpdateEmployeeScheduleAssignmentInput {
-  """
-  Assignment end date (ISO 8601)
-  """
+  """Assignment end date (ISO 8601)"""
   endDate: String
   id: Int!
 
-  """
-  Whether this is the active schedule
-  """
+  """Whether this is the active schedule"""
   isActive: Boolean = true
 
-  """
-  Optional notes about assignment
-  """
+  """Optional notes about assignment"""
   notes: String
 
-  """
-  Assignment start date (ISO 8601)
-  """
+  """Assignment start date (ISO 8601)"""
   startDate: String
 
-  """
-  ID of the user/employee
-  """
+  """ID of the user/employee"""
   userId: Int
 
-  """
-  ID of the work schedule
-  """
+  """ID of the work schedule"""
   workScheduleId: Int
 }
 
 input UpdateEmploymentDetailsInput {
-  """
-  Department ID
-  """
+  """Department ID"""
   departmentId: Int
 
-  """
-  Designation ID
-  """
+  """Designation ID"""
   designationId: Int
 
-  """
-  Employee ID
-  """
+  """Employee ID"""
   employeeId: String!
 
-  """
-  Employment Status ID
-  """
+  """Employment Status ID"""
   employmentStatusId: Int
 
-  """
-  Profile ID (userId)
-  """
+  """Profile ID (userId)"""
   id: Int!
 
-  """
-  Joining date
-  """
+  """Joining date"""
   joiningDate: String
 
-  """
-  National ID Number
-  """
+  """National ID Number"""
   nidNumber: String
 
-  """
-  Rota type
-  """
+  """Rota type"""
   rotaType: String
 
-  """
-  Salary per month
-  """
+  """Salary per month"""
   salaryPerMonth: Float
 
-  """
-  Work Schedule ID
-  """
+  """Work Schedule ID"""
   workScheduleId: Int
 
-  """
-  Work Site ID
-  """
+  """Work Site ID"""
   workSiteId: Int
 
-  """
-  Working days per week
-  """
+  """Working days per week"""
   workingDaysPerWeek: Int
 
-  """
-  Working hours per week
-  """
+  """Working hours per week"""
   workingHoursPerWeek: Int
 }
 
 input UpdateEmploymentStatusInput {
-  """
-  Description of the employment status
-  """
+  """Description of the employment status"""
   description: String
   id: Int!
 
-  """
-  Name of the employment status
-  """
+  """Name of the employment status"""
   name: String
 }
 
 input UpdateHolidayInput {
-  """
-  Description of the holiday
-  """
+  """Description of the holiday"""
   description: String
 
-  """
-  Holiday end date
-  """
+  """Holiday end date"""
   endDate: String
 
-  """
-  Type of holiday
-  """
+  """Type of holiday"""
   holidayType: HolidayType
   id: Int!
 
-  """
-  Is this a paid holiday
-  """
+  """Is this a paid holiday"""
   isPaid: Boolean = true
 
-  """
-  Is this a recurring annual holiday
-  """
+  """Is this a recurring annual holiday"""
   isRecurring: Boolean = false
 
-  """
-  Name of the holiday
-  """
+  """Name of the holiday"""
   name: String
 
-  """
-  Holiday start date
-  """
+  """Holiday start date"""
   startDate: String
 }
 
 input UpdateJobHistoryInput {
-  """
-  Key achievements and accomplishments
-  """
+  """Key achievements and accomplishments"""
   achievements: String
 
-  """
-  City where job was located
-  """
+  """City where job was located"""
   city: String
 
-  """
-  Company or organization name
-  """
+  """Company or organization name"""
   companyName: String
 
-  """
-  Country where job was located
-  """
+  """Country where job was located"""
   country: String
 
-  """
-  Employment type
-  """
+  """Employment type"""
   employmentType: String
 
-  """
-  End date (MM-YYYY or YYYY)
-  """
+  """End date (MM-YYYY or YYYY)"""
   endDate: String
   id: Int!
 
-  """
-  Job title or position
-  """
+  """Job title or position"""
   jobTitle: String
 
-  """
-  Job responsibilities and duties
-  """
+  """Job responsibilities and duties"""
   responsibilities: String
 
-  """
-  Start date (MM-YYYY or YYYY)
-  """
+  """Start date (MM-YYYY or YYYY)"""
   startDate: String
 
-  """
-  ID of the user
-  """
+  """ID of the user"""
   userId: Int
 }
 
 input UpdateJobPlatformInput {
-  """
-  Description of the job platform
-  """
+  """Description of the job platform"""
   description: String
   id: Int!
 
-  """
-  Name of the job platform
-  """
+  """Name of the job platform"""
   name: String
 }
 
 input UpdateJobTypeInput {
-  """
-  Description of the job type
-  """
+  """Description of the job type"""
   description: String
   id: Int!
 
-  """
-  Name of the job type
-  """
+  """Name of the job type"""
   name: String
 }
 
 input UpdateLeaveInput {
-  """
-  Supporting documents (JSON array or URLs)
-  """
+  """Supporting documents (JSON array or URLs)"""
   attachments: String
 
-  """
-  Leave end date (required for MULTI_DAY)
-  """
+  """Leave end date (required for MULTI_DAY)"""
   endDate: String
   id: Int!
 
-  """
-  Leave duration type (SINGLE_DAY, MULTI_DAY, HALF_DAY)
-  """
+  """Leave duration type (SINGLE_DAY, MULTI_DAY, HALF_DAY)"""
   leaveDuration: LeaveDuration
 
-  """
-  ID of the leave type
-  """
+  """ID of the leave type"""
   leaveTypeId: Int
 
-  """
-  Year this leave applies to (e.g., 2025)
-  """
+  """Year this leave applies to (e.g., 2025)"""
   leaveYear: Int
 
-  """
-  Additional notes or comments
-  """
+  """Additional notes or comments"""
   notes: String
 
-  """
-  Leave start date
-  """
+  """Leave start date"""
   startDate: String
 
-  """
-  Total leave hours deducted from balance
-  """
+  """Total leave hours deducted from balance"""
   totalHours: Float
 }
 
 input UpdateLeaveSettingInput {
-  """
-  Whether leave requests are auto-approved
-  """
+  """Whether leave requests are auto-approved"""
   autoApproval: Boolean = false
 
-  """
-  Start month for leave cycle (0-11, where 0=January)
-  """
+  """Start month for leave cycle (0-11, where 0=January)"""
   startMonth: Int = 0
 }
 
 input UpdateLeaveTypeInput {
-  """
-  Maximum carry over limit
-  """
+  """Maximum carry over limit"""
   carryOverLimit: Int
 
-  """
-  Array of employment status IDs to associate with this leave type
-  """
+  """Array of employment status IDs to associate with this leave type"""
   employmentStatuses: [Int!] = []
   id: Int!
 
-  """
-  Number of leave hours allocated
-  """
+  """Number of leave hours allocated"""
   leaveHours: Int = 0
 
-  """
-  Leave rollover policy type
-  """
+  """Leave rollover policy type"""
   leaveRolloverType: LeaveRolloverType = NONE
 
-  """
-  Type of leave (PAID or UNPAID)
-  """
+  """Type of leave (PAID or UNPAID)"""
   leaveType: LeaveTypeEnum
 
-  """
-  Name of the leave type
-  """
+  """Name of the leave type"""
   name: String
 }
 
 input UpdateNoteInput {
-  """
-  Category of the note
-  """
+  """Category of the note"""
   category: String
 
-  """
-  Content of the note
-  """
+  """Content of the note"""
   content: String
   id: Int!
 
-  """
-  Whether the note is private
-  """
+  """Whether the note is private"""
   isPrivate: Boolean
 
-  """
-  Title of the note
-  """
+  """Title of the note"""
   title: String
 
-  """
-  ID of the user this note is about
-  """
+  """ID of the user this note is about"""
   userId: Int
 }
 
+input UpdateNotificationPreferenceInput {
+  muteAll: Boolean
+  mutedUntil: DateTime
+  preferences: String
+}
+
+input UpdateNotificationTemplateInput {
+  businessId: Int
+  channels: [NotificationChannel!]!
+  id: Int!
+  isActive: Boolean
+  message: String!
+  name: String!
+  priority: NotificationPriority
+  title: String!
+  type: NotificationType!
+}
+
 input UpdateOnboardingProcessInput {
-  """
-  Description of the onboarding process
-  """
+  """Description of the onboarding process"""
   description: String
   id: Int!
 
-  """
-  Whether the onboarding process is required
-  """
+  """Whether the onboarding process is required"""
   isRequired: Boolean
 
-  """
-  Name of the onboarding process
-  """
+  """Name of the onboarding process"""
   name: String
 }
 
@@ -4581,9 +3501,7 @@ input UpdateProfileInput {
   fullName: String
   gender: GENDER
 
-  """
-  ID of the profile to update
-  """
+  """ID of the profile to update"""
   id: Int!
   maritalStatus: MARITAL_STATUS
   phone: String
@@ -4602,111 +3520,71 @@ input UpdateProjectInput {
 }
 
 input UpdateRecruitmentProcessInput {
-  """
-  Description of the recruitment process
-  """
+  """Description of the recruitment process"""
   description: String
   id: Int!
 
-  """
-  Whether the recruitment process is required
-  """
+  """Whether the recruitment process is required"""
   isRequired: Boolean
 
-  """
-  Name of the recruitment process
-  """
+  """Name of the recruitment process"""
   name: String
 }
 
 input UpdateSocialLinkInput {
-  """
-  Facebook profile URL
-  """
+  """Facebook profile URL"""
   facebook: String
 
-  """
-  GitHub profile URL
-  """
+  """GitHub profile URL"""
   github: String
 
-  """
-  Instagram profile URL
-  """
+  """Instagram profile URL"""
   instagram: String
 
-  """
-  LinkedIn profile URL
-  """
+  """LinkedIn profile URL"""
   linkedin: String
 
-  """
-  Profile ID
-  """
+  """Profile ID"""
   profileId: Int
 
-  """
-  Twitter profile URL
-  """
+  """Twitter profile URL"""
   twitter: String
 }
 
 input UpdateSubscriptionPlanInput {
-  """
-  Description of the service plan
-  """
+  """Description of the service plan"""
   description: String!
 
-  """
-  Modules for the service plan
-  """
+  """Modules for the service plan"""
   featureIds: [Int!]!
 
-  """
-  Name of the service plan
-  """
+  """Name of the service plan"""
   name: String!
 
-  """
-  Price of the service plan
-  """
+  """Price of the service plan"""
   price: Int!
 
-  """
-  One-time setup fee for the service plan
-  """
+  """One-time setup fee for the service plan"""
   setupFee: Int!
 }
 
 input UpdateWorkScheduleInput {
-  """
-  Number of break hours
-  """
+  """Number of break hours"""
   breakHours: Int = 0
 
-  """
-  Type of break in the schedule
-  """
+  """Type of break in the schedule"""
   breakType: ScheduleBreakType = UNPAID
 
-  """
-  Description of the work schedule
-  """
+  """Description of the work schedule"""
   description: String
 
-  """
-  ID of the work schedule to update
-  """
+  """ID of the work schedule to update"""
   id: Int!
 
-  """
-  Name of the work schedule
-  """
+  """Name of the work schedule"""
   name: String
 
-  """
-  Type of the schedule
-  """
+  """Type of the schedule"""
   scheduleType: ScheduleType = REGULAR
 
   """
@@ -4714,123 +3592,81 @@ input UpdateWorkScheduleInput {
   """
   schedules: [CreateDayScheduleInput!]
 
-  """
-  Status of the work schedule
-  """
+  """Status of the work schedule"""
   status: Status = ACTIVE
 }
 
 input UpdateWorkSiteInput {
-  """
-  Address of the work site
-  """
+  """Address of the work site"""
   address: String
 
-  """
-  Description of the work site
-  """
+  """Description of the work site"""
   description: String
   id: Int!
 
-  """
-  IP address
-  """
+  """IP address"""
   ipAddress: String
 
-  """
-  Whether geo location is enabled
-  """
+  """Whether geo location is enabled"""
   isGeoLocationEnabled: Boolean
 
-  """
-  Whether IP is enabled
-  """
+  """Whether IP is enabled"""
   isIpEnabled: Boolean
 
-  """
-  Whether location is enabled
-  """
+  """Whether location is enabled"""
   isLocationEnabled: Boolean
 
-  """
-  Maximum radius for location
-  """
+  """Maximum radius for location"""
   maxRadius: Int
 
-  """
-  Name of the work site
-  """
+  """Name of the work site"""
   name: String
 }
 
 type User {
   business: Business
 
-  """
-  ID of the business (direct connection)
-  """
+  """ID of the business (direct connection)"""
   businessId: Int
 
-  """
-  Date when the user was created
-  """
+  """Date when the user was created"""
   createdAt: DateTime!
 
-  """
-  ID of the user who deleted the user account
-  """
+  """ID of the user who deleted the user account"""
   deletedBy: Int
 
-  """
-  Email of the user
-  """
+  """Email of the user"""
   email: String!
   employee: Employee
   id: ID!
 
-  """
-  Formatted permissions as ["Resource:action"]
-  """
+  """Formatted permissions as ["Resource:action"]"""
   permissions: [String!]
   profile: Profile
 
-  """
-  Role of the user
-  """
+  """Role of the user"""
   role: Role
 
-  """
-  ID of the role
-  """
+  """ID of the role"""
   roleId: Int
 
-  """
-  Status of the user account
-  """
+  """Status of the user account"""
   status: USER_ACCOUNT_STATUS!
 
-  """
-  Date when the user was last updated
-  """
+  """Date when the user was last updated"""
   updatedAt: DateTime!
   userPermissions: [UserPermission!]
 }
 
 type UserPermission {
-  """
-  Permission details
-  """
+  """Permission details"""
   permission: Permission!
 
-  """
-  ID of the permission
-  """
+  """ID of the permission"""
   permissionId: Int!
   user: User
 
-  """
-  ID of the user
-  """
+  """ID of the user"""
   userId: Int!
 }
 
@@ -4851,74 +3687,46 @@ type UsersQueryResponse {
 }
 
 type WorkSchedule {
-  """
-  Number of break hours
-  """
+  """Number of break hours"""
   breakHours: Int!
 
-  """
-  Type of break in the schedule
-  """
+  """Type of break in the schedule"""
   breakType: ScheduleBreakType!
 
-  """
-  Business this work schedule belongs to
-  """
+  """Business this work schedule belongs to"""
   business: Business
 
-  """
-  ID of the business
-  """
+  """ID of the business"""
   businessId: Int
 
-  """
-  Creation timestamp
-  """
+  """Creation timestamp"""
   createdAt: DateTime!
 
-  """
-  ID of the user who created this schedule
-  """
+  """ID of the user who created this schedule"""
   createdBy: Int
 
-  """
-  User who created this work schedule
-  """
+  """User who created this work schedule"""
   creator: User
 
-  """
-  Description of the work schedule
-  """
+  """Description of the work schedule"""
   description: String!
 
-  """
-  Unique identifier for the work schedule
-  """
+  """Unique identifier for the work schedule"""
   id: ID!
 
-  """
-  Name of the work schedule
-  """
+  """Name of the work schedule"""
   name: String!
 
-  """
-  Type of the schedule
-  """
+  """Type of the schedule"""
   scheduleType: ScheduleType!
 
-  """
-  Day schedules associated with this work schedule
-  """
+  """Day schedules associated with this work schedule"""
   schedules: [DaySchedule!]!
 
-  """
-  Status of the work schedule
-  """
+  """Status of the work schedule"""
   status: Status!
 
-  """
-  Last update timestamp
-  """
+  """Last update timestamp"""
   updatedAt: DateTime!
 }
 
@@ -4939,74 +3747,46 @@ type WorkSchedulesQueryResponse {
 }
 
 type WorkSite {
-  """
-  Address of the work site
-  """
+  """Address of the work site"""
   address: String
 
-  """
-  ID of the business
-  """
+  """ID of the business"""
   businessId: Int!
 
-  """
-  Date when the work site was created
-  """
+  """Date when the work site was created"""
   createdAt: DateTime!
 
-  """
-  ID of the creator
-  """
+  """ID of the creator"""
   createdBy: Int!
 
-  """
-  Description of the work site
-  """
+  """Description of the work site"""
   description: String!
 
-  """
-  Unique identifier for the work site
-  """
+  """Unique identifier for the work site"""
   id: ID!
 
-  """
-  IP address
-  """
+  """IP address"""
   ipAddress: String
 
-  """
-  Whether geo location is enabled
-  """
+  """Whether geo location is enabled"""
   isGeoLocationEnabled: Boolean
 
-  """
-  Whether IP is enabled
-  """
+  """Whether IP is enabled"""
   isIpEnabled: Boolean
 
-  """
-  Whether location is enabled
-  """
+  """Whether location is enabled"""
   isLocationEnabled: Boolean
 
-  """
-  Maximum radius for location
-  """
+  """Maximum radius for location"""
   maxRadius: Int
 
-  """
-  Name of the work site
-  """
+  """Name of the work site"""
   name: String!
 
-  """
-  Status of the work site
-  """
+  """Status of the work site"""
   status: Status!
 
-  """
-  Date when the work site was last updated
-  """
+  """Date when the work site was last updated"""
   updatedAt: DateTime!
 }
 

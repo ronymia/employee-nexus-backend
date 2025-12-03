@@ -1,13 +1,19 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { ObjectType, Field, Int } from '@nestjs/graphql';
-import {
-  NotificationType,
-  NotificationChannel,
-  NotificationPriority,
-} from '../enums';
+// import {
+//   NotificationType,
+//   NotificationChannel,
+//   NotificationPriority,
+// } from '../enums';
 import {
   BaseResponse,
   BaseQueryResponse,
 } from '../../../common/dto/base-response.type';
+import {
+  NotificationChannel,
+  NotificationPriority,
+  NotificationType,
+} from 'generated/prisma';
 
 @ObjectType()
 export class Notification {
@@ -69,10 +75,10 @@ export class Notification {
   updatedAt: Date;
 }
 
-export const NotificationResponse = BaseResponse(Notification);
-export type NotificationResponse = InstanceType<typeof NotificationResponse>;
+@ObjectType()
+export class NotificationResponse extends BaseResponse(Notification) {}
 
-export const NotificationsQueryResponse = BaseQueryResponse(Notification);
-export type NotificationsQueryResponse = InstanceType<
-  typeof NotificationsQueryResponse
->;
+@ObjectType()
+export class NotificationsQueryResponse extends BaseQueryResponse(
+  Notification,
+) {}

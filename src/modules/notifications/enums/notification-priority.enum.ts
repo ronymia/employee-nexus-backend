@@ -1,11 +1,5 @@
 import { registerEnumType } from '@nestjs/graphql';
-
-export enum NotificationPriority {
-  LOW = 'LOW',
-  NORMAL = 'NORMAL',
-  HIGH = 'HIGH',
-  URGENT = 'URGENT',
-}
+import { NotificationPriority } from 'generated/prisma';
 
 registerEnumType(NotificationPriority, {
   name: 'NotificationPriority',

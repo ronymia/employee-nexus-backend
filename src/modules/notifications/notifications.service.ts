@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -26,15 +30,7 @@ export class NotificationsService {
   }
 
   async findAll(user: JwtPayload, query?: QueryNotificationInput) {
-    const {
-      page = 1,
-      limit = 20,
-      userId,
-      isRead,
-      type,
-      businessId,
-    } = query || {};
-    const skip = (page - 1) * limit;
+    const { userId, isRead, type, businessId } = query || {};
 
     const where: any = {};
 
@@ -42,7 +38,7 @@ export class NotificationsService {
     if (userId) {
       where.userId = userId;
     } else if (user.businessId) {
-      where.userId = user.id;
+      where.userId = user.userId;
     }
 
     if (typeof isRead === 'boolean') {
@@ -60,8 +56,6 @@ export class NotificationsService {
     const [data, total] = await Promise.all([
       this.prisma.notification.findMany({
         where,
-        skip,
-        take: limit,
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.notification.count({ where }),
@@ -74,9 +68,9 @@ export class NotificationsService {
       })),
       meta: {
         total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        page: 0,
+        limit: 0,
+        totalPages: Math.ceil(total / 1),
       },
     };
   }

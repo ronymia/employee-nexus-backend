@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { InputType, Field, Int } from '@nestjs/graphql';
 import {
   IsString,
@@ -8,10 +10,10 @@ import {
   IsBoolean,
 } from 'class-validator';
 import {
-  NotificationType,
   NotificationChannel,
   NotificationPriority,
-} from '../enums';
+  NotificationType,
+} from 'generated/prisma';
 
 @InputType()
 export class CreateNotificationTemplateInput {
