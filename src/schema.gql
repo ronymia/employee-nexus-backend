@@ -1876,7 +1876,7 @@ type Mutation {
   deleteUser(id: Int!): UserResponse!
   deleteWorkSchedule(id: Int!): WorkScheduleResponse!
   deleteWorkSite(id: Int!): WorkSiteResponse!
-  generatePayrollItems(generatePayrollItemsInput: GeneratePayrollItemsInput!): PayrollItemsQueryResponse!
+  generatePayrollItems(generatePayrollItemsInput: GeneratePayrollItemsInput!): PayrollItemResponse!
   login(loginInput: LoginAuthInput!): Auth!
   markPayrollCycleAsPaid(id: Int!): PayrollCycleResponse!
   markPayrollItemAsPaid(id: Int!, paymentMethod: String!, transactionRef: String): PayrollItemResponse!
@@ -2359,10 +2359,10 @@ type Query {
   payrollComponentByCode(businessId: Int!, code: String!): PayrollComponentResponse!
   payrollComponentById(id: Int!): PayrollComponentResponse!
   payrollComponents(query: QueryPayrollComponentInput): PayrollComponentsQueryResponse!
-  payrollCycleById(id: Int!): PayrollCycleResponse!
+  payrollCycle(id: Int!): PayrollCycleResponse!
   payrollCycles(query: QueryPayrollCycleInput): PayrollCyclesQueryResponse!
   payrollItemById(id: Int!): PayrollItemResponse!
-  payrollItemByUserId(payrollCycleId: Int!, userId: Int!): PayrollItemResponse!
+  payrollItemByUserId(payrollCycleId: Int!, userId: Int!): PayrollItemsQueryResponse!
   payrollItems(query: QueryPayrollItemInput!): PayrollItemsQueryResponse!
   permissionById(id: Int!): Permission!
   permissions: [Permission!]!
