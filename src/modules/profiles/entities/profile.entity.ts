@@ -1,6 +1,7 @@
 import { Field, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Gender, MaritalStatus } from 'generated/prisma';
 import { EmergencyContact } from './emergency-contact.entity';
+import { SocialLink } from 'src/modules/social-links/entities/social-link.entity';
 
 registerEnumType(Gender, {
   name: 'GENDER',
@@ -52,6 +53,9 @@ export class Profile {
 
   @Field(() => EmergencyContact, { nullable: true })
   emergencyContact?: EmergencyContact | null;
+
+  @Field(() => SocialLink, { nullable: true })
+  socialLinks?: SocialLink | null;
 
   @Field(() => Date)
   createdAt: Date;

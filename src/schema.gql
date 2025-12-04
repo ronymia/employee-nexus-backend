@@ -432,6 +432,27 @@ enum CalculationType {
   PERCENTAGE_OF_GROSS
 }
 
+type ChangeMyPassword {
+  """Message indicating the result of the password change"""
+  message: String!
+}
+
+input ChangeMyPasswordInput {
+  """User email"""
+  currentPassword: String!
+
+  """User password"""
+  newPassword: String!
+}
+
+type ChangeMyPasswordResponse {
+  data: ChangeMyPassword!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 """Type of payroll component"""
 enum ComponentType {
   DEDUCTION
@@ -1870,6 +1891,7 @@ type Mutation {
   assignAsset(assignAssetInput: AssignAssetInput!): AssetAssignmentResponse!
   assignProjectMember(assignProjectMemberInput: AssignProjectMemberInput!): ProjectMemberResponse!
   cancelPayrollCycle(id: Int!): PayrollCycleResponse!
+  changeMyPassword(changeMyPasswordInput: ChangeMyPasswordInput!): ChangeMyPasswordResponse!
   createAsset(createAssetInput: CreateAssetInput!): AssetResponse!
   createAssetType(createAssetTypeInput: CreateAssetTypeInput!): AssetTypeResponse!
   createAttendance(createAttendanceInput: CreateAttendanceInput!): AttendanceResponse!
@@ -2404,6 +2426,7 @@ type Profile {
   phone: String!
   postcode: String!
   profilePicture: String
+  socialLinks: SocialLink
   updatedAt: DateTime!
   userId: Int!
 }
