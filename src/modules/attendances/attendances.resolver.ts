@@ -17,12 +17,34 @@ import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
+import { RequestAttendanceInput } from './dto/request-attendance.input';
+import { ApproveAttendanceInput } from './dto/approve-attendance.input';
 
 @Resolver(() => Attendance)
 @UseGuards(GqlAuthGuard, PermissionsGuard)
 export class AttendancesResolver {
   constructor(private readonly attendancesService: AttendancesService) {}
 
+  // CREATE ATTENDANCE
+  @Mutation(() => AttendanceResponse, { name: 'attendanceRequest' })
+  @RequirePermissions('Attendance:create')
+  async attendanceRequest(
+    @CurrentUser() user: JwtPayload,
+    @Args('createAttendanceInput')
+    createAttendanceInput: RequestAttendanceInput,
+  ) {
+    const result = await this.attendancesService.attendanceRequest({
+      user,
+      createAttendanceInput,
+    });
+
+    return {
+      success: true,
+      statusCode: HttpStatus.CREATED,
+      message: 'Attendance request submitted successfully',
+      data: result,
+    };
+  }
   // CREATE ATTENDANCE
   @Mutation(() => AttendanceResponse)
   @RequirePermissions('Attendance:create')
@@ -151,5 +173,39 @@ export class AttendancesResolver {
     @Args('id', { type: () => Int }) id: number,
   ) {
     return await this.attendancesService.removePunch({ user, id });
+  }
+
+  // APPROVE ATTENDANCE
+  @Mutation(() => AttendanceResponse, { name: 'approveAttendance' })
+  @RequirePermissions('Attendance:update')
+  async approveAttendance(
+    @Args('attendanceId', { type: () => Int }) attendanceId: number,
+  ) {
+    const result = await this.attendancesService.approveAttendance({
+      attendanceId,
+    });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Attendance approved successfully',
+      data: result,
+    };
+  }
+
+  // REJECT ATTENDANCE
+  @Mutation(() => AttendanceResponse, { name: 'rejectAttendance' })
+  @RequirePermissions('Attendance:update')
+  async rejectAttendance(
+    @Args('attendanceId', { type: () => Int }) attendanceId: number,
+  ) {
+    const result = await this.attendancesService.rejectAttendance({
+      attendanceId,
+    });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Attendance rejected successfully',
+      data: result,
+    };
   }
 }

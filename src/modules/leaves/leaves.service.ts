@@ -8,6 +8,7 @@ import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { leaveSearchableFields } from './leave.constant';
 import { NotificationsService } from '../notifications/notifications.service';
+import { RequestLeaveInput } from './dto/request-leave.input';
 
 @Injectable()
 export class LeavesService {
@@ -16,6 +17,89 @@ export class LeavesService {
     private readonly notificationsService: NotificationsService,
   ) {}
 
+  async leaveRequest({
+    user,
+    createLeaveInput,
+  }: {
+    user: JwtPayload;
+    createLeaveInput: RequestLeaveInput;
+  }) {
+    const leaveType = await this.prisma.leaveType.findUnique({
+      where: {
+        id: createLeaveInput.leaveTypeId,
+      },
+    });
+    if (!leaveType) {
+      throw new NotFoundException('Leave type not found');
+    }
+
+    const existingUser = await this.prisma.user.findUnique({
+      where: {
+        id: createLeaveInput.userId,
+      },
+      include: {
+        business: {
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
+
+    if (!existingUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    // if (existingUser.business.userId !== user.userId) {
+    //   throw new NotFoundException(
+    //     'You do not have permission to request leave for this user',
+    //   );
+    // }
+
+    const leave = await this.prisma.leave.create({
+      data: {
+        ...createLeaveInput,
+        status: 'pending',
+        startDate: new Date(createLeaveInput.startDate),
+        endDate: createLeaveInput.endDate
+          ? new Date(createLeaveInput.endDate)
+          : null,
+      },
+      include: {
+        user: {
+          include: {
+            profile: true,
+          },
+        },
+        leaveType: true,
+        reviewer: true,
+      },
+    });
+
+    // Send notification to user
+    try {
+      const startDate = new Date(leave.startDate).toLocaleDateString();
+      const endDate = leave.endDate
+        ? new Date(leave.endDate).toLocaleDateString()
+        : startDate;
+
+      await this.notificationsService.create({
+        type: 'LEAVE',
+        title: 'Leave Requested',
+        message: `Your leave request from ${startDate} to ${endDate} has been submitted successfully and is pending review.`,
+        priority: 'NORMAL' as any,
+        userId: existingUser?.business?.userId || createLeaveInput.userId,
+        channels: ['IN_APP'],
+        businessId: user.businessId,
+        entityType: 'leave',
+        entityId: leave.id,
+      });
+    } catch (error) {
+      console.error('Failed to send leave notification:', error);
+    }
+
+    return leave;
+  }
   async create({
     user,
     createLeaveInput,
@@ -26,6 +110,7 @@ export class LeavesService {
     const leave = await this.prisma.leave.create({
       data: {
         ...createLeaveInput,
+        status: 'approved',
         startDate: new Date(createLeaveInput.startDate),
         endDate: createLeaveInput.endDate
           ? new Date(createLeaveInput.endDate)
@@ -386,5 +471,42 @@ export class LeavesService {
       usedHours: used,
       remainingHours: remaining,
     };
+  }
+
+  // APPROVE ATTENDANCE
+  async approveLeave({ leaveId: id }: { leaveId: number }) {
+    // Verify punch exists and belongs to user's attendance
+    const leave = await this.prisma.leave.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!leave) {
+      throw new NotFoundException(`Leave with ID ${id} not found`);
+    }
+
+    return await this.prisma.leave.update({
+      where: { id: id },
+      data: { status: 'approved' },
+    });
+  }
+  // APPROVE ATTENDANCE
+  async rejectLeave({ leaveId: id }: { leaveId: number }) {
+    // Verify punch exists and belongs to user's attendance
+    const leave = await this.prisma.leave.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!leave) {
+      throw new NotFoundException(`Leave with ID ${id} not found`);
+    }
+
+    return await this.prisma.leave.update({
+      where: { id: id },
+      data: { status: 'rejected' },
+    });
   }
 }

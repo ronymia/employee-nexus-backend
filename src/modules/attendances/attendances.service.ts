@@ -9,6 +9,8 @@ import { JwtPayload } from '../auth/jwt.strategy';
 import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { NotificationsService } from '../notifications/notifications.service';
+import { RequestAttendanceInput } from './dto/request-attendance.input';
+import { ApproveAttendanceInput } from './dto/approve-attendance.input';
 
 @Injectable()
 export class AttendancesService {
@@ -17,6 +19,95 @@ export class AttendancesService {
     private readonly notificationsService: NotificationsService,
   ) {}
 
+  // CREATE ATTENDANCE
+  async attendanceRequest({
+    user,
+    createAttendanceInput,
+  }: {
+    user: JwtPayload;
+    createAttendanceInput: RequestAttendanceInput;
+  }) {
+    const { punchRecords, ...attendanceData } = createAttendanceInput;
+
+    const existingAttendance = await this.prisma.attendance.findFirst({
+      where: {
+        userId: attendanceData.userId,
+        date: new Date(attendanceData.date),
+      },
+    });
+
+    if (existingAttendance) {
+      throw new Error('Attendance already exists for this user and date');
+    }
+
+    if (!punchRecords) {
+      throw new Error('Punch records are required');
+    }
+
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id: attendanceData.userId },
+      include: {
+        business: {
+          select: { id: true, userId: true },
+        },
+      },
+    });
+    if (!existingUser) {
+      throw new Error('User not found');
+    }
+    if (existingUser.businessId !== user.businessId) {
+      throw new Error('User does not belong to this business');
+    }
+
+    return await this.prisma.$transaction(async (prisma) => {
+      const attendance = await prisma.attendance.create({
+        data: {
+          ...attendanceData,
+          status: 'pending',
+          ...(punchRecords && {
+            punchRecords: {
+              create: punchRecords.map(
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                ({ attendanceId, ...punchData }) => punchData,
+              ),
+            },
+          }),
+        },
+        include: {
+          user: {
+            include: {
+              profile: true,
+            },
+          },
+          punchRecords: {
+            include: {
+              project: true,
+              workSite: true,
+            },
+          },
+        },
+      });
+
+      // Send notification to user
+      try {
+        await this.notificationsService.create({
+          type: 'ATTENDANCE',
+          title: 'Attendance Requested',
+          message: `Your attendance for ${new Date(attendance.date).toLocaleDateString()} has been recorded successfully.`,
+          priority: 'LOW' as any,
+          userId: existingUser?.business?.userId || attendanceData.userId,
+          channels: ['IN_APP'],
+          businessId: user.businessId,
+          entityType: 'attendance',
+          entityId: attendance.id,
+        });
+      } catch (error) {
+        console.error('Failed to send attendance notification:', error);
+      }
+
+      return attendance;
+    });
+  }
   // CREATE ATTENDANCE
   async create({
     user,
@@ -345,6 +436,43 @@ export class AttendancesService {
 
     return await this.prisma.attendancePunch.delete({
       where: { id },
+    });
+  }
+
+  // APPROVE ATTENDANCE
+  async approveAttendance({ attendanceId: id }: { attendanceId: number }) {
+    // Verify punch exists and belongs to user's attendance
+    const attendance = await this.prisma.attendance.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!attendance) {
+      throw new NotFoundException(`Attendance punch with ID ${id} not found`);
+    }
+
+    return await this.prisma.attendance.update({
+      where: { id: id },
+      data: { status: 'approved' },
+    });
+  }
+  // APPROVE ATTENDANCE
+  async rejectAttendance({ attendanceId: id }: { attendanceId: number }) {
+    // Verify punch exists and belongs to user's attendance
+    const attendance = await this.prisma.attendance.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!attendance) {
+      throw new NotFoundException(`Attendance punch with ID ${id} not found`);
+    }
+
+    return await this.prisma.attendance.update({
+      where: { id: id },
+      data: { status: 'rejected' },
     });
   }
 }
