@@ -7,7 +7,7 @@ export class ProcessPayrollCycleInput {
   @IsNumber()
   id: number;
 
-  @Field(() => Int)
-  @IsNumber()
-  processedBy: number;
+  // @Field(() => Int)
+  // @IsNumber()
+  // processedBy: number;
 }

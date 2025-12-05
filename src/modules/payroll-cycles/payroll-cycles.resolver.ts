@@ -53,9 +53,9 @@ export class PayrollCyclesResolver {
     };
   }
 
-  @Query(() => PayrollCycleResponse, { name: 'payrollCycle' })
+  @Query(() => PayrollCycleResponse, { name: 'payrollCycleById' })
   @RequirePermissions('Payroll Cycle:read')
-  async payrollCycle(@Args('id', { type: () => Int }) id: number) {
+  async payrollCycleById(@Args('id', { type: () => Int }) id: number) {
     const cycle = await this.payrollCyclesService.findOne(id);
     return {
       success: true,
@@ -68,9 +68,14 @@ export class PayrollCyclesResolver {
   @Mutation(() => PayrollCycleResponse, { name: 'approvePayrollCycle' })
   @RequirePermissions('Payroll Cycle:update')
   async approvePayrollCycle(
-    @Args('approvePayrollCycleInput') input: ApprovePayrollCycleInput,
+    @CurrentUser() user: JwtPayload,
+    @Args('approvePayrollCycleInput')
+    approvePayrollCycleInput: ApprovePayrollCycleInput,
   ) {
-    const cycle = await this.payrollCyclesService.approve(input);
+    const cycle = await this.payrollCyclesService.approve(
+      user,
+      approvePayrollCycleInput,
+    );
     return {
       success: true,
       statusCode: HttpStatus.OK,
@@ -82,9 +87,14 @@ export class PayrollCyclesResolver {
   @Mutation(() => PayrollCycleResponse, { name: 'processPayrollCycle' })
   @RequirePermissions('Payroll Cycle:update')
   async processPayrollCycle(
-    @Args('processPayrollCycleInput') input: ProcessPayrollCycleInput,
+    @CurrentUser() user: JwtPayload,
+    @Args('processPayrollCycleInput')
+    processPayrollCycleInput: ProcessPayrollCycleInput,
   ) {
-    const cycle = await this.payrollCyclesService.process(input);
+    const cycle = await this.payrollCyclesService.process(
+      user,
+      processPayrollCycleInput,
+    );
     return {
       success: true,
       statusCode: HttpStatus.OK,

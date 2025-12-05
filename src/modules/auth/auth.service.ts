@@ -5,11 +5,15 @@ import { PasswordHelpers } from 'src/helpers/passwordHelpers';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/entities/user.entity';
 import { PermissionUtils } from 'src/utils/permission.utils';
+import { ChangeMyPasswordInput } from './dto/change-my-password.input';
+import { JwtPayload } from './jwt.strategy';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UsersService,
+    private readonly prisma: PrismaService,
     // private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
   ) {}
@@ -60,6 +64,42 @@ export class AuthService {
     return {
       accessToken,
       user,
+    };
+  }
+
+  async changeMyPassword(
+    user: JwtPayload,
+    changeMyPasswordInput: ChangeMyPasswordInput,
+  ) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { id: true, password: true },
+    });
+    if (!existingUser || !existingUser.password) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const isMatchPassword = await PasswordHelpers.passwordMatch(
+      changeMyPasswordInput.currentPassword,
+      existingUser.password,
+    );
+
+    // Check if current password is correct
+    if (!isMatchPassword) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    const hashedNewPassword = await PasswordHelpers.passwordHash(
+      changeMyPasswordInput.newPassword,
+    );
+
+    await this.prisma.user.update({
+      where: { id: user.userId },
+      data: { password: hashedNewPassword },
+    });
+
+    return {
+      message: 'Password changed successfully',
     };
   }
 }

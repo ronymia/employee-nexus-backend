@@ -22,6 +22,7 @@ import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { QueryLeaveInput } from './dto/query-leave.input';
+import { RequestLeaveInput } from './dto/request-leave.input';
 
 @ObjectType()
 class LeaveBalanceData {
@@ -64,6 +65,24 @@ class LeaveBalanceResponse {
 export class LeavesResolver {
   constructor(private readonly leavesService: LeavesService) {}
 
+  // CREATE LEAVE
+  @Mutation(() => LeaveResponse, { name: 'leaveRequest' })
+  @RequirePermissions('Leave:create')
+  async leaveRequest(
+    @Args('createLeaveInput') createLeaveInput: RequestLeaveInput,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const result = await this.leavesService.leaveRequest({
+      user,
+      createLeaveInput,
+    });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `Leave request submitted successfully`,
+      data: result,
+    };
+  }
   // CREATE LEAVE
   @Mutation(() => LeaveResponse, { name: 'createLeave' })
   @RequirePermissions('Leave:create')
@@ -163,6 +182,32 @@ export class LeavesResolver {
       success: true,
       statusCode: HttpStatus.OK,
       message: `Leave balance retrieved successfully`,
+      data: result,
+    };
+  }
+
+  // APPROVE LEAVE
+  @Mutation(() => LeaveResponse, { name: 'approveLeave' })
+  @RequirePermissions('Leave:update')
+  async approveLeave(@Args('leaveId', { type: () => Int }) leaveId: number) {
+    const result = await this.leavesService.approveLeave({ leaveId });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `Leave approved successfully`,
+      data: result,
+    };
+  }
+
+  // REJECT LEAVE
+  @Mutation(() => LeaveResponse, { name: 'rejectLeave' })
+  @RequirePermissions('Leave:update')
+  async rejectLeave(@Args('leaveId', { type: () => Int }) leaveId: number) {
+    const result = await this.leavesService.rejectLeave({ leaveId });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `Leave rejected successfully`,
       data: result,
     };
   }

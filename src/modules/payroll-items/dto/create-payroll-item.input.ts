@@ -56,9 +56,24 @@ export class CreatePayrollItemInput {
   @IsNumber()
   userId: number;
 
+  // @Field(() => User, { description: 'User' })
+  // user: User;
+
   @Field(() => Float)
   @IsNumber()
   basicSalary: number;
+
+  // @Field(() => Float)
+  // @IsNumber()
+  // grossPay: number;
+
+  // @Field(() => Float)
+  // @IsNumber()
+  // totalDeductions: number;
+
+  // @Field(() => Float)
+  // @IsNumber()
+  // netPay: number;
 
   @Field(() => Int)
   @IsNumber()

@@ -169,7 +169,12 @@ export class UsersService {
     return this.prisma.user.findUnique({
       where: { id },
       include: {
-        profile: true,
+        profile: {
+          include: {
+            emergencyContact: true,
+            socialLinks: true,
+          },
+        },
         business: true,
         userPermissions: {
           include: {

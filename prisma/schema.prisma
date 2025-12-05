@@ -1213,7 +1213,7 @@ model PayrollItemComponent {
   componentId     Int              @map("component_id")
   component       PayrollComponent @relation(name: "componentInPayrollItem", fields: [componentId], references: [id], onDelete: Restrict)
   amount          Float
-  calculationBase Float?           @map("calculation_base")
+  calculationBase Float?           @map("calculation_base") // calculation type eg : percentage base , fixed amount base
   notes           String?
 
   createdAt DateTime @default(now()) @map("created_at")
