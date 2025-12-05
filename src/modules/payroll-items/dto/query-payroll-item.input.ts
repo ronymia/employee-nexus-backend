@@ -4,9 +4,10 @@ import { PayrollItemStatus } from '../enums/payroll-item-status.enum';
 
 @InputType()
 export class QueryPayrollItemInput {
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   @IsNumber()
-  payrollCycleId: number;
+  @IsOptional()
+  payrollCycleId?: number;
 
   @Field(() => Int, { nullable: true })
   @IsNumber()

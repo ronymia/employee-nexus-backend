@@ -22,34 +22,41 @@ export class PayrollItemsService {
     private readonly payrollCyclesService: PayrollCyclesService,
   ) {}
 
-  async create(user: JwtPayload, input: CreatePayrollItemInput) {
+  async create(
+    user: JwtPayload,
+    createPayrollItemInput: CreatePayrollItemInput,
+  ) {
     return this.prisma.$transaction(async (prisma) => {
       // Calculate gross pay, deductions, and net pay
-      const calculations = await this.calculatePayrollItem(input);
-
+      const calculations = await this.calculatePayrollItem(
+        createPayrollItemInput,
+      );
       // Create the payroll item
       const payrollItem = await prisma.payrollItem.create({
         data: {
-          payrollCycleId: input.payrollCycleId,
-          userId: input.userId,
-          basicSalary: input.basicSalary,
+          payrollCycleId: createPayrollItemInput.payrollCycleId,
+          userId: createPayrollItemInput.userId,
+          basicSalary: createPayrollItemInput.basicSalary,
           grossPay: calculations.grossPay,
           totalDeductions: calculations.totalDeductions,
           netPay: calculations.netPay,
-          workingDays: input.workingDays,
-          presentDays: input.presentDays,
-          absentDays: input.absentDays,
-          leaveDays: input.leaveDays,
-          overtimeHours: input.overtimeHours,
-          notes: input.notes,
+          workingDays: createPayrollItemInput.workingDays,
+          presentDays: createPayrollItemInput.presentDays,
+          absentDays: createPayrollItemInput.absentDays,
+          leaveDays: createPayrollItemInput.leaveDays,
+          overtimeHours: createPayrollItemInput.overtimeHours,
+          notes: createPayrollItemInput.notes,
           status: PayrollItemStatus.PENDING,
         },
       });
 
       // Create payroll item components if provided
-      if (input.components && input.components.length > 0) {
+      if (
+        createPayrollItemInput.components &&
+        createPayrollItemInput.components.length > 0
+      ) {
         await prisma.payrollItemComponent.createMany({
-          data: input.components.map((comp) => ({
+          data: createPayrollItemInput.components.map((comp) => ({
             payrollItemId: payrollItem.id,
             componentId: comp.componentId,
             amount: comp.amount,
@@ -60,9 +67,12 @@ export class PayrollItemsService {
       }
 
       // Create payslip adjustments if provided
-      if (input.adjustments && input.adjustments.length > 0) {
+      if (
+        createPayrollItemInput.adjustments &&
+        createPayrollItemInput.adjustments.length > 0
+      ) {
         await prisma.payslipAdjustment.createMany({
-          data: input.adjustments.map((adj) => ({
+          data: createPayrollItemInput.adjustments.map((adj) => ({
             payrollItemId: payrollItem.id,
             type: adj.type,
             description: adj.description,
@@ -74,8 +84,8 @@ export class PayrollItemsService {
         });
 
         // Recalculate net pay if adjustments were added
-        if (input.adjustments.length > 0) {
-          const adjustmentTotal = input.adjustments.reduce(
+        if (createPayrollItemInput.adjustments.length > 0) {
+          const adjustmentTotal = createPayrollItemInput.adjustments.reduce(
             (sum, adj) => sum + adj.amount,
             0,
           );
@@ -89,19 +99,40 @@ export class PayrollItemsService {
       }
 
       // Update cycle totals
-      await this.payrollCyclesService.updateTotals(input.payrollCycleId);
+      await this.payrollCyclesService.updateTotals(
+        createPayrollItemInput.payrollCycleId,
+      );
 
       return await this.findOne(payrollItem.id);
     });
   }
 
   async findAll(query: QueryPayrollItemInput) {
-    return this.prisma.payrollItem.findMany({
-      where: {
-        payrollCycleId: query.payrollCycleId,
-        ...(query.userId && { userId: query.userId }),
-        ...(query.status && { status: query.status }),
-      },
+    if (query?.payrollCycleId) {
+      const payrollCycle = await this.payrollCyclesService.findOne(
+        query.payrollCycleId,
+      );
+      if (!payrollCycle) {
+        throw new Error('Payroll cycle not found');
+      }
+    }
+
+    const whereCondition: any = {};
+
+    if (query?.userId) {
+      whereCondition.userId = query.userId;
+    }
+
+    if (query?.status) {
+      whereCondition.status = query.status;
+    }
+
+    if (query?.payrollCycleId) {
+      whereCondition.payrollCycleId = query.payrollCycleId;
+    }
+
+    return await this.prisma.payrollItem.findMany({
+      where: whereCondition,
       include: {
         user: {
           include: {
@@ -110,8 +141,12 @@ export class PayrollItemsService {
               include: {
                 designation: true,
                 department: true,
+                employmentStatus: true,
+                workSchedule: true,
+                workSite: true,
               },
             },
+            business: true,
           },
         },
         components: {

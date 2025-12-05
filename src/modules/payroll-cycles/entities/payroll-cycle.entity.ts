@@ -5,6 +5,7 @@ import {
   BaseResponse,
   BaseQueryResponse,
 } from '../../../common/dto/base-response.type';
+import { PayrollItem } from 'src/modules/payroll-items/entities/payroll-item.entity';
 
 @ObjectType()
 export class PayrollCycle {
@@ -64,6 +65,9 @@ export class PayrollCycle {
 
   @Field()
   updatedAt: Date;
+
+  @Field(() => [PayrollItem], { description: 'Payroll Items' })
+  payrollItems: PayrollItem;
 }
 
 @ObjectType()

@@ -7,7 +7,7 @@ export class ApprovePayrollCycleInput {
   @IsNumber()
   id: number;
 
-  @Field(() => Int)
-  @IsNumber()
-  approvedBy: number;
+  // @Field(() => Int)
+  // @IsNumber()
+  // approvedBy: number;
 }

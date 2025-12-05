@@ -51,37 +51,57 @@ export class PayrollCyclesService {
             user: {
               include: {
                 profile: true,
+                employee: {
+                  include: {
+                    department: true,
+                    designation: true,
+                    employmentStatus: true,
+                    workSchedule: true,
+                    workSite: true,
+                  },
+                },
               },
             },
             components: {
               include: {
                 component: true,
+                payrollItem: true,
               },
             },
-            adjustments: true,
+            adjustments: {
+              include: {
+                payrollItem: true,
+              },
+            },
           },
         },
       },
     });
   }
 
-  async approve(input: ApprovePayrollCycleInput) {
+  async approve(
+    user: JwtPayload,
+    approvePayrollCycleInput: ApprovePayrollCycleInput,
+  ) {
     return this.prisma.payrollCycle.update({
-      where: { id: input.id },
+      where: { id: approvePayrollCycleInput.id },
       data: {
         status: PayrollCycleStatus.APPROVED,
-        approvedBy: input.approvedBy,
+        approvedBy: user.userId,
         approvedAt: new Date(),
       },
     });
   }
 
-  async process(input: ProcessPayrollCycleInput) {
+  async process(
+    user: JwtPayload,
+    processPayrollCycleInput: ProcessPayrollCycleInput,
+  ) {
     return this.prisma.payrollCycle.update({
-      where: { id: input.id },
+      where: { id: processPayrollCycleInput.id },
       data: {
         status: PayrollCycleStatus.PROCESSING,
-        processedBy: input.processedBy,
+        processedBy: user.userId,
         processedAt: new Date(),
       },
     });

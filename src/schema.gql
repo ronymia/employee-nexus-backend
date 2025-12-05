@@ -10,7 +10,6 @@ input AddPayslipAdjustmentInput {
 }
 
 input ApprovePayrollCycleInput {
-  approvedBy: Int!
   id: Int!
 }
 
@@ -2261,6 +2260,9 @@ type PayrollCycle {
   name: String!
   notes: String
   paymentDate: DateTime!
+
+  """Payroll Items"""
+  payrollItems: [PayrollItem!]!
   periodEnd: DateTime!
   periodStart: DateTime!
   processedAt: DateTime
@@ -2343,6 +2345,9 @@ type PayrollItemComponent {
   componentId: Int!
   id: Int!
   notes: String
+
+  """Payroll Item"""
+  payrollItem: PayrollItem!
   payrollItemId: Int!
 }
 
@@ -2385,6 +2390,9 @@ type PayslipAdjustment {
   id: Int!
   isRecurring: Boolean!
   notes: String
+
+  """Payroll Item"""
+  payrollItem: PayrollItem!
   payrollItemId: Int!
   type: String!
 }
@@ -2409,7 +2417,6 @@ type Permission {
 
 input ProcessPayrollCycleInput {
   id: Int!
-  processedBy: Int!
 }
 
 type Profile {
@@ -2557,7 +2564,7 @@ type Query {
   payrollComponentByCode(businessId: Int!, code: String!): PayrollComponentResponse!
   payrollComponentById(id: Int!): PayrollComponentResponse!
   payrollComponents(query: QueryPayrollComponentInput): PayrollComponentsQueryResponse!
-  payrollCycle(id: Int!): PayrollCycleResponse!
+  payrollCycleById(id: Int!): PayrollCycleResponse!
   payrollCycles(query: QueryPayrollCycleInput): PayrollCyclesQueryResponse!
   payrollItemById(id: Int!): PayrollItemResponse!
   payrollItemByUserId(payrollCycleId: Int!, userId: Int!): PayrollItemsQueryResponse!
@@ -2729,7 +2736,7 @@ input QueryPayrollCycleInput {
 }
 
 input QueryPayrollItemInput {
-  payrollCycleId: Int!
+  payrollCycleId: Int
   status: PayrollItemStatus
   userId: Int
 }
