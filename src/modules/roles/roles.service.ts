@@ -9,8 +9,17 @@ export class RolesService {
   //   return this.prisma.role.create({ data: createRoleInput });
   // }
   async findAll(user: JwtPayload) {
+    // const SYSTEM_ROLES = {
+    //   OWNER: 'owner',
+    //   SUPER_ADMIN: 'super_admin',
+    // };
     const result = await this.prisma.role.findMany({
-      where: { businessId: user.businessId },
+      where: {
+        businessId: user.businessId,
+        AND: {
+          name: { not: `owner#${user.businessId}` },
+        },
+      },
       include: {
         business: true,
         rolePermissions: {
