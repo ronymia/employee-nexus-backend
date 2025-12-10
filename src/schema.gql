@@ -176,6 +176,13 @@ type Attendance {
   userId: Int!
 }
 
+type AttendanceAnalytics {
+  thisMonth: AttendanceThisMonth!
+  thisWeek: AttendanceThisWeek!
+  today: AttendanceToday!
+  trend: [AttendanceTrend!]!
+}
+
 type AttendancePunch {
   """Attendance associated with this punch"""
   attendance: Attendance!
@@ -303,12 +310,64 @@ type AttendanceSettingResponse {
   success: Boolean!
 }
 
+type AttendanceSummary {
+  recentAttendance: [RecentAttendanceItem!]!
+  thisMonth: AttendanceThisMonths!
+  today: AttendanceTodays!
+}
+
+type AttendanceThisMonth {
+  attendanceRate: Float!
+  earlyDepartures: Int!
+  lateArrivals: Int!
+}
+
+type AttendanceThisMonths {
+  attendanceRate: Float!
+  totalAbsent: Int!
+  totalLate: Int!
+  totalPresent: Int!
+}
+
+type AttendanceThisWeek {
+  averageAttendanceRate: Float!
+  totalPresentDays: Int!
+  totalWorkingDays: Int!
+}
+
+type AttendanceToday {
+  absent: Int!
+  late: Int!
+  notPunchedIn: Int!
+  onLeave: Int!
+  present: Int!
+}
+
+type AttendanceTodays {
+  checkInTime: DateTime
+  checkOutTime: DateTime
+  status: String!
+  workingHours: Float
+}
+
+type AttendanceTrend {
+  date: String!
+  presentCount: Int!
+}
+
 type Auth {
   """JWT access token"""
   accessToken: String!
 
   """User associated with the auth"""
   user: User!
+}
+
+type AvailableLeave {
+  leaveType: String!
+  remaining: Int!
+  total: Int!
+  used: Int!
 }
 
 input BasePaginationInput {
@@ -340,6 +399,17 @@ type Business {
   updatedAt: DateTime!
   userId: Int!
   website: String
+}
+
+type BusinessOverview {
+  activeEmployees: Int!
+  activeProjects: Int!
+  inactiveEmployees: Int!
+  pendingPayrollAmount: Float!
+  totalDepartments: Int!
+  totalEmployees: Int!
+  totalMonthlyPayroll: Float!
+  totalProjects: Int!
 }
 
 type BusinessQueryResponse {
@@ -1004,7 +1074,7 @@ input CreateUserInput {
   businessId: Int
   email: String!
   password: String!
-  roleId: Int!
+  roleId: Int
 }
 
 input CreateWorkScheduleInput {
@@ -1056,6 +1126,13 @@ input CreateWorkSiteInput {
 
   """Name of the work site"""
   name: String!
+}
+
+type CurrentMonthPayroll {
+  grossPay: Float!
+  netPay: Float!
+  status: String!
+  totalDeductions: Float!
 }
 
 """
@@ -1330,6 +1407,23 @@ type Employee {
   workSiteId: Int!
   workingDaysPerWeek: Int
   workingHoursPerWeek: Int
+}
+
+type EmployeeDashboard {
+  attendanceSummary: AttendanceSummary!
+  leaveSummary: LeaveSummary!
+  notifications: Notifications!
+  payrollSummary: PayrollSummarys!
+  personalInfo: PersonalInfo!
+  taskOverview: TaskOverview!
+}
+
+type EmployeeDashboardResponse {
+  data: EmployeeDashboard!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type EmployeeResponse {
@@ -1679,6 +1773,13 @@ type JobTypesQueryResponse {
   success: Boolean!
 }
 
+type LastPayment {
+  grossPay: Float!
+  month: String!
+  netPay: Float!
+  paidDate: DateTime!
+}
+
 type Leave {
   """Supporting documents (JSON array or URLs)"""
   attachments: String
@@ -1754,11 +1855,24 @@ type LeaveBalanceResponse {
   success: Boolean!
 }
 
+type LeaveByType {
+  count: Int!
+  leaveType: String!
+}
+
 """Duration type for leave"""
 enum LeaveDuration {
   HALF_DAY
   MULTI_DAY
   SINGLE_DAY
+}
+
+type LeaveHistoryItem {
+  endDate: DateTime!
+  leaveType: String!
+  reason: String
+  startDate: DateTime!
+  status: String!
 }
 
 type LeaveResponse {
@@ -1799,6 +1913,25 @@ type LeaveSettingResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
+}
+
+type LeaveStats {
+  approved: Int!
+  pending: Int!
+  rejected: Int!
+  thisMonth: LeaveThisMonth!
+  upcomingLeaves: [UpcomingLeave!]!
+}
+
+type LeaveSummary {
+  availableLeaves: [AvailableLeave!]!
+  leaveHistory: [LeaveHistoryItem!]!
+  upcomingLeaves: [UpcomingLeaveItem!]!
+}
+
+type LeaveThisMonth {
+  byType: [LeaveByType!]!
+  total: Int!
 }
 
 type LeaveType {
@@ -1881,6 +2014,11 @@ input LoginAuthInput {
 enum MARITAL_STATUS {
   MARRIED
   SINGLE
+}
+
+type MonthAmount {
+  amount: Float!
+  month: String!
 }
 
 type Mutation {
@@ -2162,6 +2300,11 @@ enum NotificationType {
   SYSTEM
 }
 
+type Notifications {
+  recent: [RecentNotification!]!
+  unread: Int!
+}
+
 type NotificationsQueryResponse {
   data: [Notification!]!
   message: String!
@@ -2215,6 +2358,23 @@ type OnboardingProcessesQueryResponse {
   success: Boolean!
 }
 
+type OwnerDashboard {
+  attendanceAnalytics: AttendanceAnalytics!
+  businessOverview: BusinessOverview!
+  leaveStats: LeaveStats!
+  payrollSummary: PayrollSummary!
+  projectOverview: ProjectOverview!
+  recentActivities: RecentActivities!
+}
+
+type OwnerDashboardResponse {
+  data: OwnerDashboard!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type PaginationMeta {
   limit: Int!
   page: Int!
@@ -2254,6 +2414,18 @@ type PayrollComponentsQueryResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
+}
+
+type PayrollCurrentCycle {
+  name: String!
+  paymentDate: DateTime!
+  periodEnd: DateTime!
+  periodStart: DateTime!
+  status: String!
+  totalDeductions: Float!
+  totalEmployees: Int!
+  totalGrossPay: Float!
+  totalNetPay: Float!
 }
 
 type PayrollCycle {
@@ -2389,6 +2561,31 @@ type PayrollItemsQueryResponse {
   success: Boolean!
 }
 
+type PayrollPendingActions {
+  draftCycles: Int!
+  pendingApprovals: Int!
+  pendingPayments: Int!
+}
+
+type PayrollSummary {
+  currentCycle: PayrollCurrentCycle!
+  pendingActions: PayrollPendingActions!
+  yearToDate: PayrollYearToDate!
+}
+
+type PayrollSummarys {
+  currentMonth: CurrentMonthPayroll!
+  lastPayment: LastPayment!
+  yearToDate: YearToDatePayroll!
+}
+
+type PayrollYearToDate {
+  averageMonthlyPayroll: Float!
+  highestMonth: MonthAmount!
+  lowestMonth: MonthAmount!
+  totalPaid: Float!
+}
+
 type PayslipAdjustment {
   amount: Float!
   createdBy: Int!
@@ -2419,6 +2616,16 @@ type Permission {
   id: ID!
   resource: String!
   updatedAt: DateTime!
+}
+
+type PersonalInfo {
+  department: String!
+  designation: String!
+  email: String!
+  employeeId: String!
+  fullName: String!
+  joiningDate: DateTime!
+  phone: String!
 }
 
 input ProcessPayrollCycleInput {
@@ -2495,6 +2702,14 @@ type ProjectMembersQueryResponse {
   success: Boolean!
 }
 
+type ProjectOverview {
+  active: Int!
+  completed: Int!
+  onHold: Int!
+  recentProjects: [RecentProject!]!
+  total: Int!
+}
+
 type ProjectResponse {
   data: Project!
   message: String!
@@ -2537,6 +2752,7 @@ type Query {
   educationHistory(id: Int!, userId: Int!): EducationHistoryResponse!
   educationHistoryByUserId(userId: Int!): EducationHistoriesQueryResponse!
   employeeById(id: Int!): UserResponse!
+  employeeDashboard: EmployeeDashboardResponse!
   employeeScheduleAssignment(id: Int!): EmployeeScheduleAssignmentResponse!
   employeeScheduleAssignments: EmployeeScheduleAssignmentsQueryResponse!
   employeeScheduleAssignmentsByUser(userId: Int!): EmployeeScheduleAssignmentsQueryResponse!
@@ -2567,6 +2783,7 @@ type Query {
   notifications(query: QueryNotificationInput): NotificationsQueryResponse!
   onboardingProcessById(id: Int!): OnboardingProcessResponse!
   onboardingProcesses(query: QueryOnboardingProcessInput): OnboardingProcessesQueryResponse!
+  ownerDashboard: OwnerDashboardResponse!
   payrollComponentByCode(businessId: Int!, code: String!): PayrollComponentResponse!
   payrollComponentById(id: Int!): PayrollComponentResponse!
   payrollComponents(query: QueryPayrollComponentInput): PayrollComponentsQueryResponse!
@@ -2789,6 +3006,47 @@ input QueryWorkSiteInput {
   pagination: BasePaginationInput
   searchTerm: String
   status: Status
+}
+
+type RecentActivities {
+  recentActivities: [RecentActivityItem!]!
+  unreadNotifications: Int!
+}
+
+type RecentActivityItem {
+  message: String!
+  timestamp: DateTime!
+  type: String!
+}
+
+type RecentAttendanceItem {
+  checkInTime: DateTime
+  checkOutTime: DateTime
+  date: DateTime!
+  status: String!
+}
+
+type RecentNotification {
+  isRead: Boolean!
+  message: String!
+  timestamp: DateTime!
+  type: String!
+}
+
+type RecentProject {
+  endDate: DateTime
+  memberCount: Int!
+  name: String!
+  startDate: DateTime!
+  status: String!
+}
+
+type RecentTask {
+  dueDate: DateTime!
+  priority: String!
+  project: String!
+  status: String!
+  title: String!
 }
 
 type RecruitmentProcess {
@@ -3027,6 +3285,14 @@ type SubscriptionPlanResponse {
   success: Boolean!
 }
 
+type TaskOverview {
+  assigned: Int!
+  completed: Int!
+  inProgress: Int!
+  overdue: Int!
+  recentTasks: [RecentTask!]!
+}
+
 type TimeSlot {
   """End time of the slot"""
   endTime: String!
@@ -3059,6 +3325,20 @@ enum USER_ACCOUNT_STATUS {
 input UnassignProjectMemberInput {
   projectId: Int!
   userId: Int!
+}
+
+type UpcomingLeave {
+  employeeName: String!
+  endDate: DateTime!
+  leaveType: String!
+  startDate: DateTime!
+}
+
+type UpcomingLeaveItem {
+  endDate: DateTime!
+  leaveType: String!
+  startDate: DateTime!
+  status: String!
 }
 
 input UpdateAssetInput {
@@ -3919,4 +4199,10 @@ type WorkSitesQueryResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
+}
+
+type YearToDatePayroll {
+  totalDeductions: Float!
+  totalGrossPay: Float!
+  totalNetPay: Float!
 }

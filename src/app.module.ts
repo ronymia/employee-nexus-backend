@@ -51,6 +51,8 @@ import { PayrollComponentsModule } from './modules/payroll-components/payroll-co
 import { PayrollCyclesModule } from './modules/payroll-cycles/payroll-cycles.module';
 import { PayrollItemsModule } from './modules/payroll-items/payroll-items.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { OwnerDashboardModule } from './modules/owner-dashboard/owner-dashboard.module';
+import { EmployeeDashboardModule } from './modules/employee-dashboard/employee-dashboard.module';
 
 @Module({
   imports: [
@@ -108,6 +110,8 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     PayrollCyclesModule,
     PayrollItemsModule,
     NotificationsModule,
+    OwnerDashboardModule,
+    EmployeeDashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],
