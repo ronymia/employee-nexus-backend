@@ -34,6 +34,7 @@ export class OwnerDashboardService {
       this.getRecentActivities(businessId),
     ]);
 
+    // console.log({ recentProjects: projectOverview.recentProjects });
     return {
       businessOverview,
       attendanceAnalytics,
@@ -443,6 +444,7 @@ export class OwnerDashboardService {
         }),
       ]);
 
+    // console.log({ recentProjects });
     return {
       total,
       active,
@@ -452,8 +454,15 @@ export class OwnerDashboardService {
         name: project.name,
         status: project.status,
         memberCount: project._count.projectMembers,
-        startDate: project.startDate ? new Date(project.startDate) : new Date(),
-        endDate: project.endDate ? new Date(project.endDate) : undefined,
+        startDate: project.startDate
+          ? dayjs(project.startDate, 'DD-MM-YYYY').toDate()
+          : new Date(),
+        endDate: project.endDate
+          ? dayjs(project.startDate, 'DD-MM-YYYY').toDate()
+          : undefined,
+        // endDate: project.endDate
+        //   ? dayjs(project.endDate, 'DD-MM-YYYY').toDate()
+        //   : undefined,
       })),
     };
   }

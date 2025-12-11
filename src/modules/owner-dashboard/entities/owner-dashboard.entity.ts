@@ -1,4 +1,5 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
+import { IsOptional } from 'class-validator';
 import { BaseResponse } from 'src/common/dto/base-response.type';
 
 // ============ Business Overview ============
@@ -243,6 +244,7 @@ export class RecentProject {
   startDate: Date;
 
   @Field({ nullable: true })
+  @IsOptional()
   endDate?: Date;
 }
 

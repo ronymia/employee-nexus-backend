@@ -117,11 +117,11 @@ export class PayrollCyclesService {
   }
 
   async cancel(id: number) {
-    return this.prisma.payrollCycle.update({
+    return this.prisma.payrollCycle.delete({
       where: { id },
-      data: {
-        status: PayrollCycleStatus.CANCELLED,
-      },
+      // data: {
+      //   status: PayrollCycleStatus.CANCELLED,
+      // },
     });
   }
 

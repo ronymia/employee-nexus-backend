@@ -2082,6 +2082,7 @@ type Mutation {
   deleteNotification(id: Int!): NotificationResponse!
   deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
   deletePayrollComponent(id: Int!): PayrollComponentResponse!
+  deletePayrollItem(id: Int!): PayrollItemResponse!
   deleteProject(id: Int!): ProjectResponse!
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
   deleteSocialLink(profileId: Int!): SocialLinkResponse!
@@ -2133,6 +2134,7 @@ type Mutation {
   updateNotificationTemplate(updateNotificationTemplateInput: UpdateNotificationTemplateInput!): NotificationTemplateResponse!
   updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
   updatePayrollComponent(updatePayrollComponentInput: UpdatePayrollComponentInput!): PayrollComponentResponse!
+  updatePayrollItem(updatePayrollItemInput: UpdatePayrollItemInput!): PayrollItemResponse!
   updateProfile(updateProfileInput: UpdateProfileInput!): ProfileResponse!
   updateProject(updateProjectInput: UpdateProjectInput!): ProjectResponse!
   updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
@@ -3886,6 +3888,22 @@ input UpdatePayrollComponentInput {
   isStatutory: Boolean = false
   isTaxable: Boolean = true
   name: String
+}
+
+input UpdatePayrollItemInput {
+  absentDays: Float
+  adjustments: [PayslipAdjustmentInput!]
+  bankAccount: String
+  basicSalary: Float
+  components: [PayrollItemComponentInput!]
+  id: Int!
+  leaveDays: Float
+  notes: String
+  overtimeHours: Float
+  paymentMethod: String
+  presentDays: Float
+  transactionRef: String
+  workingDays: Int
 }
 
 input UpdateProfileInput {

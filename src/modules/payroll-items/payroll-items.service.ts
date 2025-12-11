@@ -6,6 +6,7 @@ import { PayrollComponentsService } from '../payroll-components/payroll-componen
 import { PayrollCyclesService } from '../payroll-cycles/payroll-cycles.service';
 import {
   CreatePayrollItemInput,
+  UpdatePayrollItemInput,
   QueryPayrollItemInput,
   AddPayslipAdjustmentInput,
   GeneratePayrollItemsInput,
@@ -528,5 +529,201 @@ export class PayrollItemsService {
     }
 
     return result;
+  }
+
+  async update(
+    user: JwtPayload,
+    updatePayrollItemInput: UpdatePayrollItemInput,
+  ) {
+    return this.prisma.$transaction(async (prisma) => {
+      // Get existing payroll item
+      const existingItem = await prisma.payrollItem.findUnique({
+        where: { id: updatePayrollItemInput.id },
+        include: {
+          components: true,
+          adjustments: true,
+        },
+      });
+
+      if (!existingItem) {
+        throw new Error('Payroll item not found');
+      }
+
+      // Check if payroll item can be updated (must be in PENDING or DRAFT status)
+      if (!['PENDING', 'DRAFT'].includes(existingItem.status)) {
+        throw new Error(
+          'Cannot update payroll item that is already approved or paid',
+        );
+      }
+
+      // Prepare update data
+      const updateData: any = {};
+      if (updatePayrollItemInput.basicSalary !== undefined) {
+        updateData.basicSalary = updatePayrollItemInput.basicSalary;
+      }
+      if (updatePayrollItemInput.workingDays !== undefined) {
+        updateData.workingDays = updatePayrollItemInput.workingDays;
+      }
+      if (updatePayrollItemInput.presentDays !== undefined) {
+        updateData.presentDays = updatePayrollItemInput.presentDays;
+      }
+      if (updatePayrollItemInput.absentDays !== undefined) {
+        updateData.absentDays = updatePayrollItemInput.absentDays;
+      }
+      if (updatePayrollItemInput.leaveDays !== undefined) {
+        updateData.leaveDays = updatePayrollItemInput.leaveDays;
+      }
+      if (updatePayrollItemInput.overtimeHours !== undefined) {
+        updateData.overtimeHours = updatePayrollItemInput.overtimeHours;
+      }
+      if (updatePayrollItemInput.notes !== undefined) {
+        updateData.notes = updatePayrollItemInput.notes;
+      }
+      if (updatePayrollItemInput.paymentMethod !== undefined) {
+        updateData.paymentMethod = updatePayrollItemInput.paymentMethod;
+      }
+      if (updatePayrollItemInput.bankAccount !== undefined) {
+        updateData.bankAccount = updatePayrollItemInput.bankAccount;
+      }
+      if (updatePayrollItemInput.transactionRef !== undefined) {
+        updateData.transactionRef = updatePayrollItemInput.transactionRef;
+      }
+
+      // Update components if provided
+      if (updatePayrollItemInput.components) {
+        // Delete existing components
+        await prisma.payrollItemComponent.deleteMany({
+          where: { payrollItemId: updatePayrollItemInput.id },
+        });
+
+        // Create new components
+        await prisma.payrollItemComponent.createMany({
+          data: updatePayrollItemInput.components.map((comp) => ({
+            payrollItemId: updatePayrollItemInput.id,
+            componentId: comp.componentId,
+            amount: comp.amount,
+            calculationBase: comp.calculationBase,
+            notes: comp.notes,
+          })),
+        });
+      }
+
+      // Update adjustments if provided
+      if (updatePayrollItemInput.adjustments) {
+        // Delete existing adjustments
+        await prisma.payslipAdjustment.deleteMany({
+          where: { payrollItemId: updatePayrollItemInput.id },
+        });
+
+        // Create new adjustments
+        await prisma.payslipAdjustment.createMany({
+          data: updatePayrollItemInput.adjustments.map((adj) => ({
+            payrollItemId: updatePayrollItemInput.id,
+            type: adj.type,
+            description: adj.description,
+            amount: adj.amount,
+            isRecurring: adj.isRecurring ?? false,
+            notes: adj.notes,
+            createdBy: user.userId,
+          })),
+        });
+      }
+
+      // Recalculate gross pay, deductions, and net pay if anything affecting calculation changed
+      const shouldRecalculate =
+        updatePayrollItemInput.basicSalary !== undefined ||
+        updatePayrollItemInput.components !== undefined ||
+        updatePayrollItemInput.adjustments !== undefined;
+
+      if (shouldRecalculate) {
+        // Build the input for calculation with updated values
+        const calculationInput = {
+          payrollCycleId: existingItem.payrollCycleId,
+          userId: existingItem.userId,
+          basicSalary:
+            updatePayrollItemInput.basicSalary ?? existingItem.basicSalary,
+          workingDays:
+            updatePayrollItemInput.workingDays ?? existingItem.workingDays,
+          presentDays:
+            updatePayrollItemInput.presentDays ?? existingItem.presentDays,
+          absentDays:
+            updatePayrollItemInput.absentDays ?? existingItem.absentDays,
+          leaveDays: updatePayrollItemInput.leaveDays ?? existingItem.leaveDays,
+          overtimeHours:
+            updatePayrollItemInput.overtimeHours ?? existingItem.overtimeHours,
+          components: updatePayrollItemInput.components,
+          adjustments: updatePayrollItemInput.adjustments,
+        };
+
+        const calculations = await this.calculatePayrollItem(
+          calculationInput as any,
+        );
+
+        updateData.grossPay = calculations.grossPay;
+        updateData.totalDeductions = calculations.totalDeductions;
+        updateData.netPay = calculations.netPay;
+      }
+
+      // Update the payroll item
+      const updatedItem = await prisma.payrollItem.update({
+        where: { id: updatePayrollItemInput.id },
+        data: updateData,
+        include: {
+          user: {
+            include: {
+              profile: true,
+            },
+          },
+          payrollCycle: true,
+          components: {
+            include: {
+              component: true,
+            },
+          },
+          adjustments: true,
+        },
+      });
+
+      return updatedItem;
+    });
+  }
+
+  async remove(id: number) {
+    return this.prisma.$transaction(async (prisma) => {
+      // Get payroll item
+      const payrollItem = await prisma.payrollItem.findUnique({
+        where: { id },
+      });
+
+      if (!payrollItem) {
+        throw new Error('Payroll item not found');
+      }
+
+      // Check if payroll item can be deleted (must be in PENDING or DRAFT status)
+      if (!['PENDING', 'DRAFT'].includes(payrollItem.status)) {
+        throw new Error(
+          'Cannot delete payroll item that is already approved or paid',
+        );
+      }
+
+      // Delete related records first
+      await prisma.payrollItemComponent.deleteMany({
+        where: { payrollItemId: id },
+      });
+
+      await prisma.payslipAdjustment.deleteMany({
+        where: { payrollItemId: id },
+      });
+
+      // Delete the payroll item
+      await prisma.payrollItem.delete({
+        where: { id },
+      });
+
+      // Update cycle totals after deletion
+      await this.payrollCyclesService.updateTotals(payrollItem.payrollCycleId);
+
+      return { id, deleted: true };
+    });
   }
 }
