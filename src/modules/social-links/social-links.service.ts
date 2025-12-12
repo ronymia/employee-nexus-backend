@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSocialLinkInput } from './dto/create-social-link.input';
 import { UpdateSocialLinkInput } from './dto/update-social-link.input';
 import { PrismaService } from '../prisma/prisma.service';
-import { JwtPayload } from '../auth/jwt.strategy';
 import { Prisma } from 'generated/prisma';
 
 @Injectable()
@@ -11,20 +10,18 @@ export class SocialLinksService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create({
-    user,
     createSocialLinkInput,
   }: {
-    user: JwtPayload;
     createSocialLinkInput: CreateSocialLinkInput;
   }) {
-    const { profileId, ...socialLinkData } = createSocialLinkInput;
-    const parsedProfileId = profileId;
+    const { userId, ...socialLinkData } = createSocialLinkInput;
+    const parsedUserId = userId;
 
     return await this.prisma.socialLink.upsert({
-      where: { profileId: parsedProfileId },
+      where: { userId: parsedUserId },
       update: socialLinkData,
       create: {
-        profileId: parsedProfileId,
+        userId: parsedUserId,
         ...socialLinkData,
       },
       include: {
@@ -74,9 +71,9 @@ export class SocialLinksService {
     return result;
   }
 
-  async findOne({ profileId }: { profileId: number }) {
+  async findOne({ userId }: { userId: number }) {
     const result = await this.prisma.socialLink.findUnique({
-      where: { profileId },
+      where: { userId },
       include: {
         profile: {
           include: {
@@ -93,7 +90,7 @@ export class SocialLinksService {
 
     if (!result) {
       throw new NotFoundException(
-        `Social links not found for profile ID ${profileId}`,
+        `Social links not found for user ID ${userId}`,
       );
     }
 
@@ -105,14 +102,14 @@ export class SocialLinksService {
   }: {
     updateSocialLinkInput: UpdateSocialLinkInput;
   }) {
-    const { profileId, ...updateData } = updateSocialLinkInput;
-    const parsedProfileId = profileId as number;
+    const { userId, ...updateData } = updateSocialLinkInput;
+    const parsedUserId = userId as number;
 
     return await this.prisma.socialLink.upsert({
-      where: { profileId: parsedProfileId },
+      where: { userId: parsedUserId },
       update: updateData,
       create: {
-        profileId: parsedProfileId,
+        userId: parsedUserId,
         ...updateData,
       },
       include: {
@@ -130,11 +127,11 @@ export class SocialLinksService {
     });
   }
 
-  async remove({ profileId }: { profileId: number }) {
-    await this.findOne({ profileId }); // Ensure the social link exists
+  async remove({ userId }: { userId: number }) {
+    await this.findOne({ userId }); // Ensure the social link exists
 
     return await this.prisma.socialLink.delete({
-      where: { profileId },
+      where: { userId },
       include: {
         profile: {
           include: {

@@ -1,14 +1,13 @@
-import {
-  Gender,
-  MaritalStatus,
-  Prisma,
-  PrismaClient,
-  UserAccountStatus,
-} from 'generated/prisma';
+import { Prisma, PrismaClient } from 'generated/prisma';
 import configuration from 'src/config/configuration';
 import { ROLE } from 'src/enums';
 import { PasswordHelpers } from 'src/helpers/passwordHelpers';
 import { seedNotificationTemplates } from './notification-templates';
+import {
+  Gender,
+  MaritalStatus,
+  UserAccountStatus,
+} from 'src/modules/users/enums';
 
 const prisma = new PrismaClient();
 

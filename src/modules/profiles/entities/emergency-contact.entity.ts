@@ -2,8 +2,8 @@ import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 
 @ObjectType()
 export class EmergencyContact {
-  @Field(() => Int)
-  profileId: number;
+  @Field(() => ID)
+  userId: number;
 
   @Field(() => String)
   name: string;
@@ -19,4 +19,19 @@ export class EmergencyContact {
 
   @Field(() => Date)
   updatedAt: Date;
+}
+
+@ObjectType()
+export class EmergencyContactResponse {
+  @Field(() => Boolean)
+  success: boolean;
+
+  @Field(() => Int)
+  statusCode: number;
+
+  @Field(() => String)
+  message: string;
+
+  @Field(() => EmergencyContact)
+  data: EmergencyContact;
 }

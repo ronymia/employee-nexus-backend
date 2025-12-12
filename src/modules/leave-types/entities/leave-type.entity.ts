@@ -1,32 +1,12 @@
 // LEAVE TYPE ENTITY - DEFINES GRAPHQL TYPES AND RESPONSE STRUCTURES FOR LEAVE TYPE
-import { ObjectType, Field, Int, registerEnumType, ID } from '@nestjs/graphql';
-import { Status, LeaveRolloverType } from 'generated/prisma';
+import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
 import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
 import { EmploymentStatus } from 'src/modules/employment-status/entities/employment-status.entity';
-
-// LEAVE TYPE ENUM - DEFINES PAID AND UNPAID LEAVE TYPES
-export enum LeaveTypeEnum {
-  PAID = 'PAID',
-  UNPAID = 'UNPAID',
-}
-
-registerEnumType(LeaveTypeEnum, {
-  name: 'LeaveTypeEnum',
-  description: 'Type of leave - paid or unpaid',
-});
-
-registerEnumType(Status, {
-  name: 'Status',
-  description: 'Status of the Leave Type',
-});
-
-registerEnumType(LeaveRolloverType, {
-  name: 'LeaveRolloverType',
-  description: 'Type of leave rollover policy',
-});
+import { LeaveRolloverType, LeaveTypeEnum } from '../enums';
+import { Status } from 'src/common/enums';
 
 @ObjectType()
 export class LeaveType {

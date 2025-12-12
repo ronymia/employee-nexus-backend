@@ -3,8 +3,8 @@ import { IsOptional, IsString, IsUrl } from 'class-validator';
 
 @InputType()
 export class CreateSocialLinkInput {
-  @Field(() => Int, { description: 'Profile ID' })
-  profileId: number;
+  @Field(() => Int, { description: 'User ID' })
+  userId: number;
 
   @Field(() => String, { description: 'Facebook profile URL', nullable: true })
   @IsString()

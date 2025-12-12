@@ -10,6 +10,11 @@ import {
 
 @InputType()
 export class CreateBusinessSettingInput {
+  @Field(() => Int)
+  @IsInt()
+  @Min(0)
+  businessId: number;
+
   @Field(() => String, {
     description: 'Prefix for business identifiers',
   })

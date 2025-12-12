@@ -1,11 +1,11 @@
 import { ObjectType, Field, Int, ID, registerEnumType } from '@nestjs/graphql';
-import { HolidayType } from 'generated/prisma';
 import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
 import { Business } from 'src/modules/businesses/entities/business.entity';
 import { User } from 'src/modules/users/entities/user.entity';
+import { HolidayType } from '../enums';
 
 registerEnumType(HolidayType, {
   name: 'HolidayType',

@@ -1,5 +1,18 @@
 import { registerEnumType } from '@nestjs/graphql';
-import { NotificationType } from 'generated/prisma';
+
+export enum NotificationType {
+  SYSTEM = 'SYSTEM',
+  ATTENDANCE = 'ATTENDANCE',
+  LEAVE = 'LEAVE',
+  PAYROLL = 'PAYROLL',
+  ASSET = 'ASSET',
+  PROJECT = 'PROJECT',
+  DOCUMENT = 'DOCUMENT',
+  HOLIDAY = 'HOLIDAY',
+  SCHEDULE = 'SCHEDULE',
+  ANNOUNCEMENT = 'ANNOUNCEMENT',
+  REMINDER = 'REMINDER',
+}
 
 registerEnumType(NotificationType, {
   name: 'NotificationType',

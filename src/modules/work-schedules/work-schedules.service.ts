@@ -9,10 +9,12 @@ import { CreateWorkScheduleInput } from './dto/create-work-schedule.input';
 import { UpdateWorkScheduleInput } from './dto/update-work-schedule.input';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtPayload } from '../auth/jwt.strategy';
-import { Prisma, ScheduleType } from 'generated/prisma';
+import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { QueryWorkScheduleInput } from './dto/query-work-schedule.input';
 import { workScheduleSearchableFields } from './work-schedule.constant';
+import { ScheduleType } from './enums';
+import { Status } from 'src/common/enums';
 
 @Injectable()
 export class WorkSchedulesService {
@@ -160,6 +162,7 @@ export class WorkSchedulesService {
         ...workScheduleData,
         businessId: user.businessId,
         createdBy: user.userId,
+        status: Status.ACTIVE,
         schedules: {
           create: schedules.map((schedule) => ({
             day: schedule.day,
@@ -326,13 +329,13 @@ export class WorkSchedulesService {
   // UPDATE WORK SCHEDULE - MODIFIES AN EXISTING WORK SCHEDULE RECORD
   async update({
     user,
-    id,
     updateWorkScheduleInput,
   }: {
     user: JwtPayload;
-    id: number;
     updateWorkScheduleInput: UpdateWorkScheduleInput;
   }) {
+    // Remove id and schedules from update input
+    const { id, schedules, ...updateData } = updateWorkScheduleInput;
     const businessId = user.businessId;
 
     // Check if the work schedule exists and belongs to the user's business
@@ -367,13 +370,11 @@ export class WorkSchedulesService {
       }
     }
 
-    // Remove id and schedules from update input
-    const { id: _id, schedules, ...updateData } = updateWorkScheduleInput;
-
     // If schedules are provided, validate schedule type consistency
     if (schedules && schedules.length > 0) {
       const scheduleType =
-        updateWorkScheduleInput.scheduleType || existingSchedule.scheduleType;
+        (updateWorkScheduleInput.scheduleType as ScheduleType) ||
+        (existingSchedule.scheduleType as ScheduleType);
       this.validateScheduleType(scheduleType, schedules);
     }
 

@@ -8,12 +8,7 @@ import {
 
 @ObjectType()
 export class BusinessSetting {
-  @Field(() => ID, {
-    description: 'Unique identifier for the business setting',
-  })
-  id: number;
-
-  @Field(() => Int, { description: 'ID of the business' })
+  @Field(() => ID, { description: 'ID of the business' })
   businessId: number;
 
   @Field(() => Business, { description: 'Business this setting belongs to' })

@@ -11,6 +11,7 @@ import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { NotificationsService } from '../notifications/notifications.service';
 import { RequestAttendanceInput } from './dto/request-attendance.input';
 import { ApproveAttendanceInput } from './dto/approve-attendance.input';
+import { NotificationChannel, NotificationType } from '../notifications/enums';
 
 @Injectable()
 export class AttendancesService {
@@ -27,8 +28,10 @@ export class AttendancesService {
     user: JwtPayload;
     createAttendanceInput: RequestAttendanceInput;
   }) {
+    // EXTRACT PUNCH RECORDS AND ATTENDANCE DATA
     const { punchRecords, ...attendanceData } = createAttendanceInput;
 
+    // CHECK IF ATTENDANCE ALREADY EXISTS FOR THIS USER AND DATE
     const existingAttendance = await this.prisma.attendance.findFirst({
       where: {
         userId: attendanceData.userId,
@@ -47,8 +50,13 @@ export class AttendancesService {
     const existingUser = await this.prisma.user.findUnique({
       where: { id: attendanceData.userId },
       include: {
+        employee: {
+          include: {
+            department: true,
+          },
+        },
         business: {
-          select: { id: true, userId: true },
+          select: { id: true, ownerId: true },
         },
       },
     });
@@ -91,12 +99,14 @@ export class AttendancesService {
       // Send notification to user
       try {
         await this.notificationsService.create({
-          type: 'ATTENDANCE',
+          type: NotificationType.ATTENDANCE,
           title: 'Attendance Requested',
           message: `Your attendance for ${new Date(attendance.date).toLocaleDateString()} has been recorded successfully.`,
           priority: 'LOW' as any,
-          userId: existingUser?.business?.userId || attendanceData.userId,
-          channels: ['IN_APP'],
+          userId:
+            (existingUser?.employee?.department?.managerId as number) ||
+            (existingUser?.business?.ownerId as number),
+          channels: [NotificationChannel.IN_APP, NotificationChannel.PUSH],
           businessId: user.businessId,
           entityType: 'attendance',
           entityId: attendance.id,
@@ -116,6 +126,7 @@ export class AttendancesService {
     user: JwtPayload;
     createAttendanceInput: CreateAttendanceInput;
   }) {
+    // EXTRACT PUNCH RECORDS AND ATTENDANCE DATA
     const { punchRecords, ...attendanceData } = createAttendanceInput;
 
     return await this.prisma.$transaction(async (prisma) => {
@@ -149,12 +160,12 @@ export class AttendancesService {
       // Send notification to user
       try {
         await this.notificationsService.create({
-          type: 'ATTENDANCE',
+          type: NotificationType.ATTENDANCE,
           title: 'Attendance Recorded',
           message: `Your attendance for ${new Date(attendance.date).toLocaleDateString()} has been recorded successfully.`,
           priority: 'LOW' as any,
           userId: attendanceData.userId,
-          channels: ['IN_APP'],
+          channels: [NotificationChannel.IN_APP, NotificationChannel.PUSH],
           businessId: user.businessId,
           entityType: 'attendance',
           entityId: attendance.id,

@@ -283,9 +283,6 @@ type AttendanceSetting {
   """ID of the business"""
   businessId: Int!
 
-  """Unique identifier for the attendance setting"""
-  id: ID!
-
   """Whether geo location is enabled"""
   isGeoLocationEnabled: Boolean!
 
@@ -390,6 +387,7 @@ type Business {
   name: String!
   numberOfEmployeesAllowed: Int!
   owner: User
+  ownerId: Int!
   phone: String!
   postcode: String!
   registrationDate: String!
@@ -397,7 +395,6 @@ type Business {
   subscriptionPlan: SubscriptionPlan
   subscriptionPlanId: Int!
   updatedAt: DateTime!
-  userId: Int!
   website: String
 }
 
@@ -450,7 +447,7 @@ type BusinessSetting {
   business: Business!
 
   """ID of the business"""
-  businessId: Int!
+  businessId: ID!
 
   """Business start day of the week (0-6, where 0=Sunday)"""
   businessStartDay: Int!
@@ -463,9 +460,6 @@ type BusinessSetting {
 
   """Delete read notifications setting"""
   deleteReadNotifications: String!
-
-  """Unique identifier for the business setting"""
-  id: ID!
 
   """Prefix for business identifiers"""
   identifierPrefix: String!
@@ -485,7 +479,7 @@ type BusinessSettingResponse {
   success: Boolean!
 }
 
-"""Business Status of Business"""
+"""Status of business"""
 enum BusinessStatus {
   ACTIVE
   INACTIVE
@@ -657,7 +651,7 @@ input CreateDepartmentInput {
   description: String!
 
   """ID of the manager"""
-  managerId: Int
+  managerId: Int!
 
   """Name of the department"""
   name: String!
@@ -929,7 +923,7 @@ input CreateNotificationInput {
 }
 
 input CreateNotificationTemplateInput {
-  businessId: Int
+  businessId: Int!
   channels: [NotificationChannel!]!
   isActive: Boolean
   message: String!
@@ -996,13 +990,14 @@ input CreateProfileInput {
   address: String!
   city: String!
   country: String!
-  dateOfBirth: String!
+  dateOfBirth: DateTime!
   fullName: String!
-  gender: GENDER!
-  maritalStatus: MARITAL_STATUS!
+  gender: Gender!
+  maritalStatus: MaritalStatus!
   phone: String!
   postcode: String!
   profilePicture: String
+  userId: ID!
 }
 
 input CreateProjectInput {
@@ -1038,11 +1033,11 @@ input CreateSocialLinkInput {
   """LinkedIn profile URL"""
   linkedin: String
 
-  """Profile ID"""
-  profileId: Int!
-
   """Twitter profile URL"""
   twitter: String
+
+  """User ID"""
+  userId: Int!
 }
 
 input CreateSubscriptionPlanInput {
@@ -1372,9 +1367,9 @@ type EmergencyContact {
   createdAt: DateTime!
   name: String!
   phone: String!
-  profileId: Int!
   relation: String!
   updatedAt: DateTime!
+  userId: ID!
 }
 
 type EmergencyContactResponse {
@@ -1423,13 +1418,6 @@ type EmployeeDashboardResponse {
   message: String!
   meta: PaginationMeta
   statusCode: Float!
-  success: Boolean!
-}
-
-type EmployeeResponse {
-  data: Employee!
-  message: String!
-  statusCode: Int!
   success: Boolean!
 }
 
@@ -1485,6 +1473,31 @@ type EmployeeScheduleAssignmentsQueryResponse {
   message: String!
   meta: PaginationMeta
   statusCode: Float!
+  success: Boolean!
+}
+
+type EmploymentDetails {
+  createdAt: DateTime!
+  departmentId: Int!
+  designationId: Int!
+  employeeId: String!
+  employmentStatusId: Int!
+  joiningDate: DateTime!
+  nidNumber: String!
+  rotaType: String!
+  salaryPerMonth: Float!
+  updatedAt: DateTime!
+  userId: ID!
+  workScheduleId: Int!
+  workSiteId: Int!
+  workingDaysPerWeek: Int
+  workingHoursPerWeek: Int
+}
+
+type EmploymentDetailsResponse {
+  data: EmploymentDetails!
+  message: String!
+  statusCode: Int!
   success: Boolean!
 }
 
@@ -1553,7 +1566,7 @@ type FeatureResponse {
 }
 
 """Gender of the user"""
-enum GENDER {
+enum Gender {
   FEMALE
   MALE
 }
@@ -1860,7 +1873,7 @@ type LeaveByType {
   leaveType: String!
 }
 
-"""Duration type for leave"""
+"""Duration type of the leave"""
 enum LeaveDuration {
   HALF_DAY
   MULTI_DAY
@@ -1883,7 +1896,7 @@ type LeaveResponse {
   success: Boolean!
 }
 
-"""Type of leave rollover policy"""
+"""Types of leave rollover policies"""
 enum LeaveRolloverType {
   FULL_ROLLOVER
   NONE
@@ -1898,10 +1911,7 @@ type LeaveSetting {
   business: Business!
 
   """ID of the business"""
-  businessId: Int!
-
-  """Unique identifier for the leave setting"""
-  id: ID!
+  businessId: ID!
 
   """Start month for leave cycle (0-11)"""
   startMonth: Int!
@@ -2011,7 +2021,7 @@ input LoginAuthInput {
 }
 
 """Marital status of the user"""
-enum MARITAL_STATUS {
+enum MaritalStatus {
   MARRIED
   SINGLE
 }
@@ -2085,7 +2095,7 @@ type Mutation {
   deletePayrollItem(id: Int!): PayrollItemResponse!
   deleteProject(id: Int!): ProjectResponse!
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
-  deleteSocialLink(profileId: Int!): SocialLinkResponse!
+  deleteSocialLink(userId: Int!): SocialLinkResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
   deleteUser(id: Int!): UserResponse!
   deleteWorkSchedule(id: Int!): WorkScheduleResponse!
@@ -2120,7 +2130,7 @@ type Mutation {
   updateEmergencyContact(updateEmergencyContactInput: UpdateEmergencyContactInput!): EmergencyContactResponse!
   updateEmployee(updateEmployeeInput: UpdateEmployeeInput!): UserResponse!
   updateEmployeeScheduleAssignment(updateEmployeeScheduleAssignmentInput: UpdateEmployeeScheduleAssignmentInput!): EmployeeScheduleAssignmentResponse!
-  updateEmploymentDetails(updateEmploymentDetailsInput: UpdateEmploymentDetailsInput!): EmployeeResponse!
+  updateEmploymentDetails(updateEmploymentDetailsInput: UpdateEmploymentDetailsInput!): EmploymentDetailsResponse!
   updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
   updateHoliday(updateHolidayInput: UpdateHolidayInput!): HolidayResponse!
   updateJobHistory(updateJobHistoryInput: UpdateJobHistoryInput!): JobHistoryResponse!
@@ -2642,15 +2652,14 @@ type Profile {
   dateOfBirth: String!
   emergencyContact: EmergencyContact
   fullName: String!
-  gender: GENDER!
-  id: ID!
-  maritalStatus: MARITAL_STATUS!
+  gender: Gender!
+  maritalStatus: MaritalStatus!
   phone: String!
   postcode: String!
   profilePicture: String
   socialLinks: SocialLink
   updatedAt: DateTime!
-  userId: Int!
+  userId: ID!
 }
 
 type ProfileResponse {
@@ -2801,7 +2810,7 @@ type Query {
   recruitmentProcessById(id: Int!): RecruitmentProcessResponse!
   recruitmentProcesses(query: QueryRecruitmentProcessInput): RecruitmentProcessesQueryResponse!
   roles: RoleResponse!
-  socialLink(profileId: Int!): SocialLinkResponse!
+  socialLink(userId: Int!): SocialLinkResponse!
   socialLinksByProfileId(profileId: Int): SocialLinkResponse!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
@@ -3232,7 +3241,7 @@ type SocialLinkResponse {
   success: Boolean!
 }
 
-"""Status of the Asset Type"""
+"""Status of the Job Type"""
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -3265,7 +3274,7 @@ type SubscriptionPlan {
   setupFee: Int!
 
   """Status of the service plan"""
-  status: String!
+  status: SubscriptionStatus!
 
   """Timestamp when the service plan was last updated"""
   updatedAt: DateTime!
@@ -3285,6 +3294,15 @@ type SubscriptionPlanResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
+}
+
+"""Status of the Subscription Plan"""
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  INACTIVE
+  TRIAL
 }
 
 type TaskOverview {
@@ -3307,21 +3325,6 @@ type TimeSlot {
 
   """Start time of the slot"""
   startTime: String!
-}
-
-"""User account status"""
-enum USER_ACCOUNT_STATUS {
-  ACTIVE
-  BLOCKED
-  DELETED
-  INACTIVE
-  ON_LEAVE
-  RESIGNED
-  RETIRED
-  SUSPENDED
-  TERMINATED
-  UNVERIFIED
-  VERIFIED
 }
 
 input UnassignProjectMemberInput {
@@ -3491,6 +3494,8 @@ input UpdateBusinessScheduleInput {
 }
 
 input UpdateBusinessSettingInput {
+  businessId: Int
+
   """Business start day of the week (0-6, where 0=Sunday)"""
   businessStartDay: Int = 0
 
@@ -3502,7 +3507,6 @@ input UpdateBusinessSettingInput {
 
   """Delete read notifications setting"""
   deleteReadNotifications: String
-  id: Int!
 
   """Prefix for business identifiers"""
   identifierPrefix: String
@@ -3590,9 +3594,6 @@ input UpdateEducationHistoryInput {
 }
 
 input UpdateEmergencyContactInput {
-  """ID of the profile to update"""
-  id: Int!
-
   """Emergency contact name"""
   name: String!
 
@@ -3601,6 +3602,9 @@ input UpdateEmergencyContactInput {
 
   """Relationship to the person"""
   relation: String!
+
+  """ID of the user to update"""
+  userId: Int!
 }
 
 input UpdateEmployeeInput {
@@ -3656,9 +3660,6 @@ input UpdateEmploymentDetailsInput {
   """Employment Status ID"""
   employmentStatusId: Int
 
-  """Profile ID (userId)"""
-  id: Int!
-
   """Joining date"""
   joiningDate: String
 
@@ -3670,6 +3671,9 @@ input UpdateEmploymentDetailsInput {
 
   """Salary per month"""
   salaryPerMonth: Float
+
+  """User ID"""
+  userId: Int!
 
   """Work Schedule ID"""
   workScheduleId: Int
@@ -3852,7 +3856,7 @@ input UpdateNotificationPreferenceInput {
 }
 
 input UpdateNotificationTemplateInput {
-  businessId: Int
+  businessId: Int!
   channels: [NotificationChannel!]!
   id: Int!
   isActive: Boolean
@@ -3910,16 +3914,14 @@ input UpdateProfileInput {
   address: String
   city: String
   country: String
-  dateOfBirth: String
+  dateOfBirth: DateTime
   fullName: String
-  gender: GENDER
-
-  """ID of the profile to update"""
-  id: Int!
-  maritalStatus: MARITAL_STATUS
+  gender: Gender
+  maritalStatus: MaritalStatus
   phone: String
   postcode: String
   profilePicture: String
+  userId: ID
 }
 
 input UpdateProjectInput {
@@ -3957,11 +3959,11 @@ input UpdateSocialLinkInput {
   """LinkedIn profile URL"""
   linkedin: String
 
-  """Profile ID"""
-  profileId: Int
-
   """Twitter profile URL"""
   twitter: String
+
+  """User ID"""
+  userId: Int
 }
 
 input UpdateSubscriptionPlanInput {
@@ -4064,11 +4066,26 @@ type User {
   roleId: Int
 
   """Status of the user account"""
-  status: USER_ACCOUNT_STATUS!
+  status: UserAccountStatus!
 
   """Date when the user was last updated"""
   updatedAt: DateTime!
   userPermissions: [UserPermission!]
+}
+
+"""Account status of the user"""
+enum UserAccountStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+  INACTIVE
+  ON_LEAVE
+  RESIGNED
+  RETIRED
+  SUSPENDED
+  TERMINATED
+  UNVERIFIED
+  VERIFIED
 }
 
 type UserPermission {

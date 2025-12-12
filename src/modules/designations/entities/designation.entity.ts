@@ -1,14 +1,10 @@
-import { ObjectType, Field, ID, registerEnumType, Int } from '@nestjs/graphql';
-import { Status } from 'generated/prisma';
+import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
+import { Status } from 'src/common/enums';
 
-registerEnumType(Status, {
-  name: 'Status',
-  description: 'Status of the Designation',
-});
 @ObjectType()
 export class Designation {
   @Field(() => ID, { description: 'Unique identifier for the designation' })

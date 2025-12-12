@@ -112,7 +112,6 @@ export class WorkSchedulesResolver {
   ) {
     const result = await this.workSchedulesService.update({
       user,
-      id: updateWorkScheduleInput.id,
       updateWorkScheduleInput,
     });
     return {

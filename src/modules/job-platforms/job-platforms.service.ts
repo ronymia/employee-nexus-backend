@@ -7,6 +7,7 @@ import { QueryJobPlatformInput } from './dto/query-job-platform.input';
 import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { jobPlatformSearchableFields } from './jobPlatform.constant';
+import { Status } from 'src/common/enums';
 
 @Injectable()
 export class JobPlatformsService {
@@ -27,6 +28,7 @@ export class JobPlatformsService {
         ...createJobPlatformInput,
         createdBy: user.userId,
         businessId: user.businessId,
+        status: Status.ACTIVE,
       },
     });
   }

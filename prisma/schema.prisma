@@ -8,159 +8,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserAccountStatus {
-  ACTIVE
-  INACTIVE
-  BLOCKED
-  DELETED
-  SUSPENDED
-  VERIFIED
-  UNVERIFIED
-  TERMINATED
-  RESIGNED
-  RETIRED
-  ON_LEAVE
-}
-
-enum MaritalStatus {
-  SINGLE
-  MARRIED
-}
-
-enum Gender {
-  MALE
-  FEMALE
-}
-
-enum Status {
-  ACTIVE
-  INACTIVE
-  DEACTIVATED
-}
-
-enum BusinessStatus {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
-  TRIAL_EXPIRED
-}
-
-enum ScheduleType {
-  REGULAR
-  SCHEDULED
-  FLEXIBLE
-}
-
-enum ScheduleBreakType {
-  PAID
-  UNPAID
-}
-
-/**
- * Better as an Int column rather than enum.
- * If you must keep enum, use semantic names — but prefer Int:
- * deleteReadNotificationsDays Int @default(30)
- */
-
-enum LeaveRolloverType {
-  NONE
-  PARTIAL_ROLLOVER
-  FULL_ROLLOVER
-}
-
-enum SubscriptionStatus {
-  ACTIVE
-  INACTIVE
-  TRIAL
-  EXPIRED
-  CANCELLED
-}
-
-enum LeaveDuration {
-  SINGLE_DAY
-  MULTI_DAY
-  HALF_DAY
-}
-
-enum HolidayType {
-  PUBLIC
-  RELIGIOUS
-  COMPANY_SPECIFIC
-  REGIONAL
-}
-
-enum PayrollCycleStatus {
-  DRAFT
-  PROCESSING
-  APPROVED
-  PAID
-  CANCELLED
-}
-
-enum PayrollFrequency {
-  WEEKLY
-  BI_WEEKLY
-  SEMI_MONTHLY
-  MONTHLY
-}
-
-enum ComponentType {
-  EARNING
-  DEDUCTION
-  EMPLOYER_COST
-}
-
-enum CalculationType {
-  FIXED_AMOUNT
-  PERCENTAGE_OF_BASIC
-  PERCENTAGE_OF_GROSS
-  HOURLY_RATE
-}
-
-enum PayrollItemStatus {
-  PENDING
-  APPROVED
-  PAID
-  ON_HOLD
-  CANCELLED
-}
-
-enum NotificationType {
-  SYSTEM
-  ATTENDANCE
-  LEAVE
-  PAYROLL
-  ASSET
-  PROJECT
-  DOCUMENT
-  HOLIDAY
-  SCHEDULE
-  ANNOUNCEMENT
-  REMINDER
-}
-
-enum NotificationChannel {
-  IN_APP
-  EMAIL
-  SMS
-  PUSH
-}
-
-enum NotificationPriority {
-  LOW
-  NORMAL
-  MEDIUM
-  HIGH
-  URGENT
-}
-
 model User {
-  id        Int               @id @default(autoincrement())
-  email     String            @unique
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
   password  String
-  status    UserAccountStatus @default(UNVERIFIED)
-  deletedBy Int?              @map("deleted_by")
-  profile   Profile?          @relation(name: "userProfile")
+  status    String
+  deletedBy Int?     @map("deleted_by")
+  profile   Profile? @relation(name: "userProfile")
 
   employee Employee? @relation(name: "userEmployee")
 
@@ -214,21 +68,20 @@ model User {
 }
 
 model Profile {
-  id             Int           @id @default(autoincrement())
-  fullName       String        @map("full_name")
-  phone          String
-  profilePicture String?       @map("profile_picture")
-  dateOfBirth    String        @map("date_of_birth")
-  gender         Gender
-  maritalStatus  MaritalStatus @map("marital_status")
+  user           User     @relation(name: "userProfile", fields: [userId], references: [id], onDelete: Cascade)
+  userId         Int      @id @map("user_id")
+  fullName       String   @map("full_name")
+  phone          String   @map("phone")
+  profilePicture String?  @map("profile_picture")
+  dateOfBirth    DateTime @map("date_of_birth")
+  gender         String   @map("gender")
+  maritalStatus  String   @map("marital_status")
   address        String
   city           String
   country        String
   postcode       String
   lat            Float?
   lng            Float?
-  user           User          @relation(name: "userProfile", fields: [userId], references: [id], onDelete: Cascade)
-  userId         Int           @unique @map("user_id")
 
   emergencyContact EmergencyContact? @relation(name: "profileEmergencyContact")
   socialLinks      SocialLink[]      @relation(name: "profileSocialLinks")
@@ -240,7 +93,7 @@ model Profile {
 }
 
 model Business {
-  id                       Int     @id @default(autoincrement())
+  id                       Int      @id @default(autoincrement())
   name                     String
   email                    String
   phone                    String
@@ -250,13 +103,13 @@ model Business {
   postcode                 String
   lat                      Float?
   lng                      Float?
-  registrationDate         String  @map("registration_date")
+  registrationDate         DateTime @map("registration_date")
   website                  String?
-  numberOfEmployeesAllowed Int     @map("number_of_employees_allowed")
+  numberOfEmployeesAllowed Int      @map("number_of_employees_allowed")
 
-  status             BusinessStatus   @default(ACTIVE)
-  owner              User             @relation(name: "businessOwner", fields: [userId], references: [id], onDelete: Cascade)
-  userId             Int              @unique @map("user_id")
+  status             String
+  owner              User             @relation(name: "businessOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId            Int              @unique @map("owner_id")
   subscriptionPlan   SubscriptionPlan @relation(name: "businessSubscriptionPlan", fields: [subscriptionPlanId], references: [id])
   subscriptionPlanId Int              @map("subscription_plan_id")
 
@@ -293,13 +146,12 @@ model Business {
   updatedAt DateTime @updatedAt @map("updated_at")
   assets    Asset[]  @relation(name: "businessAssets")
 
-  @@unique([name, userId, email])
+  @@unique([name, ownerId, email])
   @@map("businesses")
 }
 
 model BusinessSettings {
-  id                      Int       @id @default(autoincrement())
-  businessId              Int       @unique @map("business_id")
+  businessId              Int       @id @map("business_id")
   business                Business? @relation(name: "businessSettings", fields: [businessId], references: [id], onDelete: Cascade)
   identifierPrefix        String    @map("identifier_prefix")
   businessStartDay        Int       @default(0) @map("business_start_day")
@@ -313,8 +165,7 @@ model BusinessSettings {
 }
 
 model AttendanceSettings {
-  id                         Int       @id @default(autoincrement())
-  businessId                 Int       @unique @map("business_id")
+  businessId                 Int       @id @map("business_id")
   business                   Business? @relation(name: "attendanceSettings", fields: [businessId], references: [id], onDelete: Cascade)
   punchInTimeTolerance       Int       @default(15) @map("punch_in_time_tolerance")
   workAvailabilityDefinition Int       @default(80) @map("work_availability_definition")
@@ -327,8 +178,7 @@ model AttendanceSettings {
 }
 
 model LeaveSettings {
-  id           Int       @id @default(autoincrement())
-  businessId   Int       @unique @map("business_id")
+  businessId   Int       @id @map("business_id")
   business     Business? @relation(name: "leaveSettings", fields: [businessId], references: [id], onDelete: Cascade)
   startMonth   Int       @default(0) @map("start_month")
   autoApproval Boolean   @default(false) @map("auto_approval")
@@ -336,25 +186,48 @@ model LeaveSettings {
   @@map("leave_settings")
 }
 
+enum PaymentFrequency {
+  WEEKLY
+  BI_WEEKLY
+  SEMI_MONTHLY
+  MONTHLY
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  CHECK
+  CASH
+  MOBILE_MONEY
+}
+
 model PaymentSettings {
-  id          Int       @id @default(autoincrement())
-  businessId  Int       @unique @map("business_id")
-  business    Business? @relation(name: "paymentSettings", fields: [businessId], references: [id], onDelete: Cascade)
-  paymentType String    @map("payment_type")
-  dayOfWeek   Int?      @map("day_of_week")
-  dayOfMonth  Int?      @map("day_of_month")
+  businessId           Int       @id @map("business_id")
+  business             Business? @relation(name: "paymentSettings", fields: [businessId], references: [id], onDelete: Cascade)
+  paymentFrequency     String    @map("payment_frequency")
+  dayOfWeek            Int?      @map("day_of_week")
+  dayOfMonth           Int?      @map("day_of_month")
+  paymentMethod        String    @map("default_payment_method")
+  autoApprovePayments  Boolean   @default(false) @map("auto_approve_payments")
+  gracePerDays         Int?      @default(3) @map("grace_period_days") // Days before payment to lock payroll
+  allowPartialPayments Boolean   @default(false) @map("allow_partial_payments")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("payment_settings")
 }
 
 model BusinessSchedule {
   id         Int       @id @default(autoincrement())
-  day        Int
+  day        Int // 0=Sunday, 6=Saturday
   isWeekend  Boolean   @map("is_weekend")
-  startTime  String    @map("start_time")
-  endTime    String    @map("end_time")
+  startTime  String    @map("start_time") // Format: "HH:mm:ss" or "HH:mm"
+  endTime    String    @map("end_time") // Format: "HH:mm:ss" or "HH:mm"
   businessId Int       @map("business_id")
   business   Business? @relation(name: "businessSchedules", fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([businessId, day, startTime, endTime])
   @@index([businessId])
@@ -420,7 +293,7 @@ model SubscriptionPlan {
   name        String @unique
   description String
   setupFee    Int    @map("setup_fee")
-  status      Status @default(ACTIVE)
+  status      String
   price       Int
 
   businesses  Business[]                @relation(name: "businessSubscriptionPlan")
@@ -475,15 +348,15 @@ model BusinessFeature {
 }
 
 model BusinessSubscription {
-  id                 Int                @id @default(autoincrement())
-  businessId         Int                @map("business_id")
-  business           Business           @relation(name: "businessSubscriptions", fields: [businessId], references: [id], onDelete: Cascade)
-  subscriptionPlanId Int                @map("subscription_plan_id")
-  SubscriptionPlan   SubscriptionPlan   @relation(name: "subscriptionPlanInBusiness", fields: [subscriptionPlanId], references: [id], onDelete: Cascade)
-  trialEndDate       String?            @map("trial_end_date")
-  startDate          String?            @map("start_date")
-  endDate            String?            @map("end_date")
-  status             SubscriptionStatus @default(TRIAL)
+  id                 Int              @id @default(autoincrement())
+  businessId         Int              @map("business_id")
+  business           Business         @relation(name: "businessSubscriptions", fields: [businessId], references: [id], onDelete: Cascade)
+  subscriptionPlanId Int              @map("subscription_plan_id")
+  SubscriptionPlan   SubscriptionPlan @relation(name: "subscriptionPlanInBusiness", fields: [subscriptionPlanId], references: [id], onDelete: Cascade)
+  trialEndDate       DateTime?        @map("trial_end_date")
+  startDate          DateTime?        @map("start_date")
+  endDate            DateTime?        @map("end_date")
+  status             String
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -497,7 +370,7 @@ model Designation {
   id          Int       @id @default(autoincrement())
   name        String
   description String
-  status      Status    @default(ACTIVE)
+  status      String
   businessId  Int?      @map("business_id")
   business    Business? @relation(name: "designationsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy   Int?      @map("created_by")
@@ -517,7 +390,7 @@ model JobType {
   id          Int       @id @default(autoincrement())
   name        String
   description String
-  status      Status    @default(ACTIVE)
+  status      String
   businessId  Int?      @map("business_id")
   business    Business? @relation(name: "jobTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy   Int?      @map("created_by")
@@ -535,7 +408,7 @@ model JobPlatform {
   id          Int       @id @default(autoincrement())
   name        String
   description String
-  status      Status    @default(ACTIVE)
+  status      String
   businessId  Int?      @map("business_id")
   business    Business? @relation(name: "jobPlatformsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy   Int?      @map("created_by")
@@ -553,7 +426,7 @@ model RecruitmentProcess {
   id          Int       @id @default(autoincrement())
   name        String
   description String
-  status      Status    @default(ACTIVE)
+  status      String
   isRequired  Boolean   @map("is_required")
   businessId  Int?      @map("business_id")
   business    Business? @relation(name: "recruitmentProcessesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
@@ -572,7 +445,7 @@ model OnboardingProcess {
   id          Int       @id @default(autoincrement())
   name        String
   description String
-  status      Status    @default(ACTIVE)
+  status      String
   isRequired  Boolean   @map("is_required")
   businessId  Int?      @map("business_id")
   business    Business? @relation(name: "onboardingProcessesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
@@ -591,7 +464,7 @@ model WorkSite {
   id                   Int       @id @default(autoincrement())
   name                 String
   description          String
-  status               Status    @default(ACTIVE)
+  status               String
   address              String?
   isLocationEnabled    Boolean?  @map("is_location_enabled")
   isGeoLocationEnabled Boolean?  @map("is_geo_location_enabled")
@@ -620,11 +493,11 @@ model Department {
   parent      Department?  @relation(name: "DepartmentHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
   name        String
   description String
-  status      Status       @default(ACTIVE)
-  businessId  Int?         @map("business_id")
-  business    Business?    @relation(name: "departmentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  managerId   Int?         @map("manager_id")
-  manager     User?        @relation(name: "managedDepartments", fields: [managerId], references: [id], onDelete: Restrict)
+  status      String
+  businessId  Int          @map("business_id")
+  business    Business     @relation(name: "departmentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  managerId   Int          @map("manager_id")
+  manager     User         @relation(name: "managedDepartments", fields: [managerId], references: [id], onDelete: Restrict)
   createdBy   Int?         @map("created_by")
   creator     User?        @relation(name: "departmentCreated", fields: [createdBy], references: [id], onDelete: SetNull)
   children    Department[] @relation("DepartmentHierarchy")
@@ -641,18 +514,18 @@ model Department {
 }
 
 model WorkSchedule {
-  id           Int               @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   name         String
   description  String
-  status       Status            @default(ACTIVE)
-  scheduleType ScheduleType      @default(REGULAR)
-  breakType    ScheduleBreakType @default(UNPAID) @map("break_type")
-  breakHours   Int               @default(0) @map("break_hours")
-  businessId   Int?              @map("business_id")
-  business     Business?         @relation(name: "workSchedulesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  createdBy    Int?              @map("created_by")
-  creator      User?             @relation(name: "workScheduleCreated", fields: [createdBy], references: [id], onDelete: SetNull)
-  schedules    DaySchedule[]     @relation(name: "daySchedule")
+  status       String
+  scheduleType String
+  breakType    String
+  breakHours   Int           @default(0) @map("break_hours")
+  businessId   Int           @map("business_id")
+  business     Business      @relation(name: "workSchedulesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  createdBy    Int?          @map("created_by")
+  creator      User?         @relation(name: "workScheduleCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  schedules    DaySchedule[] @relation(name: "daySchedule")
 
   employees           Employee[]                   @relation(name: "employeeWorkSchedule")
   scheduleAssignments EmployeeScheduleAssignment[] @relation(name: "workScheduleAssignments")
@@ -715,10 +588,10 @@ model EmploymentStatus {
   id          Int                         @id @default(autoincrement())
   name        String
   description String
-  status      Status                      @default(ACTIVE)
+  status      String
   leaveTypes  LeaveTypeEmploymentStatus[]
-  businessId  Int?                        @map("business_id")
-  business    Business?                   @relation(name: "employmentStatusesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  businessId  Int                         @map("business_id")
+  business    Business                    @relation(name: "employmentStatusesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy   Int?                        @map("created_by")
   creator     User?                       @relation(name: "employmentStatusCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
@@ -748,12 +621,12 @@ model LeaveType {
   name               String
   leaveType          String                      @map("leave_type")
   leaveHours         Int                         @default(0) @map("leave_hours")
-  leaveRolloverType  LeaveRolloverType           @default(NONE) @map("leave_rollover_type")
+  leaveRolloverType  String                      @map("leave_rollover_type")
   carryOverLimit     Int?                        @map("carry_over_limit")
-  status             Status                      @default(ACTIVE)
+  status             String
   employmentStatuses LeaveTypeEmploymentStatus[]
-  businessId         Int?                        @map("business_id")
-  business           Business?                   @relation(name: "leaveTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  businessId         Int                         @map("business_id")
+  business           Business                    @relation(name: "leaveTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy          Int?                        @map("created_by")
   creator            User?                       @relation(name: "leaveTypeCreated", fields: [createdBy], references: [id], onDelete: SetNull)
   leaves             Leave[]                     @relation(name: "leaveTypeInLeave")
@@ -767,15 +640,15 @@ model LeaveType {
 }
 
 model AssetType {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   description String
-  status      Status    @default(ACTIVE)
-  businessId  Int?      @map("business_id")
-  business    Business? @relation(name: "assetTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  createdBy   Int?      @map("created_by")
-  creator     User?     @relation(name: "assetTypesCreated", fields: [createdBy], references: [id], onDelete: SetNull)
-  assets      Asset[]   @relation(name: "assetTypesInAsset")
+  status      String
+  businessId  Int      @map("business_id")
+  business    Business @relation(name: "assetTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  createdBy   Int?     @map("created_by")
+  creator     User?    @relation(name: "assetTypesCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  assets      Asset[]  @relation(name: "assetTypesInAsset")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -795,8 +668,8 @@ model Asset {
   assetType        AssetType?        @relation(name: "assetTypesInAsset", fields: [assetTypeId], references: [id], onDelete: SetNull)
   image            String?
   status           String            @default("unassigned")
-  businessId       Int?              @map("business_id")
-  business         Business?         @relation(name: "businessAssets", fields: [businessId], references: [id], onDelete: Cascade)
+  businessId       Int               @map("business_id")
+  business         Business          @relation(name: "businessAssets", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy        Int?              @map("created_by")
   creator          User?             @relation(name: "assetCreated", fields: [createdBy], references: [id], onDelete: SetNull)
   assetAssignments AssetAssignment[] @relation(name: "assetAssignmentsInAsset")
@@ -840,7 +713,7 @@ model Project {
   startDate         String?           @map("start_date")
   endDate           String?           @map("end_date")
   businessId        Int               @map("business_id")
-  business          Business?         @relation(name: "projectsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  business          Business          @relation(name: "projectsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy         Int?              @map("created_by")
   creator           User?             @relation(name: "projectCreated", fields: [createdBy], references: [id], onDelete: SetNull)
   projectMembers    ProjectMember[]   @relation(name: "projectMembersInProject")
@@ -855,13 +728,13 @@ model Project {
 }
 
 model ProjectMember {
-  id        Int     @id @default(autoincrement())
-  projectId Int     @map("project_id")
-  project   Project @relation(name: "projectMembersInProject", fields: [projectId], references: [id], onDelete: Cascade)
-  userId    Int     @map("user_id")
-  user      User    @relation(name: "projectMembersInUser", fields: [userId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  projectId Int      @map("project_id")
+  project   Project  @relation(name: "projectMembersInProject", fields: [projectId], references: [id], onDelete: Cascade)
+  userId    Int      @map("user_id")
+  user      User     @relation(name: "projectMembersInUser", fields: [userId], references: [id], onDelete: Cascade)
   role      String?
-  // joinedAt  DateTime @default(now()) @map("joined_at")
+  joinedAt  DateTime @default(now()) @map("joined_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -873,8 +746,7 @@ model ProjectMember {
 }
 
 model Employee {
-  id                  Int              @id @default(autoincrement())
-  userId              Int              @unique @map("user_id")
+  userId              Int              @id @map("user_id")
   user                User             @relation(name: "userEmployee", fields: [userId], references: [id], onDelete: Cascade)
   employeeId          String           @unique @map("employee_id")
   nidNumber           String           @map("nid_number")
@@ -901,11 +773,11 @@ model Employee {
 }
 
 model EmergencyContact {
-  profileId Int     @id @map("profile_id")
-  profile   Profile @relation(name: "profileEmergencyContact", fields: [profileId], references: [id], onDelete: Cascade)
-  name      String  @map("name")
-  phone     String  @map("phone")
-  relation  String  @map("relation")
+  userId   Int     @id @map("profile_id")
+  profile  Profile @relation(name: "profileEmergencyContact", fields: [userId], references: [userId], onDelete: Cascade)
+  name     String  @map("name")
+  phone    String  @map("phone")
+  relation String  @map("relation")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -975,8 +847,8 @@ model Note {
   id        Int     @id @default(autoincrement())
   userId    Int     @map("user_id")
   user      User    @relation(name: "userNotes", fields: [userId], references: [id], onDelete: Cascade)
-  createdBy Int     @map("created_by")
-  creator   User    @relation(name: "noteCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  createdBy Int?    @map("created_by")
+  creator   User?   @relation(name: "noteCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
   title     String  @map("title")
   content   String  @map("content")
   category  String? @map("category") // e.g., "Performance", "Incident", "General", "Feedback"
@@ -991,8 +863,8 @@ model Note {
 }
 
 model SocialLink {
-  profileId Int     @id @map("profile_id")
-  profile   Profile @relation(name: "profileSocialLinks", fields: [profileId], references: [id], onDelete: Cascade)
+  userId    Int     @id @map("profile_id")
+  profile   Profile @relation(name: "profileSocialLinks", fields: [userId], references: [userId], onDelete: Cascade)
   facebook  String? @map("facebook")
   twitter   String? @map("twitter")
   linkedin  String? @map("linkedin")
@@ -1035,8 +907,6 @@ model AttendancePunch {
   workSite       WorkSite?  @relation(name: "attendancePunchWorkSite", fields: [workSiteId], references: [id], onDelete: SetNull)
   punchIn        DateTime   @map("punch_in") // Clock in timestamp
   punchOut       DateTime?  @map("punch_out") // Clock out timestamp (null if not clocked out yet)
-  breakStart     DateTime?  @map("break_start") // Break start timestamp
-  breakEnd       DateTime?  @map("break_end") // Break end timestamp
   workHours      Float?     @map("work_hours") // Calculated hours for this punch session
   breakHours     Float?     @map("break_hours") // Calculated break hours for this punch session
   punchInIp      String?    @map("punch_in_ip") // IP address used for punch in
@@ -1060,23 +930,23 @@ model AttendancePunch {
 }
 
 model Leave {
-  id              Int           @id @default(autoincrement())
-  userId          Int           @map("user_id")
-  user            User          @relation(name: "userLeaves", fields: [userId], references: [id], onDelete: Cascade)
-  leaveTypeId     Int           @map("leave_type_id")
-  leaveType       LeaveType     @relation(name: "leaveTypeInLeave", fields: [leaveTypeId], references: [id], onDelete: Restrict)
-  leaveYear       Int           @map("leave_year") // Year this leave applies to (e.g., 2025)
-  leaveDuration   LeaveDuration @map("leave_duration") // SINGLE_DAY, MULTI_DAY, HALF_DAY
-  startDate       DateTime      @map("start_date") // Leave start date
-  endDate         DateTime?     @map("end_date") // Leave end date (null for single day)
-  totalHours      Float         @map("total_hours") // Total leave hours deducted from balance
-  status          String        @default("pending") @map("status") // pending, approved, rejected, cancelled
-  reviewedAt      DateTime?     @map("reviewed_at") // When leave was approved/rejected
-  reviewedBy      Int?          @map("reviewed_by") // Manager/admin who reviewed
-  reviewer        User?         @relation(name: "leaveReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
-  rejectionReason String?       @map("rejection_reason") // Reason for rejection if rejected
-  attachments     String?       @map("attachments") // Supporting documents (JSON array or comma-separated URLs)
-  notes           String?       @map("notes") // Additional notes or comments
+  id              Int       @id @default(autoincrement())
+  userId          Int       @map("user_id")
+  user            User      @relation(name: "userLeaves", fields: [userId], references: [id], onDelete: Cascade)
+  leaveTypeId     Int       @map("leave_type_id")
+  leaveType       LeaveType @relation(name: "leaveTypeInLeave", fields: [leaveTypeId], references: [id], onDelete: Restrict)
+  leaveYear       Int       @map("leave_year") // Year this leave applies to (e.g., 2025)
+  leaveDuration   String    @map("leave_duration") // SINGLE_DAY, MULTI_DAY, HALF_DAY
+  startDate       DateTime  @map("start_date") // Leave start date
+  endDate         DateTime? @map("end_date") // Leave end date (null for single day)
+  totalHours      Float     @map("total_hours") // Total leave hours deducted from balance
+  status          String    @default("pending") @map("status") // pending, approved, rejected, cancelled
+  reviewedAt      DateTime? @map("reviewed_at") // When leave was approved/rejected
+  reviewedBy      Int?      @map("reviewed_by") // Manager/admin who reviewed
+  reviewer        User?     @relation(name: "leaveReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  rejectionReason String?   @map("rejection_reason") // Reason for rejection if rejected
+  attachments     String?   @map("attachments") // Supporting documents (JSON array or comma-separated URLs)
+  notes           String?   @map("notes") // Additional notes or comments
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1092,18 +962,18 @@ model Leave {
 }
 
 model Holiday {
-  id          Int         @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   description String?
-  startDate   DateTime    @map("start_date") // Holiday start date
-  endDate     DateTime    @map("end_date") // Holiday end date (same as startDate for single-day)
-  isRecurring Boolean     @default(false) @map("is_recurring") // Annual recurring holiday
-  isPaid      Boolean     @default(true) @map("is_paid") // Paid holiday or unpaid
-  holidayType HolidayType @map("holiday_type") // PUBLIC, RELIGIOUS, COMPANY_SPECIFIC, REGIONAL
-  businessId  Int?        @map("business_id")
-  business    Business?   @relation(name: "holidaysInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  createdBy   Int?        @map("created_by")
-  creator     User?       @relation(name: "holidayCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  startDate   DateTime @map("start_date") // Holiday start date
+  endDate     DateTime @map("end_date") // Holiday end date (same as startDate for single-day)
+  isRecurring Boolean  @default(false) @map("is_recurring") // Annual recurring holiday
+  isPaid      Boolean  @default(true) @map("is_paid") // Paid holiday or unpaid
+  holidayType String   @map("holiday_type") // PUBLIC, RELIGIOUS, COMPANY_SPECIFIC, REGIONAL
+  businessId  Int      @map("business_id")
+  business    Business @relation(name: "holidaysInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  createdBy   Int?     @map("created_by")
+  creator     User?    @relation(name: "holidayCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1115,19 +985,19 @@ model Holiday {
 }
 
 model PayrollComponent {
-  id              Int             @id @default(autoincrement())
+  id              Int      @id @default(autoincrement())
   name            String
   code            String
   description     String?
-  componentType   ComponentType   @map("component_type")
-  calculationType CalculationType @map("calculation_type")
-  defaultValue    Float?          @map("default_value")
-  isActive        Boolean         @default(true) @map("is_active")
-  isTaxable       Boolean         @default(true) @map("is_taxable")
-  isStatutory     Boolean         @default(false) @map("is_statutory")
-  displayOrder    Int?            @map("display_order")
-  businessId      Int?            @map("business_id")
-  business        Business?       @relation(name: "payrollComponentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  componentType   String   @map("component_type")
+  calculationType String   @map("calculation_type")
+  defaultValue    Float?   @map("default_value")
+  isActive        Boolean  @default(true) @map("is_active")
+  isTaxable       Boolean  @default(true) @map("is_taxable")
+  isStatutory     Boolean  @default(false) @map("is_statutory")
+  displayOrder    Int?     @map("display_order")
+  businessId      Int      @map("business_id")
+  business        Business @relation(name: "payrollComponentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
 
   payrollItemComponents PayrollItemComponent[] @relation(name: "componentInPayrollItem")
 
@@ -1141,24 +1011,24 @@ model PayrollComponent {
 }
 
 model PayrollCycle {
-  id              Int                @id @default(autoincrement())
+  id              Int       @id @default(autoincrement())
   name            String
-  frequency       PayrollFrequency
-  periodStart     DateTime           @map("period_start")
-  periodEnd       DateTime           @map("period_end")
-  paymentDate     DateTime           @map("payment_date")
-  status          PayrollCycleStatus @default(DRAFT)
-  totalGrossPay   Float              @default(0) @map("total_gross_pay")
-  totalDeductions Float              @default(0) @map("total_deductions")
-  totalNetPay     Float              @default(0) @map("total_net_pay")
-  totalEmployees  Int                @default(0) @map("total_employees")
-  approvedBy      Int?               @map("approved_by")
-  approvedAt      DateTime?          @map("approved_at")
-  processedBy     Int?               @map("processed_by")
-  processedAt     DateTime?          @map("processed_at")
+  frequency       String
+  periodStart     DateTime  @map("period_start")
+  periodEnd       DateTime  @map("period_end")
+  paymentDate     DateTime  @map("payment_date")
+  status          String
+  totalGrossPay   Float     @default(0) @map("total_gross_pay")
+  totalDeductions Float     @default(0) @map("total_deductions")
+  totalNetPay     Float     @default(0) @map("total_net_pay")
+  totalEmployees  Int       @default(0) @map("total_employees")
+  approvedBy      Int?      @map("approved_by")
+  approvedAt      DateTime? @map("approved_at")
+  processedBy     Int?      @map("processed_by")
+  processedAt     DateTime? @map("processed_at")
   notes           String?
-  businessId      Int                @map("business_id")
-  business        Business           @relation(name: "payrollCyclesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  businessId      Int       @map("business_id")
+  business        Business  @relation(name: "payrollCyclesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
 
   payrollItems PayrollItem[] @relation(name: "payrollItemsInCycle")
 
@@ -1173,25 +1043,25 @@ model PayrollCycle {
 }
 
 model PayrollItem {
-  id              Int               @id @default(autoincrement())
-  payrollCycleId  Int               @map("payroll_cycle_id")
-  payrollCycle    PayrollCycle      @relation(name: "payrollItemsInCycle", fields: [payrollCycleId], references: [id], onDelete: Cascade)
-  userId          Int               @map("user_id")
-  user            User              @relation(name: "userPayrollItems", fields: [userId], references: [id], onDelete: Cascade)
-  basicSalary     Float             @map("basic_salary")
-  grossPay        Float             @map("gross_pay")
-  totalDeductions Float             @map("total_deductions")
-  netPay          Float             @map("net_pay")
-  workingDays     Int               @map("working_days")
-  presentDays     Float             @map("present_days")
-  absentDays      Float             @map("absent_days")
-  leaveDays       Float             @map("leave_days")
-  overtimeHours   Float?            @map("overtime_hours")
-  status          PayrollItemStatus @default(PENDING)
-  paymentMethod   String?           @map("payment_method")
-  bankAccount     String?           @map("bank_account")
-  transactionRef  String?           @map("transaction_ref")
-  paidAt          DateTime?         @map("paid_at")
+  id              Int          @id @default(autoincrement())
+  payrollCycleId  Int          @map("payroll_cycle_id")
+  payrollCycle    PayrollCycle @relation(name: "payrollItemsInCycle", fields: [payrollCycleId], references: [id], onDelete: Cascade)
+  userId          Int          @map("user_id")
+  user            User         @relation(name: "userPayrollItems", fields: [userId], references: [id], onDelete: Cascade)
+  basicSalary     Float        @map("basic_salary")
+  grossPay        Float        @map("gross_pay")
+  totalDeductions Float        @map("total_deductions")
+  netPay          Float        @map("net_pay")
+  workingDays     Int          @map("working_days")
+  presentDays     Float        @map("present_days")
+  absentDays      Float        @map("absent_days")
+  leaveDays       Float        @map("leave_days")
+  overtimeHours   Float?       @map("overtime_hours")
+  status          String
+  paymentMethod   String       @map("payment_method")
+  bankAccount     String?      @map("bank_account")
+  transactionRef  String?      @map("transaction_ref")
+  paidAt          DateTime?    @map("paid_at")
   notes           String?
 
   components  PayrollItemComponent[] @relation(name: "payrollItemComponents")
@@ -1247,16 +1117,16 @@ model PayslipAdjustment {
 // ============ NOTIFICATION MANAGEMENT ============
 
 model NotificationTemplate {
-  id         Int                   @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   name       String // "leave_approved", "payslip_generated", "attendance_late"
-  type       NotificationType
+  type       String
   title      String // "Leave Request {{status}}"
   message    String // "Your leave from {{startDate}} to {{endDate}} has been {{status}}"
-  priority   NotificationPriority  @default(NORMAL)
-  channels   NotificationChannel[] // Default channels for this template
-  isActive   Boolean               @default(true) @map("is_active")
-  businessId Int?                  @map("business_id")
-  business   Business?             @relation(name: "notificationTemplates", fields: [businessId], references: [id], onDelete: Cascade)
+  priority   String
+  channels   String[] // Default channels for this template
+  isActive   Boolean   @default(true) @map("is_active")
+  businessId Int?      @map("business_id")
+  business   Business? @relation(name: "notificationTemplates", fields: [businessId], references: [id], onDelete: Cascade)
 
   notifications Notification[] @relation(name: "templateNotifications")
 
@@ -1270,11 +1140,11 @@ model NotificationTemplate {
 }
 
 model Notification {
-  id       Int                  @id @default(autoincrement())
-  type     NotificationType // What kind of notification
+  id       Int    @id @default(autoincrement())
+  type     String // What kind of notification
   title    String // Notification title (rendered from template or custom)
   message  String // Notification content (rendered from template or custom)
-  priority NotificationPriority @default(NORMAL)
+  priority String
 
   // Template relationship (optional - can be null for ad-hoc notifications)
   notificationTemplateId Int?                  @map("notification_template_id")
@@ -1294,8 +1164,8 @@ model Notification {
   readAt DateTime? @map("read_at")
 
   // Multi-channel delivery
-  channels NotificationChannel[] // Which channels to send on
-  sentVia  NotificationChannel[] @map("sent_via") // Which channels were actually sent
+  channels String[] // Which channels to send on
+  sentVia  String[] @map("sent_via") // Which channels were actually sent
 
   // Business context
   businessId Int?      @map("business_id")

@@ -1,4 +1,4 @@
-import { LeaveRolloverType } from 'generated/prisma';
+import { LeaveRolloverType } from 'src/modules/leave-types/enums';
 
 export const defaultLeaveTypes = [
   {

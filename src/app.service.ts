@@ -22,7 +22,6 @@ import { defaultLeaveTypes } from './Database/leave-type';
 import { defaultRecruitmentProcesses } from './Database/recruitment-process';
 import { defaultOnboardingProcesses } from './Database/onboarding-process';
 import { features } from './Database/features';
-import { seedNotificationTemplates } from './Database/notification-templates';
 
 @Injectable()
 export class AppService {
@@ -372,119 +371,6 @@ export class AppService {
         if (!superAdmin) {
           throw new NotImplementedException('No Super Admin Role Found');
         }
-
-        const creatorId = superAdmin?.id;
-        // CREATE DEFAULT DESIGNATIONS
-        await Promise.all(
-          defaultDesignations.map((element) =>
-            prismaClient.designation.create({
-              data: {
-                ...element,
-                creator: {
-                  connect: {
-                    id: creatorId,
-                  },
-                },
-              },
-            }),
-          ),
-        );
-
-        // CREATE DEFAULT EMPLOYMENT STATUS
-        await Promise.all(
-          defaultEmploymentStatuses.map(async (element) =>
-            prismaClient.employmentStatus.create({
-              data: {
-                ...element,
-                creator: {
-                  connect: {
-                    id: creatorId,
-                  },
-                },
-              },
-            }),
-          ),
-        );
-
-        // CREATE DEFAULT JOB TYPE
-        await Promise.all(
-          defaultJobTypes.map(async (element) =>
-            prismaClient.jobType.create({
-              data: {
-                ...element,
-                creator: {
-                  connect: {
-                    id: creatorId,
-                  },
-                },
-              },
-            }),
-          ),
-        );
-
-        // CREATE DEFAULT JOB PLATFORM
-        await Promise.all(
-          defaultJobPlatforms.map(async (element) =>
-            prismaClient.jobPlatform.create({
-              data: {
-                ...element,
-                creator: {
-                  connect: {
-                    id: creatorId,
-                  },
-                },
-              },
-            }),
-          ),
-        );
-
-        // CREATE DEFAULT LEAVE TYPE
-        await Promise.all(
-          defaultLeaveTypes.map(async (element) =>
-            prismaClient.leaveType.create({
-              data: {
-                ...element,
-                creator: {
-                  connect: {
-                    id: creatorId,
-                  },
-                },
-              },
-            }),
-          ),
-        );
-
-        // CREATE DEFAULT RECRUITMENT PROCESS
-        await Promise.all(
-          defaultRecruitmentProcesses.map(async (element) =>
-            prismaClient.recruitmentProcess.create({
-              data: {
-                ...element,
-                creator: {
-                  connect: {
-                    id: creatorId,
-                  },
-                },
-              },
-            }),
-          ),
-        );
-
-        // CREATE DEFAULT ONBOARDING PROCESS
-        await Promise.all(
-          defaultOnboardingProcesses.map(async (element) =>
-            prismaClient.onboardingProcess.create({
-              data: {
-                ...element,
-                creator: {
-                  connect: {
-                    id: creatorId,
-                  },
-                },
-              },
-            }),
-          ),
-        );
 
         return `Setup Complete`;
       },

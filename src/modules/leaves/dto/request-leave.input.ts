@@ -1,10 +1,4 @@
-import {
-  InputType,
-  Field,
-  Int,
-  Float,
-  registerEnumType,
-} from '@nestjs/graphql';
+import { InputType, Field, Int, Float } from '@nestjs/graphql';
 import {
   IsDateString,
   IsEnum,
@@ -13,12 +7,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { LeaveDuration } from 'generated/prisma';
-
-registerEnumType(LeaveDuration, {
-  name: 'LeaveDuration',
-  description: 'Duration type for leave',
-});
+import { LeaveDuration } from '../enums';
 
 @InputType()
 export class RequestLeaveInput {

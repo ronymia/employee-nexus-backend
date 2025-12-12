@@ -7,6 +7,7 @@ import { QueryDesignationInput } from './dto/query-designation.input';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { designationSearchableFields } from './designation.constant';
 import { Prisma } from 'generated/prisma';
+import { Status } from 'src/common/enums';
 
 @Injectable()
 export class DesignationsService {
@@ -28,6 +29,7 @@ export class DesignationsService {
         ...createDesignationInput,
         createdBy: user.userId,
         businessId: user.businessId,
+        status: Status.ACTIVE,
       },
     });
   }

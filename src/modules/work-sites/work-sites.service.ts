@@ -7,6 +7,7 @@ import { QueryWorkSiteInput } from './dto/query-work-site.input';
 import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { workSiteSearchableFields } from './workSite.constant';
+import { Status } from 'src/common/enums';
 
 @Injectable()
 export class WorkSitesService {
@@ -27,6 +28,7 @@ export class WorkSitesService {
         ...createWorkSiteInput,
         createdBy: user.userId,
         businessId: user.businessId,
+        status: Status.ACTIVE,
       },
     });
   }

@@ -7,6 +7,7 @@ import { QueryRecruitmentProcessInput } from './dto/query-recruitment-process.in
 import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { recruitmentProcessSearchableFields } from './recruitmentProcess.constant';
+import { Status } from 'src/common/enums';
 
 @Injectable()
 export class RecruitmentProcessesService {
@@ -27,6 +28,7 @@ export class RecruitmentProcessesService {
         ...createRecruitmentProcessInput,
         createdBy: user.userId,
         businessId: user.businessId,
+        status: Status.ACTIVE,
       },
     });
   }

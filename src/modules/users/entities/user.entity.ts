@@ -1,12 +1,4 @@
-import {
-  Field,
-  HideField,
-  ID,
-  Int,
-  ObjectType,
-  registerEnumType,
-} from '@nestjs/graphql';
-import { UserAccountStatus } from 'generated/prisma';
+import { Field, HideField, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Business } from 'src/modules/businesses/entities/business.entity';
 import { Profile } from 'src/modules/profiles/entities/profile.entity';
 import { Role } from 'src/modules/roles/entities/role.entity';
@@ -16,11 +8,7 @@ import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
-
-registerEnumType(UserAccountStatus, {
-  name: 'USER_ACCOUNT_STATUS',
-  description: 'User account status',
-});
+import { UserAccountStatus } from '../enums';
 
 @ObjectType()
 export class User {

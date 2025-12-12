@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import { PrismaClient } from 'generated/prisma';
 import {
   NotificationChannel,
   NotificationPriority,
   NotificationType,
-  PrismaClient,
-} from 'generated/prisma';
+} from 'src/modules/notifications/enums';
 
 const prisma = new PrismaClient();
 
@@ -188,7 +186,8 @@ export async function seedNotificationTemplates() {
     } catch (error) {
       console.error(
         `❌ Failed to create template "${template.name}":`,
-        error.message,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        error?.message,
       );
     }
   }

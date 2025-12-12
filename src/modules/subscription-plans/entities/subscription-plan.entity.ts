@@ -4,6 +4,8 @@ import {
   BaseResponse,
 } from 'src/common/dto/base-response.type';
 import { User } from 'src/modules/users/entities/user.entity';
+import { SubscriptionStatus } from '../enums';
+import { IsEnum } from 'class-validator';
 
 @ObjectType()
 export class SubscriptionPlan {
@@ -19,11 +21,12 @@ export class SubscriptionPlan {
   @Field(() => Int, { description: 'One-time setup fee for the service plan' })
   setupFee: number;
 
-  @Field(() => String, {
+  @Field(() => SubscriptionStatus, {
     description: 'Status of the service plan',
-    defaultValue: 'ACTIVE',
+    defaultValue: SubscriptionStatus.ACTIVE,
   })
-  status: string;
+  @IsEnum(SubscriptionStatus)
+  status: SubscriptionStatus;
 
   @Field(() => Int, { description: 'Price of the service plan' })
   price: number;

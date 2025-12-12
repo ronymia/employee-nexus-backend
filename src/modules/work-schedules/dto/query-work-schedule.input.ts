@@ -1,6 +1,7 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
 import { IsOptional, IsString, IsEnum, IsInt, Min, Max } from 'class-validator';
-import { ScheduleType, Status } from 'generated/prisma';
+import { ScheduleType } from '../enums';
+import { Status } from 'src/common/enums';
 
 @InputType()
 export class QueryWorkScheduleInput {

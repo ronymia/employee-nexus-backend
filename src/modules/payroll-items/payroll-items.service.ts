@@ -48,6 +48,7 @@ export class PayrollItemsService {
           overtimeHours: createPayrollItemInput.overtimeHours,
           notes: createPayrollItemInput.notes,
           status: PayrollItemStatus.PENDING,
+          paymentMethod: createPayrollItemInput.paymentMethod,
         },
       });
 
@@ -307,6 +308,7 @@ export class PayrollItemsService {
         absentDays: attendanceData.absentDays,
         leaveDays: attendanceData.leaveDays,
         overtimeHours: attendanceData.overtimeHours,
+        paymentMethod: '',
         components: await this.calculateComponents(
           employee.salaryPerMonth,
           components,

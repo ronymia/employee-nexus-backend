@@ -8,8 +8,7 @@ import {
   IsOptional,
   IsArray,
 } from 'class-validator';
-import { LeaveTypeEnum } from '../entities/leave-type.entity';
-import { LeaveRolloverType } from 'generated/prisma';
+import { LeaveRolloverType, LeaveTypeEnum } from '../enums';
 
 @InputType()
 export class CreateLeaveTypeInput {

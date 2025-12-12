@@ -1,11 +1,11 @@
 import { ObjectType, Field, Int, Float, ID } from '@nestjs/graphql';
-import { LeaveDuration } from 'generated/prisma';
 import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
 import { LeaveType } from 'src/modules/leave-types/entities/leave-type.entity';
 import { User } from 'src/modules/users/entities/user.entity';
+import { LeaveDuration } from '../enums';
 
 @ObjectType()
 export class Leave {

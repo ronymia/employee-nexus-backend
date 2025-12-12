@@ -9,9 +9,10 @@ import {
 
 @InputType()
 export class UpdateEmploymentDetailsInput {
-  @Field(() => Int, { description: 'Profile ID (userId)' })
+  @Field(() => Int, { description: 'User ID' })
   @IsInt()
-  id: number;
+  userId: number;
+
   @Field(() => String, { description: 'Employee ID' })
   @IsString()
   employeeId: string;

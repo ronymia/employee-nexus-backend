@@ -7,6 +7,7 @@ import { QueryOnboardingProcessInput } from './dto/query-onboarding-process.inpu
 import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { onboardingProcessSearchableFields } from './onboardingProcess.constant';
+import { Status } from 'src/common/enums';
 
 @Injectable()
 export class OnboardingProcessesService {
@@ -27,6 +28,7 @@ export class OnboardingProcessesService {
         ...createOnboardingProcessInput,
         createdBy: user.userId,
         businessId: user.businessId,
+        status: Status.ACTIVE,
       },
     });
   }

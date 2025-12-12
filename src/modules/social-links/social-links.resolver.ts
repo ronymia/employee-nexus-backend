@@ -20,10 +20,8 @@ export class SocialLinksResolver {
   @RequirePermissions('Social Link:create')
   async createSocialLink(
     @Args('createSocialLinkInput') createSocialLinkInput: CreateSocialLinkInput,
-    @CurrentUser() user: JwtPayload,
   ) {
     const result = await this.socialLinksService.create({
-      user,
       createSocialLinkInput,
     });
     return {
@@ -57,8 +55,8 @@ export class SocialLinksResolver {
   // @UseGuards(PermissionsGuard)
   // @RequirePermissions('Social Link:read')
   @UseGuards(GqlAuthGuard)
-  async findOne(@Args('profileId', { type: () => Int }) profileId: number) {
-    const result = await this.socialLinksService.findOne({ profileId });
+  async findOne(@Args('userId', { type: () => Int }) userId: number) {
+    const result = await this.socialLinksService.findOne({ userId });
 
     return {
       success: true,
@@ -92,10 +90,8 @@ export class SocialLinksResolver {
   // @UseGuards(PermissionsGuard)
   // @RequirePermissions('Social Link:delete')
   @UseGuards(GqlAuthGuard)
-  async removeSocialLink(
-    @Args('profileId', { type: () => Int }) profileId: number,
-  ) {
-    const result = await this.socialLinksService.remove({ profileId });
+  async removeSocialLink(@Args('userId', { type: () => Int }) userId: number) {
+    const result = await this.socialLinksService.remove({ userId });
     return {
       success: true,
       statusCode: HttpStatus.OK,

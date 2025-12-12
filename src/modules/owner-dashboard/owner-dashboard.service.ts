@@ -10,7 +10,7 @@ import {
   RecentActivityItem,
 } from './entities/owner-dashboard.entity';
 import * as dayjs from 'dayjs';
-import { UserAccountStatus } from 'generated/prisma';
+import { UserAccountStatus } from '../users/enums';
 
 @Injectable()
 export class OwnerDashboardService {

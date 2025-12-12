@@ -5,15 +5,12 @@ import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
+import { IsInt } from 'class-validator';
 
 @ObjectType()
 export class LeaveSetting {
-  @Field(() => ID, {
-    description: 'Unique identifier for the leave setting',
-  })
-  id: number;
-
-  @Field(() => Int, { description: 'ID of the business' })
+  @Field(() => ID, { description: 'ID of the business' })
+  @IsInt()
   businessId: number;
 
   @Field(() => Business, {

@@ -22,7 +22,8 @@ export class AuthService {
   async validateUserByEmail(email: string): Promise<User | null> {
     const user = await this.userService.findByEmail(email);
     if (user) {
-      return user;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return user as any;
     }
     return null;
   }

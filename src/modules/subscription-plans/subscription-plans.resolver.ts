@@ -50,7 +50,7 @@ export class SubscriptionPlansResolver {
   async findAll(
     @Args('query', { nullable: true })
     query: QuerySubscriptionPlanInput,
-  ): Promise<SubscriptionPlanQueryResponse> {
+  ) {
     const result = await this.subscriptionPlansService.findAll(query);
 
     return {

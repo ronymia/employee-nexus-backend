@@ -3,4 +3,6 @@ export const paymentSettings = {
   paymentType: 'month',
   dayOfWeek: 0,
   dayOfMonth: 5,
+  paymentFrequency: 'monthly',
+  paymentMethod: 'bank_transfer',
 };

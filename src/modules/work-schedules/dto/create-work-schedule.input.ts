@@ -10,8 +10,9 @@ import {
   IsArray,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ScheduleBreakType, ScheduleType, Status } from 'generated/prisma';
 import { CreateDayScheduleInput } from './create-day-schedule.input';
+import { ScheduleBreakType, ScheduleType } from '../enums';
+import { Status } from 'src/common/enums';
 
 @InputType()
 export class CreateWorkScheduleInput {
@@ -39,17 +40,15 @@ export class CreateWorkScheduleInput {
     description: 'Type of the schedule',
     defaultValue: ScheduleType.REGULAR,
   })
-  @IsOptional()
   @IsEnum(ScheduleType)
-  scheduleType?: ScheduleType;
+  scheduleType: ScheduleType;
 
   @Field(() => ScheduleBreakType, {
     description: 'Type of break in the schedule',
     defaultValue: ScheduleBreakType.UNPAID,
   })
-  @IsOptional()
   @IsEnum(ScheduleBreakType)
-  breakType?: ScheduleBreakType;
+  breakType: ScheduleBreakType;
 
   @Field(() => Int, {
     description: 'Number of break hours',

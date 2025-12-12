@@ -1,13 +1,8 @@
 // QUERY DEPARTMENT INPUT - DEFINES FILTERING AND PAGINATION OPTIONS FOR DEPARTMENT QUERIES
-import { Field, InputType, registerEnumType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { IsEnum, IsString, IsOptional } from 'class-validator';
-import { Status } from 'generated/prisma';
 import { BasePaginationInput } from 'src/common/dto/base-pagination.type';
-
-registerEnumType(Status, {
-  name: 'Status',
-  description: 'Status of the Department',
-});
+import { Status } from 'src/common/enums';
 
 @InputType()
 export class QueryDepartmentInput {
