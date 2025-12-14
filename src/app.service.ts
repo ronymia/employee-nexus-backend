@@ -14,13 +14,6 @@ import {
   permissions,
   superAdminPermissions,
 } from './config';
-import { defaultDesignations } from './Database/designation';
-import { defaultEmploymentStatuses } from './Database/employment-status';
-import { defaultJobTypes } from './Database/job-type';
-import { defaultJobPlatforms } from './Database/job-platform';
-import { defaultLeaveTypes } from './Database/leave-type';
-import { defaultRecruitmentProcesses } from './Database/recruitment-process';
-import { defaultOnboardingProcesses } from './Database/onboarding-process';
 import { features } from './Database/features';
 
 @Injectable()

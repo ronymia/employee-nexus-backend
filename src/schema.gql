@@ -997,7 +997,6 @@ input CreateProfileInput {
   phone: String!
   postcode: String!
   profilePicture: String
-  userId: ID!
 }
 
 input CreateProjectInput {
@@ -3921,7 +3920,7 @@ input UpdateProfileInput {
   phone: String
   postcode: String
   profilePicture: String
-  userId: ID
+  userId: ID!
 }
 
 input UpdateProjectInput {

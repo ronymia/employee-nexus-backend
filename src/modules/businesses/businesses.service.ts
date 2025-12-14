@@ -386,7 +386,7 @@ export class BusinessesService {
         await prismaTransaction.paymentSettings.create({
           data: {
             ...paymentSettings,
-            businessId,
+            businessId: businessId,
           },
         });
 

@@ -186,30 +186,16 @@ model LeaveSettings {
   @@map("leave_settings")
 }
 
-enum PaymentFrequency {
-  WEEKLY
-  BI_WEEKLY
-  SEMI_MONTHLY
-  MONTHLY
-}
-
-enum PaymentMethod {
-  BANK_TRANSFER
-  CHECK
-  CASH
-  MOBILE_MONEY
-}
-
 model PaymentSettings {
-  businessId           Int       @id @map("business_id")
-  business             Business? @relation(name: "paymentSettings", fields: [businessId], references: [id], onDelete: Cascade)
-  paymentFrequency     String    @map("payment_frequency")
-  dayOfWeek            Int?      @map("day_of_week")
-  dayOfMonth           Int?      @map("day_of_month")
-  paymentMethod        String    @map("default_payment_method")
-  autoApprovePayments  Boolean   @default(false) @map("auto_approve_payments")
-  gracePerDays         Int?      @default(3) @map("grace_period_days") // Days before payment to lock payroll
-  allowPartialPayments Boolean   @default(false) @map("allow_partial_payments")
+  businessId           Int      @id @map("business_id")
+  business             Business @relation(name: "paymentSettings", fields: [businessId], references: [id], onDelete: Cascade)
+  paymentFrequency     String?  @map("payment_frequency")
+  dayOfWeek            Int?     @map("day_of_week")
+  dayOfMonth           Int?     @map("day_of_month")
+  paymentMethod        String?  @map("payment_method")
+  autoApprovePayments  Boolean  @default(false) @map("auto_approve_payments")
+  gracePerDays         Int?     @default(3) @map("grace_period_days") // Days before payment to lock payroll
+  allowPartialPayments Boolean  @default(false) @map("allow_partial_payments")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

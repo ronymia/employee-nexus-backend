@@ -1,13 +1,9 @@
-import { InputType, Field, ID } from '@nestjs/graphql';
-import { IsString, IsOptional, IsEnum, IsInt, IsDate } from 'class-validator';
+import { InputType, Field } from '@nestjs/graphql';
+import { IsString, IsOptional, IsEnum, IsDate } from 'class-validator';
 import { Gender, MaritalStatus } from 'src/modules/users/enums';
 
 @InputType()
 export class CreateProfileInput {
-  @Field(() => ID)
-  @IsInt()
-  userId: number;
-
   @Field()
   @IsString()
   fullName: string;
