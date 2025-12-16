@@ -1,4 +1,4 @@
-import { Field, InputType, registerEnumType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import {
   IsBoolean,
   IsDateString,
@@ -6,13 +6,8 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { HolidayType } from 'generated/prisma';
 import { BasePaginationInput } from 'src/common/dto/base-pagination.type';
-
-registerEnumType(HolidayType, {
-  name: 'HolidayType',
-  description: 'Type of holiday',
-});
+import { HolidayType } from '../enums';
 
 @InputType()
 export class QueryHolidayInput {

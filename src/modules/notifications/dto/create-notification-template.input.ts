@@ -13,7 +13,7 @@ import {
   NotificationChannel,
   NotificationPriority,
   NotificationType,
-} from 'generated/prisma';
+} from '../enums';
 
 @InputType()
 export class CreateNotificationTemplateInput {
@@ -48,8 +48,7 @@ export class CreateNotificationTemplateInput {
   @IsOptional()
   isActive?: boolean;
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => Int)
   @IsInt()
-  @IsOptional()
-  businessId?: number;
+  businessId: number;
 }

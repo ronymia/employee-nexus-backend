@@ -22,9 +22,7 @@ export class CreateDepartmentInput {
 
   @Field(() => Int, {
     description: 'ID of the manager',
-    nullable: true,
   })
-  @IsOptional()
   @IsInt()
-  managerId?: number;
+  managerId: number;
 }

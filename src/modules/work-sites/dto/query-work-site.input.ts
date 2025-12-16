@@ -1,18 +1,8 @@
-import { Field, InputType, Int, registerEnumType } from '@nestjs/graphql';
-import {
-  IsEnum,
-  IsString,
-  IsBoolean,
-  IsInt,
-  IsOptional,
-} from 'class-validator';
-import { Status } from 'generated/prisma';
+import { Field, InputType, Int } from '@nestjs/graphql';
+import { IsEnum, IsString, IsInt, IsOptional } from 'class-validator';
 import { BasePaginationInput } from 'src/common/dto/base-pagination.type';
-
-registerEnumType(Status, {
-  name: 'Status',
-  description: 'Status of the Work Site',
-});
+import { Status } from 'src/common/enums';
+import { LocationTrackingType } from '../enums/location-tracking-type.enum';
 
 @InputType()
 export class QueryWorkSiteInput {
@@ -36,25 +26,15 @@ export class QueryWorkSiteInput {
   @IsString()
   address?: string;
 
-  @Field(() => Boolean, { nullable: true })
+  @Field(() => LocationTrackingType, { nullable: true })
   @IsOptional()
-  @IsBoolean()
-  isLocationEnabled?: boolean;
-
-  @Field(() => Boolean, { nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  isGeoLocationEnabled?: boolean;
+  @IsEnum(LocationTrackingType)
+  locationTrackingType?: LocationTrackingType;
 
   @Field(() => Int, { nullable: true })
   @IsOptional()
   @IsInt()
   maxRadius?: number;
-
-  @Field(() => Boolean, { nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  isIpEnabled?: boolean;
 
   @Field(() => String, { nullable: true })
   @IsOptional()

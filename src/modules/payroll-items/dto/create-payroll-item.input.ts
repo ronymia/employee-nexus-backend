@@ -104,7 +104,7 @@ export class CreatePayrollItemInput {
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  paymentMethod?: string;
+  paymentMethod: string;
 
   @Field({ nullable: true })
   @IsString()

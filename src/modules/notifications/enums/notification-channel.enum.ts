@@ -1,5 +1,11 @@
 import { registerEnumType } from '@nestjs/graphql';
-import { NotificationChannel } from 'generated/prisma';
+
+export enum NotificationChannel {
+  IN_APP = 'IN_APP',
+  EMAIL = 'EMAIL',
+  SMS = 'SMS',
+  PUSH = 'PUSH',
+}
 
 registerEnumType(NotificationChannel, {
   name: 'NotificationChannel',

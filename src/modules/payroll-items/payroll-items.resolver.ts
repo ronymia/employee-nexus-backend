@@ -8,6 +8,7 @@ import {
 } from './entities/payroll-item.entity';
 import {
   CreatePayrollItemInput,
+  UpdatePayrollItemInput,
   QueryPayrollItemInput,
   AddPayslipAdjustmentInput,
   GeneratePayrollItemsInput,
@@ -143,6 +144,33 @@ export class PayrollItemsResolver {
       statusCode: HttpStatus.OK,
       message: 'Payroll item marked as paid',
       data: item,
+    };
+  }
+
+  @Mutation(() => PayrollItemResponse, { name: 'updatePayrollItem' })
+  @RequirePermissions('Payroll Item:update')
+  async updatePayrollItem(
+    @CurrentUser() user: JwtPayload,
+    @Args('updatePayrollItemInput') input: UpdatePayrollItemInput,
+  ) {
+    const item = await this.payrollItemsService.update(user, input);
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Payroll item updated successfully',
+      data: item,
+    };
+  }
+
+  @Mutation(() => PayrollItemResponse, { name: 'deletePayrollItem' })
+  @RequirePermissions('Payroll Item:delete')
+  async deletePayrollItem(@Args('id', { type: () => Int }) id: number) {
+    const result = await this.payrollItemsService.remove(id);
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Payroll item deleted successfully',
+      data: result,
     };
   }
 }

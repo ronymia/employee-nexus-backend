@@ -1,24 +1,24 @@
-import { ObjectType, Field, Int, registerEnumType, ID } from '@nestjs/graphql';
-import { Status } from 'generated/prisma';
+import { ObjectType, Field, Int, ID, Float } from '@nestjs/graphql';
 import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
-
-registerEnumType(Status, {
-  name: 'Status',
-  description: 'Status of the Work Site',
-});
+import { Status } from 'src/common/enums';
+import { LocationTrackingType } from '../enums/location-tracking-type.enum';
 
 @ObjectType()
 export class WorkSite {
   @Field(() => ID, { description: 'Unique identifier for the work site' })
   id: number;
+
   @Field(() => String, { description: 'Name of the work site' })
   name: string;
 
-  @Field(() => String, { description: 'Description of the work site' })
-  description: string;
+  @Field(() => String, {
+    nullable: true,
+    description: 'Description of the work site',
+  })
+  description?: string;
 
   @Field(() => Status, { description: 'Status of the work site' })
   status: Status;
@@ -29,31 +29,34 @@ export class WorkSite {
   })
   address?: string;
 
-  @Field(() => Boolean, {
+  @Field(() => Float, {
     nullable: true,
-    description: 'Whether location is enabled',
+    description: 'Latitude for geo_fencing',
   })
-  isLocationEnabled?: boolean;
+  lat?: number;
 
-  @Field(() => Boolean, {
+  @Field(() => Float, {
     nullable: true,
-    description: 'Whether geo location is enabled',
+    description: 'Longitude for geo_fencing',
   })
-  isGeoLocationEnabled?: boolean;
+  lng?: number;
+
+  @Field(() => LocationTrackingType, {
+    description: 'Type of location tracking',
+    defaultValue: LocationTrackingType.NONE,
+  })
+  locationTrackingType: LocationTrackingType;
 
   @Field(() => Int, {
     nullable: true,
-    description: 'Maximum radius for location',
+    description: 'Maximum radius in meters for geo_fencing',
   })
   maxRadius?: number;
 
-  @Field(() => Boolean, {
+  @Field(() => String, {
     nullable: true,
-    description: 'Whether IP is enabled',
+    description: 'IP address for IP-based tracking',
   })
-  isIpEnabled?: boolean;
-
-  @Field(() => String, { nullable: true, description: 'IP address' })
   ipAddress?: string;
 
   @Field(() => Int, { description: 'ID of the business' })

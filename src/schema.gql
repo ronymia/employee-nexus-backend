@@ -176,6 +176,13 @@ type Attendance {
   userId: Int!
 }
 
+type AttendanceAnalytics {
+  thisMonth: AttendanceThisMonth!
+  thisWeek: AttendanceThisWeek!
+  today: AttendanceToday!
+  trend: [AttendanceTrend!]!
+}
+
 type AttendancePunch {
   """Attendance associated with this punch"""
   attendance: Attendance!
@@ -276,9 +283,6 @@ type AttendanceSetting {
   """ID of the business"""
   businessId: Int!
 
-  """Unique identifier for the attendance setting"""
-  id: ID!
-
   """Whether geo location is enabled"""
   isGeoLocationEnabled: Boolean!
 
@@ -303,12 +307,64 @@ type AttendanceSettingResponse {
   success: Boolean!
 }
 
+type AttendanceSummary {
+  recentAttendance: [RecentAttendanceItem!]!
+  thisMonth: AttendanceThisMonths!
+  today: AttendanceTodays!
+}
+
+type AttendanceThisMonth {
+  attendanceRate: Float!
+  earlyDepartures: Int!
+  lateArrivals: Int!
+}
+
+type AttendanceThisMonths {
+  attendanceRate: Float!
+  totalAbsent: Int!
+  totalLate: Int!
+  totalPresent: Int!
+}
+
+type AttendanceThisWeek {
+  averageAttendanceRate: Float!
+  totalPresentDays: Int!
+  totalWorkingDays: Int!
+}
+
+type AttendanceToday {
+  absent: Int!
+  late: Int!
+  notPunchedIn: Int!
+  onLeave: Int!
+  present: Int!
+}
+
+type AttendanceTodays {
+  checkInTime: DateTime
+  checkOutTime: DateTime
+  status: String!
+  workingHours: Float
+}
+
+type AttendanceTrend {
+  date: String!
+  presentCount: Int!
+}
+
 type Auth {
   """JWT access token"""
   accessToken: String!
 
   """User associated with the auth"""
   user: User!
+}
+
+type AvailableLeave {
+  leaveType: String!
+  remaining: Int!
+  total: Int!
+  used: Int!
 }
 
 input BasePaginationInput {
@@ -331,6 +387,7 @@ type Business {
   name: String!
   numberOfEmployeesAllowed: Int!
   owner: User
+  ownerId: Int!
   phone: String!
   postcode: String!
   registrationDate: String!
@@ -338,8 +395,18 @@ type Business {
   subscriptionPlan: SubscriptionPlan
   subscriptionPlanId: Int!
   updatedAt: DateTime!
-  userId: Int!
   website: String
+}
+
+type BusinessOverview {
+  activeEmployees: Int!
+  activeProjects: Int!
+  inactiveEmployees: Int!
+  pendingPayrollAmount: Float!
+  totalDepartments: Int!
+  totalEmployees: Int!
+  totalMonthlyPayroll: Float!
+  totalProjects: Int!
 }
 
 type BusinessQueryResponse {
@@ -380,7 +447,7 @@ type BusinessSetting {
   business: Business!
 
   """ID of the business"""
-  businessId: Int!
+  businessId: ID!
 
   """Business start day of the week (0-6, where 0=Sunday)"""
   businessStartDay: Int!
@@ -393,9 +460,6 @@ type BusinessSetting {
 
   """Delete read notifications setting"""
   deleteReadNotifications: String!
-
-  """Unique identifier for the business setting"""
-  id: ID!
 
   """Prefix for business identifiers"""
   identifierPrefix: String!
@@ -415,7 +479,7 @@ type BusinessSettingResponse {
   success: Boolean!
 }
 
-"""Business Status of Business"""
+"""Status of business"""
 enum BusinessStatus {
   ACTIVE
   INACTIVE
@@ -587,7 +651,7 @@ input CreateDepartmentInput {
   description: String!
 
   """ID of the manager"""
-  managerId: Int
+  managerId: Int!
 
   """Name of the department"""
   name: String!
@@ -859,7 +923,7 @@ input CreateNotificationInput {
 }
 
 input CreateNotificationTemplateInput {
-  businessId: Int
+  businessId: Int!
   channels: [NotificationChannel!]!
   isActive: Boolean
   message: String!
@@ -926,10 +990,10 @@ input CreateProfileInput {
   address: String!
   city: String!
   country: String!
-  dateOfBirth: String!
+  dateOfBirth: DateTime!
   fullName: String!
-  gender: GENDER!
-  maritalStatus: MARITAL_STATUS!
+  gender: Gender!
+  maritalStatus: MaritalStatus!
   phone: String!
   postcode: String!
   profilePicture: String
@@ -968,11 +1032,11 @@ input CreateSocialLinkInput {
   """LinkedIn profile URL"""
   linkedin: String
 
-  """Profile ID"""
-  profileId: Int!
-
   """Twitter profile URL"""
   twitter: String
+
+  """User ID"""
+  userId: Int!
 }
 
 input CreateSubscriptionPlanInput {
@@ -1004,7 +1068,7 @@ input CreateUserInput {
   businessId: Int
   email: String!
   password: String!
-  roleId: Int!
+  roleId: Int
 }
 
 input CreateWorkScheduleInput {
@@ -1037,25 +1101,32 @@ input CreateWorkSiteInput {
   address: String
 
   """Description of the work site"""
-  description: String!
+  description: String
 
-  """IP address"""
+  """IP address for IP-based tracking"""
   ipAddress: String
 
-  """Whether geo location is enabled"""
-  isGeoLocationEnabled: Boolean
+  """Latitude for geo_fencing"""
+  lat: Float
 
-  """Whether IP is enabled"""
-  isIpEnabled: Boolean
+  """Longitude for geo_fencing"""
+  lng: Float
 
-  """Whether location is enabled"""
-  isLocationEnabled: Boolean
+  """Type of location tracking"""
+  locationTrackingType: LocationTrackingType = NONE
 
-  """Maximum radius for location"""
+  """Maximum radius in meters for geo_fencing"""
   maxRadius: Int
 
   """Name of the work site"""
   name: String!
+}
+
+type CurrentMonthPayroll {
+  grossPay: Float!
+  netPay: Float!
+  status: String!
+  totalDeductions: Float!
 }
 
 """
@@ -1152,9 +1223,6 @@ type Designation {
 
   """Date when the designation was created"""
   createdAt: DateTime!
-
-  """ID of the creator"""
-  createdBy: Int!
 
   """Description of the designation"""
   description: String!
@@ -1295,9 +1363,9 @@ type EmergencyContact {
   createdAt: DateTime!
   name: String!
   phone: String!
-  profileId: Int!
   relation: String!
   updatedAt: DateTime!
+  userId: ID!
 }
 
 type EmergencyContactResponse {
@@ -1332,10 +1400,20 @@ type Employee {
   workingHoursPerWeek: Int
 }
 
-type EmployeeResponse {
-  data: Employee!
+type EmployeeDashboard {
+  attendanceSummary: AttendanceSummary!
+  leaveSummary: LeaveSummary!
+  notifications: Notifications!
+  payrollSummary: PayrollSummarys!
+  personalInfo: PersonalInfo!
+  taskOverview: TaskOverview!
+}
+
+type EmployeeDashboardResponse {
+  data: EmployeeDashboard!
   message: String!
-  statusCode: Int!
+  meta: PaginationMeta
+  statusCode: Float!
   success: Boolean!
 }
 
@@ -1391,6 +1469,31 @@ type EmployeeScheduleAssignmentsQueryResponse {
   message: String!
   meta: PaginationMeta
   statusCode: Float!
+  success: Boolean!
+}
+
+type EmploymentDetails {
+  createdAt: DateTime!
+  departmentId: Int!
+  designationId: Int!
+  employeeId: String!
+  employmentStatusId: Int!
+  joiningDate: DateTime!
+  nidNumber: String!
+  rotaType: String!
+  salaryPerMonth: Float!
+  updatedAt: DateTime!
+  userId: ID!
+  workScheduleId: Int!
+  workSiteId: Int!
+  workingDaysPerWeek: Int
+  workingHoursPerWeek: Int
+}
+
+type EmploymentDetailsResponse {
+  data: EmploymentDetails!
+  message: String!
+  statusCode: Int!
   success: Boolean!
 }
 
@@ -1459,7 +1562,7 @@ type FeatureResponse {
 }
 
 """Gender of the user"""
-enum GENDER {
+enum Gender {
   FEMALE
   MALE
 }
@@ -1679,6 +1782,13 @@ type JobTypesQueryResponse {
   success: Boolean!
 }
 
+type LastPayment {
+  grossPay: Float!
+  month: String!
+  netPay: Float!
+  paidDate: DateTime!
+}
+
 type Leave {
   """Supporting documents (JSON array or URLs)"""
   attachments: String
@@ -1754,11 +1864,24 @@ type LeaveBalanceResponse {
   success: Boolean!
 }
 
-"""Duration type for leave"""
+type LeaveByType {
+  count: Int!
+  leaveType: String!
+}
+
+"""Duration type of the leave"""
 enum LeaveDuration {
   HALF_DAY
   MULTI_DAY
   SINGLE_DAY
+}
+
+type LeaveHistoryItem {
+  endDate: DateTime!
+  leaveType: String!
+  reason: String
+  startDate: DateTime!
+  status: String!
 }
 
 type LeaveResponse {
@@ -1769,7 +1892,7 @@ type LeaveResponse {
   success: Boolean!
 }
 
-"""Type of leave rollover policy"""
+"""Types of leave rollover policies"""
 enum LeaveRolloverType {
   FULL_ROLLOVER
   NONE
@@ -1784,10 +1907,7 @@ type LeaveSetting {
   business: Business!
 
   """ID of the business"""
-  businessId: Int!
-
-  """Unique identifier for the leave setting"""
-  id: ID!
+  businessId: ID!
 
   """Start month for leave cycle (0-11)"""
   startMonth: Int!
@@ -1799,6 +1919,25 @@ type LeaveSettingResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
+}
+
+type LeaveStats {
+  approved: Int!
+  pending: Int!
+  rejected: Int!
+  thisMonth: LeaveThisMonth!
+  upcomingLeaves: [UpcomingLeave!]!
+}
+
+type LeaveSummary {
+  availableLeaves: [AvailableLeave!]!
+  leaveHistory: [LeaveHistoryItem!]!
+  upcomingLeaves: [UpcomingLeaveItem!]!
+}
+
+type LeaveThisMonth {
+  byType: [LeaveByType!]!
+  total: Int!
 }
 
 type LeaveType {
@@ -1869,6 +2008,21 @@ type LeavesQueryResponse {
   success: Boolean!
 }
 
+"""Type of location tracking for work sites"""
+enum LocationTrackingType {
+  """GPS-based radius check"""
+  GEO_FENCING
+
+  """IP address validation"""
+  IP_WHITELIST
+
+  """Manual selection"""
+  MANUAL
+
+  """No location validation"""
+  NONE
+}
+
 input LoginAuthInput {
   """User email"""
   email: String!
@@ -1878,9 +2032,14 @@ input LoginAuthInput {
 }
 
 """Marital status of the user"""
-enum MARITAL_STATUS {
+enum MaritalStatus {
   MARRIED
   SINGLE
+}
+
+type MonthAmount {
+  amount: Float!
+  month: String!
 }
 
 type Mutation {
@@ -1944,9 +2103,10 @@ type Mutation {
   deleteNotification(id: Int!): NotificationResponse!
   deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
   deletePayrollComponent(id: Int!): PayrollComponentResponse!
+  deletePayrollItem(id: Int!): PayrollItemResponse!
   deleteProject(id: Int!): ProjectResponse!
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
-  deleteSocialLink(profileId: Int!): SocialLinkResponse!
+  deleteSocialLink(userId: Int!): SocialLinkResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
   deleteUser(id: Int!): UserResponse!
   deleteWorkSchedule(id: Int!): WorkScheduleResponse!
@@ -1981,7 +2141,7 @@ type Mutation {
   updateEmergencyContact(updateEmergencyContactInput: UpdateEmergencyContactInput!): EmergencyContactResponse!
   updateEmployee(updateEmployeeInput: UpdateEmployeeInput!): UserResponse!
   updateEmployeeScheduleAssignment(updateEmployeeScheduleAssignmentInput: UpdateEmployeeScheduleAssignmentInput!): EmployeeScheduleAssignmentResponse!
-  updateEmploymentDetails(updateEmploymentDetailsInput: UpdateEmploymentDetailsInput!): EmployeeResponse!
+  updateEmploymentDetails(updateEmploymentDetailsInput: UpdateEmploymentDetailsInput!): EmploymentDetailsResponse!
   updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
   updateHoliday(updateHolidayInput: UpdateHolidayInput!): HolidayResponse!
   updateJobHistory(updateJobHistoryInput: UpdateJobHistoryInput!): JobHistoryResponse!
@@ -1995,6 +2155,7 @@ type Mutation {
   updateNotificationTemplate(updateNotificationTemplateInput: UpdateNotificationTemplateInput!): NotificationTemplateResponse!
   updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
   updatePayrollComponent(updatePayrollComponentInput: UpdatePayrollComponentInput!): PayrollComponentResponse!
+  updatePayrollItem(updatePayrollItemInput: UpdatePayrollItemInput!): PayrollItemResponse!
   updateProfile(updateProfileInput: UpdateProfileInput!): ProfileResponse!
   updateProject(updateProjectInput: UpdateProjectInput!): ProjectResponse!
   updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
@@ -2162,6 +2323,11 @@ enum NotificationType {
   SYSTEM
 }
 
+type Notifications {
+  recent: [RecentNotification!]!
+  unread: Int!
+}
+
 type NotificationsQueryResponse {
   data: [Notification!]!
   message: String!
@@ -2215,6 +2381,23 @@ type OnboardingProcessesQueryResponse {
   success: Boolean!
 }
 
+type OwnerDashboard {
+  attendanceAnalytics: AttendanceAnalytics!
+  businessOverview: BusinessOverview!
+  leaveStats: LeaveStats!
+  payrollSummary: PayrollSummary!
+  projectOverview: ProjectOverview!
+  recentActivities: RecentActivities!
+}
+
+type OwnerDashboardResponse {
+  data: OwnerDashboard!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type PaginationMeta {
   limit: Int!
   page: Int!
@@ -2254,6 +2437,18 @@ type PayrollComponentsQueryResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
+}
+
+type PayrollCurrentCycle {
+  name: String!
+  paymentDate: DateTime!
+  periodEnd: DateTime!
+  periodStart: DateTime!
+  status: String!
+  totalDeductions: Float!
+  totalEmployees: Int!
+  totalGrossPay: Float!
+  totalNetPay: Float!
 }
 
 type PayrollCycle {
@@ -2389,6 +2584,31 @@ type PayrollItemsQueryResponse {
   success: Boolean!
 }
 
+type PayrollPendingActions {
+  draftCycles: Int!
+  pendingApprovals: Int!
+  pendingPayments: Int!
+}
+
+type PayrollSummary {
+  currentCycle: PayrollCurrentCycle!
+  pendingActions: PayrollPendingActions!
+  yearToDate: PayrollYearToDate!
+}
+
+type PayrollSummarys {
+  currentMonth: CurrentMonthPayroll!
+  lastPayment: LastPayment!
+  yearToDate: YearToDatePayroll!
+}
+
+type PayrollYearToDate {
+  averageMonthlyPayroll: Float!
+  highestMonth: MonthAmount!
+  lowestMonth: MonthAmount!
+  totalPaid: Float!
+}
+
 type PayslipAdjustment {
   amount: Float!
   createdBy: Int!
@@ -2421,6 +2641,16 @@ type Permission {
   updatedAt: DateTime!
 }
 
+type PersonalInfo {
+  department: String!
+  designation: String!
+  email: String!
+  employeeId: String!
+  fullName: String!
+  joiningDate: DateTime!
+  phone: String!
+}
+
 input ProcessPayrollCycleInput {
   id: Int!
 }
@@ -2433,15 +2663,14 @@ type Profile {
   dateOfBirth: String!
   emergencyContact: EmergencyContact
   fullName: String!
-  gender: GENDER!
-  id: ID!
-  maritalStatus: MARITAL_STATUS!
+  gender: Gender!
+  maritalStatus: MaritalStatus!
   phone: String!
   postcode: String!
   profilePicture: String
   socialLinks: SocialLink
   updatedAt: DateTime!
-  userId: Int!
+  userId: ID!
 }
 
 type ProfileResponse {
@@ -2495,6 +2724,14 @@ type ProjectMembersQueryResponse {
   success: Boolean!
 }
 
+type ProjectOverview {
+  active: Int!
+  completed: Int!
+  onHold: Int!
+  recentProjects: [RecentProject!]!
+  total: Int!
+}
+
 type ProjectResponse {
   data: Project!
   message: String!
@@ -2537,6 +2774,7 @@ type Query {
   educationHistory(id: Int!, userId: Int!): EducationHistoryResponse!
   educationHistoryByUserId(userId: Int!): EducationHistoriesQueryResponse!
   employeeById(id: Int!): UserResponse!
+  employeeDashboard: EmployeeDashboardResponse!
   employeeScheduleAssignment(id: Int!): EmployeeScheduleAssignmentResponse!
   employeeScheduleAssignments: EmployeeScheduleAssignmentsQueryResponse!
   employeeScheduleAssignmentsByUser(userId: Int!): EmployeeScheduleAssignmentsQueryResponse!
@@ -2567,6 +2805,7 @@ type Query {
   notifications(query: QueryNotificationInput): NotificationsQueryResponse!
   onboardingProcessById(id: Int!): OnboardingProcessResponse!
   onboardingProcesses(query: QueryOnboardingProcessInput): OnboardingProcessesQueryResponse!
+  ownerDashboard: OwnerDashboardResponse!
   payrollComponentByCode(businessId: Int!, code: String!): PayrollComponentResponse!
   payrollComponentById(id: Int!): PayrollComponentResponse!
   payrollComponents(query: QueryPayrollComponentInput): PayrollComponentsQueryResponse!
@@ -2582,7 +2821,7 @@ type Query {
   recruitmentProcessById(id: Int!): RecruitmentProcessResponse!
   recruitmentProcesses(query: QueryRecruitmentProcessInput): RecruitmentProcessesQueryResponse!
   roles: RoleResponse!
-  socialLink(profileId: Int!): SocialLinkResponse!
+  socialLink(userId: Int!): SocialLinkResponse!
   socialLinksByProfileId(profileId: Int): SocialLinkResponse!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
@@ -2781,14 +3020,53 @@ input QueryWorkScheduleInput {
 input QueryWorkSiteInput {
   address: String
   ipAddress: String
-  isGeoLocationEnabled: Boolean
-  isIpEnabled: Boolean
-  isLocationEnabled: Boolean
+  locationTrackingType: LocationTrackingType
   maxRadius: Int
   name: String
   pagination: BasePaginationInput
   searchTerm: String
   status: Status
+}
+
+type RecentActivities {
+  recentActivities: [RecentActivityItem!]!
+  unreadNotifications: Int!
+}
+
+type RecentActivityItem {
+  message: String!
+  timestamp: DateTime!
+  type: String!
+}
+
+type RecentAttendanceItem {
+  checkInTime: DateTime
+  checkOutTime: DateTime
+  date: DateTime!
+  status: String!
+}
+
+type RecentNotification {
+  isRead: Boolean!
+  message: String!
+  timestamp: DateTime!
+  type: String!
+}
+
+type RecentProject {
+  endDate: DateTime
+  memberCount: Int!
+  name: String!
+  startDate: DateTime!
+  status: String!
+}
+
+type RecentTask {
+  dueDate: DateTime!
+  priority: String!
+  project: String!
+  status: String!
+  title: String!
 }
 
 type RecruitmentProcess {
@@ -2972,7 +3250,7 @@ type SocialLinkResponse {
   success: Boolean!
 }
 
-"""Status of the Asset Type"""
+"""Status of the Job Type"""
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -3005,7 +3283,7 @@ type SubscriptionPlan {
   setupFee: Int!
 
   """Status of the service plan"""
-  status: String!
+  status: SubscriptionStatus!
 
   """Timestamp when the service plan was last updated"""
   updatedAt: DateTime!
@@ -3027,6 +3305,23 @@ type SubscriptionPlanResponse {
   success: Boolean!
 }
 
+"""Status of the Subscription Plan"""
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  INACTIVE
+  TRIAL
+}
+
+type TaskOverview {
+  assigned: Int!
+  completed: Int!
+  inProgress: Int!
+  overdue: Int!
+  recentTasks: [RecentTask!]!
+}
+
 type TimeSlot {
   """End time of the slot"""
   endTime: String!
@@ -3041,24 +3336,23 @@ type TimeSlot {
   startTime: String!
 }
 
-"""User account status"""
-enum USER_ACCOUNT_STATUS {
-  ACTIVE
-  BLOCKED
-  DELETED
-  INACTIVE
-  ON_LEAVE
-  RESIGNED
-  RETIRED
-  SUSPENDED
-  TERMINATED
-  UNVERIFIED
-  VERIFIED
-}
-
 input UnassignProjectMemberInput {
   projectId: Int!
   userId: Int!
+}
+
+type UpcomingLeave {
+  employeeName: String!
+  endDate: DateTime!
+  leaveType: String!
+  startDate: DateTime!
+}
+
+type UpcomingLeaveItem {
+  endDate: DateTime!
+  leaveType: String!
+  startDate: DateTime!
+  status: String!
 }
 
 input UpdateAssetInput {
@@ -3209,6 +3503,8 @@ input UpdateBusinessScheduleInput {
 }
 
 input UpdateBusinessSettingInput {
+  businessId: Int
+
   """Business start day of the week (0-6, where 0=Sunday)"""
   businessStartDay: Int = 0
 
@@ -3220,7 +3516,6 @@ input UpdateBusinessSettingInput {
 
   """Delete read notifications setting"""
   deleteReadNotifications: String
-  id: Int!
 
   """Prefix for business identifiers"""
   identifierPrefix: String
@@ -3308,9 +3603,6 @@ input UpdateEducationHistoryInput {
 }
 
 input UpdateEmergencyContactInput {
-  """ID of the profile to update"""
-  id: Int!
-
   """Emergency contact name"""
   name: String!
 
@@ -3319,6 +3611,9 @@ input UpdateEmergencyContactInput {
 
   """Relationship to the person"""
   relation: String!
+
+  """ID of the user to update"""
+  userId: Int!
 }
 
 input UpdateEmployeeInput {
@@ -3374,9 +3669,6 @@ input UpdateEmploymentDetailsInput {
   """Employment Status ID"""
   employmentStatusId: Int
 
-  """Profile ID (userId)"""
-  id: Int!
-
   """Joining date"""
   joiningDate: String
 
@@ -3388,6 +3680,9 @@ input UpdateEmploymentDetailsInput {
 
   """Salary per month"""
   salaryPerMonth: Float
+
+  """User ID"""
+  userId: Int!
 
   """Work Schedule ID"""
   workScheduleId: Int
@@ -3570,7 +3865,7 @@ input UpdateNotificationPreferenceInput {
 }
 
 input UpdateNotificationTemplateInput {
-  businessId: Int
+  businessId: Int!
   channels: [NotificationChannel!]!
   id: Int!
   isActive: Boolean
@@ -3608,20 +3903,34 @@ input UpdatePayrollComponentInput {
   name: String
 }
 
+input UpdatePayrollItemInput {
+  absentDays: Float
+  adjustments: [PayslipAdjustmentInput!]
+  bankAccount: String
+  basicSalary: Float
+  components: [PayrollItemComponentInput!]
+  id: Int!
+  leaveDays: Float
+  notes: String
+  overtimeHours: Float
+  paymentMethod: String
+  presentDays: Float
+  transactionRef: String
+  workingDays: Int
+}
+
 input UpdateProfileInput {
   address: String
   city: String
   country: String
-  dateOfBirth: String
+  dateOfBirth: DateTime
   fullName: String
-  gender: GENDER
-
-  """ID of the profile to update"""
-  id: Int!
-  maritalStatus: MARITAL_STATUS
+  gender: Gender
+  maritalStatus: MaritalStatus
   phone: String
   postcode: String
   profilePicture: String
+  userId: ID!
 }
 
 input UpdateProjectInput {
@@ -3659,11 +3968,11 @@ input UpdateSocialLinkInput {
   """LinkedIn profile URL"""
   linkedin: String
 
-  """Profile ID"""
-  profileId: Int
-
   """Twitter profile URL"""
   twitter: String
+
+  """User ID"""
+  userId: Int
 }
 
 input UpdateSubscriptionPlanInput {
@@ -3719,19 +4028,19 @@ input UpdateWorkSiteInput {
   description: String
   id: Int!
 
-  """IP address"""
+  """IP address for IP-based tracking"""
   ipAddress: String
 
-  """Whether geo location is enabled"""
-  isGeoLocationEnabled: Boolean
+  """Latitude for geo_fencing"""
+  lat: Float
 
-  """Whether IP is enabled"""
-  isIpEnabled: Boolean
+  """Longitude for geo_fencing"""
+  lng: Float
 
-  """Whether location is enabled"""
-  isLocationEnabled: Boolean
+  """Type of location tracking"""
+  locationTrackingType: LocationTrackingType = NONE
 
-  """Maximum radius for location"""
+  """Maximum radius in meters for geo_fencing"""
   maxRadius: Int
 
   """Name of the work site"""
@@ -3766,11 +4075,26 @@ type User {
   roleId: Int
 
   """Status of the user account"""
-  status: USER_ACCOUNT_STATUS!
+  status: UserAccountStatus!
 
   """Date when the user was last updated"""
   updatedAt: DateTime!
   userPermissions: [UserPermission!]
+}
+
+"""Account status of the user"""
+enum UserAccountStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+  INACTIVE
+  ON_LEAVE
+  RESIGNED
+  RETIRED
+  SUSPENDED
+  TERMINATED
+  UNVERIFIED
+  VERIFIED
 }
 
 type UserPermission {
@@ -3875,24 +4199,24 @@ type WorkSite {
   createdBy: Int!
 
   """Description of the work site"""
-  description: String!
+  description: String
 
   """Unique identifier for the work site"""
   id: ID!
 
-  """IP address"""
+  """IP address for IP-based tracking"""
   ipAddress: String
 
-  """Whether geo location is enabled"""
-  isGeoLocationEnabled: Boolean
+  """Latitude for geo_fencing"""
+  lat: Float
 
-  """Whether IP is enabled"""
-  isIpEnabled: Boolean
+  """Longitude for geo_fencing"""
+  lng: Float
 
-  """Whether location is enabled"""
-  isLocationEnabled: Boolean
+  """Type of location tracking"""
+  locationTrackingType: LocationTrackingType!
 
-  """Maximum radius for location"""
+  """Maximum radius in meters for geo_fencing"""
   maxRadius: Int
 
   """Name of the work site"""
@@ -3919,4 +4243,10 @@ type WorkSitesQueryResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
+}
+
+type YearToDatePayroll {
+  totalDeductions: Float!
+  totalGrossPay: Float!
+  totalNetPay: Float!
 }

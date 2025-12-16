@@ -1,32 +1,32 @@
-import { ObjectType, Field, ID, registerEnumType, Int } from '@nestjs/graphql';
-import { Status } from 'generated/prisma';
+import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
+import { IsEnum, IsInt, IsString } from 'class-validator';
 import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
+import { Status } from 'src/common/enums';
 
-registerEnumType(Status, {
-  name: 'Status',
-  description: 'Status of the Designation',
-});
 @ObjectType()
 export class Designation {
   @Field(() => ID, { description: 'Unique identifier for the designation' })
+  @IsInt()
   id: number;
+
   @Field(() => String, { description: 'Name of the designation' })
+  @IsString()
   name: string;
 
   @Field(() => String, { description: 'Description of the designation' })
+  @IsString()
   description: string;
 
   @Field(() => Status, { description: 'Status of the designation' })
+  @IsEnum(Status)
   status: Status;
 
   @Field(() => Int, { description: 'ID of the business' })
+  @IsInt()
   businessId: number;
-
-  @Field(() => Int, { description: 'ID of the creator' })
-  createdBy?: number;
 
   @Field(() => Date, { description: 'Date when the designation was created' })
   createdAt: Date;

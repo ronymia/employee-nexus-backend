@@ -1,44 +1,44 @@
-import { LeaveRolloverType } from 'generated/prisma';
+import { LeaveRolloverType } from 'src/modules/leave-types/enums';
 
 export const defaultLeaveTypes = [
   {
     name: 'Vacation Leave',
-    leaveType: 'paid',
+    leaveType: 'PAID',
     leaveHours: 80,
     leaveRolloverType: LeaveRolloverType.NONE,
     // employmentStatusIds: [],
   },
   {
     name: 'Sick Leave',
-    leaveType: 'paid',
+    leaveType: 'PAID',
     leaveHours: 40,
     leaveRolloverType: LeaveRolloverType.NONE,
     // employmentStatusIds: [],
   },
   {
     name: 'Personal Leave',
-    leaveType: 'unpaid',
+    leaveType: 'UNPAID',
     leaveHours: 30,
     leaveRolloverType: LeaveRolloverType.NONE,
     // employmentStatusIds: [],
   },
   {
     name: 'Maternity Leave',
-    leaveType: 'paid',
+    leaveType: 'PAID',
     leaveHours: 120,
     leaveRolloverType: LeaveRolloverType.NONE,
     // employmentStatusIds: [],
   },
   {
     name: 'Paternity Leave',
-    leaveType: 'paid',
+    leaveType: 'PAID',
     leaveHours: 80,
     leaveRolloverType: LeaveRolloverType.NONE,
     // employmentStatusIds: [],
   },
   {
     name: 'Bereavement Leave',
-    leaveType: 'paid',
+    leaveType: 'PAID',
     leaveHours: 24,
     leaveRolloverType: LeaveRolloverType.NONE,
     // employmentStatusIds: [],

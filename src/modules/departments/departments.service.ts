@@ -8,6 +8,7 @@ import { QueryDepartmentInput } from './dto/query-department.input';
 import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { departmentSearchableFields } from './department.constant';
+import { Status } from 'src/common/enums';
 
 @Injectable()
 export class DepartmentsService {
@@ -60,6 +61,7 @@ export class DepartmentsService {
         ...createDepartmentInput,
         createdBy: user.userId,
         businessId: user.businessId,
+        status: Status.ACTIVE,
       },
       include: {
         parent: true,

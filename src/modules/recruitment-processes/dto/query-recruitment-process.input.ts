@@ -1,12 +1,7 @@
-import { Field, InputType, registerEnumType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { IsEnum, IsString, IsBoolean, IsOptional } from 'class-validator';
-import { Status } from 'generated/prisma';
 import { BasePaginationInput } from 'src/common/dto/base-pagination.type';
-
-registerEnumType(Status, {
-  name: 'Status',
-  description: 'Status of the Recruitment Process',
-});
+import { Status } from 'src/common/enums';
 
 @InputType()
 export class QueryRecruitmentProcessInput {

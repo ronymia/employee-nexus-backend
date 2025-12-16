@@ -1,8 +1,10 @@
-import { InputType, Field, PartialType, Int } from '@nestjs/graphql';
+import { Field, ID, InputType, PartialType } from '@nestjs/graphql';
 import { CreateProfileInput } from './create-profile.input';
+import { IsInt } from 'class-validator';
 
 @InputType()
 export class UpdateProfileInput extends PartialType(CreateProfileInput) {
-  @Field(() => Int, { description: 'ID of the profile to update' })
-  id: number;
+  @Field(() => ID)
+  @IsInt()
+  userId: number;
 }

@@ -8,6 +8,7 @@ import { UpdateEmploymentDetailsInput } from './dto/update-employment-details.in
 export class ProfilesService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // UPDATE PROFILE
   async updateProfile({
     updateProfileInput,
   }: {
@@ -15,7 +16,7 @@ export class ProfilesService {
   }) {
     // Get user's profile
     const profile = await this.prisma.profile.findUnique({
-      where: { id: updateProfileInput.id },
+      where: { userId: updateProfileInput.userId },
     });
 
     if (!profile) {
@@ -24,26 +25,28 @@ export class ProfilesService {
 
     // Update profile
     const updatedProfile = await this.prisma.profile.update({
-      where: { id: profile.id },
+      where: { userId: profile.userId },
       data: updateProfileInput,
       include: {
         emergencyContact: true,
+        socialLinks: true,
       },
     });
 
     return updatedProfile;
   }
 
+  // UPDATE EMERGENCY CONTACT
   async updateEmergencyContact({
     updateEmergencyContactInput,
   }: {
     updateEmergencyContactInput: UpdateEmergencyContactInput;
   }) {
-    const { id: profileId, ...rest } = updateEmergencyContactInput;
+    const { userId, ...rest } = updateEmergencyContactInput;
 
     // Get user's profile
     const profile = await this.prisma.profile.findUnique({
-      where: { id: profileId },
+      where: { userId: userId },
     });
 
     if (!profile) {
@@ -52,43 +55,35 @@ export class ProfilesService {
 
     // Upsert emergency contact
     const emergencyContact = await this.prisma.emergencyContact.upsert({
-      where: { profileId: profile.id },
+      where: { userId: profile.userId },
       update: rest,
-      create: {
-        ...rest,
-        profileId: profile.id,
-      },
+      create: updateEmergencyContactInput,
     });
 
     return emergencyContact;
   }
 
+  // UPDATE EMPLOYMENT DETAILS
   async updateEmploymentDetails({
     updateEmploymentDetailsInput,
   }: {
     updateEmploymentDetailsInput: UpdateEmploymentDetailsInput;
   }) {
-    const { id, ...updateData } = updateEmploymentDetailsInput;
+    const { userId, ...rest } = updateEmploymentDetailsInput;
 
     // Get employee by Id
     const employee = await this.prisma.employee.findUnique({
-      where: { id },
+      where: { userId },
     });
 
     if (!employee) {
       throw new NotFoundException('Employee not found');
     }
 
-    // Convert joiningDate string to Date if provided
-    const data: any = { ...updateData };
-    // if (updateData.joiningDate) {
-    //   data.joiningDate = new Date(updateData.joiningDate);
-    // }
-
     // Update employee
     const updatedEmployee = await this.prisma.employee.update({
-      where: { id: id },
-      data,
+      where: { userId: userId },
+      data: rest,
     });
 
     return updatedEmployee;

@@ -321,7 +321,7 @@ export class UsersService {
         });
 
         // Create profile linked to user
-        const createdProfile = await tx.profile.create({
+        await tx.profile.create({
           data: {
             ...profile,
             userId: createdUser.id,
@@ -333,7 +333,7 @@ export class UsersService {
           await tx.emergencyContact.create({
             data: {
               ...emergencyContact,
-              profileId: createdProfile.id,
+              userId: createdUser.id,
             },
           });
         }
@@ -675,7 +675,7 @@ export class UsersService {
 
             if (Object.keys(profileUpdateData).length > 0) {
               await tx.profile.update({
-                where: { id: existingUser.profile.id },
+                where: { userId: existingUser.id },
                 data: profileUpdateData,
               });
             }
@@ -694,7 +694,7 @@ export class UsersService {
 
               if (Object.keys(emergencyUpdateData).length > 0) {
                 await tx.emergencyContact.update({
-                  where: { profileId: existingUser.profile.id },
+                  where: { userId: existingUser.id },
                   data: emergencyUpdateData,
                 });
               }
@@ -709,16 +709,16 @@ export class UsersService {
                   name: emergencyContact.name,
                   phone: emergencyContact.phone,
                   relation: emergencyContact.relation,
-                  profileId: existingUser.profile.id,
+                  userId: existingUser.id,
                 },
               });
             }
           }
 
           // Update employee if employee data is provided
-          if (employmentDetails && existingUser?.employee?.id) {
+          if (employmentDetails && existingUser?.employee?.userId) {
             await tx.employee.update({
-              where: { id: existingUser.employee.id, AND: { userId: id } },
+              where: { userId: existingUser.id },
               data: employmentDetails,
             });
           }

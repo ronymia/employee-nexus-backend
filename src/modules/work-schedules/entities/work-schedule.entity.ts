@@ -7,7 +7,8 @@ import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
-import { ScheduleBreakType, ScheduleType, Status } from 'generated/prisma';
+import { Status } from 'src/common/enums';
+import { ScheduleBreakType, ScheduleType } from '../enums';
 // import { Status, ScheduleType, ScheduleBreakType } from 'src/enums/global';
 
 // Register enums for GraphQL

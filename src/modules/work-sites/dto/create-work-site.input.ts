@@ -1,5 +1,6 @@
-import { InputType, Field, Int } from '@nestjs/graphql';
-import { IsOptional, IsString, IsBoolean, IsInt } from 'class-validator';
+import { InputType, Field, Int, Float } from '@nestjs/graphql';
+import { IsOptional, IsString, IsInt, IsEnum, IsNumber } from 'class-validator';
+import { LocationTrackingType } from '../enums/location-tracking-type.enum';
 
 @InputType()
 export class CreateWorkSiteInput {
@@ -7,9 +8,13 @@ export class CreateWorkSiteInput {
   @IsString()
   name: string;
 
-  @Field(() => String, { description: 'Description of the work site' })
+  @Field(() => String, {
+    nullable: true,
+    description: 'Description of the work site',
+  })
+  @IsOptional()
   @IsString()
-  description: string;
+  description?: string;
 
   @Field(() => String, {
     nullable: true,
@@ -19,39 +24,43 @@ export class CreateWorkSiteInput {
   @IsString()
   address?: string;
 
-  @Field(() => Boolean, {
+  @Field(() => Float, {
     nullable: true,
-    description: 'Whether location is enabled',
+    description: 'Latitude for geo_fencing',
   })
   @IsOptional()
-  @IsBoolean()
-  isLocationEnabled?: boolean;
+  @IsNumber()
+  lat?: number;
 
-  @Field(() => Boolean, {
+  @Field(() => Float, {
     nullable: true,
-    description: 'Whether geo location is enabled',
+    description: 'Longitude for geo_fencing',
   })
   @IsOptional()
-  @IsBoolean()
-  isGeoLocationEnabled?: boolean;
+  @IsNumber()
+  lng?: number;
+
+  @Field(() => LocationTrackingType, {
+    nullable: true,
+    description: 'Type of location tracking',
+    defaultValue: LocationTrackingType.NONE,
+  })
+  @IsOptional()
+  @IsEnum(LocationTrackingType)
+  locationTrackingType?: LocationTrackingType;
 
   @Field(() => Int, {
     nullable: true,
-    description: 'Maximum radius for location',
+    description: 'Maximum radius in meters for geo_fencing',
   })
   @IsOptional()
   @IsInt()
   maxRadius?: number;
 
-  @Field(() => Boolean, {
+  @Field(() => String, {
     nullable: true,
-    description: 'Whether IP is enabled',
+    description: 'IP address for IP-based tracking',
   })
-  @IsOptional()
-  @IsBoolean()
-  isIpEnabled?: boolean;
-
-  @Field(() => String, { nullable: true, description: 'IP address' })
   @IsOptional()
   @IsString()
   ipAddress?: string;

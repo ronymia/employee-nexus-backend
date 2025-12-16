@@ -1,15 +1,10 @@
 // EMPLOYMENT STATUS ENTITY - DEFINES GRAPHQL TYPES AND RESPONSE STRUCTURES FOR EMPLOYMENT STATUS
-import { ObjectType, Field, Int, registerEnumType, ID } from '@nestjs/graphql';
-import { Status } from 'generated/prisma';
+import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
 import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
-
-registerEnumType(Status, {
-  name: 'Status',
-  description: 'Status of the Employment Status',
-});
+import { Status } from 'src/common/enums';
 
 @ObjectType()
 export class EmploymentStatus {

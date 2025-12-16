@@ -1,17 +1,12 @@
 // DEPARTMENT ENTITY - DEFINES GRAPHQL TYPES AND RESPONSE STRUCTURES FOR DEPARTMENT
 import { ObjectType, Field, Int, registerEnumType, ID } from '@nestjs/graphql';
-import { Status } from 'generated/prisma';
 import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
 import { User } from 'src/modules/users/entities/user.entity';
 import { Business } from 'src/modules/businesses/entities/business.entity';
-
-registerEnumType(Status, {
-  name: 'Status',
-  description: 'Status of the Department',
-});
+import { Status } from 'src/common/enums';
 
 @ObjectType()
 export class Department {

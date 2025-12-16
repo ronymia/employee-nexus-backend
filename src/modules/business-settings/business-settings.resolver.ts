@@ -25,7 +25,7 @@ export class BusinessSettingsResolver {
     name: 'businessSettingByBusinessId',
   })
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('Business Settings:read')
+  @RequirePermissions('Business:read')
   @UseGuards(GqlAuthGuard)
   async findByBusiness(@CurrentUser() user: JwtPayload) {
     const result = await this.businessSettingsService.findByBusiness({

@@ -1,4 +1,4 @@
-import { InputType, Field, registerEnumType } from '@nestjs/graphql';
+import { InputType, Field } from '@nestjs/graphql';
 import {
   IsBoolean,
   IsDateString,
@@ -6,12 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { HolidayType } from 'generated/prisma';
-
-registerEnumType(HolidayType, {
-  name: 'HolidayType',
-  description: 'Type of holiday',
-});
+import { HolidayType } from '../enums';
 
 @InputType()
 export class CreateHolidayInput {

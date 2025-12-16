@@ -32,6 +32,15 @@ export const permissions = [
     action: [PermissionAction.READ, PermissionAction.UPDATE],
   },
   {
+    resource: PermissionResource.SUBSCRIPTION_PLAN,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
+  {
     resource: PermissionResource.PERMISSION,
     action: [
       PermissionAction.CREATE,

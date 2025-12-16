@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
-import { BusinessStatus } from 'generated/prisma';
 import {
   BaseQueryResponse,
   BaseResponse,
@@ -8,6 +7,7 @@ import {
 import { BusinessSchedule } from 'src/modules/business-schedules/entities/business-schedule.entity';
 import { SubscriptionPlan } from 'src/modules/subscription-plans/entities/subscription-plan.entity';
 import { User } from 'src/modules/users/entities/user.entity';
+import { BusinessStatus } from '../enums';
 
 @ObjectType()
 export class Business {
@@ -54,7 +54,7 @@ export class Business {
   status: BusinessStatus;
 
   @Field(() => Int)
-  userId: number;
+  ownerId: number;
 
   @Field(() => User, { nullable: true })
   owner?: User | null;

@@ -9,6 +9,7 @@ import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { leaveSearchableFields } from './leave.constant';
 import { NotificationsService } from '../notifications/notifications.service';
 import { RequestLeaveInput } from './dto/request-leave.input';
+import { NotificationChannel, NotificationType } from '../notifications/enums';
 
 @Injectable()
 export class LeavesService {
@@ -38,9 +39,14 @@ export class LeavesService {
         id: createLeaveInput.userId,
       },
       include: {
+        employee: {
+          include: {
+            department: true,
+          },
+        },
         business: {
           select: {
-            userId: true,
+            ownerId: true,
           },
         },
       },
@@ -84,12 +90,14 @@ export class LeavesService {
         : startDate;
 
       await this.notificationsService.create({
-        type: 'LEAVE',
+        type: NotificationType.LEAVE,
         title: 'Leave Requested',
         message: `Your leave request from ${startDate} to ${endDate} has been submitted successfully and is pending review.`,
         priority: 'NORMAL' as any,
-        userId: existingUser?.business?.userId || createLeaveInput.userId,
-        channels: ['IN_APP'],
+        userId:
+          (existingUser?.employee?.department?.managerId as number) ||
+          (existingUser?.business?.ownerId as number),
+        channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
         businessId: user.businessId,
         entityType: 'leave',
         entityId: leave.id,
@@ -135,12 +143,12 @@ export class LeavesService {
         : startDate;
 
       await this.notificationsService.create({
-        type: 'LEAVE',
+        type: NotificationType.LEAVE,
         title: 'Leave Recorded',
         message: `Your leave request from ${startDate} to ${endDate} has been submitted successfully and is pending review.`,
         priority: 'NORMAL' as any,
         userId: createLeaveInput.userId,
-        channels: ['IN_APP'],
+        channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
         businessId: user.businessId,
         entityType: 'leave',
         entityId: leave.id,
@@ -397,12 +405,12 @@ export class LeavesService {
       }
 
       await this.notificationsService.create({
-        type: 'LEAVE',
+        type: NotificationType.LEAVE,
         title,
         message,
         priority: 'HIGH' as any,
         userId: updatedLeave.userId,
-        channels: ['IN_APP', 'EMAIL'],
+        channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
         businessId: leave.user.businessId || undefined,
         entityType: 'leave',
         entityId: updatedLeave.id,

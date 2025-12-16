@@ -8,6 +8,7 @@ import { QueryEmploymentStatusInput } from './dto/query-employment-status.input'
 import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { employmentStatusSearchableFields } from './employmentStatus.constant';
+import { Status } from 'src/common/enums';
 
 @Injectable()
 export class EmploymentStatusService {
@@ -29,6 +30,7 @@ export class EmploymentStatusService {
         ...createEmploymentStatusInput,
         createdBy: user.userId,
         businessId: user.businessId,
+        status: Status.ACTIVE,
       },
     });
   }

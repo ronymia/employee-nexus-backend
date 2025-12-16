@@ -11,6 +11,7 @@ import { QueryAssetTypeInput } from './dto/query-asset-type.input';
 import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { assetTypeSearchableFields } from './assetType.constant';
+import { Status } from 'src/common/enums';
 
 @Injectable()
 export class AssetTypesService {
@@ -45,6 +46,7 @@ export class AssetTypesService {
         ...createAssetTypeInput,
         createdBy: user.userId,
         businessId: user.businessId,
+        status: Status.ACTIVE,
       },
     });
   }
@@ -147,7 +149,7 @@ export class AssetTypesService {
     user: JwtPayload;
     updateAssetTypeInput: UpdateAssetTypeInput;
   }) {
-    const { id } = updateAssetTypeInput;
+    const { id, ...updateData } = updateAssetTypeInput;
     const businessId = user.businessId;
 
     // Check if asset type exists and belongs to user's business
@@ -184,9 +186,6 @@ export class AssetTypesService {
         );
       }
     }
-
-    // Remove id from update input
-    const { id: _, ...updateData } = updateAssetTypeInput;
 
     return await this.prisma.assetType.update({
       where: { id, businessId },

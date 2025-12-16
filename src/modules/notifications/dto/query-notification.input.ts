@@ -1,21 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { InputType, Field, Int, registerEnumType } from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
 import { IsInt, IsOptional, IsBoolean, IsEnum } from 'class-validator';
-import { NotificationType } from 'generated/prisma';
-// import { NotificationType } from '../enums';
-
-// registerEnumType(NotificationChannel, {
-//   name: 'NotificationChannel',
-// });
-
-registerEnumType(NotificationType, {
-  name: 'NotificationType',
-});
-
-// registerEnumType(NotificationPriority, {
-//   name: 'NotificationPriority',
-// });
+import { NotificationType } from '../enums';
 
 @InputType()
 export class QueryNotificationInput {

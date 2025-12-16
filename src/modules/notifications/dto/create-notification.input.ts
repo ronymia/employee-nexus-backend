@@ -6,7 +6,7 @@ import {
   NotificationChannel,
   NotificationPriority,
   NotificationType,
-} from 'generated/prisma';
+} from '../enums';
 
 @InputType()
 export class CreateNotificationInput {

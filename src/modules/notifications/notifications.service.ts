@@ -24,6 +24,7 @@ export class NotificationsService {
     return await this.prisma.notification.create({
       data: {
         ...data,
+        priority: input?.priority || 'NORMAL',
         metadata: metadata ? JSON.parse(metadata) : undefined,
       },
     });
@@ -128,7 +129,7 @@ export class NotificationsService {
 
   async createTemplate(input: CreateNotificationTemplateInput) {
     return await this.prisma.notificationTemplate.create({
-      data: input,
+      data: { ...input, priority: input?.priority || 'NORMAL' },
     });
   }
 

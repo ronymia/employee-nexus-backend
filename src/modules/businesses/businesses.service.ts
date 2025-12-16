@@ -26,6 +26,9 @@ import { defaultOnboardingProcesses } from 'src/Database/onboarding-process';
 import { QueryBusinessInput } from './dto/query-business.input';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { businessSearchableFields } from './businesses.constant';
+import { BusinessStatus } from './enums';
+import { Status } from 'src/common/enums';
+import { UserAccountStatus } from '../users/enums';
 
 @Injectable()
 export class BusinessesService {
@@ -77,7 +80,11 @@ export class BusinessesService {
 
         // Step 1: Create the primary user
         const createdUser = await prismaTransaction.user.create({
-          data: createUserInput,
+          data: {
+            email: createUserInput.email,
+            password: createUserInput.password,
+            status: UserAccountStatus.ACTIVE,
+          },
         });
         if (!createdUser)
           throw new NotImplementedException('User creation failed');
@@ -91,7 +98,11 @@ export class BusinessesService {
 
         // Step 3: Create the business
         const createdBusiness = await prismaTransaction.business.create({
-          data: { ...createBusinessInput, userId: createdUser.id },
+          data: {
+            ...createBusinessInput,
+            status: BusinessStatus.ACTIVE,
+            ownerId: createdUser.id,
+          },
         });
         if (!createdBusiness) {
           throw new NotImplementedException('Business creation failed');
@@ -209,14 +220,10 @@ export class BusinessesService {
             prismaTransaction.designation.create({
               data: {
                 ...element,
+                status: Status.ACTIVE,
                 business: {
                   connect: {
                     id: businessId,
-                  },
-                },
-                creator: {
-                  connect: {
-                    id: creatorId,
                   },
                 },
               },
@@ -230,6 +237,7 @@ export class BusinessesService {
             prismaTransaction.employmentStatus.create({
               data: {
                 ...element,
+                status: Status.ACTIVE,
                 business: {
                   connect: {
                     id: businessId,
@@ -251,6 +259,7 @@ export class BusinessesService {
             prismaTransaction.jobType.create({
               data: {
                 ...element,
+                status: Status.ACTIVE,
                 business: {
                   connect: {
                     id: businessId,
@@ -272,6 +281,7 @@ export class BusinessesService {
             prismaTransaction.jobPlatform.create({
               data: {
                 ...element,
+                status: Status.ACTIVE,
                 business: {
                   connect: {
                     id: businessId,
@@ -293,6 +303,7 @@ export class BusinessesService {
             prismaTransaction.leaveType.create({
               data: {
                 ...element,
+                status: Status.ACTIVE,
                 business: {
                   connect: {
                     id: businessId,
@@ -314,6 +325,7 @@ export class BusinessesService {
             prismaTransaction.recruitmentProcess.create({
               data: {
                 ...element,
+                status: Status.ACTIVE,
                 business: {
                   connect: {
                     id: businessId,
@@ -335,6 +347,7 @@ export class BusinessesService {
             prismaTransaction.onboardingProcess.create({
               data: {
                 ...element,
+                status: Status.ACTIVE,
                 business: {
                   connect: {
                     id: businessId,
@@ -368,7 +381,7 @@ export class BusinessesService {
         await prismaTransaction.paymentSettings.create({
           data: {
             ...paymentSettings,
-            businessId,
+            businessId: businessId,
           },
         });
 

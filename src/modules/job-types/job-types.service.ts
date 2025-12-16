@@ -7,6 +7,7 @@ import { QueryJobTypeInput } from './dto/query-job-type.input';
 import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { jobTypeSearchableFields } from './jobType.constant';
+import { Status } from 'src/common/enums';
 
 @Injectable()
 export class JobTypesService {
@@ -25,6 +26,7 @@ export class JobTypesService {
         ...createJobTypeInput,
         createdBy: user.userId,
         businessId: user.businessId,
+        status: Status.ACTIVE,
       },
     });
   }

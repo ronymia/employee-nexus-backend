@@ -8,6 +8,7 @@ import { QueryLeaveTypeInput } from './dto/query-leave-type.input';
 import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { leaveTypeSearchableFields } from './leaveType.constant';
+import { Status } from 'src/common/enums';
 
 @Injectable()
 export class LeaveTypesService {
@@ -54,6 +55,7 @@ export class LeaveTypesService {
         ...leaveTypeData,
         createdBy: user.userId,
         businessId: user.businessId,
+        status: Status.ACTIVE,
       },
     });
 

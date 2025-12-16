@@ -47,6 +47,7 @@ export class SubscriptionPlansService {
             data: {
               ...rest,
               createdBy: user?.userId,
+              status: 'ACTIVE',
             },
             include: { creator: true },
           });
