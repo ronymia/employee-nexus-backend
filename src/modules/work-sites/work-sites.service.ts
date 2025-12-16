@@ -49,15 +49,8 @@ export class WorkSitesService {
       paginationHelpers.calculatePagination(pagination || {});
 
     // FILTER
-    const {
-      searchTerm,
-      address,
-      isLocationEnabled,
-      isGeoLocationEnabled,
-      maxRadius,
-      isIpEnabled,
-      ipAddress,
-    } = filters;
+    const { searchTerm, address, locationTrackingType, maxRadius, ipAddress } =
+      filters;
 
     // QUERY BUILDER
     const andCondition: any[] = [];
@@ -75,17 +68,11 @@ export class WorkSitesService {
     if (address !== undefined) {
       andCondition.push({ address });
     }
-    if (isLocationEnabled !== undefined) {
-      andCondition.push({ isLocationEnabled });
-    }
-    if (isGeoLocationEnabled !== undefined) {
-      andCondition.push({ isGeoLocationEnabled });
+    if (locationTrackingType !== undefined) {
+      andCondition.push({ locationTrackingType });
     }
     if (maxRadius !== undefined) {
       andCondition.push({ maxRadius });
-    }
-    if (isIpEnabled !== undefined) {
-      andCondition.push({ isIpEnabled });
     }
     if (ipAddress !== undefined) {
       andCondition.push({ ipAddress });

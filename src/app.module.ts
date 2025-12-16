@@ -53,6 +53,7 @@ import { PayrollItemsModule } from './modules/payroll-items/payroll-items.module
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { OwnerDashboardModule } from './modules/owner-dashboard/owner-dashboard.module';
 import { EmployeeDashboardModule } from './modules/employee-dashboard/employee-dashboard.module';
+import { graphqlErrorFormatter } from './filters/graphql-error.formatter';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { EmployeeDashboardModule } from './modules/employee-dashboard/employee-d
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
       context: ({ req }) => ({ req }),
+      formatError: graphqlErrorFormatter,
     }),
     PrismaModule,
     UsersModule,

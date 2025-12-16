@@ -30,7 +30,6 @@ model User {
   ownedBusiness             Business?                    @relation(name: "businessOwner")
   subscriptionPlanCreated   SubscriptionPlan[]           @relation(name: "subscriptionPlanCreated")
   employmentStatusCreated   EmploymentStatus[]           @relation(name: "employmentStatusCreated")
-  designationCreated        Designation[]                @relation(name: "designationCreated")
   jobTypeCreated            JobType[]                    @relation(name: "jobTypeCreated")
   jobPlatformCreated        JobPlatform[]                @relation(name: "jobPlatformCreated")
   recruitmentProcessCreated RecruitmentProcess[]         @relation(name: "recruitmentProcessCreated")
@@ -353,16 +352,13 @@ model BusinessSubscription {
 }
 
 model Designation {
-  id          Int       @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   name        String
   description String
   status      String
-  businessId  Int?      @map("business_id")
-  business    Business? @relation(name: "designationsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  createdBy   Int?      @map("created_by")
-  creator     User?     @relation(name: "designationCreated", fields: [createdBy], references: [id], onDelete: SetNull)
-
-  employees Employee[] @relation(name: "employeeDesignation")
+  businessId  Int        @map("business_id")
+  business    Business   @relation(name: "designationsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  employees   Employee[] @relation(name: "employeeDesignation")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -446,21 +442,28 @@ model OnboardingProcess {
   @@map("onboarding_processes")
 }
 
+enum LocationTrackingType {
+  NONE // No location validation
+  MANUAL // Manual selection
+  GEO_FENCING // GPS-based radius check
+  IP_WHITELIST // IP address validation
+}
+
 model WorkSite {
-  id                   Int       @id @default(autoincrement())
+  id                   Int                  @id @default(autoincrement())
   name                 String
-  description          String
+  description          String?
   status               String
   address              String?
-  isLocationEnabled    Boolean?  @map("is_location_enabled")
-  isGeoLocationEnabled Boolean?  @map("is_geo_location_enabled")
-  maxRadius            Int?
-  isIpEnabled          Boolean?  @map("is_ip_enabled")
-  ipAddress            String?   @map("ip_address")
-  businessId           Int?      @map("business_id")
-  business             Business? @relation(name: "workSitesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  createdBy            Int?      @map("created_by")
-  creator              User?     @relation(name: "workSiteCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  lat                  Float? // Latitude for geo_fencing
+  lng                  Float? // Longitude for geo_fencing
+  locationTrackingType LocationTrackingType @default(NONE) @map("location_tracking_type")
+  maxRadius            Int?                 @map("max_radius") // In meters, for geo_fencing
+  ipAddress            String?              @map("ip_address") // For IP-based tracking
+  businessId           Int                  @map("business_id")
+  business             Business             @relation(name: "workSitesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  createdBy            Int?                 @map("created_by")
+  creator              User?                @relation(name: "workSiteCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
   employees         Employee[]        @relation(name: "employeeWorkSite")
   attendancePunches AttendancePunch[] @relation(name: "attendancePunchWorkSite")
@@ -470,6 +473,7 @@ model WorkSite {
 
   @@unique([name, businessId])
   @@index([businessId])
+  @@index([status])
   @@map("work_sites")
 }
 

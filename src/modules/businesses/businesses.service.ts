@@ -226,11 +226,6 @@ export class BusinessesService {
                     id: businessId,
                   },
                 },
-                creator: {
-                  connect: {
-                    id: creatorId,
-                  },
-                },
               },
             }),
           ),

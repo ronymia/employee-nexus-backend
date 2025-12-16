@@ -1101,21 +1101,21 @@ input CreateWorkSiteInput {
   address: String
 
   """Description of the work site"""
-  description: String!
+  description: String
 
-  """IP address"""
+  """IP address for IP-based tracking"""
   ipAddress: String
 
-  """Whether geo location is enabled"""
-  isGeoLocationEnabled: Boolean
+  """Latitude for geo_fencing"""
+  lat: Float
 
-  """Whether IP is enabled"""
-  isIpEnabled: Boolean
+  """Longitude for geo_fencing"""
+  lng: Float
 
-  """Whether location is enabled"""
-  isLocationEnabled: Boolean
+  """Type of location tracking"""
+  locationTrackingType: LocationTrackingType = NONE
 
-  """Maximum radius for location"""
+  """Maximum radius in meters for geo_fencing"""
   maxRadius: Int
 
   """Name of the work site"""
@@ -1223,9 +1223,6 @@ type Designation {
 
   """Date when the designation was created"""
   createdAt: DateTime!
-
-  """ID of the creator"""
-  createdBy: Int!
 
   """Description of the designation"""
   description: String!
@@ -2009,6 +2006,21 @@ type LeavesQueryResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
+}
+
+"""Type of location tracking for work sites"""
+enum LocationTrackingType {
+  """GPS-based radius check"""
+  GEO_FENCING
+
+  """IP address validation"""
+  IP_WHITELIST
+
+  """Manual selection"""
+  MANUAL
+
+  """No location validation"""
+  NONE
 }
 
 input LoginAuthInput {
@@ -3008,9 +3020,7 @@ input QueryWorkScheduleInput {
 input QueryWorkSiteInput {
   address: String
   ipAddress: String
-  isGeoLocationEnabled: Boolean
-  isIpEnabled: Boolean
-  isLocationEnabled: Boolean
+  locationTrackingType: LocationTrackingType
   maxRadius: Int
   name: String
   pagination: BasePaginationInput
@@ -4018,19 +4028,19 @@ input UpdateWorkSiteInput {
   description: String
   id: Int!
 
-  """IP address"""
+  """IP address for IP-based tracking"""
   ipAddress: String
 
-  """Whether geo location is enabled"""
-  isGeoLocationEnabled: Boolean
+  """Latitude for geo_fencing"""
+  lat: Float
 
-  """Whether IP is enabled"""
-  isIpEnabled: Boolean
+  """Longitude for geo_fencing"""
+  lng: Float
 
-  """Whether location is enabled"""
-  isLocationEnabled: Boolean
+  """Type of location tracking"""
+  locationTrackingType: LocationTrackingType = NONE
 
-  """Maximum radius for location"""
+  """Maximum radius in meters for geo_fencing"""
   maxRadius: Int
 
   """Name of the work site"""
@@ -4189,24 +4199,24 @@ type WorkSite {
   createdBy: Int!
 
   """Description of the work site"""
-  description: String!
+  description: String
 
   """Unique identifier for the work site"""
   id: ID!
 
-  """IP address"""
+  """IP address for IP-based tracking"""
   ipAddress: String
 
-  """Whether geo location is enabled"""
-  isGeoLocationEnabled: Boolean
+  """Latitude for geo_fencing"""
+  lat: Float
 
-  """Whether IP is enabled"""
-  isIpEnabled: Boolean
+  """Longitude for geo_fencing"""
+  lng: Float
 
-  """Whether location is enabled"""
-  isLocationEnabled: Boolean
+  """Type of location tracking"""
+  locationTrackingType: LocationTrackingType!
 
-  """Maximum radius for location"""
+  """Maximum radius in meters for geo_fencing"""
   maxRadius: Int
 
   """Name of the work site"""

@@ -27,7 +27,6 @@ export class DesignationsService {
     return await this.prisma.designation.create({
       data: {
         ...createDesignationInput,
-        createdBy: user.userId,
         businessId: user.businessId,
         status: Status.ACTIVE,
       },
