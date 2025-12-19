@@ -26,7 +26,6 @@ export class JobPlatformsService {
     return await this.prisma.jobPlatform.create({
       data: {
         ...createJobPlatformInput,
-        createdBy: user.userId,
         businessId: user.businessId,
         status: Status.ACTIVE,
       },

@@ -16,13 +16,15 @@ export class CreateDepartmentInput {
     description: 'ID of the parent department',
     nullable: true,
   })
-  @IsOptional()
   @IsInt()
+  @IsOptional()
   parentId?: number;
 
   @Field(() => Int, {
     description: 'ID of the manager',
+    nullable: true,
   })
   @IsInt()
-  managerId: number;
+  @IsOptional()
+  managerId?: number;
 }

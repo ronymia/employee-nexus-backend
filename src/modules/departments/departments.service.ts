@@ -59,7 +59,6 @@ export class DepartmentsService {
     return await this.prisma.department.create({
       data: {
         ...createDepartmentInput,
-        createdBy: user.userId,
         businessId: user.businessId,
         status: Status.ACTIVE,
       },
@@ -67,7 +66,6 @@ export class DepartmentsService {
         parent: true,
         children: true,
         manager: true,
-        creator: true,
         business: true,
       },
     });
@@ -126,7 +124,6 @@ export class DepartmentsService {
             parent: true,
             children: true,
             manager: true,
-            creator: true,
             business: true,
           },
         })
@@ -144,7 +141,6 @@ export class DepartmentsService {
             parent: true,
             children: true,
             manager: true,
-            creator: true,
             business: true,
           },
         });
@@ -178,7 +174,6 @@ export class DepartmentsService {
         parent: true,
         children: true,
         manager: true,
-        creator: true,
         business: true,
       },
     });
@@ -244,7 +239,6 @@ export class DepartmentsService {
         parent: true,
         children: true,
         manager: true,
-        creator: true,
         business: true,
       },
     });

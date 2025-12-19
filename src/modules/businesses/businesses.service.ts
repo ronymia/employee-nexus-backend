@@ -243,11 +243,6 @@ export class BusinessesService {
                     id: businessId,
                   },
                 },
-                creator: {
-                  connect: {
-                    id: creatorId,
-                  },
-                },
               },
             }),
           ),
@@ -263,11 +258,6 @@ export class BusinessesService {
                 business: {
                   connect: {
                     id: businessId,
-                  },
-                },
-                creator: {
-                  connect: {
-                    id: creatorId,
                   },
                 },
               },
@@ -287,11 +277,6 @@ export class BusinessesService {
                     id: businessId,
                   },
                 },
-                creator: {
-                  connect: {
-                    id: creatorId,
-                  },
-                },
               },
             }),
           ),
@@ -307,11 +292,6 @@ export class BusinessesService {
                 business: {
                   connect: {
                     id: businessId,
-                  },
-                },
-                creator: {
-                  connect: {
-                    id: creatorId,
                   },
                 },
               },

@@ -7,12 +7,14 @@ import {
 import { EmploymentStatus } from 'src/modules/employment-status/entities/employment-status.entity';
 import { LeaveRolloverType, LeaveTypeEnum } from '../enums';
 import { Status } from 'src/common/enums';
+import { IsInt } from 'class-validator';
 
 @ObjectType()
 export class LeaveType {
   @Field(() => ID, {
     description: 'Unique identifier for the leave type',
   })
+  @IsInt()
   id: number;
 
   @Field(() => String, { description: 'Name of the leave type' })
@@ -35,9 +37,6 @@ export class LeaveType {
 
   @Field(() => Int, { description: 'ID of the business' })
   businessId: number;
-
-  @Field(() => Int, { description: 'ID of the creator' })
-  createdBy: number;
 
   @Field(() => [EmploymentStatus], {
     description: 'Array of employment statuses associated with this leave type',
