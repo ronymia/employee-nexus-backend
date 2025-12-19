@@ -43,7 +43,7 @@ export class UsersResolver {
   @RequirePermissions('User:read')
   async users(
     @CurrentUser() user: JwtPayload,
-    @Args('query', { nullable: true }) query: QueryUserInput,
+    @Args('query', { nullable: true }) query?: QueryUserInput,
   ) {
     const result = await this.usersService.findAll({ user, query });
     return {

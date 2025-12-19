@@ -651,7 +651,7 @@ input CreateDepartmentInput {
   description: String!
 
   """ID of the manager"""
-  managerId: Int!
+  managerId: Int
 
   """Name of the department"""
   name: String!
@@ -1166,12 +1166,6 @@ type Department {
 
   """Date when the department was created"""
   createdAt: DateTime!
-
-  """ID of the creator"""
-  createdBy: Int!
-
-  """Creator of the department"""
-  creator: User!
 
   """Description of the department"""
   description: String!
@@ -3000,8 +2994,14 @@ input QuerySubscriptionPlanInput {
 }
 
 input QueryUserInput {
+  departmentId: Float
+  designationId: Float
+  employmentStatusId: Float
   pagination: BasePaginationInput
+  role: String
   searchTerm: String
+  status: String
+  workSiteId: Float
 }
 
 input QueryWorkScheduleInput {

@@ -34,7 +34,6 @@ model User {
   workSiteCreated           WorkSite[]                   @relation(name: "workSiteCreated")
   workScheduleCreated       WorkSchedule[]               @relation(name: "workScheduleCreated")
   managedDepartments        Department[]                 @relation(name: "managedDepartments")
-  departmentCreated         Department[]                 @relation(name: "departmentCreated")
   assetTypes                AssetType[]                  @relation(name: "assetTypesCreated")
   assetAssignments          AssetAssignment[]            @relation(name: "assetAssignmentsAssignedToUser")
   assetAssignmentsBy        AssetAssignment[]            @relation(name: "assetAssignmentsAssignedByUser")
@@ -478,10 +477,8 @@ model Department {
   status      String
   businessId  Int          @map("business_id")
   business    Business     @relation(name: "departmentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  managerId   Int          @map("manager_id")
-  manager     User         @relation(name: "managedDepartments", fields: [managerId], references: [id], onDelete: Restrict)
-  createdBy   Int?         @map("created_by")
-  creator     User?        @relation(name: "departmentCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  managerId   Int?         @map("manager_id")
+  manager     User?        @relation(name: "managedDepartments", fields: [managerId], references: [id], onDelete: Restrict)
   children    Department[] @relation("DepartmentHierarchy")
 
   employees Employee[] @relation(name: "employeeDepartment")

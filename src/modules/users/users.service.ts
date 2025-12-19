@@ -100,6 +100,13 @@ export class UsersService {
     // QUERY BUILDER
     const andCondition: Prisma.UserWhereInput[] = [];
 
+    // Only include users who have employee records
+    andCondition.push({
+      employee: {
+        isNot: null,
+      },
+    });
+
     // Filter by business (via role)
     if (businessId) {
       andCondition.push({
@@ -110,12 +117,51 @@ export class UsersService {
       });
     }
 
-    // Only include users who have employee records
-    andCondition.push({
-      employee: {
-        isNot: null,
-      },
-    });
+    // FILTER BY ROLE
+    if (query?.role) {
+      andCondition.push({
+        role: {
+          name: `${query.role}#${businessId}`,
+          businessId,
+        },
+      });
+    }
+
+    // FILTER BY DEPARTMENT
+    if (query?.departmentId) {
+      andCondition.push({
+        employee: {
+          departmentId: query.departmentId,
+        },
+      });
+    }
+
+    // FILTER BY DESIGNATION
+    if (query?.designationId) {
+      andCondition.push({
+        employee: {
+          designationId: query.designationId,
+        },
+      });
+    }
+
+    // FILTER BY EMPLOYMENT STATUS
+    if (query?.employmentStatusId) {
+      andCondition.push({
+        employee: {
+          employmentStatusId: query.employmentStatusId,
+        },
+      });
+    }
+
+    // FILTER BY EMPLOYMENT STATUS
+    if (query?.workSiteId) {
+      andCondition.push({
+        employee: {
+          workSiteId: query.workSiteId,
+        },
+      });
+    }
 
     const whereCondition: Prisma.UserWhereInput =
       andCondition.length > 0 ? { AND: andCondition } : {};
@@ -128,37 +174,66 @@ export class UsersService {
     });
 
     // GET ALL
-    const result = await this.prisma.user.findMany({
-      where: whereCondition,
-      orderBy: {
-        createdAt: 'desc',
-      },
-      include: {
-        profile: {
-          include: {
-            emergencyContact: true,
+    const pagination = query?.pagination;
+    const { page, skip, limit, sortBy, sortOrder } =
+      paginationHelpers.calculatePagination(pagination || {});
+    const result = !limit
+      ? await this.prisma.user.findMany({
+          where: whereCondition,
+          orderBy: {
+            createdAt: 'desc',
           },
-        },
-        employee: {
           include: {
-            designation: true,
-            employmentStatus: true,
-            department: true,
-            workSite: true,
-            workSchedule: true,
+            profile: {
+              include: {
+                emergencyContact: true,
+              },
+            },
+            employee: {
+              include: {
+                designation: true,
+                employmentStatus: true,
+                department: true,
+                workSite: true,
+                workSchedule: true,
+              },
+            },
+            role: true,
           },
-        },
-        role: true,
-      },
-    });
+        })
+      : await this.prisma.user.findMany({
+          where: whereCondition,
+          skip,
+          take: limit,
+          orderBy: {
+            [sortBy]: sortOrder,
+          },
+          include: {
+            profile: {
+              include: {
+                emergencyContact: true,
+              },
+            },
+            employee: {
+              include: {
+                designation: true,
+                employmentStatus: true,
+                department: true,
+                workSite: true,
+                workSchedule: true,
+              },
+            },
+            role: true,
+          },
+        });
 
     return {
       meta: {
-        page: 0,
-        limit: 0,
-        skip: 0,
+        page: page || 0,
+        limit: limit || 0,
+        skip: skip || 0,
         total: total || 0,
-        totalPages: Math.ceil(total / 1),
+        totalPages: Math.ceil(total / (limit || 1)),
       },
       data: result,
     };

@@ -56,7 +56,6 @@ export class LeaveTypesService {
       const leaveType = await prisma.leaveType.create({
         data: {
           ...leaveTypeData,
-          createdBy: user.userId,
           businessId: user.businessId,
           status: Status.ACTIVE,
         },

@@ -1,5 +1,5 @@
 // DEPARTMENT ENTITY - DEFINES GRAPHQL TYPES AND RESPONSE STRUCTURES FOR DEPARTMENT
-import { ObjectType, Field, Int, registerEnumType, ID } from '@nestjs/graphql';
+import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
 import {
   BaseQueryResponse,
   BaseResponse,
@@ -53,12 +53,6 @@ export class Department {
     nullable: true,
   })
   manager?: User;
-
-  @Field(() => Int, { description: 'ID of the creator' })
-  createdBy: number;
-
-  @Field(() => User, { description: 'Creator of the department' })
-  creator: User;
 
   @Field(() => Date, {
     description: 'Date when the department was created',
