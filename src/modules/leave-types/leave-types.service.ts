@@ -50,32 +50,34 @@ export class LeaveTypesService {
       }
     }
 
-    const leaveType = await this.prisma.leaveType.create({
-      data: {
-        ...leaveTypeData,
-        createdBy: user.userId,
-        businessId: user.businessId,
-        status: Status.ACTIVE,
-      },
-    });
-
-    // CREATE EMPLOYMENT STATUS RELATIONSHIPS IF PROVIDED
-    if (employmentStatuses && employmentStatuses.length > 0) {
-      const employmentStatusData = employmentStatuses.map(
-        (employmentStatusId) => ({
-          leaveTypeId: leaveType.id,
-          employmentStatusId,
-        }),
-      );
-
-      await this.prisma.leaveTypeEmploymentStatus.createMany({
-        data: employmentStatusData,
+    // USE TRANSACTION TO ENSURE DATA CONSISTENCY
+    return await this.prisma.$transaction(async (prisma) => {
+      // CREATE LEAVE TYPE
+      const leaveType = await prisma.leaveType.create({
+        data: {
+          ...leaveTypeData,
+          createdBy: user.userId,
+          businessId: user.businessId,
+          status: Status.ACTIVE,
+        },
       });
-    }
 
-    // RETURN LEAVE TYPE WITH EMPLOYMENT STATUSES
-    return await this.prisma.leaveType
-      .findUnique({
+      // CREATE EMPLOYMENT STATUS RELATIONSHIPS IF PROVIDED
+      if (employmentStatuses && employmentStatuses.length > 0) {
+        const employmentStatusData = employmentStatuses.map(
+          (employmentStatusId) => ({
+            leaveTypeId: leaveType.id,
+            employmentStatusId,
+          }),
+        );
+
+        await prisma.leaveTypeEmploymentStatus.createMany({
+          data: employmentStatusData,
+        });
+      }
+
+      // RETURN LEAVE TYPE WITH EMPLOYMENT STATUSES
+      const result = await prisma.leaveType.findUnique({
         where: { id: leaveType.id },
         include: {
           employmentStatuses: {
@@ -84,12 +86,10 @@ export class LeaveTypesService {
             },
           },
         },
-      })
-      .then((result) => ({
-        ...result,
-        employmentStatuses:
-          result?.employmentStatuses.map((es) => es.employmentStatus) || [],
-      }));
+      });
+
+      return result;
+    });
   }
 
   // FIND ALL LEAVE TYPES - RETRIEVES LEAVE TYPES WITH PAGINATION, SEARCH, AND BUSINESS FILTERING
@@ -248,59 +248,61 @@ export class LeaveTypesService {
 
     const { employmentStatuses, ...leaveTypeData } = updateLeaveTypeInput;
 
-    await this.prisma.leaveType.update({
-      where: { id, businessId: user.businessId },
-      data: leaveTypeData,
-    });
-
-    // UPDATE EMPLOYMENT STATUS RELATIONSHIPS IF PROVIDED
-    if (employmentStatuses !== undefined) {
-      // VALIDATE EMPLOYMENT STATUS IDS IF PROVIDED
-      if (employmentStatuses.length > 0) {
-        const existingEmploymentStatuses =
-          await this.prisma.employmentStatus.findMany({
-            where: {
-              id: { in: employmentStatuses },
-              businessId: user.businessId,
-            },
-            select: { id: true },
-          });
-
-        const existingIds = existingEmploymentStatuses.map((es) => es.id);
-        const invalidIds = employmentStatuses.filter(
-          (id) => !existingIds.includes(id),
-        );
-
-        if (invalidIds.length > 0) {
-          throw new NotFoundException(
-            `Employment Status(es) with ID(s) ${invalidIds.join(', ')} not found or do not belong to your business`,
-          );
-        }
-      }
-
-      // DELETE EXISTING RELATIONSHIPS
-      await this.prisma.leaveTypeEmploymentStatus.deleteMany({
-        where: { leaveTypeId: id },
-      });
-
-      // CREATE NEW RELATIONSHIPS IF ARRAY IS NOT EMPTY
-      if (employmentStatuses.length > 0) {
-        const employmentStatusData = employmentStatuses.map(
-          (employmentStatusId) => ({
-            leaveTypeId: id,
-            employmentStatusId,
-          }),
-        );
-
-        await this.prisma.leaveTypeEmploymentStatus.createMany({
-          data: employmentStatusData,
+    // VALIDATE EMPLOYMENT STATUS IDS IF PROVIDED
+    if (employmentStatuses !== undefined && employmentStatuses.length > 0) {
+      const existingEmploymentStatuses =
+        await this.prisma.employmentStatus.findMany({
+          where: {
+            id: { in: employmentStatuses },
+            businessId: user.businessId,
+          },
+          select: { id: true },
         });
+
+      const existingIds = existingEmploymentStatuses.map((es) => es.id);
+      const invalidIds = employmentStatuses.filter(
+        (id) => !existingIds.includes(id),
+      );
+
+      if (invalidIds.length > 0) {
+        throw new NotFoundException(
+          `Employment Status(es) with ID(s) ${invalidIds.join(', ')} not found or do not belong to your business`,
+        );
       }
     }
 
-    // RETURN UPDATED LEAVE TYPE WITH EMPLOYMENT STATUSES
-    return await this.prisma.leaveType
-      .findUnique({
+    // USE TRANSACTION TO ENSURE DATA CONSISTENCY
+    return await this.prisma.$transaction(async (prisma) => {
+      // UPDATE LEAVE TYPE
+      await prisma.leaveType.update({
+        where: { id, businessId: user.businessId },
+        data: leaveTypeData,
+      });
+
+      // UPDATE EMPLOYMENT STATUS RELATIONSHIPS IF PROVIDED
+      if (employmentStatuses !== undefined) {
+        // DELETE EXISTING RELATIONSHIPS
+        await prisma.leaveTypeEmploymentStatus.deleteMany({
+          where: { leaveTypeId: id },
+        });
+
+        // CREATE NEW RELATIONSHIPS IF ARRAY IS NOT EMPTY
+        if (employmentStatuses.length > 0) {
+          const employmentStatusData = employmentStatuses.map(
+            (employmentStatusId) => ({
+              leaveTypeId: id,
+              employmentStatusId,
+            }),
+          );
+
+          await prisma.leaveTypeEmploymentStatus.createMany({
+            data: employmentStatusData,
+          });
+        }
+      }
+
+      // RETURN UPDATED LEAVE TYPE WITH EMPLOYMENT STATUSES
+      const result = await prisma.leaveType.findUnique({
         where: { id },
         include: {
           employmentStatuses: {
@@ -309,12 +311,14 @@ export class LeaveTypesService {
             },
           },
         },
-      })
-      .then((result) => ({
+      });
+
+      return {
         ...result,
         employmentStatuses:
           result?.employmentStatuses.map((es) => es.employmentStatus) || [],
-      }));
+      };
+    });
   }
 
   // DELETE LEAVE TYPE - REMOVES A LEAVE TYPE RECORD FROM DATABASE

@@ -29,16 +29,12 @@ model User {
   userPermissions           UserPermission[]
   ownedBusiness             Business?                    @relation(name: "businessOwner")
   subscriptionPlanCreated   SubscriptionPlan[]           @relation(name: "subscriptionPlanCreated")
-  employmentStatusCreated   EmploymentStatus[]           @relation(name: "employmentStatusCreated")
-  jobTypeCreated            JobType[]                    @relation(name: "jobTypeCreated")
-  jobPlatformCreated        JobPlatform[]                @relation(name: "jobPlatformCreated")
   recruitmentProcessCreated RecruitmentProcess[]         @relation(name: "recruitmentProcessCreated")
   onboardingProcessCreated  OnboardingProcess[]          @relation(name: "onboardingProcessCreated")
   workSiteCreated           WorkSite[]                   @relation(name: "workSiteCreated")
   workScheduleCreated       WorkSchedule[]               @relation(name: "workScheduleCreated")
   managedDepartments        Department[]                 @relation(name: "managedDepartments")
   departmentCreated         Department[]                 @relation(name: "departmentCreated")
-  leaveTypeCreated          LeaveType[]                  @relation(name: "leaveTypeCreated")
   assetTypes                AssetType[]                  @relation(name: "assetTypesCreated")
   assetAssignments          AssetAssignment[]            @relation(name: "assetAssignmentsAssignedToUser")
   assetAssignmentsBy        AssetAssignment[]            @relation(name: "assetAssignmentsAssignedByUser")
@@ -375,8 +371,6 @@ model JobType {
   status      String
   businessId  Int?      @map("business_id")
   business    Business? @relation(name: "jobTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  createdBy   Int?      @map("created_by")
-  creator     User?     @relation(name: "jobTypeCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -393,8 +387,6 @@ model JobPlatform {
   status      String
   businessId  Int?      @map("business_id")
   business    Business? @relation(name: "jobPlatformsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  createdBy   Int?      @map("created_by")
-  creator     User?     @relation(name: "jobPlatformCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -582,8 +574,6 @@ model EmploymentStatus {
   leaveTypes  LeaveTypeEmploymentStatus[]
   businessId  Int                         @map("business_id")
   business    Business                    @relation(name: "employmentStatusesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  createdBy   Int?                        @map("created_by")
-  creator     User?                       @relation(name: "employmentStatusCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
   employees Employee[] @relation(name: "employeeEmploymentStatus")
 
@@ -617,8 +607,6 @@ model LeaveType {
   employmentStatuses LeaveTypeEmploymentStatus[]
   businessId         Int                         @map("business_id")
   business           Business                    @relation(name: "leaveTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  createdBy          Int?                        @map("created_by")
-  creator            User?                       @relation(name: "leaveTypeCreated", fields: [createdBy], references: [id], onDelete: SetNull)
   leaves             Leave[]                     @relation(name: "leaveTypeInLeave")
 
   createdAt DateTime @default(now()) @map("created_at")

@@ -1950,9 +1950,6 @@ type LeaveType {
   """Date when the leave type was created"""
   createdAt: DateTime!
 
-  """ID of the creator"""
-  createdBy: Int!
-
   """Array of employment statuses associated with this leave type"""
   employmentStatuses: [EmploymentStatus!]
 

@@ -28,7 +28,6 @@ export class EmploymentStatusService {
     return await this.prisma.employmentStatus.create({
       data: {
         ...createEmploymentStatusInput,
-        createdBy: user.userId,
         businessId: user.businessId,
         status: Status.ACTIVE,
       },
