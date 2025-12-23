@@ -68,3 +68,54 @@ export class UserResponse extends BaseResponse(User) {}
 
 @ObjectType()
 export class UsersQueryResponse extends BaseQueryResponse(User) {}
+
+@ObjectType()
+export class UserStatistics {
+  @Field(() => Int, { description: 'Total number of users' })
+  totalUsers: number;
+
+  @Field(() => Int, { description: 'Total number of employees' })
+  totalEmployees: number;
+
+  @Field(() => Int, { description: 'Total number of managers' })
+  totalManagers: number;
+
+  @Field(() => Int, { description: 'Total number of admins' })
+  totalAdmins: number;
+
+  @Field(() => Int, { description: 'Number of active users' })
+  activeUsers: number;
+
+  @Field(() => Int, { description: 'Number of inactive users' })
+  inactiveUsers: number;
+
+  @Field(() => Int, { description: 'Number of blocked users' })
+  blockedUsers: number;
+
+  @Field(() => Int, { description: 'Number of deleted users' })
+  deletedUsers: number;
+
+  @Field(() => Int, { description: 'Number of suspended users' })
+  suspendedUsers: number;
+
+  @Field(() => Int, { description: 'Number of verified users' })
+  verifiedUsers: number;
+
+  @Field(() => Int, { description: 'Number of unverified users' })
+  unverifiedUsers: number;
+
+  @Field(() => Int, { description: 'Number of terminated users' })
+  terminatedUsers: number;
+
+  @Field(() => Int, { description: 'Number of resigned users' })
+  resignedUsers: number;
+
+  @Field(() => Int, { description: 'Number of retired users' })
+  retiredUsers: number;
+
+  @Field(() => Int, { description: 'Number of users on leave' })
+  onLeaveUsers: number;
+}
+
+@ObjectType()
+export class UserStatisticsResponse extends BaseResponse(UserStatistics) {}

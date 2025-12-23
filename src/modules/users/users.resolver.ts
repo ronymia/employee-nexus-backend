@@ -9,7 +9,7 @@ import {
 } from '@nestjs/graphql';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { User, UserResponse, UsersQueryResponse } from './entities/user.entity';
+import { User, UserResponse, UsersQueryResponse, UserStatisticsResponse } from './entities/user.entity';
 import { CreateEmployeeInput } from './dto/create-employee.input';
 import { UpdateEmployeeInput } from './dto/update-employee.input';
 import { QueryUserInput } from './dto/query-user.input';
@@ -192,6 +192,21 @@ export class UsersResolver {
       success: true,
       statusCode: HttpStatus.OK,
       message: 'User retrieved successfully',
+      data: result,
+    };
+  }
+
+  @Query(() => UserStatisticsResponse, { name: 'userStatistics' })
+  @RequirePermissions('User:read')
+  async userStatistics(@CurrentUser() user: JwtPayload) {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    const result = await this.usersService.getUserStatistics(businessId);
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'User statistics retrieved successfully',
       data: result,
     };
   }

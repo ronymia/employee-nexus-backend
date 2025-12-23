@@ -8,9 +8,6 @@ import { WorkSchedule } from 'src/modules/work-schedules/entities/work-schedule.
 
 @ObjectType()
 export class Employee {
-  @Field(() => ID)
-  id: number;
-
   @Field(() => Int)
   userId: number;
 
