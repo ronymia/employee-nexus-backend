@@ -865,4 +865,94 @@ export class UsersService {
       },
     });
   }
+
+  async getUserStatistics(businessId: number) {
+    // Define role names
+    const employeeRole = `employee#${businessId}`;
+    const managerRole = `manager#${businessId}`;
+    const adminRole = `admin#${businessId}`;
+
+    // Statuses from enum
+    const statuses = [
+      'ACTIVE',
+      'INACTIVE',
+      'BLOCKED',
+      'DELETED',
+      'SUSPENDED',
+      'VERIFIED',
+      'UNVERIFIED',
+      'TERMINATED',
+      'RESIGNED',
+      'RETIRED',
+      'ON_LEAVE',
+    ];
+
+    // Parallel queries for efficiency
+    const [
+      totalUsers,
+      totalEmployees,
+      totalManagers,
+      totalAdmins,
+      ...statusCounts
+    ] = await Promise.all([
+      // Total users
+      this.prisma.user.count({
+        where: { businessId },
+      }),
+      // Total employees (users with employee records)
+      this.prisma.user.count({
+        where: {
+          businessId,
+          role: {
+            name: employeeRole,
+          },
+        },
+      }),
+      // Total managers
+      this.prisma.user.count({
+        where: {
+          businessId,
+          role: {
+            name: managerRole,
+          },
+        },
+      }),
+      // Total admins
+      this.prisma.user.count({
+        where: {
+          businessId,
+          role: {
+            name: adminRole,
+          },
+        },
+      }),
+      // Status counts
+      ...statuses.map((status) =>
+        this.prisma.user.count({
+          where: {
+            businessId,
+            status: status as any,
+          },
+        }),
+      ),
+    ]);
+
+    // Build status object
+    const statusStats = {};
+    statuses.forEach((status, index) => {
+      const camelCaseStatus = status
+        .toLowerCase()
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        .replace(/_([a-z])/g, (match, letter) => letter?.toUpperCase());
+      statusStats[camelCaseStatus + 'Users'] = statusCounts[index] || 0;
+    });
+
+    return {
+      totalUsers: totalUsers || 0,
+      totalEmployees: totalEmployees || 0,
+      totalManagers: totalManagers || 0,
+      totalAdmins: totalAdmins || 0,
+      ...statusStats,
+    };
+  }
 }
