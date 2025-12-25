@@ -426,25 +426,37 @@ export class LeavesService {
   async getLeaveBalance({
     user,
     leaveTypeId,
-    employmentStatusId,
+    userId,
     year,
   }: {
     user: JwtPayload;
     leaveTypeId: number;
-    employmentStatusId: number;
+    userId: number;
     year: number;
   }) {
-    const userId = user.userId;
+    const existingUser = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        employee: true,
+      },
+    });
 
+    if (!existingUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const employmentStatusId = existingUser?.employee?.employmentStatusId;
     // Get leave type with employment status validation
     const leaveType = await this.prisma.leaveType.findFirst({
       where: {
         id: leaveTypeId,
-        employmentStatuses: {
-          some: {
-            employmentStatusId: employmentStatusId,
-          },
-        },
+        // employmentStatuses: {
+        //   some: {
+        //     employmentStatusId: employmentStatusId,
+        //   },
+        // },
       },
     });
 

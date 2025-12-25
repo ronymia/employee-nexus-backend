@@ -2801,7 +2801,7 @@ type Query {
   jobPlatforms(query: QueryJobPlatformInput): JobPlatformsQueryResponse!
   jobTypeById(id: Int!): JobTypeResponse!
   jobTypes(query: QueryJobTypeInput): JobTypesQueryResponse!
-  leaveBalance(employmentStatusId: Int!, leaveTypeId: Int!, year: Int!): LeaveBalanceResponse!
+  leaveBalance(leaveTypeId: Int!, userId: Int!, year: Int!): LeaveBalanceResponse!
   leaveById(id: Int!): LeaveResponse!
   leaveSettingByBusinessId: LeaveSettingResponse!
   leaveTypeById(id: Int!): LeaveTypeResponse!

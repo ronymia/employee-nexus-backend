@@ -169,13 +169,13 @@ export class LeavesResolver {
   async getLeaveBalance(
     @CurrentUser() user: JwtPayload,
     @Args('leaveTypeId', { type: () => Int }) leaveTypeId: number,
-    @Args('employmentStatusId', { type: () => Int }) employmentStatusId: number,
+    @Args('userId', { type: () => Int }) userId: number,
     @Args('year', { type: () => Int }) year: number,
   ) {
     const result = await this.leavesService.getLeaveBalance({
       user,
       leaveTypeId,
-      employmentStatusId,
+      userId,
       year,
     });
     return {
