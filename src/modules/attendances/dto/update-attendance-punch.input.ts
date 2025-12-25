@@ -1,10 +1,10 @@
-import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
 import { CreateAttendancePunchInput } from './create-attendance-punch.input';
+import { IsInt } from 'class-validator';
 
 @InputType()
-export class UpdateAttendancePunchInput extends PartialType(
-  CreateAttendancePunchInput,
-) {
-  @Field(() => Int)
+export class UpdateAttendancePunchInput extends CreateAttendancePunchInput {
+  @Field(() => Int, { description: 'User ID' })
+  @IsInt()
   id: number;
 }

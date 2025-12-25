@@ -9,7 +9,12 @@ import {
 } from '@nestjs/graphql';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { User, UserResponse, UsersQueryResponse, UserStatisticsResponse } from './entities/user.entity';
+import {
+  User,
+  UserResponse,
+  UsersQueryResponse,
+  UserStatisticsResponse,
+} from './entities/user.entity';
 import { CreateEmployeeInput } from './dto/create-employee.input';
 import { UpdateEmployeeInput } from './dto/update-employee.input';
 import { QueryUserInput } from './dto/query-user.input';

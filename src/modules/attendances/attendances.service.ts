@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAttendanceInput } from './dto/create-attendance.input';
 import { UpdateAttendanceInput } from './dto/update-attendance.input';
@@ -10,8 +13,8 @@ import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { NotificationsService } from '../notifications/notifications.service';
 import { RequestAttendanceInput } from './dto/request-attendance.input';
-import { ApproveAttendanceInput } from './dto/approve-attendance.input';
 import { NotificationChannel, NotificationType } from '../notifications/enums';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class AttendancesService {
@@ -19,6 +22,37 @@ export class AttendancesService {
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
   ) {}
+
+  /**
+   * Calculate work hours between punchIn and punchOut using dayjs
+   * Returns hours as a decimal (e.g., 8.5 for 8 hours 30 minutes)
+   */
+  private calculateWorkHours(
+    punchIn: Date | string,
+    punchOut?: Date | string,
+  ): number {
+    if (!punchOut) {
+      return 0;
+    }
+    const punchInTime = dayjs(punchIn);
+    const punchOutTime = dayjs(punchOut);
+    const differenceInHours = punchOutTime.diff(punchInTime, 'hour', true);
+    return Math.round(differenceInHours * 100) / 100; // Round to 2 decimal places
+  }
+
+  /**
+   * Calculate total work hours from all punch records
+   */
+  private calculateTotalHours(punchRecords: any[]): number {
+    const totalHours = punchRecords.reduce((sum, record) => {
+      const workHours = this.calculateWorkHours(
+        record.punchIn,
+        record.punchOut,
+      );
+      return sum + workHours;
+    }, 0);
+    return Math.round(totalHours * 100) / 100; // Round to 2 decimal places
+  }
 
   // CREATE ATTENDANCE
   async attendanceRequest({
@@ -43,7 +77,7 @@ export class AttendancesService {
       throw new Error('Attendance already exists for this user and date');
     }
 
-    if (!punchRecords) {
+    if (!punchRecords || punchRecords.length === 0) {
       throw new Error('Punch records are required');
     }
 
@@ -67,14 +101,30 @@ export class AttendancesService {
       throw new Error('User does not belong to this business');
     }
 
+    // CALCULATE WORK HOURS FOR EACH PUNCH RECORD AND TOTAL HOURS
+    const punchRecordsWithHours = punchRecords.map((record) => {
+      const workHours = this.calculateWorkHours(
+        record.punchIn,
+        record.punchOut,
+      );
+      return {
+        ...record,
+        workHours,
+      };
+    });
+
+    // CALCULATE TOTAL HOURS FOR THE DAY
+    const totalHours = this.calculateTotalHours(punchRecordsWithHours);
+
     return await this.prisma.$transaction(async (prisma) => {
       const attendance = await prisma.attendance.create({
         data: {
           ...attendanceData,
           status: 'pending',
-          ...(punchRecords && {
+          totalHours, // Set calculated total hours
+          ...(punchRecordsWithHours && {
             punchRecords: {
-              create: punchRecords.map(
+              create: punchRecordsWithHours.map(
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 ({ attendanceId, ...punchData }) => punchData,
               ),
@@ -101,7 +151,7 @@ export class AttendancesService {
         await this.notificationsService.create({
           type: NotificationType.ATTENDANCE,
           title: 'Attendance Requested',
-          message: `Your attendance for ${new Date(attendance.date).toLocaleDateString()} has been recorded successfully.`,
+          message: `Your attendance for ${new Date(attendance.date).toLocaleDateString()} has been recorded successfully. Total hours: ${totalHours}h`,
           priority: 'LOW' as any,
           userId:
             (existingUser?.employee?.department?.managerId as number) ||
@@ -129,18 +179,39 @@ export class AttendancesService {
     // EXTRACT PUNCH RECORDS AND ATTENDANCE DATA
     const { punchRecords, ...attendanceData } = createAttendanceInput;
 
+    // CALCULATE WORK HOURS FOR EACH PUNCH RECORD AND TOTAL HOURS
+    let totalHours = 0;
+    let punchRecordsWithHours: any[] = [];
+
+    if (punchRecords && punchRecords.length > 0) {
+      punchRecordsWithHours = punchRecords.map((record) => {
+        const workHours = this.calculateWorkHours(
+          record.punchIn,
+          record.punchOut,
+        );
+        totalHours += workHours;
+        return {
+          ...record,
+          workHours,
+        };
+      });
+      totalHours = Math.round(totalHours * 100) / 100; // Round to 2 decimal places
+    }
+
     return await this.prisma.$transaction(async (prisma) => {
       const attendance = await prisma.attendance.create({
         data: {
           ...attendanceData,
-          ...(punchRecords && {
-            punchRecords: {
-              create: punchRecords.map(
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                ({ attendanceId, ...punchData }) => punchData,
-              ),
-            },
-          }),
+          totalHours: totalHours > 0 ? totalHours : undefined,
+          ...(punchRecordsWithHours &&
+            punchRecordsWithHours.length > 0 && {
+              punchRecords: {
+                create: punchRecordsWithHours.map(
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-unsafe-return
+                  ({ attendanceId, ...punchData }) => punchData,
+                ),
+              },
+            }),
         },
         include: {
           user: {
@@ -159,10 +230,15 @@ export class AttendancesService {
 
       // Send notification to user
       try {
+        const message =
+          totalHours > 0
+            ? `Your attendance for ${dayjs(attendance.date).format('MM/DD/YYYY')} has been recorded successfully. Total hours: ${totalHours}h`
+            : `Your attendance for ${dayjs(attendance.date).format('MM/DD/YYYY')} has been recorded successfully.`;
+
         await this.notificationsService.create({
           type: NotificationType.ATTENDANCE,
           title: 'Attendance Recorded',
-          message: `Your attendance for ${new Date(attendance.date).toLocaleDateString()} has been recorded successfully.`,
+          message,
           priority: 'LOW' as any,
           userId: attendanceData.userId,
           channels: [NotificationChannel.IN_APP, NotificationChannel.PUSH],
@@ -315,6 +391,37 @@ export class AttendancesService {
 
       // Update punch records if provided
       if (punchRecords && punchRecords.length > 0) {
+        // Get existing punch record IDs from the database
+        const existingPunchRecords = await prisma.attendancePunch.findMany({
+          where: { attendanceId: id },
+          select: { id: true },
+        });
+
+        const existingPunchIds = existingPunchRecords.map(
+          (record) => record.id,
+        );
+
+        // Get punch record IDs from frontend (only those being updated)
+        const frontendPunchIds = punchRecords
+          .map((record: any) => record.id)
+          .filter(Boolean); // Filter out undefined/null IDs
+
+        // Find IDs to delete (exist in DB but not in frontend data)
+        const idsToDelete = existingPunchIds.filter(
+          (existingId) => !frontendPunchIds.includes(existingId),
+        );
+
+        // Delete punch records that are not in the frontend data
+        if (idsToDelete.length > 0) {
+          await prisma.attendancePunch.deleteMany({
+            where: {
+              id: { in: idsToDelete },
+              attendanceId: id,
+            },
+          });
+        }
+
+        // Update or create punch records
         for (const punchRecord of punchRecords) {
           const {
             id: punchId,
@@ -325,7 +432,7 @@ export class AttendancesService {
           if (punchId) {
             // Update existing punch record
             await prisma.attendancePunch.update({
-              where: { id: punchId, AND: { attendanceId } },
+              where: { id: punchId, attendanceId: id },
               data: punchData,
             });
           } else {
@@ -333,11 +440,16 @@ export class AttendancesService {
             await prisma.attendancePunch.create({
               data: {
                 ...punchData,
-                attendanceId: id,
+                attendanceId,
               },
             });
           }
         }
+      } else {
+        // If no punch records provided, delete all existing ones
+        await prisma.attendancePunch.deleteMany({
+          where: { attendanceId: id },
+        });
       }
 
       // Fetch and return the updated attendance with punch records

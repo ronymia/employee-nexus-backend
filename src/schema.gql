@@ -560,7 +560,7 @@ input CreateAttendanceInput {
 
 input CreateAttendancePunchInput {
   """Attendance ID (optional for nested creation)"""
-  attendanceId: Int
+  attendanceId: Int!
 
   """Break end timestamp"""
   breakEnd: DateTime
@@ -3376,7 +3376,7 @@ input UpdateAttendanceInput {
   id: Int!
 
   """Punch records for this attendance"""
-  punchRecords: [CreateAttendancePunchInput!]
+  punchRecords: [UpdateAttendancePunchInput!]!
 
   """Attendance status"""
   status: String = "pending_approve"
@@ -3390,7 +3390,7 @@ input UpdateAttendanceInput {
 
 input UpdateAttendancePunchInput {
   """Attendance ID (optional for nested creation)"""
-  attendanceId: Int
+  attendanceId: Int!
 
   """Break end timestamp"""
   breakEnd: DateTime
@@ -3400,6 +3400,8 @@ input UpdateAttendancePunchInput {
 
   """Break start timestamp"""
   breakStart: DateTime
+
+  """User ID"""
   id: Int!
 
   """Notes for this punch session"""
@@ -3409,7 +3411,7 @@ input UpdateAttendancePunchInput {
   projectId: Int
 
   """Clock in timestamp"""
-  punchIn: DateTime
+  punchIn: DateTime!
 
   """Punch in device information"""
   punchInDevice: String

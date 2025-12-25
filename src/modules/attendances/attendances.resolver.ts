@@ -46,7 +46,7 @@ export class AttendancesResolver {
     };
   }
   // CREATE ATTENDANCE
-  @Mutation(() => AttendanceResponse)
+  @Mutation(() => AttendanceResponse, { name: 'createAttendance' })
   @RequirePermissions('Attendance:create')
   async createAttendance(
     @CurrentUser() user: JwtPayload,
@@ -103,7 +103,7 @@ export class AttendancesResolver {
   }
 
   // UPDATE ATTENDANCE
-  @Mutation(() => AttendanceResponse)
+  @Mutation(() => AttendanceResponse, { name: 'updateAttendance' })
   @RequirePermissions('Attendance:update')
   async updateAttendance(
     // @CurrentUser() user: JwtPayload,
