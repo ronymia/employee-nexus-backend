@@ -682,11 +682,10 @@ model AssetAssignment {
 model Project {
   id                Int               @id @default(autoincrement())
   name              String
-  description       String?
-  cover             String
+  description       String?           @db.Text
   status            String
-  startDate         String?           @map("start_date")
-  endDate           String?           @map("end_date")
+  startDate         DateTime?         @map("start_date") @db.Date
+  endDate           DateTime?         @map("end_date") @db.Date
   businessId        Int               @map("business_id")
   business          Business          @relation(name: "projectsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   createdBy         Int?              @map("created_by")
@@ -703,13 +702,12 @@ model Project {
 }
 
 model ProjectMember {
-  id        Int      @id @default(autoincrement())
-  projectId Int      @map("project_id")
-  project   Project  @relation(name: "projectMembersInProject", fields: [projectId], references: [id], onDelete: Cascade)
-  userId    Int      @map("user_id")
-  user      User     @relation(name: "projectMembersInUser", fields: [userId], references: [id], onDelete: Cascade)
+  id        Int     @id @default(autoincrement())
+  projectId Int     @map("project_id")
+  project   Project @relation(name: "projectMembersInProject", fields: [projectId], references: [id], onDelete: Cascade)
+  userId    Int     @map("user_id")
+  user      User    @relation(name: "projectMembersInUser", fields: [userId], references: [id], onDelete: Cascade)
   role      String?
-  joinedAt  DateTime @default(now()) @map("joined_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

@@ -1000,11 +1000,10 @@ input CreateProfileInput {
 }
 
 input CreateProjectInput {
-  cover: String!
   description: String
-  endDate: String
+  endDate: DateTime
   name: String!
-  startDate: String
+  startDate: DateTime!
   status: String!
 }
 
@@ -2673,16 +2672,15 @@ type ProfileResponse {
 type Project {
   business: Business
   businessId: Int
-  cover: String!
   createdAt: DateTime!
   createdBy: Int
   creator: User
   description: String
-  endDate: String
+  endDate: DateTime
   id: Int!
   name: String!
   projectMembers: [ProjectMember!]
-  startDate: String
+  startDate: DateTime!
   status: String!
   updatedAt: DateTime!
 }
@@ -3931,12 +3929,11 @@ input UpdateProfileInput {
 }
 
 input UpdateProjectInput {
-  cover: String
   description: String
-  endDate: String
+  endDate: DateTime
   id: Int!
   name: String
-  startDate: String
+  startDate: DateTime
   status: String
 }
 

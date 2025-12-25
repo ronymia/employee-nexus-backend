@@ -1,6 +1,10 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Project } from './project.entity';
 import { User } from '../../users/entities/user.entity';
+import {
+  BaseQueryResponse,
+  BaseResponse,
+} from 'src/common/dto/base-response.type';
 
 @ObjectType()
 export class ProjectMember {
@@ -28,3 +32,11 @@ export class ProjectMember {
   @Field()
   updatedAt: Date;
 }
+
+@ObjectType()
+export class ProjectMemberResponse extends BaseResponse(ProjectMember) {}
+
+@ObjectType()
+export class ProjectMembersQueryResponse extends BaseQueryResponse(
+  ProjectMember,
+) {}
