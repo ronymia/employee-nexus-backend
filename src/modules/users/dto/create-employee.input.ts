@@ -58,8 +58,8 @@ export class CreateEmployeeInput {
   @Field(() => Int)
   departmentId: number;
 
-  @Field(() => Int)
-  workSiteId: number;
+  @Field(() => [Int], { nullable: true })
+  workSiteIds?: number[];
 
   @Field(() => Int)
   workScheduleId: number;

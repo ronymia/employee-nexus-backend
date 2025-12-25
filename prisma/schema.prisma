@@ -455,8 +455,8 @@ model WorkSite {
   createdBy            Int?                 @map("created_by")
   creator              User?                @relation(name: "workSiteCreated", fields: [createdBy], references: [id], onDelete: SetNull)
 
-  employees         Employee[]        @relation(name: "employeeWorkSite")
   attendancePunches AttendancePunch[] @relation(name: "attendancePunchWorkSite")
+  employees         UserWorkSite[]    @relation(name: "workSiteUsers")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -465,6 +465,22 @@ model WorkSite {
   @@index([businessId])
   @@index([status])
   @@map("work_sites")
+}
+
+model UserWorkSite {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  employee   Employee @relation(name: "userWorkSites", fields: [userId], references: [userId], onDelete: Cascade)
+  workSiteId Int      @map("work_site_id")
+  workSite   WorkSite @relation(name: "workSiteUsers", fields: [workSiteId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, workSiteId])
+  @@index([userId])
+  @@index([workSiteId])
+  @@map("user_work_sites")
 }
 
 model Department {
@@ -730,11 +746,10 @@ model Employee {
   employmentStatus    EmploymentStatus @relation(name: "employeeEmploymentStatus", fields: [employmentStatusId], references: [id])
   departmentId        Int              @map("department_id")
   department          Department       @relation(name: "employeeDepartment", fields: [departmentId], references: [id])
-  workSiteId          Int              @map("work_site_id")
-  workSite            WorkSite         @relation(name: "employeeWorkSite", fields: [workSiteId], references: [id])
   workScheduleId      Int              @map("work_schedule_id")
   workSchedule        WorkSchedule     @relation(name: "employeeWorkSchedule", fields: [workScheduleId], references: [id])
   rotaType            String           @default("day_base") @map("rota_type")
+  workSites           UserWorkSite[]   @relation(name: "userWorkSites")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

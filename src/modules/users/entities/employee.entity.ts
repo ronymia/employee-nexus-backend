@@ -1,10 +1,10 @@
-import { ObjectType, Field, ID, Int, Float } from '@nestjs/graphql';
+import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { User } from './user.entity';
 import { Designation } from 'src/modules/designations/entities/designation.entity';
 import { EmploymentStatus } from 'src/modules/employment-status/entities/employment-status.entity';
 import { Department } from 'src/modules/departments/entities/department.entity';
-import { WorkSite } from 'src/modules/work-sites/entities/work-site.entity';
 import { WorkSchedule } from 'src/modules/work-schedules/entities/work-schedule.entity';
+import { UserWorkSite } from './user-work-site.entity';
 
 @ObjectType()
 export class Employee {
@@ -51,12 +51,6 @@ export class Employee {
   department: Department;
 
   @Field(() => Int)
-  workSiteId: number;
-
-  @Field(() => WorkSite)
-  workSite: WorkSite;
-
-  @Field(() => Int)
   workScheduleId: number;
 
   @Field(() => WorkSchedule)
@@ -64,6 +58,9 @@ export class Employee {
 
   @Field(() => String)
   rotaType: string;
+
+  @Field(() => [UserWorkSite], { nullable: true })
+  workSites?: UserWorkSite[] | [];
 
   @Field(() => Date)
   createdAt: Date;

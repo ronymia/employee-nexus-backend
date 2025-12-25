@@ -141,6 +141,14 @@ input AssignProjectMemberInput {
   userId: Int!
 }
 
+input AssignWorkSiteInput {
+  """User ID of the employee"""
+  userId: Int!
+
+  """Work site ID to assign"""
+  workSiteId: Int!
+}
+
 type Attendance {
   """Total break hours for the day"""
   breakHours: Float
@@ -733,7 +741,7 @@ input CreateEmployeeInput {
   salaryPerMonth: Float!
   user: CreateUserInput!
   workScheduleId: Int!
-  workSiteId: Int!
+  workSiteIds: [Int!]
   workingDaysPerWeek: Int
   workingHoursPerWeek: Int
 }
@@ -1383,8 +1391,7 @@ type Employee {
   userId: Int!
   workSchedule: WorkSchedule!
   workScheduleId: Int!
-  workSite: WorkSite!
-  workSiteId: Int!
+  workSites: [UserWorkSite!]
   workingDaysPerWeek: Int
   workingHoursPerWeek: Int
 }
@@ -2036,6 +2043,7 @@ type Mutation {
   approvePayrollItem(id: Int!): PayrollItemResponse!
   assignAsset(assignAssetInput: AssignAssetInput!): AssetAssignmentResponse!
   assignProjectMember(assignProjectMemberInput: AssignProjectMemberInput!): ProjectMemberResponse!
+  assignWorkSite(input: AssignWorkSiteInput!): UserWorkSiteResponse!
   attendanceRequest(createAttendanceInput: RequestAttendanceInput!): AttendanceResponse!
   cancelPayrollCycle(id: Int!): PayrollCycleResponse!
   changeMyPassword(changeMyPasswordInput: ChangeMyPasswordInput!): ChangeMyPasswordResponse!
@@ -2112,6 +2120,7 @@ type Mutation {
   removeAttendancePunch(id: Int!): AttendancePunch!
   returnAsset(returnAssetInput: ReturnAssetInput!): AssetAssignmentResponse!
   unassignProjectMember(unassignProjectMemberInput: UnassignProjectMemberInput!): ProjectMemberResponse!
+  unassignWorkSite(input: UnassignWorkSiteInput!): UserWorkSiteResponse!
   updateAsset(updateAssetInput: UpdateAssetInput!): AssetResponse!
   updateAssetType(updateAssetTypeInput: UpdateAssetTypeInput!): AssetTypeResponse!
   updateAttendance(updateAttendanceInput: UpdateAttendanceInput!): AttendanceResponse!
@@ -2646,7 +2655,7 @@ type Profile {
   city: String!
   country: String!
   createdAt: DateTime!
-  dateOfBirth: String!
+  dateOfBirth: DateTime!
   emergencyContact: EmergencyContact
   fullName: String!
   gender: Gender!
@@ -2763,6 +2772,7 @@ type Query {
   employeeScheduleAssignment(id: Int!): EmployeeScheduleAssignmentResponse!
   employeeScheduleAssignments: EmployeeScheduleAssignmentsQueryResponse!
   employeeScheduleAssignmentsByUser(userId: Int!): EmployeeScheduleAssignmentsQueryResponse!
+  employeeWorkSites(userId: Int!): UserWorkSitesResponse!
   employees(query: QueryUserInput): UsersQueryResponse!
   employmentStatusById(id: Int!): EmploymentStatusResponse!
   employmentStatuses(query: QueryEmploymentStatusInput): EmploymentStatusesQueryResponse!
@@ -2996,7 +3006,6 @@ input QueryUserInput {
   role: String
   searchTerm: String
   status: String
-  workSiteId: Float
 }
 
 input QueryWorkScheduleInput {
@@ -3333,6 +3342,14 @@ input UnassignProjectMemberInput {
   userId: Int!
 }
 
+input UnassignWorkSiteInput {
+  """User ID of the employee"""
+  userId: Int!
+
+  """Work site ID to unassign"""
+  workSiteId: Int!
+}
+
 type UpcomingLeave {
   employeeName: String!
   endDate: DateTime!
@@ -3624,7 +3641,7 @@ input UpdateEmployeeInput {
   salaryPerMonth: Float
   user: CreateUserInput
   workScheduleId: Int
-  workSiteId: Int
+  workSiteIds: [Int!]
   workingDaysPerWeek: Int
   workingHoursPerWeek: Int
 }
@@ -3680,9 +3697,6 @@ input UpdateEmploymentDetailsInput {
 
   """Work Schedule ID"""
   workScheduleId: Int
-
-  """Work Site ID"""
-  workSiteId: Int
 
   """Working days per week"""
   workingDaysPerWeek: Int
@@ -4161,6 +4175,30 @@ type UserStatisticsResponse {
   data: UserStatistics!
   message: String!
   meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type UserWorkSite {
+  createdAt: DateTime!
+  employee: Employee
+  id: ID!
+  updatedAt: DateTime!
+  userId: Int!
+  workSite: WorkSite
+  workSiteId: Int!
+}
+
+type UserWorkSiteResponse {
+  data: UserWorkSite
+  message: String!
+  statusCode: Float!
+  success: Boolean!
+}
+
+type UserWorkSitesResponse {
+  data: [UserWorkSite!]
+  message: String!
   statusCode: Float!
   success: Boolean!
 }

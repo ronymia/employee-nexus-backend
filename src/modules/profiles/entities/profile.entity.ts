@@ -20,7 +20,7 @@ export class Profile {
   profilePicture?: string | null;
 
   @Field()
-  dateOfBirth: string;
+  dateOfBirth: Date;
 
   @Field(() => Gender)
   @IsEnum(Gender)

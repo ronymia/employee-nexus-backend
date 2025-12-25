@@ -145,7 +145,11 @@ export class PayrollItemsService {
                 department: true,
                 employmentStatus: true,
                 workSchedule: true,
-                workSite: true,
+                workSites: {
+                  include: {
+                    workSite: true,
+                  },
+                },
               },
             },
             business: true,

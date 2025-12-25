@@ -57,7 +57,11 @@ export class PayrollCyclesService {
                     designation: true,
                     employmentStatus: true,
                     workSchedule: true,
-                    workSite: true,
+                    workSites: {
+                      include: {
+                        workSite: true,
+                      },
+                    },
                   },
                 },
               },

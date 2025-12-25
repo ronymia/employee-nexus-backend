@@ -15,9 +15,17 @@ import {
   UsersQueryResponse,
   UserStatisticsResponse,
 } from './entities/user.entity';
+import {
+  UserWorkSiteResponse,
+  UserWorkSitesResponse,
+} from './entities/user-work-site.entity';
 import { CreateEmployeeInput } from './dto/create-employee.input';
 import { UpdateEmployeeInput } from './dto/update-employee.input';
 import { QueryUserInput } from './dto/query-user.input';
+import {
+  AssignWorkSiteInput,
+  UnassignWorkSiteInput,
+} from './dto/work-site-assignment.input';
 import { PermissionUtils } from 'src/utils/permission.utils';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
@@ -212,6 +220,76 @@ export class UsersResolver {
       success: true,
       statusCode: HttpStatus.OK,
       message: 'User statistics retrieved successfully',
+      data: result,
+    };
+  }
+
+  // ============ WORK SITE ASSIGNMENT OPERATIONS ============
+
+  @Mutation(() => UserWorkSiteResponse, { name: 'assignWorkSite' })
+  @RequirePermissions('User:update')
+  async assignWorkSite(
+    @Args('input') input: AssignWorkSiteInput,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    const result = await this.usersService.assignWorkSite(
+      input.userId,
+      input.workSiteId,
+      businessId,
+    );
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Work site assigned successfully',
+      data: result,
+    };
+  }
+
+  @Mutation(() => UserWorkSiteResponse, { name: 'unassignWorkSite' })
+  @RequirePermissions('User:update')
+  async unassignWorkSite(
+    @Args('input') input: UnassignWorkSiteInput,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    const result = await this.usersService.unassignWorkSite(
+      input.userId,
+      input.workSiteId,
+      businessId,
+    );
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Work site unassigned successfully',
+      data: result,
+    };
+  }
+
+  @Query(() => UserWorkSitesResponse, { name: 'employeeWorkSites' })
+  @RequirePermissions('User:read')
+  async employeeWorkSites(
+    @Args('userId', { type: () => Int }) userId: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    const result = await this.usersService.getEmployeeWorkSites(
+      userId,
+      businessId,
+    );
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Employee work sites retrieved successfully',
       data: result,
     };
   }
