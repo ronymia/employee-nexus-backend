@@ -22,9 +22,6 @@ export class AssetType {
   @Field(() => Int, { description: 'ID of the business' })
   businessId: number;
 
-  @Field(() => Int, { description: 'ID of the creator' })
-  createdBy: number;
-
   @Field(() => Date, { description: 'Date when the asset type was created' })
   createdAt: Date;
 

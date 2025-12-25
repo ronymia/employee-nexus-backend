@@ -81,9 +81,6 @@ type AssetType {
   """Date when the asset type was created"""
   createdAt: DateTime!
 
-  """ID of the creator"""
-  createdBy: Int!
-
   """Description of the asset type"""
   description: String!
 

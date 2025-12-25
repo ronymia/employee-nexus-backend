@@ -44,7 +44,6 @@ export class AssetTypesService {
     return await this.prisma.assetType.create({
       data: {
         ...createAssetTypeInput,
-        createdBy: user.userId,
         businessId: user.businessId,
         status: Status.ACTIVE,
       },

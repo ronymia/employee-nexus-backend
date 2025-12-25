@@ -34,7 +34,6 @@ model User {
   workSiteCreated           WorkSite[]                   @relation(name: "workSiteCreated")
   workScheduleCreated       WorkSchedule[]               @relation(name: "workScheduleCreated")
   managedDepartments        Department[]                 @relation(name: "managedDepartments")
-  assetTypes                AssetType[]                  @relation(name: "assetTypesCreated")
   assetAssignments          AssetAssignment[]            @relation(name: "assetAssignmentsAssignedToUser")
   assetAssignmentsBy        AssetAssignment[]            @relation(name: "assetAssignmentsAssignedByUser")
   assetCreated              Asset[]                      @relation(name: "assetCreated")
@@ -621,8 +620,6 @@ model AssetType {
   status      String
   businessId  Int      @map("business_id")
   business    Business @relation(name: "assetTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  createdBy   Int?     @map("created_by")
-  creator     User?    @relation(name: "assetTypesCreated", fields: [createdBy], references: [id], onDelete: SetNull)
   assets      Asset[]  @relation(name: "assetTypesInAsset")
 
   createdAt DateTime @default(now()) @map("created_at")
