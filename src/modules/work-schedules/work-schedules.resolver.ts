@@ -139,4 +139,25 @@ export class WorkSchedulesResolver {
       data: result,
     };
   }
+
+  // GET USER WORK SCHEDULE QUERY
+  @Query(() => WorkScheduleResponse, { name: 'getUserWorkSchedule' })
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('Work Schedule:read')
+  @UseGuards(GqlAuthGuard)
+  async getUserWorkSchedule(
+    @Args('userId', { type: () => Int }) userId: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const result = await this.workSchedulesService.getUserWorkSchedule({
+      user,
+      userId,
+    });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `User work schedule retrieved successfully`,
+      data: result,
+    };
+  }
 }

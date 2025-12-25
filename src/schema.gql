@@ -567,9 +567,6 @@ input CreateAttendanceInput {
 }
 
 input CreateAttendancePunchInput {
-  """Attendance ID (optional for nested creation)"""
-  attendanceId: Int!
-
   """Break end timestamp"""
   breakEnd: DateTime
 
@@ -2778,6 +2775,7 @@ type Query {
   employmentStatuses(query: QueryEmploymentStatusInput): EmploymentStatusesQueryResponse!
   generateEmployeeId: String!
   getMyProfile: UserResponse!
+  getUserWorkSchedule(userId: Int!): WorkScheduleResponse!
   holidayById(id: Int!): HolidayResponse!
   holidays(query: QueryHolidayInput): HolidaysQueryResponse!
   jobHistory(id: Int!, userId: Int!): JobHistoryResponse!
@@ -3406,9 +3404,6 @@ input UpdateAttendanceInput {
 }
 
 input UpdateAttendancePunchInput {
-  """Attendance ID (optional for nested creation)"""
-  attendanceId: Int!
-
   """Break end timestamp"""
   breakEnd: DateTime
 

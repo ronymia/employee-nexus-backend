@@ -10,12 +10,6 @@ import {
 @InputType()
 export class CreateAttendancePunchInput {
   @Field(() => Int, {
-    description: 'Attendance ID (optional for nested creation)',
-  })
-  @IsInt()
-  attendanceId: number;
-
-  @Field(() => Int, {
     nullable: true,
     description: 'Project ID if working on a project',
   })

@@ -7,4 +7,10 @@ export class UpdateAttendancePunchInput extends CreateAttendancePunchInput {
   @Field(() => Int, { description: 'User ID' })
   @IsInt()
   id: number;
+
+  @Field(() => Int, {
+    description: 'Attendance ID (optional for nested creation)',
+  })
+  @IsInt()
+  attendanceId: number;
 }

@@ -452,4 +452,52 @@ export class WorkSchedulesService {
       where: { id, businessId },
     });
   }
+
+  // GET USER WORK SCHEDULE - RETRIEVES WORK SCHEDULE FOR A SPECIFIC USER
+  async getUserWorkSchedule({
+    user,
+    userId,
+  }: {
+    user: JwtPayload;
+    userId: number;
+  }) {
+    const businessId = user.businessId;
+
+    // Find the employee record for this user
+    const employee = await this.prisma.employee.findUnique({
+      where: {
+        userId,
+      },
+      include: {
+        workSchedule: {
+          include: {
+            business: true,
+            creator: true,
+            schedules: {
+              include: {
+                timeSlots: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!employee) {
+      throw new NotFoundException(`Employee with user ID ${userId} not found`);
+    }
+
+    if (!employee.workSchedule) {
+      throw new NotFoundException(
+        `No work schedule found for employee with user ID ${userId}`,
+      );
+    }
+
+    // Verify the work schedule belongs to the user's business
+    if (employee.workSchedule.businessId !== businessId) {
+      throw new NotFoundException(`Work schedule not found for your business`);
+    }
+
+    return employee.workSchedule;
+  }
 }
