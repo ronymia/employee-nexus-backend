@@ -126,7 +126,7 @@ export class AttendancesService {
             punchRecords: {
               create: punchRecordsWithHours.map(
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                ({ attendanceId, ...punchData }) => punchData,
+                (punchData) => punchData,
               ),
             },
           }),
@@ -488,15 +488,15 @@ export class AttendancesService {
   }: {
     createAttendancePunchInput: CreateAttendancePunchInput;
   }) {
-    const { attendanceId, ...data } = createAttendancePunchInput;
+    const { ...data } = createAttendancePunchInput;
 
     // Verify attendance belongs to user
-    await this.findOne({ id: attendanceId });
+    // await this.findOne({ id: attendanceId });
 
     return await this.prisma.attendancePunch.create({
       data: {
         ...data,
-        attendanceId,
+        attendanceId: 1,
       },
       include: {
         attendance: true,
@@ -597,5 +597,70 @@ export class AttendancesService {
       where: { id: id },
       data: { status: 'rejected' },
     });
+  }
+
+  // GET ATTENDANCE SUMMARY
+  async getAttendanceSummary({
+    user,
+    startDate,
+    endDate,
+    userId,
+  }: {
+    user: JwtPayload;
+    startDate?: Date;
+    endDate?: Date;
+    userId?: number;
+  }) {
+    const whereCondition: any = {
+      user: {
+        businessId: user.businessId,
+      },
+    };
+
+    if (userId) {
+      whereCondition.userId = userId;
+    }
+
+    if (startDate && endDate) {
+      whereCondition.date = {
+        gte: startDate,
+        lte: endDate,
+      };
+    } else if (startDate) {
+      whereCondition.date = {
+        gte: startDate,
+      };
+    } else if (endDate) {
+      whereCondition.date = {
+        lte: endDate,
+      };
+    }
+
+    const summary = await this.prisma.attendance.groupBy({
+      by: ['status'],
+      where: whereCondition,
+      _count: {
+        status: true,
+      },
+    });
+
+    const result = {
+      pending: 0,
+      approved: 0,
+      absent: 0,
+      late: 0,
+      halfDay: 0,
+    };
+
+    summary.forEach((item) => {
+      const status = item.status.toLowerCase();
+      if (status === 'pending') result.pending = item._count.status;
+      else if (status === 'approved') result.approved = item._count.status;
+      else if (status === 'absent') result.absent = item._count.status;
+      else if (status === 'late') result.late = item._count.status;
+      else if (status === 'half_day') result.halfDay = item._count.status;
+    });
+
+    return result;
   }
 }

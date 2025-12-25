@@ -188,6 +188,14 @@ type AttendanceAnalytics {
   trend: [AttendanceTrend!]!
 }
 
+type AttendanceInsight {
+  absent: Int!
+  approved: Int!
+  halfDay: Int!
+  late: Int!
+  pending: Int!
+}
+
 type AttendancePunch {
   """Attendance associated with this punch"""
   attendance: Attendance!
@@ -316,6 +324,14 @@ type AttendanceSummary {
   recentAttendance: [RecentAttendanceItem!]!
   thisMonth: AttendanceThisMonths!
   today: AttendanceTodays!
+}
+
+type AttendanceSummaryResponse {
+  data: AttendanceInsight!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type AttendanceThisMonth {
@@ -2751,6 +2767,7 @@ type Query {
   assetsByUserId(userId: Int!): AssetsQueryResponse!
   attendanceById(id: Int!): AttendanceResponse!
   attendanceSettingsByBusiness: AttendanceSettingResponse!
+  attendanceSummary(endDate: DateTime, startDate: DateTime, userId: Int): AttendanceSummaryResponse!
   attendances(query: QueryAttendanceInput): AttendanceQueryResponse!
   businessById(id: Int!): BusinessResponse!
   businessScheduleByBusinessId(id: Int!): BusinessSchedule!
@@ -3404,6 +3421,9 @@ input UpdateAttendanceInput {
 }
 
 input UpdateAttendancePunchInput {
+  """Attendance ID (optional for nested creation)"""
+  attendanceId: Int!
+
   """Break end timestamp"""
   breakEnd: DateTime
 

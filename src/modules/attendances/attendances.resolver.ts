@@ -18,7 +18,7 @@ import { RequirePermissions } from '../permissions/decorators/permissions.decora
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { RequestAttendanceInput } from './dto/request-attendance.input';
-import { ApproveAttendanceInput } from './dto/approve-attendance.input';
+import { AttendanceSummaryResponse } from './entities/attendance-summary.entity';
 
 @Resolver(() => Attendance)
 @UseGuards(GqlAuthGuard, PermissionsGuard)
@@ -98,6 +98,30 @@ export class AttendancesResolver {
       success: true,
       statusCode: HttpStatus.OK,
       message: 'Attendance retrieved successfully',
+      data: result,
+    };
+  }
+
+  // GET ATTENDANCE SUMMARY
+  @Query(() => AttendanceSummaryResponse, { name: 'attendanceSummary' })
+  @RequirePermissions('Attendance:read')
+  async getAttendanceSummary(
+    @CurrentUser() user: JwtPayload,
+    @Args('startDate', { nullable: true }) startDate?: Date,
+    @Args('endDate', { nullable: true }) endDate?: Date,
+    @Args('userId', { nullable: true, type: () => Int }) userId?: number,
+  ) {
+    const result = await this.attendancesService.getAttendanceSummary({
+      user,
+      startDate,
+      endDate,
+      userId,
+    });
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Attendance summary retrieved successfully',
       data: result,
     };
   }
