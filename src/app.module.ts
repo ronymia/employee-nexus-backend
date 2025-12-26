@@ -7,6 +7,7 @@ import { join } from 'path';
 import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { ScheduleModule } from '@nestjs/schedule';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { UsersModule } from './modules/users/users.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
@@ -53,6 +54,7 @@ import { PayrollItemsModule } from './modules/payroll-items/payroll-items.module
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { OwnerDashboardModule } from './modules/owner-dashboard/owner-dashboard.module';
 import { EmployeeDashboardModule } from './modules/employee-dashboard/employee-dashboard.module';
+import { SchedulerModule } from './modules/scheduler/scheduler.module';
 import { graphqlErrorFormatter } from './filters/graphql-error.formatter';
 
 @Module({
@@ -61,6 +63,7 @@ import { graphqlErrorFormatter } from './filters/graphql-error.formatter';
       isGlobal: true,
       load: [configuration],
     }),
+    ScheduleModule.forRoot(),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       graphiql: true,
@@ -114,6 +117,7 @@ import { graphqlErrorFormatter } from './filters/graphql-error.formatter';
     NotificationsModule,
     OwnerDashboardModule,
     EmployeeDashboardModule,
+    SchedulerModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

@@ -1677,7 +1677,7 @@ type JobHistory {
   employmentType: String!
 
   """End date (MM-YYYY or YYYY)"""
-  endDate: String
+  endDate: DateTime
   id: ID!
 
   """Job title or position"""
@@ -1687,7 +1687,7 @@ type JobHistory {
   responsibilities: String
 
   """Start date (MM-YYYY or YYYY)"""
-  startDate: String!
+  startDate: DateTime!
 
   """Date when the record was last updated"""
   updatedAt: DateTime!

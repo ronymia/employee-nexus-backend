@@ -538,8 +538,8 @@ model EmployeeScheduleAssignment {
   user           User         @relation(name: "userScheduleAssignments", fields: [userId], references: [id], onDelete: Cascade)
   workScheduleId Int          @map("work_schedule_id")
   workSchedule   WorkSchedule @relation(name: "workScheduleAssignments", fields: [workScheduleId], references: [id], onDelete: Restrict)
-  startDate      DateTime     @map("start_date") // When the assignment becomes effective
-  endDate        DateTime?    @map("end_date") // When the assignment ends, null if current
+  startDate      DateTime     @map("start_date") @db.Date // When the assignment becomes effective
+  endDate        DateTime?    @map("end_date") @db.Date // When the assignment ends, null if current
   isActive       Boolean      @default(true) @map("is_active") // Whether this is the active schedule
   assignedBy     Int          @map("assigned_by")
   assignedByUser User         @relation(name: "scheduleAssignmentsByUser", fields: [assignedBy], references: [id], onDelete: SetNull)
