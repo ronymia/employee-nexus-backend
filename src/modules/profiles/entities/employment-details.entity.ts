@@ -1,4 +1,5 @@
 import { ObjectType, Field, Int, Float, ID } from '@nestjs/graphql';
+import { UserWorkSite } from 'src/modules/users/entities/user-work-site.entity';
 
 @ObjectType()
 export class EmploymentDetails {
@@ -32,8 +33,8 @@ export class EmploymentDetails {
   @Field(() => Int)
   departmentId: number;
 
-  @Field(() => Int)
-  workSiteId: number;
+  @Field(() => [UserWorkSite], { nullable: true })
+  workSites?: UserWorkSite[] | [];
 
   @Field(() => Int)
   workScheduleId: number;

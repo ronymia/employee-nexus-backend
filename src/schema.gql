@@ -1494,7 +1494,7 @@ type EmploymentDetails {
   updatedAt: DateTime!
   userId: ID!
   workScheduleId: Int!
-  workSiteId: Int!
+  workSites: [UserWorkSite!]
   workingDaysPerWeek: Int
   workingHoursPerWeek: Int
 }
@@ -3713,6 +3713,9 @@ input UpdateEmploymentDetailsInput {
   """Work Schedule ID"""
   workScheduleId: Int
 
+  """Work Site IDs"""
+  workSiteIds: [Int!]
+
   """Working days per week"""
   workingDaysPerWeek: Int
 
@@ -3953,7 +3956,9 @@ input UpdateProfileInput {
   phone: String
   postcode: String
   profilePicture: String
-  userId: ID!
+
+  """User ID"""
+  userId: Int!
 }
 
 input UpdateProjectInput {

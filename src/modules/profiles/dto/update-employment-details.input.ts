@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { UserWorkSite } from 'src/modules/users/entities/user-work-site.entity';
 
 @InputType()
 export class UpdateEmploymentDetailsInput {
@@ -79,15 +80,14 @@ export class UpdateEmploymentDetailsInput {
   })
   @IsInt()
   @IsOptional()
-  departmentId?: number;
+  departmentId: number;
 
-  // @Field(() => Int, {
-  //   description: 'Work Site ID',
-  //   nullable: true,
-  // })
-  // @IsInt()
-  // @IsOptional()
-  // workSiteId?: number;
+  @Field(() => [Int], {
+    description: 'Work Site IDs',
+    nullable: true,
+  })
+  @IsInt({ each: true })
+  workSiteIds: number[];
 
   @Field(() => Int, {
     description: 'Work Schedule ID',
