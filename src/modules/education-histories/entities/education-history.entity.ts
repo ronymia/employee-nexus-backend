@@ -37,14 +37,14 @@ export class EducationHistory {
   })
   city?: string | null;
 
-  @Field(() => String, { description: 'Start date (MM-YYYY or YYYY)' })
-  startDate: string;
+  @Field(() => Date, { description: 'Start date (MM-YYYY or YYYY)' })
+  startDate: Date;
 
-  @Field(() => String, {
+  @Field(() => Date, {
     nullable: true,
     description: 'End/graduation date (MM-YYYY or YYYY)',
   })
-  endDate?: string | null;
+  endDate?: Date | null;
 
   @Field(() => Boolean, { description: 'Whether currently studying' })
   isCurrentlyStudying: boolean;

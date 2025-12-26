@@ -1334,7 +1334,7 @@ type EducationHistory {
   description: String
 
   """End/graduation date (MM-YYYY or YYYY)"""
-  endDate: String
+  endDate: DateTime
 
   """Field of study or major"""
   fieldOfStudy: String!
@@ -1350,7 +1350,7 @@ type EducationHistory {
   isCurrentlyStudying: Boolean!
 
   """Start date (MM-YYYY or YYYY)"""
-  startDate: String!
+  startDate: DateTime!
 
   """Date when the record was last updated"""
   updatedAt: DateTime!

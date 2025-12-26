@@ -37,15 +37,14 @@ export class JobHistory {
   })
   city?: string | null;
 
-  @Field(() => String, { description: 'Start date (MM-YYYY or YYYY)' })
-  startDate: string;
+  @Field(() => Date, { description: 'Start date (MM-YYYY or YYYY)' })
+  startDate: Date;
 
-  @Field(() => String, {
+  @Field(() => Date, {
     nullable: true,
     description: 'End date (MM-YYYY or YYYY)',
   })
-  endDate?: string | null;
-
+  endDate?: Date | null;
   @Field(() => String, {
     nullable: true,
     description: 'Job responsibilities and duties',

@@ -771,19 +771,19 @@ model EmergencyContact {
 }
 
 model EducationHistory {
-  id                  Int     @id @default(autoincrement())
-  userId              Int     @map("user_id")
-  user                User    @relation(name: "userEducationHistory", fields: [userId], references: [id], onDelete: Cascade)
-  degree              String // e.g., "Bachelor of Science", "Master of Arts", "High School Diploma"
-  fieldOfStudy        String  @map("field_of_study") // e.g., "Computer Science", "Business Administration"
-  institution         String // Name of school/university
-  country             String // Country where institution is located
-  city                String? // City where institution is located
-  startDate           String  @map("start_date") // Format: "MM-YYYY" or "YYYY"
-  endDate             String? @map("end_date") // Format: "MM-YYYY" or "YYYY", null if currently studying
-  isCurrentlyStudying Boolean @default(false) @map("is_currently_studying")
-  grade               String? // GPA, percentage, or grade classification
-  description         String? // Additional details, achievements, or relevant coursework
+  id                  Int       @id @default(autoincrement())
+  userId              Int       @map("user_id")
+  user                User      @relation(name: "userEducationHistory", fields: [userId], references: [id], onDelete: Cascade)
+  degree              String
+  fieldOfStudy        String    @map("field_of_study")
+  institution         String
+  country             String
+  city                String?
+  startDate           DateTime  @map("start_date") @db.Date
+  endDate             DateTime? @map("end_date") @db.Date
+  isCurrentlyStudying Boolean   @default(false) @map("is_currently_studying")
+  grade               String?
+  description         String?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -793,16 +793,16 @@ model EducationHistory {
 }
 
 model JobHistory {
-  id               Int     @id @default(autoincrement())
-  userId           Int     @map("user_id")
-  user             User    @relation(name: "userJobHistory", fields: [userId], references: [id], onDelete: Cascade)
-  jobTitle         String  @map("job_title") // e.g., "Software Engineer", "Project Manager"
-  companyName      String  @map("company_name") // Name of the company/organization
-  employmentType   String  @map("employment_type") // e.g., "Full-time", "Part-time", "Contract", "Freelance"
+  id               Int       @id @default(autoincrement())
+  userId           Int       @map("user_id")
+  user             User      @relation(name: "userJobHistory", fields: [userId], references: [id], onDelete: Cascade)
+  jobTitle         String    @map("job_title") // e.g., "Software Engineer", "Project Manager"
+  companyName      String    @map("company_name") // Name of the company/organization
+  employmentType   String    @map("employment_type") // e.g., "Full-time", "Part-time", "Contract", "Freelance"
   country          String // Country where job was located
   city             String? // City where job was located
-  startDate        String  @map("start_date") // Format: "MM-YYYY" or "YYYY"
-  endDate          String? @map("end_date") // Format: "MM-YYYY" or "YYYY", null if currently working
+  startDate        DateTime  @map("start_date") @db.Date // Format: "MM-YYYY" or "YYYY"
+  endDate          DateTime? @map("end_date") @db.Date // Format: "MM-YYYY" or "YYYY", null if currently working
   responsibilities String? // Job responsibilities and duties
   achievements     String? // Key achievements and accomplishments
 
