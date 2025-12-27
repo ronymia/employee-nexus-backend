@@ -119,10 +119,7 @@ export class UsersResolver {
     if (!businessId) throw new Error('Business ID not found in token');
 
     // GET RESPONSE
-    const result = this.usersService.createEmployee(
-      createEmployeeInput,
-      businessId,
-    );
+    const result = this.usersService.createEmployee(createEmployeeInput, user);
     return {
       success: true,
       statusCode: HttpStatus.CREATED,

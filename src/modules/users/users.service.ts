@@ -346,25 +346,43 @@ export class UsersService {
 
   async createEmployee(
     createEmployeeInput: CreateEmployeeInput,
-    businessId: number,
+    authUser: JwtPayload,
   ) {
-    const { user, profile, emergencyContact, workSiteIds, ...employeeData } =
-      createEmployeeInput;
+    const {
+      user,
+      profile,
+      emergencyContact,
+      workSiteIds,
+      workScheduleId,
+      ...employeeData
+    } = createEmployeeInput;
 
     // Validate that all related entities belong to the business
     const [designation, employmentStatus, department, workSchedule] =
       await Promise.all([
         this.prisma.designation.findUnique({
-          where: { id: employeeData.designationId, AND: { businessId } },
+          where: {
+            id: employeeData.designationId,
+            AND: { businessId: authUser.businessId },
+          },
         }),
         this.prisma.employmentStatus.findUnique({
-          where: { id: employeeData.employmentStatusId, AND: { businessId } },
+          where: {
+            id: employeeData.employmentStatusId,
+            AND: { businessId: authUser.businessId },
+          },
         }),
         this.prisma.department.findUnique({
-          where: { id: employeeData.departmentId, AND: { businessId } },
+          where: {
+            id: employeeData.departmentId,
+            AND: { businessId: authUser.businessId },
+          },
         }),
         this.prisma.workSchedule.findUnique({
-          where: { id: employeeData.workScheduleId, AND: { businessId } },
+          where: {
+            id: workScheduleId,
+            AND: { businessId: authUser.businessId },
+          },
         }),
       ]);
 
@@ -376,7 +394,7 @@ export class UsersService {
     // Validate work sites if provided
     if (workSiteIds && workSiteIds.length > 0) {
       const workSites = await this.prisma.workSite.findMany({
-        where: { id: { in: workSiteIds }, businessId },
+        where: { id: { in: workSiteIds }, businessId: authUser.businessId },
       });
       if (workSites.length !== workSiteIds.length) {
         throw new HttpException(
@@ -394,12 +412,14 @@ export class UsersService {
 
     // Validate role belongs to business
     const role = await this.prisma.role.findFirst({
-      where: { id: user.roleId, businessId },
+      where: { id: user.roleId, businessId: authUser.businessId },
     });
     if (!role) throw new Error('Invalid role');
 
     // Generate employeeId if not provided
-    const generatedEmployeeId = await this.generateEmployeeId(businessId);
+    const generatedEmployeeId = await this.generateEmployeeId(
+      authUser.businessId,
+    );
 
     // ADD DEFAULT PASSWORD
     let hashedPassword: string;
@@ -420,7 +440,7 @@ export class UsersService {
             email: user.email,
             password: hashedPassword,
             roleId: role.id,
-            businessId,
+            businessId: authUser.businessId,
             status: 'ACTIVE',
           },
         });
@@ -451,6 +471,19 @@ export class UsersService {
             userId: createdUser.id,
           },
         });
+        // ASSIGN WORK SCHEDULE
+        if (workScheduleId) {
+          await tx.employeeScheduleAssignment.create({
+            data: {
+              userId: createdUser.id,
+              workScheduleId,
+              startDate: new Date(),
+              isActive: true,
+              assignedBy: authUser.userId,
+              notes: 'Initial schedule assignment upon employee creation',
+            },
+          });
+        }
 
         // Create work site assignments if provided
         if (Array.isArray(workSiteIds) && workSiteIds.length > 0) {
@@ -465,7 +498,7 @@ export class UsersService {
         const result = await tx.user.findUnique({
           where: {
             id: createdUser.id,
-            AND: { businessId },
+            AND: { businessId: authUser.businessId },
           },
           include: {
             profile: {
