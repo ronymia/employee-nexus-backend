@@ -161,7 +161,6 @@ export class WorkSchedulesService {
       data: {
         ...workScheduleData,
         businessId: user.businessId,
-        createdBy: user.userId,
         status: Status.ACTIVE,
         schedules: {
           create: schedules.map((schedule) => ({
@@ -178,7 +177,6 @@ export class WorkSchedulesService {
       },
       include: {
         business: true,
-        creator: true,
         schedules: {
           include: {
             timeSlots: true,
@@ -252,7 +250,6 @@ export class WorkSchedulesService {
           },
           include: {
             business: true,
-            creator: true,
             schedules: {
               include: {
                 timeSlots: true,
@@ -272,7 +269,6 @@ export class WorkSchedulesService {
           take: currentLimit,
           include: {
             business: true,
-            creator: true,
             schedules: {
               include: {
                 timeSlots: true,
@@ -311,7 +307,6 @@ export class WorkSchedulesService {
       where: { id, businessId },
       include: {
         business: true,
-        creator: true,
         schedules: {
           include: {
             timeSlots: true,
@@ -406,7 +401,6 @@ export class WorkSchedulesService {
           },
           include: {
             business: true,
-            creator: true,
             schedules: {
               include: {
                 timeSlots: true,
@@ -423,7 +417,6 @@ export class WorkSchedulesService {
       data: updateData,
       include: {
         business: true,
-        creator: true,
         schedules: {
           include: {
             timeSlots: true,
@@ -463,19 +456,25 @@ export class WorkSchedulesService {
   }) {
     const businessId = user.businessId;
 
-    // Find the employee record for this user
+    // Find the employee record for this user with active work schedules
     const employee = await this.prisma.employee.findUnique({
       where: {
         userId,
       },
       include: {
-        workSchedule: {
+        workSchedules: {
+          where: {
+            isActive: true,
+          },
           include: {
-            business: true,
-            creator: true,
-            schedules: {
+            workSchedule: {
               include: {
-                timeSlots: true,
+                business: true,
+                schedules: {
+                  include: {
+                    timeSlots: true,
+                  },
+                },
               },
             },
           },
@@ -487,17 +486,18 @@ export class WorkSchedulesService {
       throw new NotFoundException(`Employee with user ID ${userId} not found`);
     }
 
-    if (!employee.workSchedule) {
+    const activeScheduleAssignment = employee.workSchedules[0];
+    if (!activeScheduleAssignment) {
       throw new NotFoundException(
         `No work schedule found for employee with user ID ${userId}`,
       );
     }
 
     // Verify the work schedule belongs to the user's business
-    if (employee.workSchedule.businessId !== businessId) {
+    if (activeScheduleAssignment.workSchedule.businessId !== businessId) {
       throw new NotFoundException(`Work schedule not found for your business`);
     }
 
-    return employee.workSchedule;
+    return activeScheduleAssignment.workSchedule;
   }
 }

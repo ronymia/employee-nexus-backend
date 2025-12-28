@@ -24,14 +24,12 @@ export class AssetsService {
     const asset = await this.prisma.asset.create({
       data: {
         ...assetData,
-        createdBy: user.userId,
         businessId: user.businessId,
         status: assignedTo ? 'assigned' : 'unassigned',
       },
       include: {
         assetType: true,
         business: true,
-        creator: true,
         assetAssignments: {
           include: {
             assignedToUser: true,
@@ -65,7 +63,6 @@ export class AssetsService {
         include: {
           assetType: true,
           business: true,
-          creator: true,
           assetAssignments: {
             include: {
               assignedToUser: true,
@@ -99,7 +96,6 @@ export class AssetsService {
       include: {
         assetType: true,
         business: true,
-        creator: true,
         assetAssignments: {
           include: {
             assignedToUser: true,
@@ -123,7 +119,6 @@ export class AssetsService {
           include: {
             assetType: true,
             business: true,
-            creator: true,
             assetAssignments: {
               include: {
                 assignedToUser: {
@@ -169,12 +164,6 @@ export class AssetsService {
           include: {
             assetType: true,
             business: true,
-            creator: {
-              include: {
-                profile: true,
-                role: true,
-              },
-            },
           },
         },
         assignedToUser: {
@@ -200,7 +189,6 @@ export class AssetsService {
       include: {
         assetType: true,
         business: true,
-        creator: true,
         assetAssignments: {
           include: {
             assignedToUser: true,
@@ -234,7 +222,6 @@ export class AssetsService {
       include: {
         assetType: true,
         business: true,
-        creator: true,
         assetAssignments: {
           include: {
             assignedToUser: true,
@@ -255,7 +242,6 @@ export class AssetsService {
       include: {
         assetType: true,
         business: true,
-        creator: true,
         assetAssignments: {
           include: {
             assignedToUser: true,

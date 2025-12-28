@@ -26,7 +26,6 @@ export class WorkSitesService {
     return await this.prisma.workSite.create({
       data: {
         ...createWorkSiteInput,
-        createdBy: user.userId,
         businessId: user.businessId,
         status: Status.ACTIVE,
       },

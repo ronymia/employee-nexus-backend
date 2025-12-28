@@ -29,7 +29,7 @@ export class ProfilesService {
       data: updateProfileInput,
       include: {
         emergencyContact: true,
-        socialLinks: true,
+        socialLink: true,
       },
     });
 
@@ -89,13 +89,13 @@ export class ProfilesService {
     // Handle work sites update if workSiteIds provided
     if (workSiteIds !== undefined) {
       // Delete existing work site assignments
-      await this.prisma.userWorkSite.deleteMany({
+      await this.prisma.employeeWorkSite.deleteMany({
         where: { userId },
       });
 
       // Create new work site assignments
       if (workSiteIds.length > 0) {
-        await this.prisma.userWorkSite.createMany({
+        await this.prisma.employeeWorkSite.createMany({
           data: workSiteIds.map((workSiteId) => ({
             userId,
             workSiteId,

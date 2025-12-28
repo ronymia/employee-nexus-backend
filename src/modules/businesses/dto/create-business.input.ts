@@ -1,5 +1,6 @@
-import { InputType, Field, Int, Float } from '@nestjs/graphql';
-import { IsEmail, IsInt, IsString } from 'class-validator';
+import { InputType, Field, Int } from '@nestjs/graphql';
+import { IsDate, IsEmail, IsInt, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 
 @InputType()
 export class CreateBusinessInput {
@@ -31,20 +32,10 @@ export class CreateBusinessInput {
   @IsString()
   postcode: string;
 
-  @Field(() => Float, { nullable: true })
-  @IsInt()
-  lat?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsInt()
-  lng?: number;
-
   @Field()
-  registrationDate: string;
-
-  @Field({ nullable: true })
-  @IsString()
-  website?: string;
+  @IsDate()
+  @Type(() => Date)
+  registrationDate: Date;
 
   @Field(() => Int)
   @IsInt()

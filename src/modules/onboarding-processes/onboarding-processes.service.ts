@@ -26,7 +26,6 @@ export class OnboardingProcessesService {
     return await this.prisma.onboardingProcess.create({
       data: {
         ...createOnboardingProcessInput,
-        createdBy: user.userId,
         businessId: user.businessId,
         status: Status.ACTIVE,
       },

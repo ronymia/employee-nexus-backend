@@ -19,13 +19,14 @@ export class NotificationsService {
 
   // ============ NOTIFICATION OPERATIONS ============
 
-  async create(input: CreateNotificationInput) {
+  async create(user: JwtPayload, input: CreateNotificationInput) {
     const { metadata, ...data } = input;
     return await this.prisma.notification.create({
       data: {
         ...data,
         priority: input?.priority || 'NORMAL',
         metadata: metadata ? JSON.parse(metadata) : undefined,
+        businessId: user.businessId,
       },
     });
   }
@@ -154,7 +155,7 @@ export class NotificationsService {
     return await this.prisma.notificationTemplate.findFirst({
       where: {
         name,
-        OR: [{ businessId }, { businessId: null }],
+        OR: [{ businessId }],
         isActive: true,
       },
     });
@@ -262,7 +263,7 @@ export class NotificationsService {
     // Extract only valid Notification fields from variables
     const { entityType, entityId, actionUrl, expiresAt } = variables;
 
-    return await this.create({
+    return await this.create({ userId: 1, businessId: 1 } as JwtPayload, {
       type: template.type,
       title,
       message,

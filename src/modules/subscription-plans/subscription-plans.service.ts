@@ -46,10 +46,8 @@ export class SubscriptionPlansService {
           await prismaTransaction.subscriptionPlan.create({
             data: {
               ...rest,
-              createdBy: user?.userId,
               status: 'ACTIVE',
             },
-            include: { creator: true },
           });
 
         // if subscription plan not created
@@ -74,7 +72,6 @@ export class SubscriptionPlansService {
             where: { id: newSubscriptionPlan.id },
             include: {
               features: { include: { feature: true } },
-              creator: true,
             },
           });
 

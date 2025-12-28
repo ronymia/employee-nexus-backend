@@ -7,7 +7,7 @@ import {
 
 const prisma = new PrismaClient();
 
-export async function seedNotificationTemplates() {
+export async function seedNotificationTemplates(businessId: number) {
   console.log('🔔 Seeding notification templates...');
 
   const templates = [
@@ -21,7 +21,7 @@ export async function seedNotificationTemplates() {
       priority: NotificationPriority.NORMAL,
       channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null, // Global template
+      businessId,
     },
     {
       name: 'leave_approved',
@@ -32,7 +32,7 @@ export async function seedNotificationTemplates() {
       priority: NotificationPriority.HIGH,
       channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null,
+      businessId,
     },
     {
       name: 'leave_rejected',
@@ -43,7 +43,7 @@ export async function seedNotificationTemplates() {
       priority: NotificationPriority.HIGH,
       channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null,
+      businessId,
     },
 
     // Payroll Notifications
@@ -56,7 +56,7 @@ export async function seedNotificationTemplates() {
       priority: NotificationPriority.HIGH,
       channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null,
+      businessId,
     },
 
     // Attendance Notifications
@@ -69,7 +69,7 @@ export async function seedNotificationTemplates() {
       priority: NotificationPriority.NORMAL,
       channels: [NotificationChannel.IN_APP],
       isActive: true,
-      businessId: null,
+      businessId,
     },
     {
       name: 'attendance_absent',
@@ -80,7 +80,7 @@ export async function seedNotificationTemplates() {
       priority: NotificationPriority.HIGH,
       channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null,
+      businessId,
     },
     {
       name: 'attendance_reminder',
@@ -91,7 +91,7 @@ export async function seedNotificationTemplates() {
       priority: NotificationPriority.LOW,
       channels: [NotificationChannel.IN_APP],
       isActive: true,
-      businessId: null,
+      businessId,
     },
 
     // Asset Management
@@ -104,7 +104,7 @@ export async function seedNotificationTemplates() {
       priority: NotificationPriority.NORMAL,
       channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null,
+      businessId,
     },
 
     // Project Management
@@ -117,7 +117,7 @@ export async function seedNotificationTemplates() {
       priority: NotificationPriority.NORMAL,
       channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null,
+      businessId,
     },
 
     // Holiday Announcements
@@ -129,7 +129,7 @@ export async function seedNotificationTemplates() {
       priority: NotificationPriority.NORMAL,
       channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null,
+      businessId,
     },
 
     // System Reminders
@@ -142,7 +142,7 @@ export async function seedNotificationTemplates() {
       priority: NotificationPriority.HIGH,
       channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null,
+      businessId,
     },
     {
       name: 'profile_incomplete',
@@ -153,7 +153,7 @@ export async function seedNotificationTemplates() {
       priority: NotificationPriority.LOW,
       channels: [NotificationChannel.IN_APP],
       isActive: true,
-      businessId: null,
+      businessId,
     },
   ];
 
@@ -166,7 +166,7 @@ export async function seedNotificationTemplates() {
       const existing = await prisma.notificationTemplate.findFirst({
         where: {
           name: template.name,
-          businessId: null, // Global templates
+          businessId,
         },
       });
 

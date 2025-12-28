@@ -53,10 +53,10 @@ export class PayrollCyclesService {
                 profile: true,
                 employee: {
                   include: {
-                    department: true,
-                    designation: true,
-                    employmentStatus: true,
-                    workSchedule: true,
+                    departments: true,
+                    designations: true,
+                    employmentStatuses: true,
+                    workSchedules: true,
                     workSites: {
                       include: {
                         workSite: true,

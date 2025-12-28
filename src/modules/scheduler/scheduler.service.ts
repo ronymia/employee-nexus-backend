@@ -21,23 +21,21 @@ export class SchedulerService {
       today.setHours(0, 0, 0, 0); // Set to start of day
 
       // Get all users who have schedule assignments
-      const usersWithAssignments =
-        await this.prisma.employeeScheduleAssignment.findMany({
-          select: {
-            userId: true,
-          },
-          distinct: ['userId'],
-        });
+      const usersWithAssignments = await this.prisma.employeeSchedule.findMany({
+        select: {
+          userId: true,
+        },
+        distinct: ['userId'],
+      });
 
       let totalUpdated = 0;
 
       for (const { userId } of usersWithAssignments) {
         // Get all assignments for this user
-        const assignments =
-          await this.prisma.employeeScheduleAssignment.findMany({
-            where: { userId },
-            orderBy: { startDate: 'desc' }, // Most recent first
-          });
+        const assignments = await this.prisma.employeeSchedule.findMany({
+          where: { userId },
+          orderBy: { startDate: 'desc' }, // Most recent first
+        });
 
         // Find assignments that should be active (startDate <= today)
         const eligibleAssignments = assignments.filter(
@@ -49,24 +47,29 @@ export class SchedulerService {
           const activeAssignment = eligibleAssignments[0];
 
           // Update all assignments for this user
-          await this.prisma.employeeScheduleAssignment.updateMany({
+          await this.prisma.employeeSchedule.updateMany({
             where: { userId },
             data: { isActive: false },
           });
 
-          // Set the active one
-          await this.prisma.employeeScheduleAssignment.update({
-            where: { id: activeAssignment.id },
+          // Set the active one using composite key
+          await this.prisma.employeeSchedule.update({
+            where: {
+              userId_workScheduleId: {
+                userId: activeAssignment.userId,
+                workScheduleId: activeAssignment.workScheduleId,
+              },
+            },
             data: { isActive: true },
           });
 
           totalUpdated++;
           this.logger.log(
-            `Updated user ${userId}: Set assignment ${activeAssignment.id} as active`,
+            `Updated user ${userId}: Set assignment for schedule ${activeAssignment.workScheduleId} as active`,
           );
         } else {
           // No eligible assignments, ensure all are inactive
-          await this.prisma.employeeScheduleAssignment.updateMany({
+          await this.prisma.employeeSchedule.updateMany({
             where: { userId },
             data: { isActive: false },
           });

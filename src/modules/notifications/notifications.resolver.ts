@@ -34,9 +34,10 @@ export class NotificationsResolver {
   @Mutation(() => NotificationResponse)
   @RequirePermissions('Notification:create')
   async createNotification(
+    @CurrentUser() user: JwtPayload,
     @Args('createNotificationInput') input: CreateNotificationInput,
   ) {
-    const notification = await this.notificationsService.create(input);
+    const notification = await this.notificationsService.create(user, input);
     return {
       success: true,
       statusCode: HttpStatus.CREATED,

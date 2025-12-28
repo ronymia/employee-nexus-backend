@@ -134,7 +134,12 @@ export class UsersService {
     if (query?.departmentId) {
       andCondition.push({
         employee: {
-          departmentId: query.departmentId,
+          departments: {
+            some: {
+              departmentId: query.departmentId,
+              isActive: true,
+            },
+          },
         },
       });
     }
@@ -143,7 +148,12 @@ export class UsersService {
     if (query?.designationId) {
       andCondition.push({
         employee: {
-          designationId: query.designationId,
+          designations: {
+            some: {
+              designationId: query.designationId,
+              isActive: true,
+            },
+          },
         },
       });
     }
@@ -152,7 +162,12 @@ export class UsersService {
     if (query?.employmentStatusId) {
       andCondition.push({
         employee: {
-          employmentStatusId: query.employmentStatusId,
+          employmentStatuses: {
+            some: {
+              employmentStatusId: query.employmentStatusId,
+              isActive: true,
+            },
+          },
         },
       });
     }
@@ -198,15 +213,19 @@ export class UsersService {
             },
             employee: {
               include: {
-                designation: true,
-                employmentStatus: true,
-                department: true,
+                designations: true,
+                employmentStatuses: true,
+                departments: true,
                 workSites: {
                   include: {
                     workSite: true,
                   },
                 },
-                workSchedule: true,
+                workSchedules: {
+                  include: {
+                    workSchedule: true,
+                  },
+                },
               },
             },
             role: true,
@@ -227,15 +246,19 @@ export class UsersService {
             },
             employee: {
               include: {
-                designation: true,
-                employmentStatus: true,
-                department: true,
+                designations: true,
+                employmentStatuses: true,
+                departments: true,
                 workSites: {
                   include: {
                     workSite: true,
                   },
                 },
-                workSchedule: true,
+                workSchedules: {
+                  include: {
+                    workSchedule: true,
+                  },
+                },
               },
             },
             role: true,
@@ -262,7 +285,7 @@ export class UsersService {
         profile: {
           include: {
             emergencyContact: true,
-            socialLinks: true,
+            socialLink: true,
           },
         },
         business: true,
@@ -473,7 +496,7 @@ export class UsersService {
         });
         // ASSIGN WORK SCHEDULE
         if (workScheduleId) {
-          await tx.employeeScheduleAssignment.create({
+          await tx.employeeSchedule.create({
             data: {
               userId: createdUser.id,
               workScheduleId,
@@ -487,7 +510,7 @@ export class UsersService {
 
         // Create work site assignments if provided
         if (Array.isArray(workSiteIds) && workSiteIds.length > 0) {
-          await tx.userWorkSite.createMany({
+          await tx.employeeWorkSite.createMany({
             data: workSiteIds.map((workSiteId) => ({
               userId: createdUser.id,
               workSiteId,
@@ -508,10 +531,14 @@ export class UsersService {
             },
             employee: {
               include: {
-                designation: true,
-                employmentStatus: true,
-                department: true,
-                workSchedule: true,
+                designations: true,
+                employmentStatuses: true,
+                departments: true,
+                workSchedules: {
+                  include: {
+                    workSchedule: true,
+                  },
+                },
                 workSites: {
                   include: {
                     workSite: true,
@@ -608,10 +635,14 @@ export class UsersService {
             },
             employee: {
               include: {
-                designation: true,
-                employmentStatus: true,
-                department: true,
-                workSchedule: true,
+                designations: true,
+                employmentStatuses: true,
+                departments: true,
+                workSchedules: {
+                  include: {
+                    workSchedule: true,
+                  },
+                },
                 workSites: {
                   include: {
                     workSite: true,
@@ -641,10 +672,14 @@ export class UsersService {
             },
             employee: {
               include: {
-                designation: true,
-                employmentStatus: true,
-                department: true,
-                workSchedule: true,
+                designations: true,
+                employmentStatuses: true,
+                departments: true,
+                workSchedules: {
+                  include: {
+                    workSchedule: true,
+                  },
+                },
                 workSites: {
                   include: {
                     workSite: true,
@@ -679,15 +714,19 @@ export class UsersService {
         },
         employee: {
           include: {
-            designation: true,
-            employmentStatus: true,
-            department: true,
+            designations: true,
+            employmentStatuses: true,
+            departments: true,
             workSites: {
               include: {
                 workSite: true,
               },
             },
-            workSchedule: true,
+            workSchedules: {
+              include: {
+                workSchedule: true,
+              },
+            },
           },
         },
         role: true,
@@ -895,13 +934,13 @@ export class UsersService {
         // Update work site assignments if workSiteIds is provided
         if (workSiteIds !== undefined) {
           // Delete existing work site assignments
-          await tx.userWorkSite.deleteMany({
+          await tx.employeeWorkSite.deleteMany({
             where: { userId: existingUser.id },
           });
 
           // Create new work site assignments
           if (workSiteIds.length > 0) {
-            await tx.userWorkSite.createMany({
+            await tx.employeeWorkSite.createMany({
               data: workSiteIds.map((workSiteId) => ({
                 userId: existingUser.id,
                 workSiteId,
@@ -924,15 +963,19 @@ export class UsersService {
             },
             employee: {
               include: {
-                designation: true,
-                employmentStatus: true,
-                department: true,
+                designations: true,
+                employmentStatuses: true,
+                departments: true,
                 workSites: {
                   include: {
                     workSite: true,
                   },
                 },
-                workSchedule: true,
+                workSchedules: {
+                  include: {
+                    workSchedule: true,
+                  },
+                },
               },
             },
             role: true,
@@ -969,15 +1012,19 @@ export class UsersService {
         },
         employee: {
           include: {
-            designation: true,
-            employmentStatus: true,
-            department: true,
+            designations: true,
+            employmentStatuses: true,
+            departments: true,
             workSites: {
               include: {
                 workSite: true,
               },
             },
-            workSchedule: true,
+            workSchedules: {
+              include: {
+                workSchedule: true,
+              },
+            },
           },
         },
         role: true,
@@ -1102,7 +1149,7 @@ export class UsersService {
     }
 
     // Check if assignment already exists
-    const existingAssignment = await this.prisma.userWorkSite.findUnique({
+    const existingAssignment = await this.prisma.employeeWorkSite.findUnique({
       where: {
         userId_workSiteId: {
           userId,
@@ -1116,7 +1163,7 @@ export class UsersService {
     }
 
     // Create assignment
-    return this.prisma.userWorkSite.create({
+    return this.prisma.employeeWorkSite.create({
       data: {
         userId,
         workSiteId,
@@ -1165,7 +1212,7 @@ export class UsersService {
     }
 
     // Check if assignment exists
-    const existingAssignment = await this.prisma.userWorkSite.findUnique({
+    const existingAssignment = await this.prisma.employeeWorkSite.findUnique({
       where: {
         userId_workSiteId: {
           userId,
@@ -1179,7 +1226,7 @@ export class UsersService {
     }
 
     // Delete assignment
-    return this.prisma.userWorkSite.delete({
+    return this.prisma.employeeWorkSite.delete({
       where: {
         userId_workSiteId: {
           userId,
@@ -1217,7 +1264,7 @@ export class UsersService {
     }
 
     // Get all work site assignments for this employee
-    return this.prisma.userWorkSite.findMany({
+    return this.prisma.employeeWorkSite.findMany({
       where: {
         userId,
         workSite: {

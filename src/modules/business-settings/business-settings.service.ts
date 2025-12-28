@@ -38,7 +38,11 @@ export class BusinessSettingsService {
     // Update the business setting for the user's business
     return await this.prisma.businessSettings.update({
       where: { businessId: user.businessId },
-      data: updateBusinessSettingInput,
+      data: {
+        ...updateBusinessSettingInput,
+        businessId: user.businessId,
+        deleteReadNotifications: 30,
+      },
       include: {
         business: true,
       },

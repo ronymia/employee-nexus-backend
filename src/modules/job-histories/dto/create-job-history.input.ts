@@ -23,12 +23,10 @@ export class CreateJobHistoryInput {
   country: string;
 
   @Field(() => String, {
-    nullable: true,
     description: 'City where job was located',
   })
-  @IsOptional()
   @IsString()
-  city?: string;
+  city: string;
 
   @Field(() => String, { description: 'Start date (MM-YYYY or YYYY)' })
   @IsString()

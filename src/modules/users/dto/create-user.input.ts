@@ -10,9 +10,6 @@ export class CreateUserInput {
   @Field()
   password: string;
 
-  @Field(() => Int, { nullable: true })
-  roleId?: number;
-
-  @Field(() => Int, { nullable: true })
-  businessId?: number;
+  @Field(() => Int)
+  roleId: number;
 }

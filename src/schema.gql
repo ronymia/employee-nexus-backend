@@ -149,141 +149,11 @@ input AssignWorkSiteInput {
   workSiteId: Int!
 }
 
-type Attendance {
-  """Total break hours for the day"""
-  breakHours: Float
-
-  """Creation timestamp"""
-  createdAt: DateTime!
-
-  """Date of attendance"""
-  date: DateTime!
-
-  """Unique identifier for the attendance"""
-  id: ID!
-
-  """Punch records for this attendance"""
-  punchRecords: [AttendancePunch!]
-
-  """Attendance status"""
-  status: String!
-
-  """Total working hours for the day"""
-  totalHours: Float
-
-  """Last update timestamp"""
-  updatedAt: DateTime!
-
-  """User associated with this attendance"""
-  user: User!
-
-  """User ID"""
-  userId: Int!
-}
-
 type AttendanceAnalytics {
   thisMonth: AttendanceThisMonth!
   thisWeek: AttendanceThisWeek!
   today: AttendanceToday!
   trend: [AttendanceTrend!]!
-}
-
-type AttendanceInsight {
-  absent: Int!
-  approved: Int!
-  halfDay: Int!
-  late: Int!
-  pending: Int!
-}
-
-type AttendancePunch {
-  """Attendance associated with this punch"""
-  attendance: Attendance!
-
-  """Attendance ID"""
-  attendanceId: Int!
-
-  """Break end timestamp"""
-  breakEnd: DateTime
-
-  """Calculated break hours for this session"""
-  breakHours: Float
-
-  """Break start timestamp"""
-  breakStart: DateTime
-
-  """Creation timestamp"""
-  createdAt: DateTime!
-
-  """Unique identifier for the punch record"""
-  id: ID!
-
-  """Notes for this punch session"""
-  notes: String
-
-  """Project associated with this punch"""
-  project: Project
-
-  """Project ID if working on a project"""
-  projectId: Int
-
-  """Clock in timestamp"""
-  punchIn: DateTime!
-
-  """Punch in device information"""
-  punchInDevice: String
-
-  """Punch in IP address"""
-  punchInIp: String
-
-  """Punch in latitude"""
-  punchInLat: Float
-
-  """Punch in longitude"""
-  punchInLng: Float
-
-  """Clock out timestamp"""
-  punchOut: DateTime
-
-  """Punch out device information"""
-  punchOutDevice: String
-
-  """Punch out IP address"""
-  punchOutIp: String
-
-  """Punch out latitude"""
-  punchOutLat: Float
-
-  """Punch out longitude"""
-  punchOutLng: Float
-
-  """Last update timestamp"""
-  updatedAt: DateTime!
-
-  """Calculated work hours for this session"""
-  workHours: Float
-
-  """Work site associated with this punch"""
-  workSite: WorkSite
-
-  """Work site ID"""
-  workSiteId: Int
-}
-
-type AttendanceQueryResponse {
-  data: [Attendance!]!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
-type AttendanceResponse {
-  data: Attendance!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
 }
 
 type AttendanceSetting {
@@ -324,14 +194,6 @@ type AttendanceSummary {
   recentAttendance: [RecentAttendanceItem!]!
   thisMonth: AttendanceThisMonths!
   today: AttendanceTodays!
-}
-
-type AttendanceSummaryResponse {
-  data: AttendanceInsight!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
 }
 
 type AttendanceThisMonth {
@@ -545,7 +407,8 @@ enum ComponentType {
 }
 
 input CreateAssetInput {
-  assetTypeId: Int
+  """Asset type ID"""
+  assetTypeId: Int!
   assignedTo: Int
   code: String!
   date: String!
@@ -562,93 +425,17 @@ input CreateAssetTypeInput {
   name: String!
 }
 
-input CreateAttendanceInput {
-  """Total break hours for the day"""
-  breakHours: Float
-
-  """Date of attendance"""
-  date: DateTime!
-
-  """Punch records for this attendance"""
-  punchRecords: [CreateAttendancePunchInput!]
-
-  """Attendance status"""
-  status: String! = "pending_approve"
-
-  """Total working hours for the day"""
-  totalHours: Float
-
-  """User ID"""
-  userId: Int!
-}
-
-input CreateAttendancePunchInput {
-  """Break end timestamp"""
-  breakEnd: DateTime
-
-  """Break hours for this session"""
-  breakHours: Float
-
-  """Break start timestamp"""
-  breakStart: DateTime
-
-  """Notes for this punch session"""
-  notes: String
-
-  """Project ID if working on a project"""
-  projectId: Int
-
-  """Clock in timestamp"""
-  punchIn: DateTime!
-
-  """Punch in device information"""
-  punchInDevice: String
-
-  """Punch in IP address"""
-  punchInIp: String
-
-  """Punch in latitude"""
-  punchInLat: Float
-
-  """Punch in longitude"""
-  punchInLng: Float
-
-  """Clock out timestamp"""
-  punchOut: DateTime
-
-  """Punch out device information"""
-  punchOutDevice: String
-
-  """Punch out IP address"""
-  punchOutIp: String
-
-  """Punch out latitude"""
-  punchOutLat: Float
-
-  """Punch out longitude"""
-  punchOutLng: Float
-
-  """Work hours for this session"""
-  workHours: Float
-
-  """Work site ID"""
-  workSiteId: Int
-}
-
 input CreateBusinessInput {
   address: String!
   city: String!
   country: String!
   email: String!
-  lat: Float
-  lng: Float
   name: String!
   numberOfEmployeesAllowed: Int!
   phone: String!
   postcode: String!
-  registrationDate: String!
+  registrationDate: DateTime!
   subscriptionPlanId: Int!
-  website: String
 }
 
 input CreateDayScheduleInput {
@@ -700,41 +487,6 @@ input CreateDocumentInput {
   userId: Int!
 }
 
-input CreateEducationHistoryInput {
-  """City where institution is located"""
-  city: String
-
-  """Country where institution is located"""
-  country: String!
-
-  """Degree or qualification"""
-  degree: String!
-
-  """Additional details or achievements"""
-  description: String
-
-  """End/graduation date (MM-YYYY or YYYY)"""
-  endDate: String
-
-  """Field of study or major"""
-  fieldOfStudy: String!
-
-  """Grade, GPA, or percentage"""
-  grade: String
-
-  """Institution or university name"""
-  institution: String!
-
-  """Whether currently studying"""
-  isCurrentlyStudying: Boolean! = false
-
-  """Start date (MM-YYYY or YYYY)"""
-  startDate: String!
-
-  """ID of the user"""
-  userId: Int!
-}
-
 input CreateEmergencyContactInput {
   name: String!
   phone: String!
@@ -757,26 +509,6 @@ input CreateEmployeeInput {
   workSiteIds: [Int!]
   workingDaysPerWeek: Int
   workingHoursPerWeek: Int
-}
-
-input CreateEmployeeScheduleAssignmentInput {
-  """Assignment end date (ISO 8601)"""
-  endDate: String
-
-  """Whether this is the active schedule"""
-  isActive: Boolean! = true
-
-  """Optional notes about assignment"""
-  notes: String
-
-  """Assignment start date (ISO 8601)"""
-  startDate: String!
-
-  """ID of the user/employee"""
-  userId: Int!
-
-  """ID of the work schedule"""
-  workScheduleId: Int!
 }
 
 input CreateEmploymentStatusInput {
@@ -815,7 +547,7 @@ input CreateJobHistoryInput {
   achievements: String
 
   """City where job was located"""
-  city: String
+  city: String!
 
   """Company or organization name"""
   companyName: String!
@@ -1082,10 +814,9 @@ input CreateTimeSlotInput {
 }
 
 input CreateUserInput {
-  businessId: Int
   email: String!
   password: String!
-  roleId: Int
+  roleId: Int!
 }
 
 input CreateWorkScheduleInput {
@@ -1115,10 +846,10 @@ input CreateWorkScheduleInput {
 
 input CreateWorkSiteInput {
   """Address of the work site"""
-  address: String
+  address: String!
 
   """Description of the work site"""
-  description: String
+  description: String!
 
   """IP address for IP-based tracking"""
   ipAddress: String
@@ -1309,67 +1040,6 @@ type DocumentsQueryResponse {
   success: Boolean!
 }
 
-type EducationHistoriesQueryResponse {
-  data: [EducationHistory!]!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
-type EducationHistory {
-  """City where institution is located"""
-  city: String
-
-  """Country where institution is located"""
-  country: String!
-
-  """Date when the record was created"""
-  createdAt: DateTime!
-
-  """Degree or qualification"""
-  degree: String!
-
-  """Additional details or achievements"""
-  description: String
-
-  """End/graduation date (MM-YYYY or YYYY)"""
-  endDate: DateTime
-
-  """Field of study or major"""
-  fieldOfStudy: String!
-
-  """Grade, GPA, or percentage"""
-  grade: String
-  id: ID!
-
-  """Institution or university name"""
-  institution: String!
-
-  """Whether currently studying"""
-  isCurrentlyStudying: Boolean!
-
-  """Start date (MM-YYYY or YYYY)"""
-  startDate: DateTime!
-
-  """Date when the record was last updated"""
-  updatedAt: DateTime!
-
-  """User who owns this education history"""
-  user: User
-
-  """ID of the user"""
-  userId: Int!
-}
-
-type EducationHistoryResponse {
-  data: EducationHistory!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
 type EmergencyContact {
   createdAt: DateTime!
   name: String!
@@ -1420,61 +1090,6 @@ type EmployeeDashboard {
 
 type EmployeeDashboardResponse {
   data: EmployeeDashboard!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
-type EmployeeScheduleAssignment {
-  """ID of user who assigned the schedule"""
-  assignedBy: Int!
-
-  """User who assigned the schedule"""
-  assignedByUser: User
-
-  """Date when the record was created"""
-  createdAt: DateTime!
-
-  """Assignment end date"""
-  endDate: DateTime
-  id: ID!
-
-  """Whether this is the active schedule"""
-  isActive: Boolean!
-
-  """Optional notes about assignment"""
-  notes: String
-
-  """Assignment start date"""
-  startDate: DateTime!
-
-  """Date when the record was last updated"""
-  updatedAt: DateTime!
-
-  """User/employee assigned to schedule"""
-  user: User
-
-  """ID of the user/employee"""
-  userId: Int!
-
-  """Assigned work schedule"""
-  workSchedule: WorkSchedule
-
-  """ID of the work schedule"""
-  workScheduleId: Int!
-}
-
-type EmployeeScheduleAssignmentResponse {
-  data: EmployeeScheduleAssignment!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
-type EmployeeScheduleAssignmentsQueryResponse {
-  data: [EmployeeScheduleAssignment!]!
   message: String!
   meta: PaginationMeta
   statusCode: Float!
@@ -2050,26 +1665,20 @@ type MonthAmount {
 
 type Mutation {
   addPayslipAdjustment(addPayslipAdjustmentInput: AddPayslipAdjustmentInput!): PayrollItemResponse!
-  approveAttendance(attendanceId: Int!): AttendanceResponse!
   approveLeave(leaveId: Int!): LeaveResponse!
   approvePayrollCycle(approvePayrollCycleInput: ApprovePayrollCycleInput!): PayrollCycleResponse!
   approvePayrollItem(id: Int!): PayrollItemResponse!
   assignAsset(assignAssetInput: AssignAssetInput!): AssetAssignmentResponse!
   assignProjectMember(assignProjectMemberInput: AssignProjectMemberInput!): ProjectMemberResponse!
   assignWorkSite(input: AssignWorkSiteInput!): UserWorkSiteResponse!
-  attendanceRequest(createAttendanceInput: RequestAttendanceInput!): AttendanceResponse!
   cancelPayrollCycle(id: Int!): PayrollCycleResponse!
   changeMyPassword(changeMyPasswordInput: ChangeMyPasswordInput!): ChangeMyPasswordResponse!
   createAsset(createAssetInput: CreateAssetInput!): AssetResponse!
   createAssetType(createAssetTypeInput: CreateAssetTypeInput!): AssetTypeResponse!
-  createAttendance(createAttendanceInput: CreateAttendanceInput!): AttendanceResponse!
-  createAttendancePunch(createAttendancePunchInput: CreateAttendancePunchInput!): AttendancePunch!
   createDepartment(createDepartmentInput: CreateDepartmentInput!): DepartmentResponse!
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
   createDocument(createDocumentInput: CreateDocumentInput!): DocumentResponse!
-  createEducationHistory(createEducationHistoryInput: CreateEducationHistoryInput!): EducationHistoryResponse!
   createEmployee(createEmployeeInput: CreateEmployeeInput!): UserResponse!
-  createEmployeeScheduleAssignment(createEmployeeScheduleAssignmentInput: CreateEmployeeScheduleAssignmentInput!): EmployeeScheduleAssignmentResponse!
   createEmploymentStatus(createEmploymentStatusInput: CreateEmploymentStatusInput!): EmploymentStatusResponse!
   createHoliday(createHolidayInput: CreateHolidayInput!): HolidayResponse!
   createJobHistory(createJobHistoryInput: CreateJobHistoryInput!): JobHistoryResponse!
@@ -2091,14 +1700,11 @@ type Mutation {
   createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
   createWorkSchedule(createWorkScheduleInput: CreateWorkScheduleInput!): WorkScheduleResponse!
   createWorkSite(createWorkSiteInput: CreateWorkSiteInput!): WorkSiteResponse!
-  deleteAttendance(id: Int!): AttendanceResponse!
   deleteBusiness(id: Int!): BusinessResponse!
   deleteDepartment(id: Int!): DepartmentResponse!
   deleteDesignation(id: Int!): DesignationResponse!
   deleteDocument(id: Int!, userId: Int!): DocumentResponse!
-  deleteEducationHistory(id: Int!, userId: Int!): EducationHistoryResponse!
   deleteEmployee(id: Int!): UserResponse!
-  deleteEmployeeScheduleAssignment(id: Int!): EmployeeScheduleAssignmentResponse!
   deleteEmploymentStatus(id: Int!): EmploymentStatusResponse!
   deleteHoliday(id: Int!): HolidayResponse!
   deleteJobHistory(id: Int!, userId: Int!): JobHistoryResponse!
@@ -2126,18 +1732,14 @@ type Mutation {
   markPayrollCycleAsPaid(id: Int!): PayrollCycleResponse!
   markPayrollItemAsPaid(id: Int!, paymentMethod: String!, transactionRef: String): PayrollItemResponse!
   processPayrollCycle(processPayrollCycleInput: ProcessPayrollCycleInput!): PayrollCycleResponse!
-  rejectAttendance(attendanceId: Int!): AttendanceResponse!
   rejectLeave(leaveId: Int!): LeaveResponse!
   removeAsset(id: Int!): AssetResponse!
   removeAssetType(id: Int!): AssetTypeResponse!
-  removeAttendancePunch(id: Int!): AttendancePunch!
   returnAsset(returnAssetInput: ReturnAssetInput!): AssetAssignmentResponse!
   unassignProjectMember(unassignProjectMemberInput: UnassignProjectMemberInput!): ProjectMemberResponse!
   unassignWorkSite(input: UnassignWorkSiteInput!): UserWorkSiteResponse!
   updateAsset(updateAssetInput: UpdateAssetInput!): AssetResponse!
   updateAssetType(updateAssetTypeInput: UpdateAssetTypeInput!): AssetTypeResponse!
-  updateAttendance(updateAttendanceInput: UpdateAttendanceInput!): AttendanceResponse!
-  updateAttendancePunch(updateAttendancePunchInput: UpdateAttendancePunchInput!): AttendancePunch!
   updateAttendanceSetting(updateAttendanceSettingInput: UpdateAttendanceSettingInput!): AttendanceSettingResponse!
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): BusinessResponse!
   updateBusinessSchedule(updateBusinessScheduleInput: UpdateBusinessScheduleInput!): BusinessScheduleResponse!
@@ -2145,10 +1747,8 @@ type Mutation {
   updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): DepartmentResponse!
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
   updateDocument(updateDocumentInput: UpdateDocumentInput!): DocumentResponse!
-  updateEducationHistory(updateEducationHistoryInput: UpdateEducationHistoryInput!): EducationHistoryResponse!
   updateEmergencyContact(updateEmergencyContactInput: UpdateEmergencyContactInput!): EmergencyContactResponse!
   updateEmployee(updateEmployeeInput: UpdateEmployeeInput!): UserResponse!
-  updateEmployeeScheduleAssignment(updateEmployeeScheduleAssignmentInput: UpdateEmployeeScheduleAssignmentInput!): EmployeeScheduleAssignmentResponse!
   updateEmploymentDetails(updateEmploymentDetailsInput: UpdateEmploymentDetailsInput!): EmploymentDetailsResponse!
   updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
   updateHoliday(updateHolidayInput: UpdateHolidayInput!): HolidayResponse!
@@ -2757,7 +2357,6 @@ type ProjectsQueryResponse {
 
 type Query {
   FeatureById(id: Int!): FeatureResponse!
-  activeEmployeeScheduleAssignment(userId: Int!): EmployeeScheduleAssignmentResponse!
   activePayrollComponents(businessId: Int!): PayrollComponentsQueryResponse!
   allFeatures: FeatureQueryResponse!
   asset(id: Int!): AssetResponse!
@@ -2765,10 +2364,7 @@ type Query {
   assetTypes(query: QueryAssetTypeInput): AssetTypesQueryResponse!
   assets(query: QueryAssetInput): AssetsQueryResponse!
   assetsByUserId(userId: Int!): AssetsQueryResponse!
-  attendanceById(id: Int!): AttendanceResponse!
   attendanceSettingsByBusiness: AttendanceSettingResponse!
-  attendanceSummary(endDate: DateTime, startDate: DateTime, userId: Int): AttendanceSummaryResponse!
-  attendances(query: QueryAttendanceInput): AttendanceQueryResponse!
   businessById(id: Int!): BusinessResponse!
   businessScheduleByBusinessId(id: Int!): BusinessSchedule!
   businessSettingByBusinessId: BusinessSettingResponse!
@@ -2779,13 +2375,8 @@ type Query {
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
   document(id: Int!, userId: Int!): DocumentResponse!
   documentsByUserId(query: QueryDocumentInput, userId: Int!): DocumentsQueryResponse!
-  educationHistory(id: Int!, userId: Int!): EducationHistoryResponse!
-  educationHistoryByUserId(userId: Int!): EducationHistoriesQueryResponse!
   employeeById(id: Int!): UserResponse!
   employeeDashboard: EmployeeDashboardResponse!
-  employeeScheduleAssignment(id: Int!): EmployeeScheduleAssignmentResponse!
-  employeeScheduleAssignments: EmployeeScheduleAssignmentsQueryResponse!
-  employeeScheduleAssignmentsByUser(userId: Int!): EmployeeScheduleAssignmentsQueryResponse!
   employeeWorkSites(userId: Int!): UserWorkSitesResponse!
   employees(query: QueryUserInput): UsersQueryResponse!
   employmentStatusById(id: Int!): EmploymentStatusResponse!
@@ -2857,16 +2448,6 @@ input QueryAssetTypeInput {
   pagination: BasePaginationInput
   searchTerm: String
   status: Status
-}
-
-input QueryAttendanceInput {
-  endDate: DateTime
-  pagination: BasePaginationInput
-  startDate: DateTime
-  status: String
-
-  """User ID"""
-  userId: Int
 }
 
 input QueryBusinessInput {
@@ -3130,26 +2711,6 @@ type RecruitmentProcessesQueryResponse {
   success: Boolean!
 }
 
-input RequestAttendanceInput {
-  """Total break hours for the day"""
-  breakHours: Float
-
-  """Date of attendance"""
-  date: DateTime!
-
-  """Punch records for this attendance"""
-  punchRecords: [CreateAttendancePunchInput!]
-
-  """Attendance status"""
-  status: String! = "pending_approve"
-
-  """Total working hours for the day"""
-  totalHours: Float
-
-  """User ID"""
-  userId: Int!
-}
-
 input RequestLeaveInput {
   """Supporting documents (JSON array or URLs)"""
   attachments: String
@@ -3380,6 +2941,7 @@ type UpcomingLeaveItem {
 }
 
 input UpdateAssetInput {
+  """Asset type ID"""
   assetTypeId: Int
   assignedTo: Int
   code: String
@@ -3397,86 +2959,6 @@ input UpdateAssetTypeInput {
 
   """Name of the asset type"""
   name: String
-}
-
-input UpdateAttendanceInput {
-  """Total break hours for the day"""
-  breakHours: Float
-
-  """Date of attendance"""
-  date: DateTime
-  id: Int!
-
-  """Punch records for this attendance"""
-  punchRecords: [UpdateAttendancePunchInput!]!
-
-  """Attendance status"""
-  status: String = "pending_approve"
-
-  """Total working hours for the day"""
-  totalHours: Float
-
-  """User ID"""
-  userId: Int!
-}
-
-input UpdateAttendancePunchInput {
-  """Attendance ID (optional for nested creation)"""
-  attendanceId: Int!
-
-  """Break end timestamp"""
-  breakEnd: DateTime
-
-  """Break hours for this session"""
-  breakHours: Float
-
-  """Break start timestamp"""
-  breakStart: DateTime
-
-  """User ID"""
-  id: Int!
-
-  """Notes for this punch session"""
-  notes: String
-
-  """Project ID if working on a project"""
-  projectId: Int
-
-  """Clock in timestamp"""
-  punchIn: DateTime!
-
-  """Punch in device information"""
-  punchInDevice: String
-
-  """Punch in IP address"""
-  punchInIp: String
-
-  """Punch in latitude"""
-  punchInLat: Float
-
-  """Punch in longitude"""
-  punchInLng: Float
-
-  """Clock out timestamp"""
-  punchOut: DateTime
-
-  """Punch out device information"""
-  punchOutDevice: String
-
-  """Punch out IP address"""
-  punchOutIp: String
-
-  """Punch out latitude"""
-  punchOutLat: Float
-
-  """Punch out longitude"""
-  punchOutLng: Float
-
-  """Work hours for this session"""
-  workHours: Float
-
-  """Work site ID"""
-  workSiteId: Int
 }
 
 input UpdateAttendanceSettingInput {
@@ -3505,15 +2987,12 @@ input UpdateBusinessInput {
   country: String
   email: String
   id: Int!
-  lat: Float
-  lng: Float
   name: String
   numberOfEmployeesAllowed: Int
   phone: String
   postcode: String
-  registrationDate: String
+  registrationDate: DateTime
   subscriptionPlanId: Int
-  website: String
 }
 
 input UpdateBusinessScheduleInput {
@@ -3592,42 +3071,6 @@ input UpdateDocumentInput {
   userId: Int
 }
 
-input UpdateEducationHistoryInput {
-  """City where institution is located"""
-  city: String
-
-  """Country where institution is located"""
-  country: String
-
-  """Degree or qualification"""
-  degree: String
-
-  """Additional details or achievements"""
-  description: String
-
-  """End/graduation date (MM-YYYY or YYYY)"""
-  endDate: String
-
-  """Field of study or major"""
-  fieldOfStudy: String
-
-  """Grade, GPA, or percentage"""
-  grade: String
-  id: Int!
-
-  """Institution or university name"""
-  institution: String
-
-  """Whether currently studying"""
-  isCurrentlyStudying: Boolean = false
-
-  """Start date (MM-YYYY or YYYY)"""
-  startDate: String
-
-  """ID of the user"""
-  userId: Int
-}
-
 input UpdateEmergencyContactInput {
   """Emergency contact name"""
   name: String!
@@ -3659,27 +3102,6 @@ input UpdateEmployeeInput {
   workSiteIds: [Int!]
   workingDaysPerWeek: Int
   workingHoursPerWeek: Int
-}
-
-input UpdateEmployeeScheduleAssignmentInput {
-  """Assignment end date (ISO 8601)"""
-  endDate: String
-  id: Int!
-
-  """Whether this is the active schedule"""
-  isActive: Boolean = true
-
-  """Optional notes about assignment"""
-  notes: String
-
-  """Assignment start date (ISO 8601)"""
-  startDate: String
-
-  """ID of the user/employee"""
-  userId: Int
-
-  """ID of the work schedule"""
-  workScheduleId: Int
 }
 
 input UpdateEmploymentDetailsInput {

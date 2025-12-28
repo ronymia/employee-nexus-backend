@@ -28,7 +28,6 @@ export class HolidaysService {
         ...createHolidayInput,
         startDate: new Date(createHolidayInput.startDate),
         endDate: new Date(createHolidayInput.endDate),
-        createdBy: user.userId,
         businessId: user.businessId,
       },
     });
@@ -143,7 +142,6 @@ export class HolidaysService {
           },
           include: {
             business: true,
-            creator: true,
           },
         })
       : await this.prisma.holiday.findMany({
@@ -158,7 +156,6 @@ export class HolidaysService {
           },
           include: {
             business: true,
-            creator: true,
           },
         });
 

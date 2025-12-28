@@ -26,7 +26,6 @@ export class RecruitmentProcessesService {
     return await this.prisma.recruitmentProcess.create({
       data: {
         ...createRecruitmentProcessInput,
-        createdBy: user.userId,
         businessId: user.businessId,
         status: Status.ACTIVE,
       },
