@@ -463,7 +463,7 @@ model EmployeeWorkSite {
   employee   Employee  @relation(name: "employeeWorkSites", fields: [userId], references: [userId], onDelete: Cascade)
   workSiteId Int       @map("work_site_id")
   workSite   WorkSite  @relation(name: "workSiteUsers", fields: [workSiteId], references: [id], onDelete: Cascade)
-  startDate  DateTime? @map("start_date") @db.Date
+  startDate  DateTime @map("start_date") @db.Date
   endDate    DateTime? @map("end_date") @db.Date
   isActive   Boolean   @default(true) @map("is_active")
 
@@ -512,7 +512,7 @@ model EmployeeDepartment {
   endDate      DateTime?  @map("end_date") @db.Date
   isPrimary    Boolean    @default(false) @map("is_primary")
   isActive     Boolean    @default(true) @map("is_active")
-  roleInDept   String?    @default("member") @map("role_in_dept")
+  roleInDept   String    @default("member") @map("role_in_dept")
   remarks      String?    @map("remarks") @db.Text
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -534,7 +534,7 @@ model WorkSchedule {
   status       String
   scheduleType String
   breakType    String
-  breakHours   Int                @default(0) @map("break_hours")
+  breakMinutes   Int                @default(0) @map("break_minutes")
   businessId   Int                @map("business_id")
   business     Business           @relation(name: "workSchedulesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
   schedules    DaySchedule[]      @relation(name: "daySchedule")

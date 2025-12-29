@@ -1,5 +1,11 @@
 import { ObjectType, Field, Int, Float, ID } from '@nestjs/graphql';
-import { UserWorkSite } from 'src/modules/users/entities/user-work-site.entity';
+import { IsOptional } from 'class-validator';
+import { BaseResponse } from 'src/common/dto/base-response.type';
+import { EmployeeDepartment } from 'src/modules/employee-departments/entities/employee-department.entity';
+import { EmployeeDesignation } from 'src/modules/employee-designations/entities/employee-designation.entity';
+import { EmployeeEmploymentStatus } from 'src/modules/employee-employment-statuses/entities/employee-employment-status.entity';
+import { EmployeeWorkSchedule } from 'src/modules/employee-work-schedules/entities/employee-work-schedule.entity';
+import { EmployeeWorkSite } from 'src/modules/employee-work-sites/entities/employee-work-site.entity';
 
 @ObjectType()
 export class EmploymentDetails {
@@ -24,20 +30,24 @@ export class EmploymentDetails {
   @Field(() => Int, { nullable: true })
   workingHoursPerWeek?: number;
 
-  @Field(() => Int)
-  designationId: number;
+  @Field(() => [EmployeeDesignation], { nullable: true })
+  @IsOptional()
+  designations?: EmployeeDesignation[];
 
-  @Field(() => Int)
-  employmentStatusId: number;
+  @Field(() => [EmployeeEmploymentStatus], { nullable: true })
+  employmentStatuses?: EmployeeEmploymentStatus[] | [];
 
-  @Field(() => Int)
-  departmentId: number;
+  @Field(() => [EmployeeDepartment], { nullable: true })
+  @IsOptional()
+  departments?: EmployeeDepartment[] | [];
 
-  @Field(() => [UserWorkSite], { nullable: true })
-  workSites?: UserWorkSite[] | [];
+  @Field(() => [EmployeeWorkSchedule], { nullable: true })
+  @IsOptional()
+  workSchedules?: EmployeeWorkSchedule[] | [];
 
-  @Field(() => Int)
-  workScheduleId: number;
+  @Field(() => [EmployeeWorkSite], { nullable: true })
+  @IsOptional()
+  workSites?: EmployeeWorkSite[] | [];
 
   @Field(() => String)
   rotaType: string;
@@ -50,16 +60,6 @@ export class EmploymentDetails {
 }
 
 @ObjectType()
-export class EmploymentDetailsResponse {
-  @Field(() => Boolean)
-  success: boolean;
-
-  @Field(() => Int)
-  statusCode: number;
-
-  @Field(() => String)
-  message: string;
-
-  @Field(() => EmploymentDetails)
-  data: EmploymentDetails;
-}
+export class EmploymentDetailsResponse extends BaseResponse(
+  EmploymentDetails,
+) {}

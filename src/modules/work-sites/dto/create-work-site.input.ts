@@ -12,8 +12,12 @@ export class CreateWorkSiteInput {
   @IsString()
   description: string;
 
-  @Field(() => String, { description: 'Address of the work site' })
+  @Field(() => String, {
+    nullable: true,
+    description: 'Address of the work site',
+  })
   @IsString()
+  @IsOptional()
   address?: string;
 
   @Field(() => Float, {

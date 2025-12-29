@@ -213,9 +213,21 @@ export class UsersService {
             },
             employee: {
               include: {
-                designations: true,
-                employmentStatuses: true,
-                departments: true,
+                designations: {
+                  include: {
+                    designation: true,
+                  },
+                },
+                employmentStatuses: {
+                  include: {
+                    employmentStatus: true,
+                  },
+                },
+                departments: {
+                  include: {
+                    department: true,
+                  },
+                },
                 workSites: {
                   include: {
                     workSite: true,
@@ -246,9 +258,21 @@ export class UsersService {
             },
             employee: {
               include: {
-                designations: true,
-                employmentStatuses: true,
-                departments: true,
+                designations: {
+                  include: {
+                    designation: true,
+                  },
+                },
+                employmentStatuses: {
+                  include: {
+                    employmentStatus: true,
+                  },
+                },
+                departments: {
+                  include: {
+                    department: true,
+                  },
+                },
                 workSites: {
                   include: {
                     workSite: true,
@@ -377,6 +401,9 @@ export class UsersService {
       emergencyContact,
       workSiteIds,
       workScheduleId,
+      departmentId,
+      designationId,
+      employmentStatusId,
       ...employeeData
     } = createEmployeeInput;
 
@@ -385,19 +412,19 @@ export class UsersService {
       await Promise.all([
         this.prisma.designation.findUnique({
           where: {
-            id: employeeData.designationId,
+            id: designationId,
             AND: { businessId: authUser.businessId },
           },
         }),
         this.prisma.employmentStatus.findUnique({
           where: {
-            id: employeeData.employmentStatusId,
+            id: employmentStatusId,
             AND: { businessId: authUser.businessId },
           },
         }),
         this.prisma.department.findUnique({
           where: {
-            id: employeeData.departmentId,
+            id: departmentId,
             AND: { businessId: authUser.businessId },
           },
         }),
@@ -409,10 +436,26 @@ export class UsersService {
         }),
       ]);
 
-    if (!designation) throw new Error('Invalid designation');
-    if (!employmentStatus) throw new Error('Invalid employment status');
-    if (!department) throw new Error('Invalid department');
-    if (!workSchedule) throw new Error('Invalid work schedule');
+    if (!designation)
+      throw new HttpException(
+        'Invalid designation',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    if (!employmentStatus)
+      throw new HttpException(
+        'Invalid employment status',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    if (!department)
+      throw new HttpException(
+        'Invalid department',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    if (!workSchedule)
+      throw new HttpException(
+        'Invalid work schedule',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
 
     // Validate work sites if provided
     if (workSiteIds && workSiteIds.length > 0) {
@@ -437,7 +480,8 @@ export class UsersService {
     const role = await this.prisma.role.findFirst({
       where: { id: user.roleId, businessId: authUser.businessId },
     });
-    if (!role) throw new Error('Invalid role');
+    if (!role)
+      throw new HttpException('Invalid role', HttpStatus.UNPROCESSABLE_ENTITY);
 
     // Generate employeeId if not provided
     const generatedEmployeeId = await this.generateEmployeeId(
@@ -501,7 +545,6 @@ export class UsersService {
               userId: createdUser.id,
               workScheduleId,
               startDate: new Date(),
-              isActive: true,
               assignedBy: authUser.userId,
               notes: 'Initial schedule assignment upon employee creation',
             },
@@ -514,7 +557,45 @@ export class UsersService {
             data: workSiteIds.map((workSiteId) => ({
               userId: createdUser.id,
               workSiteId,
+              startDate: new Date(),
             })),
+          });
+        }
+
+        // ASSIGN DEPARTMENT
+        if (departmentId) {
+          await tx.employeeDepartment.create({
+            data: {
+              userId: createdUser.id,
+              departmentId,
+              startDate: new Date(),
+              isPrimary: true,
+            },
+          });
+        }
+
+        // ASSIGN DESIGNATION
+        if (designationId) {
+          await tx.employeeDesignation.create({
+            data: {
+              userId: createdUser.id,
+              designationId,
+              startDate: new Date(),
+              salary: employeeData.salaryPerMonth,
+              remarks: `Initial schedule assignment upon employee creation`,
+            },
+          });
+        }
+
+        // ASSIGN EMPLOYMENT STATUS
+        if (employmentStatusId) {
+          await tx.employeeStatus.create({
+            data: {
+              userId: createdUser.id,
+              employmentStatusId,
+              startDate: new Date(),
+              remarks: `Initial schedule assignment upon employee creation`,
+            },
           });
         }
 
@@ -531,9 +612,21 @@ export class UsersService {
             },
             employee: {
               include: {
-                designations: true,
-                employmentStatuses: true,
-                departments: true,
+                designations: {
+                  include: {
+                    designation: true,
+                  },
+                },
+                employmentStatuses: {
+                  include: {
+                    employmentStatus: true,
+                  },
+                },
+                departments: {
+                  include: {
+                    department: true,
+                  },
+                },
                 workSchedules: {
                   include: {
                     workSchedule: true,
@@ -635,9 +728,21 @@ export class UsersService {
             },
             employee: {
               include: {
-                designations: true,
-                employmentStatuses: true,
-                departments: true,
+                designations: {
+                  include: {
+                    designation: true,
+                  },
+                },
+                employmentStatuses: {
+                  include: {
+                    employmentStatus: true,
+                  },
+                },
+                departments: {
+                  include: {
+                    department: true,
+                  },
+                },
                 workSchedules: {
                   include: {
                     workSchedule: true,
@@ -672,9 +777,21 @@ export class UsersService {
             },
             employee: {
               include: {
-                designations: true,
-                employmentStatuses: true,
-                departments: true,
+                designations: {
+                  include: {
+                    designation: true,
+                  },
+                },
+                employmentStatuses: {
+                  include: {
+                    employmentStatus: true,
+                  },
+                },
+                departments: {
+                  include: {
+                    department: true,
+                  },
+                },
                 workSchedules: {
                   include: {
                     workSchedule: true,
@@ -714,17 +831,29 @@ export class UsersService {
         },
         employee: {
           include: {
-            designations: true,
-            employmentStatuses: true,
-            departments: true,
-            workSites: {
+            designations: {
               include: {
-                workSite: true,
+                designation: true,
+              },
+            },
+            employmentStatuses: {
+              include: {
+                employmentStatus: true,
+              },
+            },
+            departments: {
+              include: {
+                department: true,
               },
             },
             workSchedules: {
               include: {
                 workSchedule: true,
+              },
+            },
+            workSites: {
+              include: {
+                workSite: true,
               },
             },
           },
@@ -963,17 +1092,29 @@ export class UsersService {
             },
             employee: {
               include: {
-                designations: true,
-                employmentStatuses: true,
-                departments: true,
-                workSites: {
+                designations: {
                   include: {
-                    workSite: true,
+                    designation: true,
+                  },
+                },
+                employmentStatuses: {
+                  include: {
+                    employmentStatus: true,
+                  },
+                },
+                departments: {
+                  include: {
+                    department: true,
                   },
                 },
                 workSchedules: {
                   include: {
                     workSchedule: true,
+                  },
+                },
+                workSites: {
+                  include: {
+                    workSite: true,
                   },
                 },
               },
@@ -1012,17 +1153,29 @@ export class UsersService {
         },
         employee: {
           include: {
-            designations: true,
-            employmentStatuses: true,
-            departments: true,
-            workSites: {
+            designations: {
               include: {
-                workSite: true,
+                designation: true,
+              },
+            },
+            employmentStatuses: {
+              include: {
+                employmentStatus: true,
+              },
+            },
+            departments: {
+              include: {
+                department: true,
               },
             },
             workSchedules: {
               include: {
                 workSchedule: true,
+              },
+            },
+            workSites: {
+              include: {
+                workSite: true,
               },
             },
           },
@@ -1120,163 +1273,5 @@ export class UsersService {
       totalAdmins: totalAdmins || 0,
       ...statusStats,
     };
-  }
-
-  // ============ WORK SITE ASSIGNMENT METHODS ============
-
-  async assignWorkSite(userId: number, workSiteId: number, businessId: number) {
-    // Validate user exists and belongs to business
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId, businessId },
-      include: { employee: true },
-    });
-
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    if (!user.employee) {
-      throw new Error('User is not an employee');
-    }
-
-    // Validate work site exists and belongs to business
-    const workSite = await this.prisma.workSite.findUnique({
-      where: { id: workSiteId, businessId },
-    });
-
-    if (!workSite) {
-      throw new Error('Work site not found');
-    }
-
-    // Check if assignment already exists
-    const existingAssignment = await this.prisma.employeeWorkSite.findUnique({
-      where: {
-        userId_workSiteId: {
-          userId,
-          workSiteId,
-        },
-      },
-    });
-
-    if (existingAssignment) {
-      throw new Error('Work site already assigned to this employee');
-    }
-
-    // Create assignment
-    return this.prisma.employeeWorkSite.create({
-      data: {
-        userId,
-        workSiteId,
-      },
-      include: {
-        workSite: true,
-        employee: {
-          include: {
-            user: {
-              include: {
-                profile: true,
-              },
-            },
-          },
-        },
-      },
-    });
-  }
-
-  async unassignWorkSite(
-    userId: number,
-    workSiteId: number,
-    businessId: number,
-  ) {
-    // Validate user exists and belongs to business
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId, businessId },
-      include: { employee: true },
-    });
-
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    if (!user.employee) {
-      throw new Error('User is not an employee');
-    }
-
-    // Validate work site exists and belongs to business
-    const workSite = await this.prisma.workSite.findUnique({
-      where: { id: workSiteId, businessId },
-    });
-
-    if (!workSite) {
-      throw new Error('Work site not found');
-    }
-
-    // Check if assignment exists
-    const existingAssignment = await this.prisma.employeeWorkSite.findUnique({
-      where: {
-        userId_workSiteId: {
-          userId,
-          workSiteId,
-        },
-      },
-    });
-
-    if (!existingAssignment) {
-      throw new Error('Work site is not assigned to this employee');
-    }
-
-    // Delete assignment
-    return this.prisma.employeeWorkSite.delete({
-      where: {
-        userId_workSiteId: {
-          userId,
-          workSiteId,
-        },
-      },
-      include: {
-        workSite: true,
-        employee: {
-          include: {
-            user: {
-              include: {
-                profile: true,
-              },
-            },
-          },
-        },
-      },
-    });
-  }
-
-  async getEmployeeWorkSites(userId: number, businessId: number) {
-    // Validate user exists and belongs to business
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId, businessId },
-      include: { employee: true },
-    });
-
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    if (!user.employee) {
-      throw new Error('User is not an employee');
-    }
-
-    // Get all work site assignments for this employee
-    return this.prisma.employeeWorkSite.findMany({
-      where: {
-        userId,
-        workSite: {
-          businessId,
-        },
-      },
-      include: {
-        workSite: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
   }
 }

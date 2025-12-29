@@ -63,7 +63,7 @@ export class WorkSchedule {
     description: 'Number of break hours',
     defaultValue: 0,
   })
-  breakHours: number;
+  breakMinutes: number;
 
   @Field(() => Int, {
     description: 'ID of the business',

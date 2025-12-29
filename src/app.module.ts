@@ -54,6 +54,11 @@ import { OwnerDashboardModule } from './modules/owner-dashboard/owner-dashboard.
 import { EmployeeDashboardModule } from './modules/employee-dashboard/employee-dashboard.module';
 import { SchedulerModule } from './modules/scheduler/scheduler.module';
 import { graphqlErrorFormatter } from './filters/graphql-error.formatter';
+import { EmployeeDesignationsModule } from './modules/employee-designations/employee-designations.module';
+import { EmployeeWorkSitesModule } from './modules/employee-work-sites/employee-work-sites.module';
+import { EmployeeDepartmentsModule } from './modules/employee-departments/employee-departments.module';
+import { EmployeeWorkSchedulesModule } from './modules/employee-work-schedules/employee-work-schedules.module';
+import { EmployeeEmploymentStatusesModule } from './modules/employee-employment-statuses/employee-employment-statuses.module';
 
 @Module({
   imports: [
@@ -114,6 +119,11 @@ import { graphqlErrorFormatter } from './filters/graphql-error.formatter';
     OwnerDashboardModule,
     EmployeeDashboardModule,
     SchedulerModule,
+    EmployeeDesignationsModule,
+    EmployeeWorkSitesModule,
+    EmployeeDepartmentsModule,
+    EmployeeWorkSchedulesModule,
+    EmployeeEmploymentStatusesModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

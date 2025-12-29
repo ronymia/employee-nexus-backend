@@ -1,10 +1,11 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { User } from './user.entity';
-import { Designation } from 'src/modules/designations/entities/designation.entity';
-import { EmploymentStatus } from 'src/modules/employment-status/entities/employment-status.entity';
-import { Department } from 'src/modules/departments/entities/department.entity';
-import { WorkSchedule } from 'src/modules/work-schedules/entities/work-schedule.entity';
-import { UserWorkSite } from './user-work-site.entity';
+import { EmployeeDesignation } from 'src/modules/employee-designations/entities/employee-designation.entity';
+import { IsOptional } from 'class-validator';
+import { EmployeeDepartment } from 'src/modules/employee-departments/entities/employee-department.entity';
+import { EmployeeEmploymentStatus } from 'src/modules/employee-employment-statuses/entities/employee-employment-status.entity';
+import { EmployeeWorkSchedule } from 'src/modules/employee-work-schedules/entities/employee-work-schedule.entity';
+import { EmployeeWorkSite } from 'src/modules/employee-work-sites/entities/employee-work-site.entity';
 
 @ObjectType()
 export class Employee {
@@ -32,35 +33,27 @@ export class Employee {
   @Field(() => Int, { nullable: true })
   workingHoursPerWeek?: number;
 
-  @Field(() => Int)
-  designationId: number;
+  @Field(() => [EmployeeDesignation], { nullable: true })
+  @IsOptional()
+  designations?: EmployeeDesignation[];
 
-  @Field(() => Designation)
-  designation: Designation;
+  @Field(() => [EmployeeEmploymentStatus], { nullable: true })
+  employmentStatuses?: EmployeeEmploymentStatus[] | [];
 
-  @Field(() => Int)
-  employmentStatusId: number;
+  @Field(() => [EmployeeDepartment], { nullable: true })
+  @IsOptional()
+  departments?: EmployeeDepartment[] | [];
 
-  @Field(() => EmploymentStatus)
-  employmentStatus: EmploymentStatus;
+  @Field(() => [EmployeeWorkSchedule], { nullable: true })
+  @IsOptional()
+  workSchedules?: EmployeeWorkSchedule[] | [];
 
-  @Field(() => Int)
-  departmentId: number;
-
-  @Field(() => Department)
-  department: Department;
-
-  @Field(() => Int)
-  workScheduleId: number;
-
-  @Field(() => WorkSchedule)
-  workSchedule: WorkSchedule;
+  @Field(() => [EmployeeWorkSite], { nullable: true })
+  @IsOptional()
+  workSites?: EmployeeWorkSite[] | [];
 
   @Field(() => String)
   rotaType: string;
-
-  @Field(() => [UserWorkSite], { nullable: true })
-  workSites?: UserWorkSite[] | [];
 
   @Field(() => Date)
   createdAt: Date;

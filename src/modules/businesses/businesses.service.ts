@@ -87,7 +87,7 @@ export class BusinessesService {
             email: createUserInput.email,
             password: createUserInput.password,
             status: UserAccountStatus.ACTIVE,
-            role: { connect: { id: 1 } }, // TEMPORARY ROLE - WILL BE UPDATED AFTER BUSINESS CREATION
+            role: { connect: { id: 2 } }, // TEMPORARY ROLE - WILL BE UPDATED AFTER BUSINESS CREATION
           },
         });
         if (!createdUser) {

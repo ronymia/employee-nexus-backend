@@ -6,7 +6,6 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { UserWorkSite } from 'src/modules/users/entities/user-work-site.entity';
 
 @InputType()
 export class UpdateEmploymentDetailsInput {

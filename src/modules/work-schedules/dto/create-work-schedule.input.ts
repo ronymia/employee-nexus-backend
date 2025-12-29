@@ -51,13 +51,13 @@ export class CreateWorkScheduleInput {
   breakType: ScheduleBreakType;
 
   @Field(() => Int, {
-    description: 'Number of break hours',
+    description: 'Number of break minutes',
     defaultValue: 0,
   })
   @IsOptional()
   @IsInt()
   @Min(0)
-  breakHours?: number;
+  breakMinutes?: number;
 
   @Field(() => [CreateDayScheduleInput], {
     description:
