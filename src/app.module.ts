@@ -59,6 +59,7 @@ import { EmployeeWorkSitesModule } from './modules/employee-work-sites/employee-
 import { EmployeeDepartmentsModule } from './modules/employee-departments/employee-departments.module';
 import { EmployeeWorkSchedulesModule } from './modules/employee-work-schedules/employee-work-schedules.module';
 import { EmployeeEmploymentStatusesModule } from './modules/employee-employment-statuses/employee-employment-statuses.module';
+import { BusinessSubscriptionsModule } from './modules/business-subscriptions/business-subscriptions.module';
 
 @Module({
   imports: [
@@ -124,6 +125,7 @@ import { EmployeeEmploymentStatusesModule } from './modules/employee-employment-
     EmployeeDepartmentsModule,
     EmployeeWorkSchedulesModule,
     EmployeeEmploymentStatusesModule,
+    BusinessSubscriptionsModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

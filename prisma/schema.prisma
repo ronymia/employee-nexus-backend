@@ -308,7 +308,7 @@ model BusinessSubscription {
   businessId         Int              @map("business_id")
   business           Business         @relation(name: "businessSubscriptions", fields: [businessId], references: [id], onDelete: Cascade)
   subscriptionPlanId Int              @map("subscription_plan_id")
-  SubscriptionPlan   SubscriptionPlan @relation(name: "subscriptionPlanInBusiness", fields: [subscriptionPlanId], references: [id], onDelete: Cascade)
+  subscriptionPlan   SubscriptionPlan @relation(name: "subscriptionPlanInBusiness", fields: [subscriptionPlanId], references: [id], onDelete: Cascade)
   trialEndDate       DateTime?        @map("trial_end_date") @db.Date
   startDate          DateTime?        @map("start_date") @db.Date
   endDate            DateTime?        @map("end_date") @db.Date

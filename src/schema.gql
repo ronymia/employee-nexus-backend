@@ -471,6 +471,54 @@ enum BusinessStatus {
   TRIAL_EXPIRED
 }
 
+type BusinessSubscription {
+  """ID of the business"""
+  businessId: Int!
+
+  """Date when the subscription was created"""
+  createdAt: DateTime!
+
+  """Subscription end date"""
+  endDate: DateTime
+
+  """Unique identifier for the business subscription"""
+  id: ID!
+
+  """Subscription start date"""
+  startDate: DateTime
+
+  """Status of the subscription"""
+  status: String!
+
+  """Subscription plan details"""
+  subscriptionPlan: SubscriptionPlan!
+
+  """ID of the subscription plan"""
+  subscriptionPlanId: Int!
+
+  """Trial end date"""
+  trialEndDate: DateTime
+
+  """Date when the subscription was last updated"""
+  updatedAt: DateTime!
+}
+
+type BusinessSubscriptionResponse {
+  data: BusinessSubscription!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type BusinessSubscriptionsQueryResponse {
+  data: [BusinessSubscription!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 """Calculation method for payroll component"""
 enum CalculationType {
   FIXED_AMOUNT
@@ -537,6 +585,26 @@ input CreateBusinessInput {
   postcode: String!
   registrationDate: DateTime!
   subscriptionPlanId: Int!
+}
+
+input CreateBusinessSubscriptionInput {
+  """ID of the business"""
+  businessId: Int!
+
+  """Subscription end date"""
+  endDate: DateTime
+
+  """Subscription start date"""
+  startDate: DateTime
+
+  """Status of the subscription"""
+  status: String!
+
+  """ID of the subscription plan"""
+  subscriptionPlanId: Int!
+
+  """Trial end date"""
+  trialEndDate: DateTime
 }
 
 input CreateDayScheduleInput {
@@ -2052,10 +2120,12 @@ type Mutation {
   """Assign a work site to an employee"""
   assignEmployeeWorkSite(assignEmployeeWorkSiteInput: AssignEmployeeWorkSiteInput!): EmployeeWorkSiteResponse!
   assignProjectMember(assignProjectMemberInput: AssignProjectMemberInput!): ProjectMemberResponse!
+  cancelBusinessSubscription(id: Int!): BusinessSubscriptionResponse!
   cancelPayrollCycle(id: Int!): PayrollCycleResponse!
   changeMyPassword(changeMyPasswordInput: ChangeMyPasswordInput!): ChangeMyPasswordResponse!
   createAsset(createAssetInput: CreateAssetInput!): AssetResponse!
   createAssetType(createAssetTypeInput: CreateAssetTypeInput!): AssetTypeResponse!
+  createBusinessSubscription(createBusinessSubscriptionInput: CreateBusinessSubscriptionInput!): BusinessSubscriptionResponse!
   createDepartment(createDepartmentInput: CreateDepartmentInput!): DepartmentResponse!
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
   createDocument(createDocumentInput: CreateDocumentInput!): DocumentResponse!
@@ -2116,6 +2186,7 @@ type Mutation {
   rejectLeave(leaveId: Int!): LeaveResponse!
   removeAsset(id: Int!): AssetResponse!
   removeAssetType(id: Int!): AssetTypeResponse!
+  renewBusinessSubscription(renewBusinessSubscriptionInput: RenewBusinessSubscriptionInput!): BusinessSubscriptionResponse!
   returnAsset(returnAssetInput: ReturnAssetInput!): AssetAssignmentResponse!
   unassignProjectMember(unassignProjectMemberInput: UnassignProjectMemberInput!): ProjectMemberResponse!
   updateAsset(updateAssetInput: UpdateAssetInput!): AssetResponse!
@@ -2124,6 +2195,7 @@ type Mutation {
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): BusinessResponse!
   updateBusinessSchedule(updateBusinessScheduleInput: UpdateBusinessScheduleInput!): BusinessScheduleResponse!
   updateBusinessSetting(updateBusinessSettingInput: UpdateBusinessSettingInput!): BusinessSettingResponse!
+  updateBusinessSubscription(updateBusinessSubscriptionInput: UpdateBusinessSubscriptionInput!): BusinessSubscriptionResponse!
   updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): DepartmentResponse!
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
   updateDocument(updateDocumentInput: UpdateDocumentInput!): DocumentResponse!
@@ -2737,6 +2809,7 @@ type ProjectsQueryResponse {
 
 type Query {
   FeatureById(id: Int!): FeatureResponse!
+  activeBusinessSubscription(businessId: Int): BusinessSubscriptionResponse!
   activePayrollComponents(businessId: Int!): PayrollComponentsQueryResponse!
   allFeatures: FeatureQueryResponse!
   asset(id: Int!): AssetResponse!
@@ -2748,6 +2821,8 @@ type Query {
   businessById(id: Int!): BusinessResponse!
   businessScheduleByBusinessId(id: Int!): BusinessSchedule!
   businessSettingByBusinessId: BusinessSettingResponse!
+  businessSubscriptionById(id: Int!): BusinessSubscriptionResponse!
+  businessSubscriptions(query: QueryBusinessSubscriptionInput): BusinessSubscriptionsQueryResponse!
   businesses(query: QueryBusinessInput): BusinessQueryResponse!
   departmentById(id: Int!): DepartmentResponse!
   departments(query: QueryDepartmentInput): DepartmentsQueryResponse!
@@ -2849,6 +2924,18 @@ input QueryBusinessInput {
   pagination: BasePaginationInput
   searchTerm: String
   status: BusinessStatus
+}
+
+input QueryBusinessSubscriptionInput {
+  """ID of the business to query subscriptions for"""
+  businessId: Int
+  pagination: BasePaginationInput
+
+  """Search term"""
+  searchTerm: String
+
+  """Status filter"""
+  status: String
 }
 
 input QueryDepartmentInput {
@@ -3103,6 +3190,17 @@ type RecruitmentProcessesQueryResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
+}
+
+input RenewBusinessSubscriptionInput {
+  """New end date"""
+  endDate: DateTime!
+
+  """ID of the subscription to renew"""
+  id: Int!
+
+  """New start date"""
+  startDate: DateTime!
 }
 
 input RequestLeaveInput {
@@ -3416,6 +3514,23 @@ input UpdateBusinessSettingInput {
 
   """Business theme"""
   theme: String
+}
+
+input UpdateBusinessSubscriptionInput {
+  """Subscription end date"""
+  endDate: DateTime
+
+  """ID of the subscription to update"""
+  id: Int!
+
+  """Subscription start date"""
+  startDate: DateTime
+
+  """Status of the subscription"""
+  status: String
+
+  """Trial end date"""
+  trialEndDate: DateTime
 }
 
 input UpdateDepartmentInput {
