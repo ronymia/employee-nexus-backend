@@ -94,14 +94,14 @@ export class ProfilesService {
       });
 
       // Create new work site assignments
-      if (workSiteIds.length > 0) {
-        await this.prisma.employeeWorkSite.createMany({
-          data: workSiteIds.map((workSiteId) => ({
-            userId,
-            workSiteId,
-          })),
-        });
-      }
+      // if (workSiteIds.length > 0) {
+      //   await this.prisma.employeeWorkSite.createMany({
+      //     data: workSiteIds.map((workSiteId) => ({
+      //       userId,
+      //       workSiteId,
+      //     })),
+      //   });
+      // }
     }
 
     return updatedEmployee;

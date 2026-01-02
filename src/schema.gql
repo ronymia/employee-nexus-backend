@@ -3351,7 +3351,7 @@ input UpdateAttendanceSettingInput {
   """Whether auto approval is enabled"""
   autoApproval: Boolean = false
 
-  """Whether geo location is enabled"""
+  """Whether geolocation is enabled"""
   isGeoLocationEnabled: Boolean = false
 
   """Whether punch in/out alerts are enabled"""

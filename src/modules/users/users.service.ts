@@ -1068,14 +1068,14 @@ export class UsersService {
           });
 
           // Create new work site assignments
-          if (workSiteIds.length > 0) {
-            await tx.employeeWorkSite.createMany({
-              data: workSiteIds.map((workSiteId) => ({
-                userId: existingUser.id,
-                workSiteId,
-              })),
-            });
-          }
+          // if (workSiteIds.length > 0) {
+          //   await tx.employeeWorkSite.createMany({
+          //     data: workSiteIds.map((workSiteId) => ({
+          //       userId: existingUser.id,
+          //       workSiteId,
+          //     })),
+          //   });
+          // }
         }
 
         // Return updated employee with all relations
