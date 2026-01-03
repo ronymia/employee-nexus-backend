@@ -1,58 +1,65 @@
-// import { ObjectType, Field, Int, ID, Float } from '@nestjs/graphql';
-// import { User } from 'src/modules/users/entities/user.entity';
-// import { AttendancePunch } from './attendance-punch.entity';
-// import {
-//   BaseQueryResponse,
-//   BaseResponse,
-// } from 'src/common/dto/base-response.type';
+import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
+import { User } from 'src/modules/users/entities/user.entity';
+import { AttendancePunch } from './attendance-punch.entity';
+import {
+  BaseQueryResponse,
+  BaseResponse,
+} from 'src/common/dto/base-response.type';
 
-// @ObjectType()
-// export class Attendance {
-//   @Field(() => ID, { description: 'Unique identifier for the attendance' })
-//   id: number;
+@ObjectType()
+export class Attendance {
+  @Field(() => ID, { description: 'Unique identifier for the attendance' })
+  id: number;
 
-//   @Field(() => Int, { description: 'User ID' })
-//   userId: number;
+  @Field(() => Int, { description: 'User ID' })
+  userId: number;
 
-//   @Field(() => User, { description: 'User associated with this attendance' })
-//   user: User;
+  @Field(() => User, {
+    description: 'User associated with this attendance',
+    nullable: true,
+  })
+  user?: User;
 
-//   @Field(() => Date, { description: 'Date of attendance' })
-//   date: Date;
+  @Field(() => Date, { description: 'Date of attendance' })
+  date: Date;
 
-//   @Field(() => Float, {
-//     nullable: true,
-//     description: 'Total working hours for the day',
-//   })
-//   totalHours?: number;
+  @Field(() => Int, {
+    description: 'Total working minutes for the day',
+  })
+  totalMinutes: number;
 
-//   @Field(() => Float, {
-//     nullable: true,
-//     description: 'Total break hours for the day',
-//   })
-//   breakHours?: number;
+  @Field(() => Int, {
+    description: 'Total break minutes for the day',
+  })
+  breakMinutes: number;
 
-//   @Field(() => String, {
-//     description: 'Attendance status',
-//     defaultValue: 'present',
-//   })
-//   status: string;
+  @Field(() => Int, {
+    description: 'Overtime minutes beyond regular schedule',
+    defaultValue: 0,
+  })
+  overtimeMinutes: number;
 
-//   @Field(() => [AttendancePunch], {
-//     description: 'Punch records for this attendance',
-//     nullable: true,
-//   })
-//   punchRecords?: AttendancePunch[];
+  @Field(() => String, {
+    description: 'Attendance status',
+    defaultValue: 'pending',
+  })
+  status: string;
 
-//   @Field(() => Date, { description: 'Creation timestamp' })
-//   createdAt: Date;
+  @Field(() => [AttendancePunch], {
+    description: 'Punch records for this attendance',
+    nullable: true,
+  })
+  punchRecords?: AttendancePunch[];
 
-//   @Field(() => Date, { description: 'Last update timestamp' })
-//   updatedAt: Date;
-// }
+  @Field(() => Date, { description: 'Creation timestamp' })
+  createdAt: Date;
 
-// @ObjectType()
-// export class AttendanceResponse extends BaseResponse(Attendance) {}
+  @Field(() => Date, { description: 'Last update timestamp' })
+  updatedAt: Date;
+}
 
-// @ObjectType()
-// export class AttendanceQueryResponse extends BaseQueryResponse(Attendance) {}
+@ObjectType()
+export class AttendanceResponse extends BaseResponse(Attendance) {}
+
+@ObjectType()
+export class AttendanceQueryResponse extends BaseQueryResponse(Attendance) {}

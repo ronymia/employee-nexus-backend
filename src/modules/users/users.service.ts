@@ -1261,7 +1261,7 @@ export class UsersService {
     statuses.forEach((status, index) => {
       const camelCaseStatus = status
         .toLowerCase()
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+
         .replace(/_([a-z])/g, (match, letter) => letter?.toUpperCase());
       statusStats[camelCaseStatus + 'Users'] = statusCounts[index] || 0;
     });

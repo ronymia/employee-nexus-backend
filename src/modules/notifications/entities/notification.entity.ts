@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import {
   NotificationType,

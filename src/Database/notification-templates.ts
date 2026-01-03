@@ -61,6 +61,59 @@ export async function seedNotificationTemplates(businessId: number) {
 
     // Attendance Notifications
     {
+      name: 'attendance_created',
+      type: NotificationType.ATTENDANCE,
+      title: 'New Attendance Record',
+      message:
+        '{{employeeName}} created an attendance record for {{date}} with {{workTime}} work time.',
+      priority: NotificationPriority.NORMAL,
+      channels: [NotificationChannel.IN_APP],
+      isActive: true,
+      businessId,
+    },
+    {
+      name: 'attendance_updated',
+      type: NotificationType.ATTENDANCE,
+      title: 'Attendance Record Updated',
+      message:
+        '{{employeeName}} updated attendance record for {{date}}. Total work time: {{workTime}}.',
+      priority: NotificationPriority.NORMAL,
+      channels: [NotificationChannel.IN_APP],
+      isActive: true,
+      businessId,
+    },
+    {
+      name: 'attendance_deleted',
+      type: NotificationType.ATTENDANCE,
+      title: 'Attendance Record Deleted',
+      message: '{{employeeName}} deleted attendance record for {{date}}.',
+      priority: NotificationPriority.HIGH,
+      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
+      isActive: true,
+      businessId,
+    },
+    {
+      name: 'attendance_punch_in',
+      type: NotificationType.ATTENDANCE,
+      title: 'Employee Punched In',
+      message: '{{employeeName}} punched in at {{checkInTime}} on {{date}}.',
+      priority: NotificationPriority.LOW,
+      channels: [NotificationChannel.IN_APP],
+      isActive: true,
+      businessId,
+    },
+    {
+      name: 'attendance_punch_out',
+      type: NotificationType.ATTENDANCE,
+      title: 'Employee Punched Out',
+      message:
+        '{{employeeName}} punched out at {{checkOutTime}}. Total work time: {{workTime}}.',
+      priority: NotificationPriority.LOW,
+      channels: [NotificationChannel.IN_APP],
+      isActive: true,
+      businessId,
+    },
+    {
       name: 'attendance_late',
       type: NotificationType.ATTENDANCE,
       title: 'Late Check-in Alert',

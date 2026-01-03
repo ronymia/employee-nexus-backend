@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { AssignEmployeeWorkSiteInput } from './dto/assign-employee-work-site.input';
-import { GetEmployeeWorkSitesInput } from './dto/get-employee-work-sites.input';
+import { QueryEmployeeWorkSitesInput } from './dto/query-employee-work-sites.input';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtPayload } from '../auth/jwt.strategy';
 
@@ -108,12 +108,12 @@ export class EmployeeWorkSitesService {
   // GET EMPLOYEE WORK SITES
   async getEmployeeWorkSites({
     user,
-    getEmployeeWorkSitesInput,
+    queryEmployeeWorkSitesInput,
   }: {
     user: JwtPayload;
-    getEmployeeWorkSitesInput?: GetEmployeeWorkSitesInput;
+    queryEmployeeWorkSitesInput?: QueryEmployeeWorkSitesInput;
   }) {
-    const { userId, workSiteId, isActive } = getEmployeeWorkSitesInput || {};
+    const { userId, workSiteId, isActive } = queryEmployeeWorkSitesInput || {};
 
     const whereCondition: {
       employee?: { user?: { businessId?: number } };

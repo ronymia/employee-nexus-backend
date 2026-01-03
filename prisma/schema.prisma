@@ -911,14 +911,15 @@ model SocialLink {
 }
 
 model Attendance {
-  id           Int               @id @default(autoincrement())
-  userId       Int               @map("user_id")
-  user         User              @relation(name: "userAttendance", fields: [userId], references: [id], onDelete: Cascade)
-  date         DateTime          @map("date") @db.Date // Date of attendance (stored as date only for grouping)
-  totalMinutes Int               @map("total_minutes") // Calculated total working hours for the day
-  breakMinutes Int               @map("break_minutes") // Calculated total break hours for the day
-  status       String            @default("pending") @map("status") // present, absent, late, half_day, on_leave
-  punchRecords AttendancePunch[] @relation(name: "attendancePunchRecords")
+  id              Int               @id @default(autoincrement())
+  userId          Int               @map("user_id")
+  user            User              @relation(name: "userAttendance", fields: [userId], references: [id], onDelete: Cascade)
+  date            DateTime          @map("date") @db.Date // Date of attendance (stored as date only for grouping)
+  totalMinutes    Int               @default(0) @map("total_minutes") // Calculated total working hours for the day
+  breakMinutes    Int               @default(0) @map("break_minutes") // Calculated total break hours for the day
+  overtimeMinutes Int               @default(0) @map("overtime_minutes") // Calculated overtime minutes beyond regular schedule
+  status          String            @default("pending") @map("status") // present, absent, late, half_day, on_leave
+  punchRecords    AttendancePunch[] @relation(name: "attendancePunchRecords")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -942,8 +943,12 @@ model AttendancePunch {
   workSite       WorkSite?  @relation(name: "attendancePunchWorkSite", fields: [workSiteId], references: [id], onDelete: SetNull)
   punchIn        DateTime   @map("punch_in") // Clock in timestamp
   punchOut       DateTime?  @map("punch_out") // Clock out timestamp (null if not clocked out yet)
-  workMinutes    Float?     @map("work_minutes") // Calculated hours for this punch session
-  breakMinutes   Float?     @map("break_minutes") // Calculated break hours for this punch session
+  punchInBy      Int        @map("punch_in_by") // User ID who recorded the punch in (self or manager)
+  punchOutBy     Int?       @map("punch_out_by") // User ID who recorded the punch out (self or manager)
+  workMinutes    Int?       @map("work_minutes") // Calculated hours for this punch session
+  breakMinutes   Int?       @map("break_minutes") // Calculated break hours for this punch session
+  breakStart     DateTime?  @map("break_start") // Break start timestamp
+  breakEnd       DateTime?  @map("break_end") // Break end timestamp
   punchInIp      String?    @map("punch_in_ip") // IP address used for punch in
   punchOutIp     String?    @map("punch_out_ip") // IP address used for punch out
   punchInLat     Float?     @map("punch_in_lat") // Punch in latitude

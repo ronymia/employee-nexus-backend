@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { InputType, Field, Int } from '@nestjs/graphql';
 import { IsString, IsEnum, IsArray, IsOptional, IsInt } from 'class-validator';
 import {

@@ -9,7 +9,6 @@ import {
   IsArray,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreateAttendancePunchInput } from './create-attendance-punch.input';
 
 @InputType()
 export class CreateAttendanceInput {
@@ -21,35 +20,100 @@ export class CreateAttendanceInput {
   @IsDateString()
   date: Date;
 
-  @Field(() => Float, {
+  @Field(() => Int, {
     nullable: true,
-    description: 'Total working hours for the day',
+    description: 'Total break minutes for the day',
   })
   @IsOptional()
   @IsNumber()
-  totalHours?: number;
-
-  @Field(() => Float, {
-    nullable: true,
-    description: 'Total break hours for the day',
-  })
-  @IsOptional()
-  @IsNumber()
-  breakHours?: number;
-
-  @Field(() => String, {
-    description: 'Attendance status',
-    defaultValue: 'pending_approve',
-  })
-  @IsString()
-  status: string;
+  breakMinutes?: number;
 
   @Field(() => [CreateAttendancePunchInput], {
-    nullable: true,
     description: 'Punch records for this attendance',
   })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateAttendancePunchInput)
   punchRecords: CreateAttendancePunchInput[];
+}
+
+@InputType()
+export class CreateAttendancePunchInput {
+  @Field(() => Int, {
+    description: 'Project ID if working on a project',
+  })
+  @IsInt()
+  projectId: number;
+
+  @Field(() => Int, {
+    description: 'Work site ID',
+  })
+  @IsInt()
+  workSiteId: number;
+
+  @Field(() => Date, { description: 'Clock in timestamp' })
+  @IsDateString()
+  punchIn: Date;
+
+  @Field(() => Date, {
+    description: 'Clock out timestamp',
+  })
+  @IsDateString()
+  punchOut: Date;
+
+  @Field(() => Float, {
+    nullable: true,
+    description: 'Break minutes for this session',
+  })
+  @IsOptional()
+  @IsNumber()
+  breakMinutes?: number;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Notes for this punch session',
+  })
+  @IsOptional()
+  @IsString()
+  notes?: string;
+
+  // PUNCH IN FIELDS
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  punchInIp?: string;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  punchInLat?: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  punchInLng?: number;
+
+  @Field(() => String, { description: 'Device used for punch in' })
+  @IsString()
+  punchInDevice: string;
+
+  // PUNCH OUT FIELDS
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  punchOutIp?: string;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  punchOutLat?: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  punchOutLng?: number;
+
+  @Field(() => String, { description: 'Device used for punch out' })
+  @IsString()
+  punchOutDevice: string;
 }

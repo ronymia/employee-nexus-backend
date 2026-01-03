@@ -5,7 +5,7 @@ import {
   EmployeeWorkSiteResponse,
 } from './entities/employee-work-site.entity';
 import { AssignEmployeeWorkSiteInput } from './dto/assign-employee-work-site.input';
-import { GetEmployeeWorkSitesInput } from './dto/get-employee-work-sites.input';
+import { QueryEmployeeWorkSitesInput } from './dto/query-employee-work-sites.input';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -47,12 +47,12 @@ export class EmployeeWorkSitesResolver {
   })
   async getEmployeeWorkSites(
     @CurrentUser() user: JwtPayload,
-    @Args('getEmployeeWorkSitesInput', { nullable: true })
-    getEmployeeWorkSitesInput?: GetEmployeeWorkSitesInput,
+    @Args('queryEmployeeWorkSitesInput', { nullable: true })
+    queryEmployeeWorkSitesInput?: QueryEmployeeWorkSitesInput,
   ) {
     const result = await this.employeeWorkSitesService.getEmployeeWorkSites({
       user,
-      getEmployeeWorkSitesInput,
+      queryEmployeeWorkSitesInput,
     });
 
     return {

@@ -250,11 +250,149 @@ input AssignProjectMemberInput {
   userId: Int!
 }
 
+type Attendance {
+  """Total break minutes for the day"""
+  breakMinutes: Int!
+
+  """Creation timestamp"""
+  createdAt: DateTime!
+
+  """Date of attendance"""
+  date: DateTime!
+
+  """Unique identifier for the attendance"""
+  id: ID!
+
+  """Overtime minutes beyond regular schedule"""
+  overtimeMinutes: Int!
+
+  """Punch records for this attendance"""
+  punchRecords: [AttendancePunch!]
+
+  """Attendance status"""
+  status: String!
+
+  """Total working minutes for the day"""
+  totalMinutes: Int!
+
+  """Last update timestamp"""
+  updatedAt: DateTime!
+
+  """User associated with this attendance"""
+  user: User
+
+  """User ID"""
+  userId: Int!
+}
+
 type AttendanceAnalytics {
   thisMonth: AttendanceThisMonth!
   thisWeek: AttendanceThisWeek!
   today: AttendanceToday!
   trend: [AttendanceTrend!]!
+}
+
+type AttendancePunch {
+  """Attendance associated with this punch"""
+  attendance: Attendance
+
+  """Attendance ID"""
+  attendanceId: Int!
+
+  """Break end timestamp"""
+  breakEnd: DateTime
+
+  """Calculated break minutes for this session"""
+  breakMinutes: Int!
+
+  """Break start timestamp"""
+  breakStart: DateTime
+
+  """Creation timestamp"""
+  createdAt: DateTime!
+
+  """Unique identifier for the punch record"""
+  id: ID!
+
+  """Notes for this punch session"""
+  notes: String
+
+  """Project associated with this punch"""
+  project: Project!
+
+  """Project ID if working on a project"""
+  projectId: Int!
+
+  """Clock in timestamp"""
+  punchIn: DateTime!
+
+  """User ID who recorded the punch in (self or manager)"""
+  punchInBy: Int!
+
+  """Punch in device information"""
+  punchInDevice: String
+
+  """Punch in IP address"""
+  punchInIp: String
+
+  """Punch in latitude"""
+  punchInLat: Float
+
+  """Punch in longitude"""
+  punchInLng: Float
+
+  """Clock out timestamp"""
+  punchOut: DateTime
+
+  """User ID who recorded the punch out (self or manager)"""
+  punchOutBy: Int!
+
+  """Punch out device information"""
+  punchOutDevice: String
+
+  """Punch out IP address"""
+  punchOutIp: String
+
+  """Punch out latitude"""
+  punchOutLat: Float
+
+  """Punch out longitude"""
+  punchOutLng: Float
+
+  """Last update timestamp"""
+  updatedAt: DateTime!
+
+  """Calculated work minutes for this session"""
+  workMinutes: Int!
+
+  """Work site associated with this punch"""
+  workSite: WorkSite!
+
+  """Work site ID"""
+  workSiteId: Int!
+}
+
+type AttendancePunchResponse {
+  data: AttendancePunch!
+  message: String!
+  statusCode: Int!
+  success: Boolean!
+}
+
+type AttendanceQueryResponse {
+  data: [Attendance!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type AttendanceResponse {
+  data: Attendance!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type AttendanceSetting {
@@ -572,6 +710,52 @@ input CreateAssetTypeInput {
 
   """Name of the asset type"""
   name: String!
+}
+
+input CreateAttendanceInput {
+  """Total break minutes for the day"""
+  breakMinutes: Int
+
+  """Date of attendance"""
+  date: DateTime!
+
+  """Punch records for this attendance"""
+  punchRecords: [CreateAttendancePunchInput!]!
+
+  """User ID"""
+  userId: Int!
+}
+
+input CreateAttendancePunchInput {
+  """Break minutes for this session"""
+  breakMinutes: Float
+
+  """Notes for this punch session"""
+  notes: String
+
+  """Project ID if working on a project"""
+  projectId: Int!
+
+  """Clock in timestamp"""
+  punchIn: DateTime!
+
+  """Device used for punch in"""
+  punchInDevice: String!
+  punchInIp: String
+  punchInLat: Float
+  punchInLng: Float
+
+  """Clock out timestamp"""
+  punchOut: DateTime!
+
+  """Device used for punch out"""
+  punchOutDevice: String!
+  punchOutIp: String
+  punchOutLat: Float
+  punchOutLng: Float
+
+  """Work site ID"""
+  workSiteId: Int!
 }
 
 input CreateBusinessInput {
@@ -1465,10 +1649,16 @@ type EmployeeWorkSite {
 }
 
 type EmployeeWorkSiteResponse {
-  data: EmployeeWorkSite!
+  """Employee Work Site data"""
+  data: [EmployeeWorkSite!]!
+
+  """Response message"""
   message: String!
-  meta: PaginationMeta
-  statusCode: Float!
+
+  """Response status code"""
+  statusCode: Int!
+
+  """Base response data"""
   success: Boolean!
 }
 
@@ -1618,17 +1808,6 @@ input GetEmployeeStatusesInput {
 
   """Filter by user ID"""
   userId: Int
-}
-
-input GetEmployeeWorkSitesInput {
-  """Filter by active status"""
-  isActive: Boolean
-
-  """Filter by user ID"""
-  userId: Int
-
-  """Filter by work site ID"""
-  workSiteId: Int
 }
 
 type Holiday {
@@ -2125,6 +2304,7 @@ type Mutation {
   changeMyPassword(changeMyPasswordInput: ChangeMyPasswordInput!): ChangeMyPasswordResponse!
   createAsset(createAssetInput: CreateAssetInput!): AssetResponse!
   createAssetType(createAssetTypeInput: CreateAssetTypeInput!): AssetTypeResponse!
+  createAttendance(createAttendanceInput: CreateAttendanceInput!): AttendanceResponse!
   createBusinessSubscription(createBusinessSubscriptionInput: CreateBusinessSubscriptionInput!): BusinessSubscriptionResponse!
   createDepartment(createDepartmentInput: CreateDepartmentInput!): DepartmentResponse!
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
@@ -2151,6 +2331,7 @@ type Mutation {
   createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
   createWorkSchedule(createWorkScheduleInput: CreateWorkScheduleInput!): WorkScheduleResponse!
   createWorkSite(createWorkSiteInput: CreateWorkSiteInput!): WorkSiteResponse!
+  deleteAttendance(id: Int!): AttendanceResponse!
   deleteBusiness(id: Int!): BusinessResponse!
   deleteDepartment(id: Int!): DepartmentResponse!
   deleteDesignation(id: Int!): DesignationResponse!
@@ -2183,6 +2364,8 @@ type Mutation {
   markPayrollCycleAsPaid(id: Int!): PayrollCycleResponse!
   markPayrollItemAsPaid(id: Int!, paymentMethod: String!, transactionRef: String): PayrollItemResponse!
   processPayrollCycle(processPayrollCycleInput: ProcessPayrollCycleInput!): PayrollCycleResponse!
+  punchIn(punchInInput: PunchInInput!): AttendancePunchResponse!
+  punchOut(punchOutInput: PunchOutInput!): AttendancePunchResponse!
   rejectLeave(leaveId: Int!): LeaveResponse!
   removeAsset(id: Int!): AssetResponse!
   removeAssetType(id: Int!): AssetTypeResponse!
@@ -2191,6 +2374,7 @@ type Mutation {
   unassignProjectMember(unassignProjectMemberInput: UnassignProjectMemberInput!): ProjectMemberResponse!
   updateAsset(updateAssetInput: UpdateAssetInput!): AssetResponse!
   updateAssetType(updateAssetTypeInput: UpdateAssetTypeInput!): AssetTypeResponse!
+  updateAttendance(updateAttendanceInput: UpdateAttendanceInput!): AttendanceResponse!
   updateAttendanceSetting(updateAttendanceSettingInput: UpdateAttendanceSettingInput!): AttendanceSettingResponse!
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): BusinessResponse!
   updateBusinessSchedule(updateBusinessScheduleInput: UpdateBusinessScheduleInput!): BusinessScheduleResponse!
@@ -2807,6 +2991,33 @@ type ProjectsQueryResponse {
   success: Boolean!
 }
 
+input PunchInInput {
+  notes: String
+
+  """Project ID"""
+  projectId: Int!
+
+  """Device used for punch in"""
+  punchInDevice: String!
+  punchInIp: String
+  punchInLat: Float
+  punchInLng: Float
+
+  """Work Site ID"""
+  workSiteId: Int!
+}
+
+input PunchOutInput {
+  notes: String
+  punchId: Int!
+
+  """Device used for punch out"""
+  punchOutDevice: String!
+  punchOutIp: String
+  punchOutLat: Float
+  punchOutLng: Float
+}
+
 type Query {
   FeatureById(id: Int!): FeatureResponse!
   activeBusinessSubscription(businessId: Int): BusinessSubscriptionResponse!
@@ -2817,7 +3028,9 @@ type Query {
   assetTypes(query: QueryAssetTypeInput): AssetTypesQueryResponse!
   assets(query: QueryAssetInput): AssetsQueryResponse!
   assetsByUserId(userId: Int!): AssetsQueryResponse!
+  attendanceById(id: Int!): AttendanceResponse!
   attendanceSettingsByBusiness: AttendanceSettingResponse!
+  attendances(query: QueryAttendanceInput): AttendanceQueryResponse!
   businessById(id: Int!): BusinessResponse!
   businessScheduleByBusinessId(id: Int!): BusinessSchedule!
   businessSettingByBusinessId: BusinessSettingResponse!
@@ -2850,7 +3063,7 @@ type Query {
   getEmployeeStatuses(getEmployeeStatusesInput: GetEmployeeStatusesInput): EmployeeEmploymentStatusResponse!
 
   """Get employee work sites with optional filters"""
-  getEmployeeWorkSites(getEmployeeWorkSitesInput: GetEmployeeWorkSitesInput): EmployeeWorkSiteResponse!
+  getEmployeeWorkSites(queryEmployeeWorkSitesInput: QueryEmployeeWorkSitesInput): EmployeeWorkSiteResponse!
   getMyProfile: UserResponse!
   getUserWorkSchedule(userId: Int!): WorkScheduleResponse!
   holidayById(id: Int!): HolidayResponse!
@@ -2919,6 +3132,16 @@ input QueryAssetTypeInput {
   status: Status
 }
 
+input QueryAttendanceInput {
+  endDate: DateTime
+  pagination: BasePaginationInput
+  startDate: DateTime
+  status: String
+
+  """User ID"""
+  userId: Int
+}
+
 input QueryBusinessInput {
   name: String
   pagination: BasePaginationInput
@@ -2956,6 +3179,17 @@ input QueryDocumentInput {
   pagination: BasePaginationInput
   searchTerm: String
   title: String
+}
+
+input QueryEmployeeWorkSitesInput {
+  """Filter by active status"""
+  isActive: Boolean
+
+  """Filter by user ID"""
+  userId: Int
+
+  """Filter by work site ID"""
+  workSiteId: Int
 }
 
 input QueryEmploymentStatusInput {
@@ -3443,6 +3677,23 @@ input UpdateAssetTypeInput {
 
   """Name of the asset type"""
   name: String
+}
+
+input UpdateAttendanceInput {
+  """Total break minutes for the day"""
+  breakMinutes: Int
+
+  """Date of attendance"""
+  date: DateTime!
+
+  """Attendance ID"""
+  id: ID!
+
+  """Punch records for this attendance"""
+  punchRecords: [CreateAttendancePunchInput!]!
+
+  """User ID"""
+  userId: Int!
 }
 
 input UpdateAttendanceSettingInput {

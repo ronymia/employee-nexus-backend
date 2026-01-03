@@ -7,7 +7,7 @@ export class ApproveAttendanceInput {
   @IsInt()
   id: number;
 
-  @Field(() => Int, { description: 'User ID' })
-  @IsInt()
-  userId: number;
+  // @Field(() => Int, { description: 'User ID' })
+  // @IsInt()
+  // userId: number;
 }

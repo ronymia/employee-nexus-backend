@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Resolver } from '@nestjs/graphql';
 import { BusinessFeature } from './entities/business-feature.entity';
 

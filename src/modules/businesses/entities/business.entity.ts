@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import {
   BaseQueryResponse,

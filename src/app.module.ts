@@ -43,7 +43,7 @@ import { JobHistoriesModule } from './modules/job-histories/job-histories.module
 import { DocumentsModule } from './modules/documents/documents.module';
 import { NotesModule } from './modules/notes/notes.module';
 import { SocialLinksModule } from './modules/social-links/social-links.module';
-// import { AttendancesModule } from './modules/attendances/attendances.module';
+import { AttendancesModule } from './modules/attendances/attendances.module';
 import { LeavesModule } from './modules/leaves/leaves.module';
 import { HolidaysModule } from './modules/holidays/holidays.module';
 import { PayrollComponentsModule } from './modules/payroll-components/payroll-components.module';
@@ -110,7 +110,7 @@ import { BusinessSubscriptionsModule } from './modules/business-subscriptions/bu
     DocumentsModule,
     NotesModule,
     SocialLinksModule,
-    // AttendancesModule,
+    AttendancesModule,
     LeavesModule,
     HolidaysModule,
     PayrollComponentsModule,

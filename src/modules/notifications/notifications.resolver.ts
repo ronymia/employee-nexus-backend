@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';

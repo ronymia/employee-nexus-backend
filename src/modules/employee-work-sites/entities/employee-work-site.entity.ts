@@ -45,4 +45,16 @@ export class EmployeeWorkSite {
 }
 
 @ObjectType()
-export class EmployeeWorkSiteResponse extends BaseResponse(EmployeeWorkSite) {}
+export class EmployeeWorkSiteResponse {
+  @Field(() => Boolean, { description: 'Base response data' })
+  success: boolean;
+
+  @Field(() => Int, { description: 'Response status code' })
+  statusCode: number;
+
+  @Field(() => String, { description: 'Response message' })
+  message: string;
+
+  @Field(() => [EmployeeWorkSite], { description: 'Employee Work Site data' })
+  data: EmployeeWorkSite[] | [];
+}

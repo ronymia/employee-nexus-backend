@@ -9,7 +9,7 @@ import {
   IsArray,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreateAttendancePunchInput } from './create-attendance-punch.input';
+import { CreateAttendancePunchInput } from './create-attendance.input';
 
 @InputType()
 export class RequestAttendanceInput {

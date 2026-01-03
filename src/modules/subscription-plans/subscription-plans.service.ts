@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { ConsoleLogger, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSubscriptionPlanInput } from './dto/create-subscription-plan.input';
 import { UpdateSubscriptionPlanInput } from './dto/update-subscription-plan.input';

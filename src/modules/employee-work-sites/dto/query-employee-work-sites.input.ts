@@ -2,7 +2,7 @@ import { InputType, Field, Int } from '@nestjs/graphql';
 import { IsInt, IsOptional, IsBoolean } from 'class-validator';
 
 @InputType()
-export class GetEmployeeWorkSitesInput {
+export class QueryEmployeeWorkSitesInput {
   @Field(() => Int, { nullable: true, description: 'Filter by user ID' })
   @IsInt()
   @IsOptional()
