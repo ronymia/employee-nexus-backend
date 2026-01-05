@@ -269,6 +269,9 @@ type Attendance {
   """Punch records for this attendance"""
   punchRecords: [AttendancePunch!]
 
+  """Total work schedule minutes for the day"""
+  scheduleMinutes: Int!
+
   """Attendance status"""
   status: String!
 

@@ -24,6 +24,11 @@ export class Attendance {
   date: Date;
 
   @Field(() => Int, {
+    description: 'Total work schedule minutes for the day',
+  })
+  scheduleMinutes: number;
+
+  @Field(() => Int, {
     description: 'Total working minutes for the day',
   })
   totalMinutes: number;

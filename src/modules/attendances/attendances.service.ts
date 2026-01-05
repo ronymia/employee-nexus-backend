@@ -9,6 +9,13 @@ import { CreateAttendanceInput } from './dto/create-attendance.input';
 import { Prisma } from 'generated/prisma';
 import { NotificationsService } from '../notifications/notifications.service';
 import { minutesToHoursAndMinutes } from 'src/utils/time.utils';
+import * as isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import * as isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class AttendancesService {
@@ -96,6 +103,49 @@ export class AttendancesService {
     return business?.ownerId || null;
   }
 
+  /**
+   * Get employee's active schedule for a specific date
+   * Returns the schedule with workSchedule included
+   */
+  private async getEmployeeSchedule(userId: number, date: Date) {
+    return await this.prisma.employeeSchedule.findFirst({
+      where: {
+        userId,
+        isActive: true,
+        startDate: {
+          lte: date,
+        },
+        OR: [
+          { endDate: null },
+          {
+            endDate: {
+              gte: date,
+            },
+          },
+        ],
+      },
+      include: {
+        workSchedule: true,
+      },
+    });
+  }
+
+  /**
+   * Apply unpaid break deduction if applicable
+   * Returns adjusted total minutes
+   */
+  private applyBreakDeduction(
+    totalMinutes: number,
+    employeeSchedule: Awaited<ReturnType<typeof this.getEmployeeSchedule>>,
+  ): number {
+    if (employeeSchedule?.workSchedule.breakType === 'UNPAID') {
+      const scheduleBreakMinutes =
+        employeeSchedule.workSchedule.breakMinutes || 0;
+      return Math.max(0, totalMinutes - scheduleBreakMinutes);
+    }
+    return totalMinutes;
+  }
+
   // CREATE ATTENDANCE
   async create({
     user,
@@ -115,6 +165,13 @@ export class AttendancesService {
       totalMinutes = calculated.totalMinutes;
       breakMinutes = calculated.breakMinutes;
     }
+
+    // Get employee's active schedule and apply break deduction if unpaid
+    const employeeSchedule = await this.getEmployeeSchedule(
+      attendanceData.userId,
+      attendanceData.date,
+    );
+    totalMinutes = this.applyBreakDeduction(totalMinutes, employeeSchedule);
 
     const attendance = await this.prisma.attendance.create({
       data: {
@@ -280,6 +337,91 @@ export class AttendancesService {
       where: whereCondition,
     });
 
+    // OPTIMIZE: Batch fetch employee schedules to avoid N+1 query problem
+    const uniqueUserIds = [...new Set(result.map((a) => a.userId))];
+    const uniqueDates = [...new Set(result.map((a) => a.date))];
+
+    // Get all employee schedules in one query
+    const employeeSchedules = await this.prisma.employeeSchedule.findMany({
+      where: {
+        userId: { in: uniqueUserIds },
+        isActive: true,
+        startDate: {
+          lte: new Date(Math.max(...uniqueDates.map((d) => d.getTime()))),
+        },
+      },
+      orderBy: {
+        startDate: 'desc',
+      },
+      include: {
+        workSchedule: {
+          include: {
+            schedules: {
+              include: {
+                timeSlots: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Create a map of userId -> schedules for fast lookup
+    const schedulesByUser = new Map<number, typeof employeeSchedules>();
+    for (const schedule of employeeSchedules) {
+      if (!schedulesByUser.has(schedule.userId)) {
+        schedulesByUser.set(schedule.userId, []);
+      }
+      schedulesByUser.get(schedule.userId)!.push(schedule);
+    }
+
+    // Calculate schedule minutes for each attendance
+    const resultWithSchedules = result.map((attendance) => {
+      let scheduleMinutes = 0;
+      const attendanceDay = dayjs(attendance.date).day();
+
+      // Find the most recent active schedule for this user on this date
+      const userSchedules = schedulesByUser.get(attendance.userId) || [];
+      const activeSchedule = userSchedules.find(
+        (s) =>
+          s.isActive &&
+          dayjs(s.startDate).isSameOrBefore(attendance.date, 'day') &&
+          (!s.endDate ||
+            dayjs(s.endDate).isSameOrAfter(attendance.date, 'day')),
+      );
+
+      if (activeSchedule) {
+        const daySchedule = activeSchedule.workSchedule.schedules.find(
+          (s) => s.day === attendanceDay,
+        );
+
+        if (daySchedule?.timeSlots && daySchedule.timeSlots.length > 0) {
+          // Calculate total time from all time slots
+          const totalSlotMinutes = daySchedule.timeSlots.reduce(
+            (total, slot) => {
+              // Parse time strings (format: "HH:mm" or "HH:mm:ss")
+              const start = dayjs(slot.startTime, ['HH:mm:ss', 'HH:mm'], true);
+              const end = dayjs(slot.endTime, ['HH:mm:ss', 'HH:mm'], true);
+
+              if (!start.isValid() || !end.isValid()) {
+                return total;
+              }
+
+              return total + end.diff(start, 'minute');
+            },
+            0,
+          );
+
+          scheduleMinutes = totalSlotMinutes;
+        }
+      }
+
+      return {
+        ...attendance,
+        scheduleMinutes,
+      };
+    });
+
     return {
       meta: {
         page: Number(page),
@@ -288,7 +430,7 @@ export class AttendancesService {
         total: Number(total),
         totalPages: limit ? Math.ceil(total / limit) : 1,
       },
-      data: result,
+      data: resultWithSchedules,
     };
   }
 
@@ -350,6 +492,20 @@ export class AttendancesService {
       await this.prisma.attendancePunch.deleteMany({
         where: { attendanceId: id },
       });
+
+      // Get employee's active schedule and apply break deduction if unpaid
+      const attendance = await this.prisma.attendance.findUnique({
+        where: { id },
+        select: { userId: true, date: true },
+      });
+
+      if (attendance) {
+        const employeeSchedule = await this.getEmployeeSchedule(
+          attendance.userId,
+          attendance.date,
+        );
+        totalMinutes = this.applyBreakDeduction(totalMinutes, employeeSchedule);
+      }
     }
 
     const updatedAttendance = await this.prisma.attendance.update({
@@ -622,11 +778,22 @@ export class AttendancesService {
     });
 
     const totals = this.calculateTotalMinutes(allPunches);
+    let finalTotalMinutes = totals.totalMinutes;
+
+    // Get employee's active schedule and apply break deduction if unpaid
+    const employeeSchedule = await this.getEmployeeSchedule(
+      punch.attendance.userId,
+      punch.attendance.date,
+    );
+    finalTotalMinutes = this.applyBreakDeduction(
+      finalTotalMinutes,
+      employeeSchedule,
+    );
 
     await this.prisma.attendance.update({
       where: { id: punch.attendanceId },
       data: {
-        totalMinutes: totals.totalMinutes,
+        totalMinutes: finalTotalMinutes,
         breakMinutes: totals.breakMinutes,
       },
     });
