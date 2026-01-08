@@ -164,7 +164,7 @@ export class WorkSchedulesService {
         status: Status.ACTIVE,
         schedules: {
           create: schedules.map((schedule) => ({
-            day: schedule.day,
+            dayOfWeek: schedule.day,
             isWeekend: schedule.isWeekend,
             timeSlots: {
               create: schedule.timeSlots.map((slot) => ({
@@ -388,7 +388,7 @@ export class WorkSchedulesService {
             ...updateData,
             schedules: {
               create: schedules.map((schedule) => ({
-                day: schedule.day,
+                dayOfWeek: schedule.day,
                 isWeekend: schedule.isWeekend,
                 timeSlots: {
                   create: schedule.timeSlots.map((slot) => ({

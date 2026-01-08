@@ -39,17 +39,17 @@ export class BusinessesService {
   constructor(private readonly prisma: PrismaService) {}
   private getDefaultBusinessSchedules(businessId: number) {
     const daysConfig = [
-      { day: 0, isWeekend: false }, // Sunday
-      { day: 1, isWeekend: false }, // Monday
-      { day: 2, isWeekend: false }, // Tuesday
-      { day: 3, isWeekend: false }, // Wednesday
-      { day: 4, isWeekend: false }, // Thursday
-      { day: 5, isWeekend: true }, // Friday
-      { day: 6, isWeekend: true }, // Saturday
+      { dayOfWeek: 0, isWeekend: false }, // Sunday
+      { dayOfWeek: 1, isWeekend: false }, // Monday
+      { dayOfWeek: 2, isWeekend: false }, // Tuesday
+      { dayOfWeek: 3, isWeekend: false }, // Wednesday
+      { dayOfWeek: 4, isWeekend: false }, // Thursday
+      { dayOfWeek: 5, isWeekend: true }, // Friday
+      { dayOfWeek: 6, isWeekend: true }, // Saturday
     ];
 
-    return daysConfig.map(({ day, isWeekend }) => ({
-      day,
+    return daysConfig.map(({ dayOfWeek, isWeekend }) => ({
+      dayOfWeek,
       isWeekend,
       startTime: '10:00',
       endTime: '18:00',
@@ -331,7 +331,7 @@ export class BusinessesService {
         return await prismaTransaction.business.findUnique({
           where: { id: createdBusiness.id },
           include: {
-            subscriptionPlan: true,
+            subscriptions: true,
             businessSchedules: true,
             businessSettings: true,
             attendanceSettings: true,
@@ -421,7 +421,7 @@ export class BusinessesService {
       include: {
         businessSchedules: true,
         businessSettings: true,
-        subscriptionPlan: true,
+        subscriptions: true,
       },
     });
     return business;
@@ -457,7 +457,7 @@ export class BusinessesService {
           include: {
             businessSchedules: true,
             businessSettings: true,
-            subscriptionPlan: true,
+            subscriptions: true,
           },
         });
 

@@ -324,17 +324,14 @@ export class PayrollItemsService {
       const payrollItemInput: CreatePayrollItemInput = {
         payrollCycleId: input.payrollCycleId,
         userId: employee.userId,
-        basicSalary: employee.salaryPerMonth,
+        basicSalary: 100,
         workingDays: attendanceData.workingDays,
         presentDays: attendanceData.presentDays,
         absentDays: attendanceData.absentDays,
         leaveDays: attendanceData.leaveDays,
         overtimeHours: attendanceData.overtimeHours,
         paymentMethod: '',
-        components: await this.calculateComponents(
-          employee.salaryPerMonth,
-          components,
-        ),
+        components: await this.calculateComponents(100, components),
       };
 
       const item = await this.create(user, payrollItemInput);

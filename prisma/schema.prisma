@@ -178,8 +178,8 @@ model BusinessSchedule {
   id         Int      @id @default(autoincrement())
   dayOfWeek  Int      @map("day_of_week")
   isWeekend  Boolean  @map("is_weekend")
-  startTime  DateTime @map("start_time") @db.Time // Format: "HH:mm:ss"
-  endTime    DateTime @map("end_time") @db.Time // Format: "HH:mm:ss"
+  startTime  String   @map("start_time") // Format: "HH:mm:ss"
+  endTime    String   @map("end_time") // Format: "HH:mm:ss"
   businessId Int      @map("business_id")
   business   Business @relation(name: "businessSchedules", fields: [businessId], references: [id], onDelete: Cascade)
 
@@ -594,8 +594,8 @@ model DaySchedule {
 }
 
 model TimeSlot {
-  startTime  DateTime    @map("start_time") @db.Time // Format: "HH:mm:ss"
-  endTime    DateTime    @map("end_time") @db.Time // Format: "HH:mm:ss"
+  startTime  String      @map("start_time") // Format: "HH:mm:ss"
+  endTime    String      @map("end_time") // Format: "HH:mm:ss"
   scheduleId Int         @map("schedule_id")
   schedule   DaySchedule @relation(name: "shiftInSchedule", fields: [scheduleId], references: [id], onDelete: Cascade)
 

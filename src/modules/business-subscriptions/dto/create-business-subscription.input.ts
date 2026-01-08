@@ -25,7 +25,7 @@ export class CreateBusinessSubscriptionInput {
   })
   @IsOptional()
   @IsDate()
-  startDate?: Date;
+  startDate: Date;
 
   @Field(() => Date, {
     description: 'Subscription end date',

@@ -392,7 +392,7 @@ export class AttendancesService {
 
       if (activeSchedule) {
         const daySchedule = activeSchedule.workSchedule.schedules.find(
-          (s) => s.day === attendanceDay,
+          (s) => s.dayOfWeek === attendanceDay,
         );
 
         if (daySchedule?.timeSlots && daySchedule.timeSlots.length > 0) {

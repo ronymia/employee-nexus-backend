@@ -60,14 +60,14 @@ export class BusinessSchedulesService {
     const updated = await this.prisma.businessSchedule.upsert({
       where: { id: updateBusinessScheduleInput.id },
       create: {
-        day: updateBusinessScheduleInput.day || 0,
+        dayOfWeek: updateBusinessScheduleInput.day || 0,
         isWeekend: updateBusinessScheduleInput.isWeekend || false,
         startTime: updateBusinessScheduleInput.startTime || '09:00:00',
         endTime: updateBusinessScheduleInput.endTime || '17:00:00',
         businessId: user.businessId,
       },
       update: {
-        day: updateBusinessScheduleInput.day ?? 0,
+        dayOfWeek: updateBusinessScheduleInput.day ?? 0,
         isWeekend: updateBusinessScheduleInput.isWeekend ?? false,
         startTime: updateBusinessScheduleInput.startTime,
         endTime: updateBusinessScheduleInput.endTime,

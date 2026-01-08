@@ -581,7 +581,6 @@ export class UsersService {
               userId: createdUser.id,
               designationId,
               startDate: new Date(),
-              salary: employeeData.salaryPerMonth,
               remarks: `Initial schedule assignment upon employee creation`,
             },
           });
