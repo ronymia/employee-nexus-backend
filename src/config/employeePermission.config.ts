@@ -29,6 +29,10 @@ export const employeePermissions = [
     action: [PermissionAction.READ],
   },
   {
+    resource: PermissionResource.BUSINESS_SUBSCRIPTION,
+    action: [PermissionAction.READ],
+  },
+  {
     resource: PermissionResource.JOB_TYPE,
     action: [PermissionAction.READ],
   },
