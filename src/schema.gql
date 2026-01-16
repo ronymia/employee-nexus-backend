@@ -23,7 +23,7 @@ type Asset {
   createdAt: DateTime!
   createdBy: Int
   creator: User
-  date: String!
+  date: DateTime!
   id: Int!
   image: String
   name: String!
