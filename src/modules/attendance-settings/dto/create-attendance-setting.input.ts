@@ -50,5 +50,5 @@ export class CreateAttendanceSettingInput {
     defaultValue: false,
   })
   @IsBoolean()
-  isGeoLocationEnabled: boolean;
+  isGeoFencingEnabled: boolean;
 }

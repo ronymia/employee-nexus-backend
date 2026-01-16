@@ -409,7 +409,7 @@ type AttendanceSetting {
   businessId: Int!
 
   """Whether geo location is enabled"""
-  isGeoLocationEnabled: Boolean!
+  isGeoFencingEnabled: Boolean!
 
   """Whether punch in/out alerts are enabled"""
   punchInOutAlert: Boolean!
@@ -3712,7 +3712,7 @@ input UpdateAttendanceSettingInput {
   autoApproval: Boolean = false
 
   """Whether geolocation is enabled"""
-  isGeoLocationEnabled: Boolean = false
+  isGeoFencingEnabled: Boolean = false
 
   """Whether punch in/out alerts are enabled"""
   punchInOutAlert: Boolean = true
