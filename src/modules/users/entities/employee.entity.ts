@@ -5,7 +5,7 @@ import { IsOptional } from 'class-validator';
 import { EmployeeDepartment } from 'src/modules/employee-departments/entities/employee-department.entity';
 import { EmployeeEmploymentStatus } from 'src/modules/employee-employment-statuses/entities/employee-employment-status.entity';
 import { EmployeeWorkSchedule } from 'src/modules/employee-work-schedules/entities/employee-work-schedule.entity';
-import { EmployeeWorkSite } from 'src/modules/employee-work-sites/entities/employee-work-site.entity';
+// import { EmployeeWorkSite } from 'src/modules/employee-work-sites/entities/employee-work-site.entity';
 import { Department } from 'src/modules/departments/entities/department.entity';
 import { Designation } from 'src/modules/designations/entities/designation.entity';
 import { EmploymentStatus } from 'src/modules/employment-status/entities/employment-status.entity';
@@ -48,9 +48,9 @@ export class Employee {
   @IsOptional()
   workSchedules?: EmployeeWorkSchedule[] | [];
 
-  @Field(() => [EmployeeWorkSite], { nullable: true })
-  @IsOptional()
-  workSites?: EmployeeWorkSite[] | [];
+  // @Field(() => [EmployeeWorkSite], { nullable: true })
+  // @IsOptional()
+  // workSites?: EmployeeWorkSite[] | [];
 
   @Field(() => Department, {
     nullable: true,
@@ -70,17 +70,23 @@ export class Employee {
   })
   employmentStatus?: EmploymentStatus | null;
 
-  @Field(() => WorkSite, {
+  @Field(() => [WorkSite], {
     nullable: true,
-    description: 'Active work site of the user',
+    description: 'Active work sites of the user',
   })
-  workSite?: WorkSite | null;
+  workSites?: WorkSite[] | [];
 
   @Field(() => WorkSchedule, {
     nullable: true,
     description: 'Active work schedule of the user',
   })
   workSchedule?: WorkSchedule | null;
+
+  @Field(() => EmployeeSalary, {
+    nullable: true,
+    description: 'Active salary of the employee',
+  })
+  salary?: EmployeeSalary | null;
 
   @Field(() => Date)
   createdAt: Date;

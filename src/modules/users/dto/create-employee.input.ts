@@ -1,7 +1,15 @@
 import { InputType, Field, Float, Int } from '@nestjs/graphql';
 import { CreateUserInput } from './create-user.input';
 import { CreateProfileInput } from 'src/modules/profiles/dto/create-profile.input';
-import { IsString } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsNumber,
+  Min,
+  IsDateString,
+  IsOptional,
+} from 'class-validator';
+import { SalaryType } from 'src/modules/employee-salaries/entities/employee-salary.entity';
 
 @InputType()
 export class CreateEmergencyContactInput {
@@ -40,14 +48,39 @@ export class CreateEmployeeInput {
   @Field(() => Date)
   joiningDate: Date;
 
-  @Field(() => Float)
-  salaryPerMonth: number;
+  @Field(() => Float, { description: 'Salary amount' })
+  @IsNumber()
+  @Min(0)
+  salaryAmount: number;
 
-  @Field(() => Int, { nullable: true })
-  workingDaysPerWeek?: number;
+  @Field(() => SalaryType, {
+    description: 'Type of salary (HOURLY, DAILY, MONTHLY)',
+  })
+  @IsEnum(SalaryType)
+  salaryType: SalaryType;
 
-  @Field(() => Int, { nullable: true })
-  workingHoursPerWeek?: number;
+  @Field(() => String, {
+    nullable: true,
+    description:
+      'Start date of the salary (YYYY-MM-DD). Defaults to joiningDate if not provided',
+  })
+  @IsOptional()
+  @IsDateString()
+  salaryStartDate?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Reason for initial salary',
+  })
+  @IsOptional()
+  salaryReason?: string;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Remarks for initial salary',
+  })
+  @IsOptional()
+  salaryRemarks?: string;
 
   @Field(() => Int)
   designationId: number;
@@ -63,7 +96,4 @@ export class CreateEmployeeInput {
 
   @Field(() => Int)
   workScheduleId: number;
-
-  @Field(() => String, { nullable: true })
-  rotaType?: string;
 }

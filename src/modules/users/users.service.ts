@@ -404,6 +404,11 @@ export class UsersService {
       departmentId,
       designationId,
       employmentStatusId,
+      salaryAmount,
+      salaryType,
+      salaryStartDate,
+      salaryReason,
+      salaryRemarks,
       ...employeeData
     } = createEmployeeInput;
 
@@ -598,6 +603,21 @@ export class UsersService {
           });
         }
 
+        // CREATE EMPLOYEE SALARY
+        await tx.employeeSalary.create({
+          data: {
+            userId: createdUser.id,
+            salaryAmount,
+            salaryType: salaryType as any,
+            startDate: salaryStartDate
+              ? salaryStartDate
+              : employeeData.joiningDate,
+            isActive: true,
+            reason: salaryReason || 'Initial salary upon employee creation',
+            remarks: salaryRemarks,
+          },
+        });
+
         const result = await tx.user.findUnique({
           where: {
             id: createdUser.id,
@@ -634,6 +654,11 @@ export class UsersService {
                 workSites: {
                   include: {
                     workSite: true,
+                  },
+                },
+                salaries: {
+                  where: {
+                    isActive: true,
                   },
                 },
               },
@@ -1322,8 +1347,8 @@ export class UsersService {
   }
 
   // GET ACTIVE WORK SITE FOR USER
-  async getActiveWorkSite(userId: number) {
-    const employeeWorkSite = await this.prisma.employeeWorkSite.findFirst({
+  async getActiveWorkSites(userId: number) {
+    const employeeWorkSite = await this.prisma.employeeWorkSite.findMany({
       where: {
         userId,
         isActive: true,
@@ -1332,8 +1357,7 @@ export class UsersService {
         workSite: true,
       },
     });
-
-    return employeeWorkSite?.workSite || null;
+    return employeeWorkSite?.map((ews) => ews.workSite) || [];
   }
 
   // GET ACTIVE WORK SCHEDULE FOR USER

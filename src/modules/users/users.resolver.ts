@@ -29,6 +29,9 @@ import { Designation } from '../designations/entities/designation.entity';
 import { EmploymentStatus } from '../employment-status/entities/employment-status.entity';
 import { WorkSite } from '../work-sites/entities/work-site.entity';
 import { WorkSchedule } from '../work-schedules/entities/work-schedule.entity';
+import { Employee } from './entities/employee.entity';
+import { EmployeeSalariesService } from '../employee-salaries/employee-salary.service';
+import { EmployeeSalary } from '../employee-salaries/entities/employee-salary.entity';
 
 @Resolver(() => User)
 @UseGuards(GqlAuthGuard, PermissionsGuard)
@@ -42,31 +45,6 @@ export class UsersResolver {
   permissions(@Parent() user: User): string[] {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return PermissionUtils.formatUserPermissions(user as any);
-  }
-
-  @ResolveField(() => Department, { nullable: true })
-  async department(@Parent() user: User) {
-    return await this.usersService.getActiveDepartment(user.id);
-  }
-
-  @ResolveField(() => Designation, { nullable: true })
-  async designation(@Parent() user: User) {
-    return await this.usersService.getActiveDesignation(user.id);
-  }
-
-  @ResolveField(() => EmploymentStatus, { nullable: true })
-  async employmentStatus(@Parent() user: User) {
-    return await this.usersService.getActiveEmploymentStatus(user.id);
-  }
-
-  @ResolveField(() => WorkSite, { nullable: true })
-  async workSite(@Parent() user: User) {
-    return await this.usersService.getActiveWorkSite(user.id);
-  }
-
-  @ResolveField(() => WorkSchedule, { nullable: true })
-  async workSchedule(@Parent() user: User) {
-    return await this.usersService.getActiveWorkSchedule(user.id);
   }
 
   // @Mutation(() => User)
@@ -241,5 +219,44 @@ export class UsersResolver {
       message: 'User statistics retrieved successfully',
       data: result,
     };
+  }
+}
+
+@Resolver(() => Employee)
+@UseGuards(GqlAuthGuard, PermissionsGuard)
+export class EmployeeResolver {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly employeeSalariesService: EmployeeSalariesService,
+  ) {}
+
+  @ResolveField(() => Department, { nullable: true })
+  async department(@Parent() employee: Employee) {
+    return await this.usersService.getActiveDepartment(employee.userId);
+  }
+
+  @ResolveField(() => Designation, { nullable: true })
+  async designation(@Parent() employee: Employee) {
+    return await this.usersService.getActiveDesignation(employee.userId);
+  }
+
+  @ResolveField(() => EmploymentStatus, { nullable: true })
+  async employmentStatus(@Parent() employee: Employee) {
+    return await this.usersService.getActiveEmploymentStatus(employee.userId);
+  }
+
+  @ResolveField(() => [WorkSite], { nullable: true })
+  async workSites(@Parent() employee: Employee) {
+    return await this.usersService.getActiveWorkSites(employee.userId);
+  }
+
+  @ResolveField(() => WorkSchedule, { nullable: true })
+  async workSchedule(@Parent() employee: Employee) {
+    return await this.usersService.getActiveWorkSchedule(employee.userId);
+  }
+
+  @ResolveField(() => EmployeeSalary, { nullable: true })
+  async salary(@Parent() employee: Employee) {
+    return await this.employeeSalariesService.getActiveSalary(employee.userId);
   }
 }

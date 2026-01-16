@@ -874,13 +874,26 @@ input CreateEmployeeInput {
   joiningDate: DateTime!
   nidNumber: String!
   profile: CreateProfileInput!
-  rotaType: String
-  salaryPerMonth: Float!
+
+  """Salary amount"""
+  salaryAmount: Float!
+
+  """Reason for initial salary"""
+  salaryReason: String
+
+  """Remarks for initial salary"""
+  salaryRemarks: String
+
+  """
+  Start date of the salary (YYYY-MM-DD). Defaults to joiningDate if not provided
+  """
+  salaryStartDate: String
+
+  """Type of salary (HOURLY, DAILY, MONTHLY)"""
+  salaryType: SalaryType!
   user: CreateUserInput!
   workScheduleId: Int!
   workSiteIds: [Int!]
-  workingDaysPerWeek: Int
-  workingHoursPerWeek: Int
 }
 
 input CreateEmployeeSalaryInput {
@@ -1472,6 +1485,9 @@ type Employee {
   joiningDate: DateTime!
   nidNumber: String!
   salaries: [EmployeeSalary!]
+
+  """Active salary of the employee"""
+  salary: EmployeeSalary
   updatedAt: DateTime!
   user: User!
   userId: Int!
@@ -1480,9 +1496,8 @@ type Employee {
   workSchedule: WorkSchedule
   workSchedules: [EmployeeWorkSchedule!]
 
-  """Active work site of the user"""
-  workSite: WorkSite
-  workSites: [EmployeeWorkSite!]
+  """Active work sites of the user"""
+  workSites: [WorkSite!]
 }
 
 type EmployeeDashboard {
@@ -3956,13 +3971,26 @@ input UpdateEmployeeInput {
   joiningDate: DateTime
   nidNumber: String
   profile: CreateProfileInput
-  rotaType: String
-  salaryPerMonth: Float
+
+  """Salary amount"""
+  salaryAmount: Float
+
+  """Reason for initial salary"""
+  salaryReason: String
+
+  """Remarks for initial salary"""
+  salaryRemarks: String
+
+  """
+  Start date of the salary (YYYY-MM-DD). Defaults to joiningDate if not provided
+  """
+  salaryStartDate: String
+
+  """Type of salary (HOURLY, DAILY, MONTHLY)"""
+  salaryType: SalaryType
   user: CreateUserInput
   workScheduleId: Int
   workSiteIds: [Int!]
-  workingDaysPerWeek: Int
-  workingHoursPerWeek: Int
 }
 
 input UpdateEmployeeSalaryInput {
@@ -4385,13 +4413,10 @@ type User {
 
   """Date when the user was created"""
   createdAt: DateTime!
-  department: Department
-  designation: Designation
 
   """Email of the user"""
   email: String!
   employee: Employee
-  employmentStatus: EmploymentStatus
   id: ID!
 
   """Formatted permissions as ["Resource:action"]"""
@@ -4410,8 +4435,6 @@ type User {
   """Date when the user was last updated"""
   updatedAt: DateTime!
   userPermissions: [UserPermission!]
-  workSchedule: WorkSchedule
-  workSite: WorkSite
 }
 
 """Account status of the user"""
