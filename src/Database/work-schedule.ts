@@ -1,68 +1,85 @@
-export const workSchedule = {
-  name: 'Main Work Shift',
-  type: 'regular',
-  description: '',
-  is_personal: false,
-  break_type: 'unpaid',
-  break_hours: 1,
-  is_active: 1,
-  is_default: 1,
-  details: [
+import {
+  ScheduleBreakType,
+  ScheduleType,
+} from 'src/modules/work-schedules/enums';
+
+export const defaultWorkSchedule = {
+  name: 'Regular Shift',
+  description: 'Standard 5-day work week schedule',
+  status: 'ACTIVE',
+  scheduleType: ScheduleType.REGULAR,
+  breakType: ScheduleBreakType.PAID,
+  breakMinutes: 60, // 1 hour break
+  schedules: [
     {
-      day: '0',
-      shifts: {
-        start_at: '',
-        end_at: '',
-      },
-      is_weekend: 1,
+      dayOfWeek: 0, // Sunday
+      isWeekend: true,
+      timeSlots: [
+        {
+          startTime: '10:00:00',
+          endTime: '18:00:00',
+        },
+      ], // No work on weekends
     },
     {
-      day: '1',
-      shifts: {
-        start_at: '10:00:00',
-        end_at: '18:00:00',
-      },
-      is_weekend: 0,
+      dayOfWeek: 1, // Monday
+      isWeekend: false,
+      timeSlots: [
+        {
+          startTime: '10:00:00',
+          endTime: '18:00:00',
+        },
+      ],
     },
     {
-      day: '2',
-      shifts: {
-        start_at: '10:00:00',
-        end_at: '18:00:00',
-      },
-      is_weekend: 0,
+      dayOfWeek: 2, // Tuesday
+      isWeekend: false,
+      timeSlots: [
+        {
+          startTime: '10:00:00',
+          endTime: '18:00:00',
+        },
+      ],
     },
     {
-      day: '3',
-      shifts: {
-        start_at: '10:00:00',
-        end_at: '18:00:00',
-      },
-      is_weekend: 0,
+      dayOfWeek: 3, // Wednesday
+      isWeekend: false,
+      timeSlots: [
+        {
+          startTime: '10:00:00',
+          endTime: '18:00:00',
+        },
+      ],
     },
     {
-      day: '4',
-      shifts: {
-        start_at: '10:00:00',
-        end_at: '18:00:00',
-      },
-      is_weekend: 0,
+      dayOfWeek: 4, // Thursday
+      isWeekend: false,
+      timeSlots: [
+        {
+          startTime: '10:00:00',
+          endTime: '18:00:00',
+        },
+      ],
     },
     {
-      day: '5',
-      shifts: {
-        start_at: '10:00:00',
-        end_at: '18:00:00',
-      },
-      is_weekend: 0,
+      dayOfWeek: 5, // Friday
+      isWeekend: false,
+      timeSlots: [
+        {
+          startTime: '10:00:00',
+          endTime: '18:00:00',
+        },
+      ],
     },
     {
-      day: '6',
-      shifts: {
-        start_at: '',
-        end_at: '',
-      },
-      is_weekend: 1,
+      dayOfWeek: 6, // Saturday
+      isWeekend: true,
+      timeSlots: [
+        {
+          startTime: '10:00:00',
+          endTime: '18:00:00',
+        },
+      ], // No work on weekends
     },
   ],
 };

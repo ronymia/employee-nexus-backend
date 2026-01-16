@@ -23,8 +23,8 @@ export class LeaveType {
   @Field(() => LeaveTypeEnum, { description: 'Type of leave (PAID or UNPAID)' })
   leaveType: LeaveTypeEnum;
 
-  @Field(() => Int, { description: 'Number of leave hours allocated' })
-  leaveHours: number;
+  @Field(() => Int, { description: 'Number of leave minutes allocated' })
+  leaveMinutes: number;
 
   @Field(() => LeaveRolloverType, { description: 'Leave rollover policy type' })
   leaveRolloverType: LeaveRolloverType;
@@ -42,7 +42,7 @@ export class LeaveType {
     description: 'Array of employment statuses associated with this leave type',
     nullable: true,
   })
-  employmentStatuses?: EmploymentStatus[];
+  employmentStatuses?: EmploymentStatus[] | null;
 
   @Field(() => Date, {
     description: 'Date when the leave type was created',

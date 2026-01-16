@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
+
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -19,13 +18,14 @@ export class NotificationsService {
 
   // ============ NOTIFICATION OPERATIONS ============
 
-  async create(input: CreateNotificationInput) {
+  async create(user: JwtPayload, input: CreateNotificationInput) {
     const { metadata, ...data } = input;
     return await this.prisma.notification.create({
       data: {
         ...data,
         priority: input?.priority || 'NORMAL',
         metadata: metadata ? JSON.parse(metadata) : undefined,
+        businessId: user.businessId,
       },
     });
   }
@@ -97,7 +97,6 @@ export class NotificationsService {
     return await this.prisma.notification.update({
       where: { id },
       data: {
-        isRead: true,
         readAt: new Date(),
       },
     });
@@ -105,9 +104,13 @@ export class NotificationsService {
 
   async markAllAsRead(userId: number) {
     return await this.prisma.notification.updateMany({
-      where: { userId, isRead: false },
+      where: {
+        userId,
+        readAt: {
+          not: null,
+        },
+      },
       data: {
-        isRead: true,
         readAt: new Date(),
       },
     });
@@ -121,7 +124,7 @@ export class NotificationsService {
 
   async getUnreadCount(userId: number): Promise<number> {
     return await this.prisma.notification.count({
-      where: { userId, isRead: false },
+      where: { userId, readAt: null },
     });
   }
 
@@ -154,8 +157,7 @@ export class NotificationsService {
     return await this.prisma.notificationTemplate.findFirst({
       where: {
         name,
-        OR: [{ businessId }, { businessId: null }],
-        isActive: true,
+        OR: [{ businessId }],
       },
     });
   }
@@ -175,49 +177,6 @@ export class NotificationsService {
   }
 
   // ============ NOTIFICATION PREFERENCE OPERATIONS ============
-
-  async getPreferences(userId: number) {
-    const preference = await this.prisma.notificationPreference.findUnique({
-      where: { userId },
-    });
-
-    if (!preference) {
-      // Return default preferences
-      return {
-        userId,
-        preferences: JSON.stringify(this.getDefaultPreferences()),
-        muteAll: false,
-        mutedUntil: null,
-      };
-    }
-
-    return {
-      ...preference,
-      preferences: JSON.stringify(preference.preferences),
-    };
-  }
-
-  async updatePreferences(
-    userId: number,
-    input: UpdateNotificationPreferenceInput,
-  ) {
-    const { preferences, ...data } = input;
-
-    const updateData: any = { ...data };
-    if (preferences) {
-      updateData.preferences = JSON.parse(preferences);
-    }
-
-    return await this.prisma.notificationPreference.upsert({
-      where: { userId },
-      update: updateData,
-      create: {
-        userId,
-        ...updateData,
-        preferences: updateData.preferences || this.getDefaultPreferences(),
-      },
-    });
-  }
 
   // ============ HELPER METHODS ============
 
@@ -262,13 +221,12 @@ export class NotificationsService {
     // Extract only valid Notification fields from variables
     const { entityType, entityId, actionUrl, expiresAt } = variables;
 
-    return await this.create({
+    return await this.create({ userId: 1, businessId: 1 } as JwtPayload, {
       type: template.type,
       title,
       message,
       priority: template.priority,
       notificationTemplateId: template.id,
-      channels: template.channels,
       userId,
       businessId,
       metadata: JSON.stringify(variables),

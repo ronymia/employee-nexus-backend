@@ -1,5 +1,5 @@
 // BUSINESS SETTINGS RESOLVER - HANDLES GRAPHQL OPERATIONS FOR BUSINESS SETTING MANAGEMENT
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { BusinessSettingsService } from './business-settings.service';
 import {
   BusinessSetting,
@@ -10,8 +10,6 @@ import { HttpStatus, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { JwtPayload } from '../auth/jwt.strategy';
 
 @Resolver(() => BusinessSetting)
 export class BusinessSettingsResolver {
@@ -27,9 +25,11 @@ export class BusinessSettingsResolver {
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Business:read')
   @UseGuards(GqlAuthGuard)
-  async findByBusiness(@CurrentUser() user: JwtPayload) {
+  async findByBusiness(
+    @Args('businessId', { type: () => Int }) businessId: number,
+  ) {
     const result = await this.businessSettingsService.findByBusiness({
-      user,
+      businessId,
     });
 
     return {
@@ -43,15 +43,15 @@ export class BusinessSettingsResolver {
   // UPDATE BUSINESS SETTING MUTATION
   @Mutation(() => BusinessSettingResponse)
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('Business Settings:update')
+  @RequirePermissions('Business:update')
   @UseGuards(GqlAuthGuard)
   async updateBusinessSetting(
-    @CurrentUser() user: JwtPayload,
+    @Args('businessId', { type: () => Int }) businessId: number,
     @Args('updateBusinessSettingInput')
     updateBusinessSettingInput: UpdateBusinessSettingInput,
   ) {
     const result = await this.businessSettingsService.update({
-      user,
+      businessId,
       updateBusinessSettingInput,
     });
     return {

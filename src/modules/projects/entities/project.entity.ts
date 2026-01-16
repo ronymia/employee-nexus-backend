@@ -1,12 +1,12 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
-import { Business } from '../../businesses/entities/business.entity';
-import { User } from '../../users/entities/user.entity';
 import { ProjectMember } from './project-member.entity';
+import { IsOptional } from 'class-validator';
+import { Business } from 'src/modules/businesses/entities/business.entity';
+import { User } from 'src/modules/users/entities/user.entity';
 import {
   BaseQueryResponse,
   BaseResponse,
-} from '../../../common/dto/base-response.type';
-import { IsOptional } from 'class-validator';
+} from 'src/common/dto/base-response.type';
 
 @ObjectType()
 export class Project {
@@ -20,16 +20,13 @@ export class Project {
   description?: string;
 
   @Field()
-  cover: string;
-
-  @Field()
   status: string;
 
-  @Field({ nullable: true })
-  startDate?: string;
+  @Field()
+  startDate: Date;
 
   @Field({ nullable: true })
-  endDate?: string;
+  endDate?: Date;
 
   @Field(() => Int, { nullable: true })
   businessId?: number;
@@ -59,11 +56,3 @@ export class ProjectResponse extends BaseResponse(Project) {}
 
 @ObjectType()
 export class ProjectsQueryResponse extends BaseQueryResponse(Project) {}
-
-@ObjectType()
-export class ProjectMemberResponse extends BaseResponse(ProjectMember) {}
-
-@ObjectType()
-export class ProjectMembersQueryResponse extends BaseQueryResponse(
-  ProjectMember,
-) {}

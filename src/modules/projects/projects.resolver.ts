@@ -4,8 +4,6 @@ import {
   Project,
   ProjectResponse,
   ProjectsQueryResponse,
-  ProjectMemberResponse,
-  ProjectMembersQueryResponse,
 } from './entities/project.entity';
 import { CreateProjectInput } from './dto/create-project.input';
 import { UpdateProjectInput } from './dto/update-project.input';
@@ -17,6 +15,10 @@ import { RequirePermissions } from '../permissions/decorators/permissions.decora
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import {
+  ProjectMemberResponse,
+  ProjectMembersQueryResponse,
+} from './entities/project-member.entity';
 
 @Resolver(() => Project)
 export class ProjectsResolver {
@@ -124,7 +126,8 @@ export class ProjectsResolver {
     };
   }
 
-  @Mutation(() => ProjectMemberResponse)
+  // ASSIGN / UNASSIGN PROJECT MEMBERS
+  @Mutation(() => ProjectMemberResponse, { name: 'assignProjectMember' })
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Project Member:create')
   @UseGuards(GqlAuthGuard)
@@ -145,7 +148,8 @@ export class ProjectsResolver {
     };
   }
 
-  @Mutation(() => ProjectMemberResponse)
+  // UNASSIGN PROJECT MEMBER
+  @Mutation(() => ProjectMemberResponse, { name: 'unassignProjectMember' })
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Project Member:delete')
   @UseGuards(GqlAuthGuard)
@@ -164,6 +168,7 @@ export class ProjectsResolver {
     };
   }
 
+  // GET USER PROJECTS
   @Query(() => ProjectMembersQueryResponse, { name: 'userProjects' })
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Project:read')

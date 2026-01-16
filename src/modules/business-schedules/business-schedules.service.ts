@@ -28,10 +28,10 @@ import { JwtPayload } from '../auth/jwt.strategy';
 export class BusinessSchedulesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  // GET BUSINESS SCHEDULE BY BUSINESS ID
+  // GET BUSINESS SCHEDULE BY ID
   async findOne(id: number) {
-    const row = await this.prisma.businessSchedule.findFirst({
-      where: { businessId: id },
+    const row = await this.prisma.businessSchedule.findUnique({
+      where: { id },
     });
     if (!row) {
       throw new NotFoundException('BusinessSchedule not found');
@@ -39,12 +39,27 @@ export class BusinessSchedulesService {
     return row;
   }
 
+  // GET ALL BUSINESS SCHEDULES BY BUSINESS ID
+  async findByBusinessId(businessId: number) {
+    const business = await this.prisma.business.findUnique({
+      where: { id: businessId },
+    });
+
+    if (!business) {
+      throw new NotFoundException(`Business not Found with ${businessId}`);
+    }
+
+    return this.prisma.businessSchedule.findMany({
+      where: { businessId },
+    });
+  }
+
   // UPDATE BUSINESS SCHEDULE
   async update({
-    user,
+    businessId,
     updateBusinessScheduleInput,
   }: {
-    user: JwtPayload;
+    businessId: number;
     updateBusinessScheduleInput: UpdateBusinessScheduleInput;
   }) {
     // Fetch current to compare / fill defaults
@@ -60,18 +75,18 @@ export class BusinessSchedulesService {
     const updated = await this.prisma.businessSchedule.upsert({
       where: { id: updateBusinessScheduleInput.id },
       create: {
-        day: updateBusinessScheduleInput.day || 0,
+        dayOfWeek: updateBusinessScheduleInput.dayOfWeek || 0,
         isWeekend: updateBusinessScheduleInput.isWeekend || false,
         startTime: updateBusinessScheduleInput.startTime || '09:00:00',
         endTime: updateBusinessScheduleInput.endTime || '17:00:00',
-        businessId: user.businessId,
+        businessId: businessId,
       },
       update: {
-        day: updateBusinessScheduleInput.day ?? 0,
+        dayOfWeek: updateBusinessScheduleInput.dayOfWeek ?? 0,
         isWeekend: updateBusinessScheduleInput.isWeekend ?? false,
         startTime: updateBusinessScheduleInput.startTime,
         endTime: updateBusinessScheduleInput.endTime,
-        businessId: user.businessId,
+        businessId: businessId,
       },
     });
     return updated;

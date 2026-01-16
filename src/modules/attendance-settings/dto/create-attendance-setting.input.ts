@@ -46,9 +46,9 @@ export class CreateAttendanceSettingInput {
   autoApproval: boolean;
 
   @Field(() => Boolean, {
-    description: 'Whether geo location is enabled',
+    description: 'Whether geolocation is enabled',
     defaultValue: false,
   })
   @IsBoolean()
-  isGeoLocationEnabled: boolean;
+  isGeoFencingEnabled: boolean;
 }

@@ -1,5 +1,13 @@
 // DEPARTMENTS RESOLVER - HANDLES GRAPHQL OPERATIONS FOR DEPARTMENT MANAGEMENT
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  Int,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { DepartmentsService } from './departments.service';
 import {
   Department,
@@ -120,5 +128,17 @@ export class DepartmentsResolver {
       message: `Department deleted successfully`,
       data: result,
     };
+  }
+
+  // RESOLVE IS_DEFAULT FIELD
+  @ResolveField(() => Boolean, { name: 'isDefault' })
+  async isDefault(
+    @Parent() department: Department,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<boolean> {
+    return await this.departmentsService.isDefault({
+      departmentId: department.id,
+      businessId: user.businessId,
+    });
   }
 }

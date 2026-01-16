@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
 import { BusinessSchedule } from 'src/modules/business-schedules/entities/business-schedule.entity';
-import { SubscriptionPlan } from 'src/modules/subscription-plans/entities/subscription-plan.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import { BusinessStatus } from '../enums';
+import { BusinessSubscription } from 'src/modules/business-subscriptions/entities/business-subscription.entity';
 
 @ObjectType()
 export class Business {
@@ -35,20 +34,11 @@ export class Business {
   @Field()
   postcode: string;
 
-  @Field(() => Float, { nullable: true })
-  lat?: number | null;
-
-  @Field(() => Float, { nullable: true })
-  lng?: number | null;
-
   @Field()
-  registrationDate: string;
+  registrationDate: Date;
 
   @Field(() => String, { nullable: true })
   website?: string | null;
-
-  @Field(() => Int)
-  numberOfEmployeesAllowed: number;
 
   @Field(() => String)
   status: BusinessStatus;
@@ -62,11 +52,12 @@ export class Business {
   @Field(() => [BusinessSchedule], { nullable: true })
   businessSchedules?: BusinessSchedule[] | null;
 
-  @Field(() => Int)
-  subscriptionPlanId: number;
+  @Field(() => BusinessSubscription)
+  subscription: BusinessSubscription;
 
-  @Field(() => SubscriptionPlan, { nullable: true })
-  subscriptionPlan?: SubscriptionPlan;
+  @Field(() => [BusinessSubscription])
+  subscriptions: BusinessSubscription[];
+
   @Field()
   createdAt: Date;
 

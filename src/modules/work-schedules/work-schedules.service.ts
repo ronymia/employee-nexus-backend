@@ -40,7 +40,7 @@ export class WorkSchedulesService {
         }
 
         // Check all days 0-6 are present
-        const days = schedules.map((s) => s.day).sort();
+        const days = schedules.map((s) => s.dayOfWeek).sort();
         const expectedDays = [0, 1, 2, 3, 4, 5, 6];
         if (JSON.stringify(days) !== JSON.stringify(expectedDays)) {
           throw new BadRequestException(
@@ -82,7 +82,7 @@ export class WorkSchedulesService {
         }
 
         // Check for duplicate days
-        const scheduledDays = schedules.map((s) => s.day);
+        const scheduledDays = schedules.map((s) => s.dayOfWeek);
         const uniqueDays = new Set(scheduledDays);
         if (scheduledDays.length !== uniqueDays.size) {
           throw new BadRequestException(
@@ -110,7 +110,7 @@ export class WorkSchedulesService {
         }
 
         // Check for duplicate days
-        const flexibleDays = schedules.map((s) => s.day);
+        const flexibleDays = schedules.map((s) => s.dayOfWeek);
         const uniqueFlexibleDays = new Set(flexibleDays);
         if (flexibleDays.length !== uniqueFlexibleDays.size) {
           throw new BadRequestException(
@@ -161,11 +161,10 @@ export class WorkSchedulesService {
       data: {
         ...workScheduleData,
         businessId: user.businessId,
-        createdBy: user.userId,
         status: Status.ACTIVE,
         schedules: {
           create: schedules.map((schedule) => ({
-            day: schedule.day,
+            dayOfWeek: schedule.dayOfWeek,
             isWeekend: schedule.isWeekend,
             timeSlots: {
               create: schedule.timeSlots.map((slot) => ({
@@ -178,7 +177,6 @@ export class WorkSchedulesService {
       },
       include: {
         business: true,
-        creator: true,
         schedules: {
           include: {
             timeSlots: true,
@@ -252,7 +250,6 @@ export class WorkSchedulesService {
           },
           include: {
             business: true,
-            creator: true,
             schedules: {
               include: {
                 timeSlots: true,
@@ -272,7 +269,6 @@ export class WorkSchedulesService {
           take: currentLimit,
           include: {
             business: true,
-            creator: true,
             schedules: {
               include: {
                 timeSlots: true,
@@ -311,7 +307,6 @@ export class WorkSchedulesService {
       where: { id, businessId },
       include: {
         business: true,
-        creator: true,
         schedules: {
           include: {
             timeSlots: true,
@@ -340,7 +335,7 @@ export class WorkSchedulesService {
 
     // Check if the work schedule exists and belongs to the user's business
     const existingSchedule = await this.prisma.workSchedule.findUnique({
-      where: { id, businessId },
+      where: { id: Number(id), businessId },
     });
 
     if (!existingSchedule) {
@@ -383,17 +378,17 @@ export class WorkSchedulesService {
       return await this.prisma.$transaction(async (tx) => {
         // Delete existing day schedules (cascade will delete time slots)
         await tx.daySchedule.deleteMany({
-          where: { workScheduleId: id },
+          where: { workScheduleId: Number(id) },
         });
 
         // Update work schedule with new schedules
         return await tx.workSchedule.update({
-          where: { id, businessId },
+          where: { id: Number(id), businessId },
           data: {
             ...updateData,
             schedules: {
               create: schedules.map((schedule) => ({
-                day: schedule.day,
+                dayOfWeek: schedule.dayOfWeek,
                 isWeekend: schedule.isWeekend,
                 timeSlots: {
                   create: schedule.timeSlots.map((slot) => ({
@@ -406,7 +401,6 @@ export class WorkSchedulesService {
           },
           include: {
             business: true,
-            creator: true,
             schedules: {
               include: {
                 timeSlots: true,
@@ -423,7 +417,6 @@ export class WorkSchedulesService {
       data: updateData,
       include: {
         business: true,
-        creator: true,
         schedules: {
           include: {
             timeSlots: true,
@@ -431,6 +424,22 @@ export class WorkSchedulesService {
         },
       },
     });
+  }
+
+  // CHECK IF WORK SCHEDULE IS DEFAULT - VERIFIES IF WORK SCHEDULE IS SET AS DEFAULT IN SYSTEM DEFAULTS
+  async isDefault({
+    workScheduleId,
+    businessId,
+  }: {
+    workScheduleId: number;
+    businessId: number;
+  }): Promise<boolean> {
+    const systemDefaults = await this.prisma.systemDefaults.findUnique({
+      where: { businessId },
+      select: { defaultWorkScheduleId: true },
+    });
+
+    return systemDefaults?.defaultWorkScheduleId === workScheduleId;
   }
 
   // DELETE WORK SCHEDULE - REMOVES A WORK SCHEDULE RECORD FROM DATABASE
@@ -451,5 +460,60 @@ export class WorkSchedulesService {
     return await this.prisma.workSchedule.delete({
       where: { id, businessId },
     });
+  }
+
+  // GET USER WORK SCHEDULE - RETRIEVES WORK SCHEDULE FOR A SPECIFIC USER
+  async getUserWorkSchedule({
+    user,
+    userId,
+  }: {
+    user: JwtPayload;
+    userId: number;
+  }) {
+    const businessId = user.businessId;
+
+    // Find the employee record for this user with active work schedules
+    const employee = await this.prisma.employee.findUnique({
+      where: {
+        userId,
+      },
+      include: {
+        workSchedules: {
+          where: {
+            isActive: true,
+          },
+          include: {
+            workSchedule: {
+              include: {
+                business: true,
+                schedules: {
+                  include: {
+                    timeSlots: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!employee) {
+      throw new NotFoundException(`Employee with user ID ${userId} not found`);
+    }
+
+    const activeScheduleAssignment = employee.workSchedules[0];
+    if (!activeScheduleAssignment) {
+      throw new NotFoundException(
+        `No work schedule found for employee with user ID ${userId}`,
+      );
+    }
+
+    // Verify the work schedule belongs to the user's business
+    if (activeScheduleAssignment.workSchedule.businessId !== businessId) {
+      throw new NotFoundException(`Work schedule not found for your business`);
+    }
+
+    return activeScheduleAssignment.workSchedule;
   }
 }

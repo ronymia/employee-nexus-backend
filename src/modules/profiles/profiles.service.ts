@@ -29,7 +29,7 @@ export class ProfilesService {
       data: updateProfileInput,
       include: {
         emergencyContact: true,
-        socialLinks: true,
+        socialLink: true,
       },
     });
 
@@ -69,7 +69,7 @@ export class ProfilesService {
   }: {
     updateEmploymentDetailsInput: UpdateEmploymentDetailsInput;
   }) {
-    const { userId, ...rest } = updateEmploymentDetailsInput;
+    const { userId, workSiteIds, ...rest } = updateEmploymentDetailsInput;
 
     // Get employee by Id
     const employee = await this.prisma.employee.findUnique({
@@ -80,11 +80,29 @@ export class ProfilesService {
       throw new NotFoundException('Employee not found');
     }
 
-    // Update employee
+    // Update employee (excluding workSiteIds)
     const updatedEmployee = await this.prisma.employee.update({
       where: { userId: userId },
       data: rest,
     });
+
+    // Handle work sites update if workSiteIds provided
+    if (workSiteIds !== undefined) {
+      // Delete existing work site assignments
+      await this.prisma.employeeWorkSite.deleteMany({
+        where: { userId },
+      });
+
+      // Create new work site assignments
+      // if (workSiteIds.length > 0) {
+      //   await this.prisma.employeeWorkSite.createMany({
+      //     data: workSiteIds.map((workSiteId) => ({
+      //       userId,
+      //       workSiteId,
+      //     })),
+      //   });
+      // }
+    }
 
     return updatedEmployee;
   }

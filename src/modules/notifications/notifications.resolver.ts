@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
@@ -34,9 +32,10 @@ export class NotificationsResolver {
   @Mutation(() => NotificationResponse)
   @RequirePermissions('Notification:create')
   async createNotification(
+    @CurrentUser() user: JwtPayload,
     @Args('createNotificationInput') input: CreateNotificationInput,
   ) {
-    const notification = await this.notificationsService.create(input);
+    const notification = await this.notificationsService.create(user, input);
     return {
       success: true,
       statusCode: HttpStatus.CREATED,
@@ -176,41 +175,4 @@ export class NotificationsResolver {
   //       data: template,
   //     };
   //   }
-
-  // ============ NOTIFICATION PREFERENCE OPERATIONS ============
-
-  @Query(() => NotificationPreferenceResponse, {
-    name: 'notificationPreferences',
-  })
-  @RequirePermissions('Notification:read')
-  async notificationPreferences(@CurrentUser() user: JwtPayload) {
-    const preferences = await this.notificationsService.getPreferences(
-      user.userId,
-    );
-    return {
-      success: true,
-      statusCode: HttpStatus.OK,
-      message: 'Notification preferences retrieved successfully',
-      data: preferences,
-    };
-  }
-
-  @Mutation(() => NotificationPreferenceResponse)
-  @RequirePermissions('Notification:update')
-  async updateNotificationPreferences(
-    @CurrentUser() user: JwtPayload,
-    @Args('updateNotificationPreferenceInput')
-    input: UpdateNotificationPreferenceInput,
-  ) {
-    const preferences = await this.notificationsService.updatePreferences(
-      user.userId,
-      input,
-    );
-    return {
-      success: true,
-      statusCode: HttpStatus.OK,
-      message: 'Notification preferences updated successfully',
-      data: preferences,
-    };
-  }
 }

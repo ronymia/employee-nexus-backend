@@ -74,5 +74,5 @@ export const seedSuperAdmin = async () => {
   }
 
   // Seed notification templates
-  await seedNotificationTemplates();
+  await seedNotificationTemplates(1);
 };

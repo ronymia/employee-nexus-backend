@@ -23,7 +23,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 export class AssetsResolver {
   constructor(private readonly assetsService: AssetsService) {}
 
-  @Mutation(() => AssetResponse)
+  @Mutation(() => AssetResponse, { name: 'createAsset' })
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Asset:create')
   @UseGuards(GqlAuthGuard)

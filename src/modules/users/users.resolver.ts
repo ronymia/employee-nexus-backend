@@ -9,7 +9,12 @@ import {
 } from '@nestjs/graphql';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { User, UserResponse, UsersQueryResponse, UserStatisticsResponse } from './entities/user.entity';
+import {
+  User,
+  UserResponse,
+  UsersQueryResponse,
+  UserStatisticsResponse,
+} from './entities/user.entity';
 import { CreateEmployeeInput } from './dto/create-employee.input';
 import { UpdateEmployeeInput } from './dto/update-employee.input';
 import { QueryUserInput } from './dto/query-user.input';
@@ -19,6 +24,14 @@ import { JwtPayload } from '../auth/jwt.strategy';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
+import { Department } from '../departments/entities/department.entity';
+import { Designation } from '../designations/entities/designation.entity';
+import { EmploymentStatus } from '../employment-status/entities/employment-status.entity';
+import { WorkSite } from '../work-sites/entities/work-site.entity';
+import { WorkSchedule } from '../work-schedules/entities/work-schedule.entity';
+import { Employee } from './entities/employee.entity';
+import { EmployeeSalariesService } from '../employee-salaries/employee-salary.service';
+import { EmployeeSalary } from '../employee-salaries/entities/employee-salary.entity';
 
 @Resolver(() => User)
 @UseGuards(GqlAuthGuard, PermissionsGuard)
@@ -106,10 +119,7 @@ export class UsersResolver {
     if (!businessId) throw new Error('Business ID not found in token');
 
     // GET RESPONSE
-    const result = this.usersService.createEmployee(
-      createEmployeeInput,
-      businessId,
-    );
+    const result = this.usersService.createEmployee(createEmployeeInput, user);
     return {
       success: true,
       statusCode: HttpStatus.CREATED,
@@ -209,5 +219,44 @@ export class UsersResolver {
       message: 'User statistics retrieved successfully',
       data: result,
     };
+  }
+}
+
+@Resolver(() => Employee)
+@UseGuards(GqlAuthGuard, PermissionsGuard)
+export class EmployeeResolver {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly employeeSalariesService: EmployeeSalariesService,
+  ) {}
+
+  @ResolveField(() => Department, { nullable: true })
+  async department(@Parent() employee: Employee) {
+    return await this.usersService.getActiveDepartment(employee.userId);
+  }
+
+  @ResolveField(() => Designation, { nullable: true })
+  async designation(@Parent() employee: Employee) {
+    return await this.usersService.getActiveDesignation(employee.userId);
+  }
+
+  @ResolveField(() => EmploymentStatus, { nullable: true })
+  async employmentStatus(@Parent() employee: Employee) {
+    return await this.usersService.getActiveEmploymentStatus(employee.userId);
+  }
+
+  @ResolveField(() => [WorkSite], { nullable: true })
+  async workSites(@Parent() employee: Employee) {
+    return await this.usersService.getActiveWorkSites(employee.userId);
+  }
+
+  @ResolveField(() => WorkSchedule, { nullable: true })
+  async workSchedule(@Parent() employee: Employee) {
+    return await this.usersService.getActiveWorkSchedule(employee.userId);
+  }
+
+  @ResolveField(() => EmployeeSalary, { nullable: true })
+  async salary(@Parent() employee: Employee) {
+    return await this.employeeSalariesService.getActiveSalary(employee.userId);
   }
 }

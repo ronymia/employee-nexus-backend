@@ -15,6 +15,7 @@ import {
   superAdminPermissions,
 } from './config';
 import { features } from './Database/features';
+import { subscriptionPlans } from './Database/subscription.seeders';
 
 @Injectable()
 export class AppService {
@@ -99,6 +100,36 @@ export class AppService {
             },
           });
         }
+
+        // MODULE REFRESH
+        await this.moduleRefresh();
+
+        // CREATE SUBSCRIPTION PLAN
+        await Promise.all(
+          subscriptionPlans.map(
+            async (plan) =>
+              await prismaTransaction.subscriptionPlan.create({
+                data: {
+                  ...plan,
+                },
+              }),
+          ),
+        );
+
+        // RELATION PLAN WITH FEATURE
+        const subscriptionPlan =
+          await prismaTransaction.subscriptionPlan.findMany({
+            select: {
+              id: true,
+            },
+          });
+        await prismaTransaction.subscriptionPlanFeature.createMany({
+          data: subscriptionPlan.map((plan) => ({
+            subscriptionPlanId: plan.id,
+            featureId: 1,
+          })),
+          skipDuplicates: true,
+        });
 
         // Seed notification templates
         // await seedNotificationTemplates();

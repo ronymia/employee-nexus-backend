@@ -1,5 +1,13 @@
 // WORK SCHEDULES RESOLVER - HANDLES GRAPHQL OPERATIONS FOR WORK SCHEDULE MANAGEMENT
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  Int,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { WorkSchedulesService } from './work-schedules.service';
 import {
   WorkSchedule,
@@ -110,6 +118,7 @@ export class WorkSchedulesResolver {
     @Args('updateWorkScheduleInput')
     updateWorkScheduleInput: UpdateWorkScheduleInput,
   ) {
+    // console.log({ updateWorkScheduleInput });
     const result = await this.workSchedulesService.update({
       user,
       updateWorkScheduleInput,
@@ -138,5 +147,38 @@ export class WorkSchedulesResolver {
       message: `Work schedule deleted successfully`,
       data: result,
     };
+  }
+
+  // GET USER WORK SCHEDULE QUERY
+  @Query(() => WorkScheduleResponse, { name: 'getUserWorkSchedule' })
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('Work Schedule:read')
+  @UseGuards(GqlAuthGuard)
+  async getUserWorkSchedule(
+    @Args('userId', { type: () => Int }) userId: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const result = await this.workSchedulesService.getUserWorkSchedule({
+      user,
+      userId,
+    });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `User work schedule retrieved successfully`,
+      data: result,
+    };
+  }
+
+  // RESOLVE IS_DEFAULT FIELD
+  @ResolveField(() => Boolean, { name: 'isDefault' })
+  async isDefault(
+    @Parent() workSchedule: WorkSchedule,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<boolean> {
+    return await this.workSchedulesService.isDefault({
+      workScheduleId: workSchedule.id,
+      businessId: user.businessId,
+    });
   }
 }

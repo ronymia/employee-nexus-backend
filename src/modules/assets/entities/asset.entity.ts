@@ -20,7 +20,7 @@ export class Asset {
   code: string;
 
   @Field()
-  date: string;
+  date: Date;
 
   @Field({ nullable: true })
   note?: string;

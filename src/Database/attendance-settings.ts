@@ -5,6 +5,6 @@ export const defaultAttendanceSettings = {
   punchInOutAlert: true,
   punchInOutInterval: 1,
   autoApproval: false,
-  isGeoLocationEnabled: false,
+  isGeoFencingEnabled: false,
 };
 // alert_area: ['web', 'system'],

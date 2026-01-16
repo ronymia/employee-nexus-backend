@@ -87,7 +87,12 @@ export class LeaveTypesService {
         },
       });
 
-      return result;
+      return {
+        ...result,
+        employmentStatuses: result?.employmentStatuses.map(
+          (es) => es.employmentStatus,
+        ),
+      };
     });
   }
 

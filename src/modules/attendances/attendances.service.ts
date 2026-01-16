@@ -1,17 +1,21 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateAttendanceInput } from './dto/create-attendance.input';
-import { UpdateAttendanceInput } from './dto/update-attendance.input';
-import { QueryAttendanceInput } from './dto/query-attendance.input';
-import { CreateAttendancePunchInput } from './dto/create-attendance-punch.input';
-import { UpdateAttendancePunchInput } from './dto/update-attendance-punch.input';
 import { PrismaService } from '../prisma/prisma.service';
+import { QueryAttendanceInput } from './dto/query-attendance.input';
 import { JwtPayload } from '../auth/jwt.strategy';
-import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
+import * as dayjs from 'dayjs';
+import { UpdateAttendanceInput } from './dto/update-attendance.input';
+import { CreateAttendanceInput } from './dto/create-attendance.input';
+import { Prisma } from 'generated/prisma';
 import { NotificationsService } from '../notifications/notifications.service';
-import { RequestAttendanceInput } from './dto/request-attendance.input';
-import { ApproveAttendanceInput } from './dto/approve-attendance.input';
-import { NotificationChannel, NotificationType } from '../notifications/enums';
+import { minutesToHoursAndMinutes } from 'src/utils/time.utils';
+import * as isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import * as isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class AttendancesService {
@@ -20,104 +24,128 @@ export class AttendancesService {
     private readonly notificationsService: NotificationsService,
   ) {}
 
-  // CREATE ATTENDANCE
-  async attendanceRequest({
-    user,
-    createAttendanceInput,
-  }: {
-    user: JwtPayload;
-    createAttendanceInput: RequestAttendanceInput;
-  }) {
-    // EXTRACT PUNCH RECORDS AND ATTENDANCE DATA
-    const { punchRecords, ...attendanceData } = createAttendanceInput;
+  /**
+   * Calculate work minutes between punchIn and punchOut using dayjs
+   * Returns minutes as a number
+   */
+  private calculateWorkMinutes(punchIn: Date, punchOut: Date): number {
+    const start = dayjs(punchIn);
+    const end = dayjs(punchOut);
+    return end.diff(start, 'minute');
+  }
 
-    // CHECK IF ATTENDANCE ALREADY EXISTS FOR THIS USER AND DATE
-    const existingAttendance = await this.prisma.attendance.findFirst({
-      where: {
-        userId: attendanceData.userId,
-        date: new Date(attendanceData.date),
-      },
-    });
+  /**
+   * Calculate total minutes from punch records
+   */
+  private calculateTotalMinutes(
+    punchRecords: {
+      punchIn: Date;
+      punchOut?: Date | null;
+      breakMinutes?: number | null;
+    }[],
+  ): {
+    totalMinutes: number;
+    breakMinutes: number;
+  } {
+    let totalMinutes = 0;
+    let breakMinutes = 0;
 
-    if (existingAttendance) {
-      throw new Error('Attendance already exists for this user and date');
-    }
-
-    if (!punchRecords) {
-      throw new Error('Punch records are required');
-    }
-
-    const existingUser = await this.prisma.user.findUnique({
-      where: { id: attendanceData.userId },
-      include: {
-        employee: {
-          include: {
-            department: true,
-          },
-        },
-        business: {
-          select: { id: true, ownerId: true },
-        },
-      },
-    });
-    if (!existingUser) {
-      throw new Error('User not found');
-    }
-    if (existingUser.businessId !== user.businessId) {
-      throw new Error('User does not belong to this business');
-    }
-
-    return await this.prisma.$transaction(async (prisma) => {
-      const attendance = await prisma.attendance.create({
-        data: {
-          ...attendanceData,
-          status: 'pending',
-          ...(punchRecords && {
-            punchRecords: {
-              create: punchRecords.map(
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                ({ attendanceId, ...punchData }) => punchData,
-              ),
-            },
-          }),
-        },
-        include: {
-          user: {
-            include: {
-              profile: true,
-            },
-          },
-          punchRecords: {
-            include: {
-              project: true,
-              workSite: true,
-            },
-          },
-        },
-      });
-
-      // Send notification to user
-      try {
-        await this.notificationsService.create({
-          type: NotificationType.ATTENDANCE,
-          title: 'Attendance Requested',
-          message: `Your attendance for ${new Date(attendance.date).toLocaleDateString()} has been recorded successfully.`,
-          priority: 'LOW' as any,
-          userId:
-            (existingUser?.employee?.department?.managerId as number) ||
-            (existingUser?.business?.ownerId as number),
-          channels: [NotificationChannel.IN_APP, NotificationChannel.PUSH],
-          businessId: user.businessId,
-          entityType: 'attendance',
-          entityId: attendance.id,
-        });
-      } catch (error) {
-        console.error('Failed to send attendance notification:', error);
+    for (const punch of punchRecords) {
+      if (punch?.punchIn && punch?.punchOut) {
+        const minutes = this.calculateWorkMinutes(
+          punch.punchIn,
+          punch.punchOut,
+        );
+        totalMinutes += minutes;
       }
+      if (punch?.breakMinutes) {
+        breakMinutes += Number(punch.breakMinutes);
+      }
+    }
 
-      return attendance;
+    return { totalMinutes, breakMinutes };
+  }
+
+  /**
+   * Find manager or owner to notify
+   */
+  private async findNotificationRecipient(
+    userId: number,
+    businessId: number,
+  ): Promise<number | null> {
+    // Get user's primary department
+    const userDepartment = await this.prisma.employeeDepartment.findFirst({
+      where: {
+        userId,
+        isActive: true,
+        isPrimary: true,
+      },
+      include: {
+        department: {
+          include: {
+            manager: true,
+          },
+        },
+      },
+    });
+
+    // If department has a manager, return manager's ID
+    if (userDepartment?.department?.managerId) {
+      return userDepartment.department.managerId;
+    }
+
+    // Otherwise, find business owner
+    const business = await this.prisma.business.findUnique({
+      where: { id: businessId },
+      select: { ownerId: true },
+    });
+
+    return business?.ownerId || null;
+  }
+
+  /**
+   * Get employee's active schedule for a specific date
+   * Returns the schedule with workSchedule included
+   */
+  private async getEmployeeSchedule(userId: number, date: Date) {
+    return await this.prisma.employeeSchedule.findFirst({
+      where: {
+        userId,
+        isActive: true,
+        startDate: {
+          lte: date,
+        },
+        OR: [
+          { endDate: null },
+          {
+            endDate: {
+              gte: date,
+            },
+          },
+        ],
+      },
+      include: {
+        workSchedule: true,
+      },
     });
   }
+
+  /**
+   * Apply unpaid break deduction if applicable
+   * Returns adjusted total minutes
+   */
+  private applyBreakDeduction(
+    totalMinutes: number,
+    employeeSchedule: Awaited<ReturnType<typeof this.getEmployeeSchedule>>,
+  ): number {
+    if (employeeSchedule?.workSchedule.breakType === 'UNPAID') {
+      const scheduleBreakMinutes =
+        employeeSchedule.workSchedule.breakMinutes || 0;
+      return Math.max(0, totalMinutes - scheduleBreakMinutes);
+    }
+    return totalMinutes;
+  }
+
   // CREATE ATTENDANCE
   async create({
     user,
@@ -126,56 +154,89 @@ export class AttendancesService {
     user: JwtPayload;
     createAttendanceInput: CreateAttendanceInput;
   }) {
-    // EXTRACT PUNCH RECORDS AND ATTENDANCE DATA
     const { punchRecords, ...attendanceData } = createAttendanceInput;
 
-    return await this.prisma.$transaction(async (prisma) => {
-      const attendance = await prisma.attendance.create({
-        data: {
-          ...attendanceData,
-          ...(punchRecords && {
-            punchRecords: {
-              create: punchRecords.map(
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                ({ attendanceId, ...punchData }) => punchData,
-              ),
-            },
-          }),
-        },
-        include: {
-          user: {
-            include: {
-              profile: true,
-            },
-          },
-          punchRecords: {
-            include: {
-              project: true,
-              workSite: true,
-            },
-          },
-        },
-      });
+    // Calculate totals if punch records are provided
+    let totalMinutes = 0;
+    let breakMinutes = 0;
 
-      // Send notification to user
-      try {
-        await this.notificationsService.create({
-          type: NotificationType.ATTENDANCE,
-          title: 'Attendance Recorded',
-          message: `Your attendance for ${new Date(attendance.date).toLocaleDateString()} has been recorded successfully.`,
-          priority: 'LOW' as any,
-          userId: attendanceData.userId,
-          channels: [NotificationChannel.IN_APP, NotificationChannel.PUSH],
-          businessId: user.businessId,
-          entityType: 'attendance',
-          entityId: attendance.id,
-        });
-      } catch (error) {
-        console.error('Failed to send attendance notification:', error);
-      }
+    if (punchRecords && punchRecords.length > 0) {
+      const calculated = this.calculateTotalMinutes(punchRecords);
+      totalMinutes = calculated.totalMinutes;
+      breakMinutes = calculated.breakMinutes;
+    }
 
-      return attendance;
+    // Get employee's active schedule and apply break deduction if unpaid
+    const employeeSchedule = await this.getEmployeeSchedule(
+      attendanceData.userId,
+      attendanceData.date,
+    );
+    totalMinutes = this.applyBreakDeduction(totalMinutes, employeeSchedule);
+
+    const attendance = await this.prisma.attendance.create({
+      data: {
+        ...attendanceData,
+        totalMinutes,
+        breakMinutes,
+        punchRecords: punchRecords
+          ? {
+              create: punchRecords.map((punch) => {
+                const workMinutes =
+                  punch.punchIn && punch.punchOut
+                    ? this.calculateWorkMinutes(punch.punchIn, punch.punchOut)
+                    : 0;
+                return {
+                  ...punch,
+                  punchInBy: user.userId,
+                  punchOutBy: user.userId,
+                  workMinutes,
+                };
+              }),
+            }
+          : undefined,
+      },
+      include: {
+        user: {
+          include: {
+            profile: true,
+          },
+        },
+        punchRecords: {
+          include: {
+            project: true,
+            workSite: true,
+          },
+        },
+      },
     });
+
+    // Send notification to manager or owner
+    try {
+      const recipientId = await this.findNotificationRecipient(
+        attendance.userId,
+        user.businessId,
+      );
+
+      if (recipientId) {
+        await this.notificationsService.sendFromTemplate(
+          'attendance_created',
+          recipientId,
+          {
+            employeeName: attendance.user.profile?.fullName || 'Employee',
+            date: dayjs(attendance.date).format('MMM DD, YYYY'),
+            workTime: minutesToHoursAndMinutes(totalMinutes),
+            entityType: 'attendance',
+            entityId: attendance.id.toString(),
+            actionUrl: `/attendances/${attendance.id}`,
+          },
+          user.businessId,
+        );
+      }
+    } catch (error) {
+      console.error('Failed to send attendance creation notification:', error);
+    }
+
+    return attendance;
   }
 
   // FIND ALL ATTENDANCES
@@ -184,74 +245,181 @@ export class AttendancesService {
     query,
   }: {
     user: JwtPayload;
-    query: QueryAttendanceInput;
+    query?: QueryAttendanceInput;
   }) {
-    console.log(user);
-    const { pagination, startDate, endDate, status } = query ?? {};
+    const businessId = user.businessId;
+    const { pagination, ...filters } = query ?? {};
 
+    // PAGINATION
     const { page, skip, limit, sortBy, sortOrder } =
       paginationHelpers.calculatePagination(pagination || {});
 
+    // FILTER
+    const { status, startDate, endDate, userId } = filters;
+
+    // QUERY BUILDER
     const andCondition: any[] = [];
 
-    if (query?.userId) {
-      andCondition.push({ userId: query.userId });
+    // Filter by userId if provided, otherwise show all in business
+    if (userId) {
+      andCondition.push({ userId });
+    } else {
+      // Show all attendances for users in this business
+      andCondition.push({
+        user: {
+          businessId,
+        },
+      });
     }
+
+    // Add status filter
     if (status) {
-      // Filter by status
       andCondition.push({ status });
     }
 
-    // Filter by date range
-    if (startDate && endDate) {
-      andCondition.push({
-        date: {
-          gte: startDate,
-          lte: endDate,
-        },
-      });
-    } else if (startDate) {
-      andCondition.push({
-        date: {
-          gte: startDate,
-        },
-      });
-    } else if (endDate) {
-      andCondition.push({
-        date: {
-          lte: endDate,
-        },
-      });
+    // Add date range filter
+    if (startDate || endDate) {
+      const dateFilter: { gte?: Date; lte?: Date } = {};
+      if (startDate) {
+        dateFilter.gte = dayjs(startDate).toDate();
+      }
+      if (endDate) {
+        dateFilter.lte = dayjs(endDate).toDate();
+      }
+      andCondition.push({ date: dateFilter });
     }
 
-    const whereCondition: Prisma.AttendanceWhereInput = {
-      AND: andCondition,
-    };
+    const whereCondition: Prisma.AttendanceWhereInput = andCondition.length
+      ? { AND: andCondition }
+      : {};
 
-    const result = await this.prisma.attendance.findMany({
+    const result = !limit
+      ? await this.prisma.attendance.findMany({
+          where: whereCondition,
+          include: {
+            user: {
+              include: {
+                profile: true,
+              },
+            },
+            punchRecords: {
+              include: {
+                project: true,
+                workSite: true,
+              },
+            },
+          },
+        })
+      : await this.prisma.attendance.findMany({
+          where: whereCondition,
+          skip,
+          take: limit,
+          orderBy: {
+            [sortBy]: sortOrder,
+          },
+          include: {
+            user: {
+              include: {
+                profile: true,
+              },
+            },
+            punchRecords: {
+              include: {
+                project: true,
+                workSite: true,
+              },
+            },
+          },
+        });
+
+    // META
+    const total = await this.prisma.attendance.count({
       where: whereCondition,
-      // skip,
-      // take: limit,
+    });
+
+    // OPTIMIZE: Batch fetch employee schedules to avoid N+1 query problem
+    const uniqueUserIds = [...new Set(result.map((a) => a.userId))];
+    const uniqueDates = [...new Set(result.map((a) => a.date))];
+
+    // Get all employee schedules in one query
+    const employeeSchedules = await this.prisma.employeeSchedule.findMany({
+      where: {
+        userId: { in: uniqueUserIds },
+        isActive: true,
+        startDate: {
+          lte: new Date(Math.max(...uniqueDates.map((d) => d.getTime()))),
+        },
+      },
       orderBy: {
-        [sortBy]: sortOrder,
+        startDate: 'desc',
       },
       include: {
-        user: {
+        workSchedule: {
           include: {
-            profile: true,
-          },
-        },
-        punchRecords: {
-          include: {
-            project: true,
-            workSite: true,
+            schedules: {
+              include: {
+                timeSlots: true,
+              },
+            },
           },
         },
       },
     });
 
-    const total = await this.prisma.attendance.count({
-      where: whereCondition,
+    // Create a map of userId -> schedules for fast lookup
+    const schedulesByUser = new Map<number, typeof employeeSchedules>();
+    for (const schedule of employeeSchedules) {
+      if (!schedulesByUser.has(schedule.userId)) {
+        schedulesByUser.set(schedule.userId, []);
+      }
+      schedulesByUser.get(schedule.userId)!.push(schedule);
+    }
+
+    // Calculate schedule minutes for each attendance
+    const resultWithSchedules = result.map((attendance) => {
+      let scheduleMinutes = 0;
+      const attendanceDay = dayjs(attendance.date).day();
+
+      // Find the most recent active schedule for this user on this date
+      const userSchedules = schedulesByUser.get(attendance.userId) || [];
+      const activeSchedule = userSchedules.find(
+        (s) =>
+          s.isActive &&
+          dayjs(s.startDate).isSameOrBefore(attendance.date, 'day') &&
+          (!s.endDate ||
+            dayjs(s.endDate).isSameOrAfter(attendance.date, 'day')),
+      );
+
+      if (activeSchedule) {
+        const daySchedule = activeSchedule.workSchedule.schedules.find(
+          (s) => s.dayOfWeek === attendanceDay,
+        );
+
+        if (daySchedule?.timeSlots && daySchedule.timeSlots.length > 0) {
+          // Calculate total time from all time slots
+          const totalSlotMinutes = daySchedule.timeSlots.reduce(
+            (total, slot) => {
+              // Parse time strings (format: "HH:mm" or "HH:mm:ss")
+              const start = dayjs(slot.startTime, ['HH:mm:ss', 'HH:mm'], true);
+              const end = dayjs(slot.endTime, ['HH:mm:ss', 'HH:mm'], true);
+
+              if (!start.isValid() || !end.isValid()) {
+                return total;
+              }
+
+              return total + end.diff(start, 'minute');
+            },
+            0,
+          );
+
+          scheduleMinutes = totalSlotMinutes;
+        }
+      }
+
+      return {
+        ...attendance,
+        scheduleMinutes,
+      };
     });
 
     return {
@@ -260,18 +428,113 @@ export class AttendancesService {
         limit: Number(limit),
         skip: Number(skip),
         total: Number(total),
-        totalPages: Math.ceil(total / limit),
+        totalPages: limit ? Math.ceil(total / limit) : 1,
       },
-      data: result,
+      data: resultWithSchedules,
     };
   }
 
   // FIND ONE ATTENDANCE
-  async findOne({ id }: { id: number }) {
-    // console.log(user)
-    const result = await this.prisma.attendance.findUnique({
-      where: {
-        id,
+  async findOne({ user, id }: { user: JwtPayload; id: number }) {
+    const attendance = await this.prisma.attendance.findUnique({
+      where: { id },
+      include: {
+        user: {
+          include: {
+            profile: true,
+          },
+        },
+        punchRecords: {
+          include: {
+            project: true,
+            workSite: true,
+          },
+        },
+      },
+    });
+
+    if (!attendance) {
+      throw new NotFoundException(`Attendance with ID ${id} not found`);
+    }
+
+    // Verify user has access to this attendance
+    if (user.businessId !== attendance.user.businessId) {
+      throw new NotFoundException(`Attendance with ID ${id} not found`);
+    }
+
+    return attendance;
+  }
+
+  // UPDATE ATTENDANCE
+  async update({
+    user,
+    updateAttendanceInput,
+  }: {
+    user: JwtPayload;
+    updateAttendanceInput: UpdateAttendanceInput;
+  }) {
+    const { id, punchRecords, ...attendanceData } = updateAttendanceInput;
+
+    // Verify attendance exists and user has access
+    await this.findOne({ user, id });
+
+    // If punch records are updated, recalculate totals
+    let totalMinutes = 0;
+    let breakMinutes = 0;
+
+    if (punchRecords && punchRecords.length > 0) {
+      const calculated = this.calculateTotalMinutes(punchRecords);
+      totalMinutes = calculated.totalMinutes;
+      breakMinutes = calculated.breakMinutes;
+
+      // Handle punch record updates
+      // Delete existing punch records and create new ones
+      await this.prisma.attendancePunch.deleteMany({
+        where: { attendanceId: id },
+      });
+
+      // Get employee's active schedule and apply break deduction if unpaid
+      const attendance = await this.prisma.attendance.findUnique({
+        where: { id },
+        select: { userId: true, date: true },
+      });
+
+      if (attendance) {
+        const employeeSchedule = await this.getEmployeeSchedule(
+          attendance.userId,
+          attendance.date,
+        );
+        totalMinutes = this.applyBreakDeduction(totalMinutes, employeeSchedule);
+      }
+    }
+
+    const updatedAttendance = await this.prisma.attendance.update({
+      where: { id },
+      data: {
+        ...attendanceData,
+        totalMinutes,
+        breakMinutes,
+        punchRecords: punchRecords?.length
+          ? {
+              create: punchRecords.map((punch) => {
+                const workMinutes =
+                  punch.punchIn && punch.punchOut
+                    ? this.calculateWorkMinutes(punch.punchIn, punch.punchOut)
+                    : 0;
+                return {
+                  projectId: punch.projectId,
+                  workSiteId: punch.workSiteId,
+                  punchIn: punch.punchIn,
+                  punchOut: punch.punchOut,
+                  punchInBy: user.userId,
+                  punchOutBy: punch.punchOut ? user.userId : null,
+                  workMinutes,
+                  breakMinutes: punch.breakMinutes || 0,
+                  notes: punch.notes,
+                };
+              }),
+            }
+          : undefined,
       },
       include: {
         user: {
@@ -288,202 +551,330 @@ export class AttendancesService {
       },
     });
 
-    if (!result) {
-      throw new NotFoundException(`Attendance with ID ${id} not found`);
+    // Send notification to manager or owner
+    try {
+      const recipientId = await this.findNotificationRecipient(
+        updatedAttendance.userId,
+        user.businessId,
+      );
+
+      if (recipientId) {
+        await this.notificationsService.sendFromTemplate(
+          'attendance_updated',
+          recipientId,
+          {
+            employeeName:
+              updatedAttendance.user.profile?.fullName || 'Employee',
+            date: dayjs(updatedAttendance.date).format('MMM DD, YYYY'),
+            workTime: minutesToHoursAndMinutes(totalMinutes),
+            entityType: 'attendance',
+            entityId: updatedAttendance.id.toString(),
+            actionUrl: `/attendances/${updatedAttendance.id}`,
+          },
+          user.businessId,
+        );
+      }
+    } catch (error) {
+      console.error('Failed to send attendance update notification:', error);
     }
 
-    return result;
-  }
-
-  // UPDATE ATTENDANCE
-  async update({
-    updateAttendanceInput,
-  }: {
-    updateAttendanceInput: UpdateAttendanceInput;
-  }) {
-    const { id, punchRecords, ...data } = updateAttendanceInput;
-
-    // Check if attendance exists and belongs to user
-    await this.findOne({ id });
-
-    return await this.prisma.$transaction(async (prisma) => {
-      // Update attendance without punch records first
-      await prisma.attendance.update({
-        where: { id },
-        data,
-      });
-
-      // Update punch records if provided
-      if (punchRecords && punchRecords.length > 0) {
-        for (const punchRecord of punchRecords) {
-          const {
-            id: punchId,
-            attendanceId,
-            ...punchData
-          } = punchRecord as any;
-
-          if (punchId) {
-            // Update existing punch record
-            await prisma.attendancePunch.update({
-              where: { id: punchId, AND: { attendanceId } },
-              data: punchData,
-            });
-          } else {
-            // Create new punch record
-            await prisma.attendancePunch.create({
-              data: {
-                ...punchData,
-                attendanceId: id,
-              },
-            });
-          }
-        }
-      }
-
-      // Fetch and return the updated attendance with punch records
-      return await prisma.attendance.findUnique({
-        where: { id },
-        include: {
-          user: {
-            include: {
-              profile: true,
-            },
-          },
-          punchRecords: {
-            include: {
-              project: true,
-              workSite: true,
-            },
-          },
-        },
-      });
-    });
+    return updatedAttendance;
   }
 
   // DELETE ATTENDANCE
-  async remove({ id }: { id: number }) {
-    // Check if attendance exists and belongs to user
-    await this.findOne({ id });
+  async remove({ user, id }: { user: JwtPayload; id: number }) {
+    const attendance = await this.findOne({ user, id });
 
-    return await this.prisma.attendance.delete({
+    const deletedAttendance = await this.prisma.attendance.delete({
       where: { id },
-    });
-  }
-
-  // CREATE PUNCH RECORD
-  async createPunch({
-    createAttendancePunchInput,
-  }: {
-    createAttendancePunchInput: CreateAttendancePunchInput;
-  }) {
-    const { attendanceId, ...data } = createAttendancePunchInput;
-
-    // Verify attendance belongs to user
-    await this.findOne({ id: attendanceId });
-
-    return await this.prisma.attendancePunch.create({
-      data: {
-        ...data,
-        attendanceId,
-      },
       include: {
-        attendance: true,
-        project: true,
-        workSite: true,
+        user: {
+          include: {
+            profile: true,
+          },
+        },
       },
     });
+
+    // Send notification to manager or owner
+    try {
+      const recipientId = await this.findNotificationRecipient(
+        attendance.userId,
+        user.businessId,
+      );
+
+      if (recipientId) {
+        await this.notificationsService.sendFromTemplate(
+          'attendance_deleted',
+          recipientId,
+          {
+            employeeName:
+              deletedAttendance.user.profile?.fullName || 'Employee',
+            date: dayjs(attendance.date).format('MMM DD, YYYY'),
+            entityType: 'attendance',
+            entityId: id.toString(),
+            actionUrl: `/attendances`,
+          },
+          user.businessId,
+        );
+      }
+    } catch (error) {
+      console.error('Failed to send attendance deletion notification:', error);
+    }
+
+    return deletedAttendance;
   }
 
-  // UPDATE PUNCH RECORD
-  async updatePunch({
+  // PUNCH IN
+  async punchIn({
     user,
-    updateAttendancePunchInput,
+    data,
   }: {
     user: JwtPayload;
-    updateAttendancePunchInput: UpdateAttendancePunchInput;
+    data: {
+      projectId?: number;
+      workSiteId?: number;
+      punchInIp?: string;
+      punchInLat?: number;
+      punchInLng?: number;
+      punchInDevice?: string;
+      notes?: string;
+    };
   }) {
-    const { id, ...data } = updateAttendancePunchInput;
+    const today = dayjs().format('YYYY-MM-DD');
+    const userId = user.userId;
 
-    // Verify punch exists and belongs to user's attendance
-    const punch = await this.prisma.attendancePunch.findFirst({
+    // Find or create attendance record for today
+    let attendance = await this.prisma.attendance.findFirst({
       where: {
-        id,
-        attendance: {
-          userId: user.userId,
-        },
+        userId,
+        date: new Date(today),
       },
     });
 
-    if (!punch) {
-      throw new NotFoundException(`Attendance punch with ID ${id} not found`);
+    if (!attendance) {
+      attendance = await this.prisma.attendance.create({
+        data: {
+          userId,
+          date: new Date(today),
+          totalMinutes: 0,
+          breakMinutes: 0,
+          status: 'pending',
+        },
+      });
     }
 
-    return await this.prisma.attendancePunch.update({
-      where: { id },
-      data,
+    // Create punch record
+    const punchRecord = await this.prisma.attendancePunch.create({
+      data: {
+        attendanceId: attendance.id,
+        punchInBy: user.userId,
+        punchIn: new Date(),
+        ...data,
+      },
       include: {
         attendance: true,
         project: true,
         workSite: true,
       },
     });
+
+    // Send notification to manager or owner
+    try {
+      const recipientId = await this.findNotificationRecipient(
+        userId,
+        user.businessId,
+      );
+      if (recipientId) {
+        const userProfile = await this.prisma.user.findUnique({
+          where: { id: userId },
+          include: { profile: true },
+        });
+
+        await this.notificationsService.sendFromTemplate(
+          'attendance_punch_in',
+          recipientId,
+          {
+            employeeName: userProfile?.profile?.fullName || 'Employee',
+            checkInTime: dayjs(punchRecord.punchIn).format('h:mm A'),
+            date: dayjs(punchRecord.punchIn).format('MMM DD, YYYY'),
+            entityType: 'attendance',
+            entityId: attendance.id.toString(),
+            actionUrl: `/attendances/${attendance.id}`,
+          },
+          user.businessId,
+        );
+      }
+    } catch (error) {
+      // Log error but don't fail the punch in
+      console.error('Failed to send punch in notification:', error);
+    }
+
+    return punchRecord;
   }
 
-  // DELETE PUNCH RECORD
-  async removePunch({ user, id }: { user: JwtPayload; id: number }) {
-    // Verify punch exists and belongs to user's attendance
-    const punch = await this.prisma.attendancePunch.findFirst({
-      where: {
-        id,
-        attendance: {
-          userId: user.userId,
-        },
-      },
+  // PUNCH OUT
+  async punchOut({
+    user,
+    punchId,
+    data,
+  }: {
+    user: JwtPayload;
+    punchId: number;
+    data: {
+      punchOutIp?: string;
+      punchOutLat?: number;
+      punchOutLng?: number;
+      punchOutDevice?: string;
+      breakMinutes?: number;
+      notes?: string;
+    };
+  }) {
+    // Find punch record
+    const punch = await this.prisma.attendancePunch.findUnique({
+      where: { id: punchId },
+      include: { attendance: true },
     });
 
     if (!punch) {
-      throw new NotFoundException(`Attendance punch with ID ${id} not found`);
+      throw new NotFoundException('Punch record not found');
     }
 
-    return await this.prisma.attendancePunch.delete({
-      where: { id },
-    });
-  }
+    if (punch.attendance.userId !== user.userId) {
+      throw new NotFoundException('Punch record not found');
+    }
 
-  // APPROVE ATTENDANCE
-  async approveAttendance({ attendanceId: id }: { attendanceId: number }) {
-    // Verify punch exists and belongs to user's attendance
-    const attendance = await this.prisma.attendance.findUnique({
-      where: {
-        id: id,
+    if (punch.punchOut) {
+      throw new Error('Already punched out');
+    }
+
+    const punchOut = new Date();
+    const workMinutes = this.calculateWorkMinutes(punch.punchIn, punchOut);
+
+    // Update punch record
+    const updatedPunch = await this.prisma.attendancePunch.update({
+      where: { id: punchId },
+      data: {
+        punchOut,
+        punchOutBy: user.userId,
+        workMinutes,
+        breakMinutes: data.breakMinutes || 0,
+        punchOutIp: data.punchOutIp,
+        punchOutLat: data.punchOutLat,
+        punchOutLng: data.punchOutLng,
+        punchOutDevice: data.punchOutDevice,
+        notes: data.notes || punch.notes,
+      },
+      include: {
+        attendance: true,
+        project: true,
+        workSite: true,
       },
     });
 
-    if (!attendance) {
-      throw new NotFoundException(`Attendance punch with ID ${id} not found`);
-    }
-
-    return await this.prisma.attendance.update({
-      where: { id: id },
-      data: { status: 'approved' },
+    // Update attendance totals
+    const allPunches = await this.prisma.attendancePunch.findMany({
+      where: { attendanceId: punch.attendanceId },
     });
-  }
-  // APPROVE ATTENDANCE
-  async rejectAttendance({ attendanceId: id }: { attendanceId: number }) {
-    // Verify punch exists and belongs to user's attendance
-    const attendance = await this.prisma.attendance.findUnique({
-      where: {
-        id: id,
+
+    const totals = this.calculateTotalMinutes(allPunches);
+    let finalTotalMinutes = totals.totalMinutes;
+
+    // Get employee's active schedule and apply break deduction if unpaid
+    const employeeSchedule = await this.getEmployeeSchedule(
+      punch.attendance.userId,
+      punch.attendance.date,
+    );
+    finalTotalMinutes = this.applyBreakDeduction(
+      finalTotalMinutes,
+      employeeSchedule,
+    );
+
+    await this.prisma.attendance.update({
+      where: { id: punch.attendanceId },
+      data: {
+        totalMinutes: finalTotalMinutes,
+        breakMinutes: totals.breakMinutes,
       },
     });
 
-    if (!attendance) {
-      throw new NotFoundException(`Attendance punch with ID ${id} not found`);
+    // Send notification to manager or owner about punch out
+    try {
+      const recipientId = await this.findNotificationRecipient(
+        punch.attendance.userId,
+        user.businessId,
+      );
+      if (recipientId) {
+        const userProfile = await this.prisma.user.findUnique({
+          where: { id: punch.attendance.userId },
+          include: { profile: true },
+        });
+
+        await this.notificationsService.sendFromTemplate(
+          'attendance_punch_out',
+          recipientId,
+          {
+            employeeName: userProfile?.profile?.fullName || 'Employee',
+            checkOutTime: dayjs(punchOut).format('h:mm A'),
+            workTime: minutesToHoursAndMinutes(workMinutes),
+            entityType: 'attendance',
+            entityId: punch.attendanceId.toString(),
+            actionUrl: `/attendances/${punch.attendanceId}`,
+          },
+          user.businessId,
+        );
+      }
+    } catch (error) {
+      // Log error but don't fail the punch out
+      console.error('Failed to send punch out notification:', error);
     }
 
-    return await this.prisma.attendance.update({
-      where: { id: id },
-      data: { status: 'rejected' },
+    return updatedPunch;
+  }
+
+  // GET USER'S ATTENDANCE SUMMARY
+  async getAttendanceSummary({
+    user,
+    userId,
+    startDate,
+    endDate,
+  }: {
+    user: JwtPayload;
+    userId?: number;
+    startDate: Date;
+    endDate: Date;
+  }) {
+    const targetUserId = userId || user.userId;
+
+    const attendances = await this.prisma.attendance.findMany({
+      where: {
+        userId: targetUserId,
+        date: {
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+        },
+      },
+      include: {
+        punchRecords: true,
+      },
     });
+
+    const summary = {
+      totalDays: attendances.length,
+      totalMinutes: attendances.reduce((sum, a) => sum + a.totalMinutes, 0),
+      totalBreakMinutes: attendances.reduce(
+        (sum, a) => sum + a.breakMinutes,
+        0,
+      ),
+      presentDays: attendances.filter((a) => a.status === 'present').length,
+      absentDays: attendances.filter((a) => a.status === 'absent').length,
+      lateDays: attendances.filter((a) => a.status === 'late').length,
+      halfDays: attendances.filter((a) => a.status === 'half_day').length,
+    };
+
+    return {
+      summary,
+      attendances,
+    };
   }
 }

@@ -12,6 +12,7 @@ export enum PermissionResource {
   FEATURE = 'Feature',
   PERMISSION = 'Permission',
   SUBSCRIPTION_PLAN = 'Subscription Plan',
+  BUSINESS_SUBSCRIPTION = 'BusinessSubscription',
   EMPLOYMENT_STATUS = 'Employment Status',
   DESIGNATION = 'Designation',
   JOB_TYPE = 'Job Type',

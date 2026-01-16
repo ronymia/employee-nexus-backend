@@ -1,27 +1,30 @@
 export const defaultDesignations = [
-  { name: 'CEO', description: 'Chief Executive Officer' },
   {
-    name: 'HR Manager',
-    description: 'Human Resources Manager',
+    name: 'Senior PHP Developer',
+    description: 'Senior PHP Developer',
+  },
+  {
+    name: 'Frontend Developer',
+    description: 'Frontend Developer',
   },
   {
     name: 'Finance Manager',
     description: 'Finance Manager',
   },
   {
-    name: 'Sales Representative',
-    description: 'Sales Representative',
+    name: 'Backend Developer',
+    description: 'Backend Developer',
   },
   {
-    name: 'IT Specialist',
-    description: 'Information Technology Specialist',
+    name: 'Full Stack Developer',
+    description: 'Full Stack Developer',
   },
   {
-    name: 'Marketing Coordinator',
-    description: 'Marketing Coordinator',
+    name: 'Web Designer',
+    description: 'Web Designer',
   },
   {
-    name: 'Customer Service Representative',
-    description: 'Customer Service Representative',
+    name: 'HR Manager',
+    description: 'HR Manager',
   },
 ];

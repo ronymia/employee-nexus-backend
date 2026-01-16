@@ -13,32 +13,29 @@ export class AttendancePunch {
 
   @Field(() => Attendance, {
     description: 'Attendance associated with this punch',
+    nullable: true,
   })
-  attendance: Attendance;
+  attendance?: Attendance;
 
   @Field(() => Int, {
-    nullable: true,
     description: 'Project ID if working on a project',
   })
-  projectId?: number;
+  projectId: number;
 
   @Field(() => Project, {
-    nullable: true,
     description: 'Project associated with this punch',
   })
-  project?: Project;
+  project: Project;
 
   @Field(() => Int, {
-    nullable: true,
     description: 'Work site ID',
   })
-  workSiteId?: number;
+  workSiteId: number;
 
   @Field(() => WorkSite, {
-    nullable: true,
     description: 'Work site associated with this punch',
   })
-  workSite?: WorkSite;
+  workSite: WorkSite;
 
   @Field(() => Date, { description: 'Clock in timestamp' })
   punchIn: Date;
@@ -48,6 +45,26 @@ export class AttendancePunch {
     description: 'Clock out timestamp',
   })
   punchOut?: Date;
+
+  @Field(() => Int, {
+    description: 'User ID who recorded the punch in (self or manager)',
+  })
+  punchInBy: number;
+
+  @Field(() => Int, {
+    description: 'User ID who recorded the punch out (self or manager)',
+  })
+  punchOutBy: number;
+
+  @Field(() => Int, {
+    description: 'Calculated work minutes for this session',
+  })
+  workMinutes: number;
+
+  @Field(() => Int, {
+    description: 'Calculated break minutes for this session',
+  })
+  breakMinutes: number;
 
   @Field(() => Date, {
     nullable: true,
@@ -60,18 +77,6 @@ export class AttendancePunch {
     description: 'Break end timestamp',
   })
   breakEnd?: Date;
-
-  @Field(() => Float, {
-    nullable: true,
-    description: 'Calculated work hours for this session',
-  })
-  workHours?: number;
-
-  @Field(() => Float, {
-    nullable: true,
-    description: 'Calculated break hours for this session',
-  })
-  breakHours?: number;
 
   @Field(() => String, {
     nullable: true,
@@ -132,4 +137,19 @@ export class AttendancePunch {
 
   @Field(() => Date, { description: 'Last update timestamp' })
   updatedAt: Date;
+}
+
+@ObjectType()
+export class AttendancePunchResponse {
+  @Field(() => Boolean)
+  success: boolean;
+
+  @Field(() => Int)
+  statusCode: number;
+
+  @Field(() => String)
+  message: string;
+
+  @Field(() => AttendancePunch)
+  data: AttendancePunch;
 }

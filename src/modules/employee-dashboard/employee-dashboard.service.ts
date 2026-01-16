@@ -40,8 +40,14 @@ export class EmployeeDashboardService {
         profile: true,
         employee: {
           include: {
-            department: true,
-            designation: true,
+            departments: {
+              where: { isActive: true },
+              include: { department: true },
+            },
+            designations: {
+              where: { isActive: true },
+              include: { designation: true },
+            },
           },
         },
       },
@@ -50,8 +56,9 @@ export class EmployeeDashboardService {
     return {
       fullName: user?.profile?.fullName || 'N/A',
       employeeId: user?.employee?.employeeId || 'N/A',
-      department: user?.employee?.department?.name || 'N/A',
-      designation: user?.employee?.designation?.name || 'N/A',
+      department: user?.employee?.departments?.[0]?.department?.name || 'N/A',
+      designation:
+        user?.employee?.designations?.[0]?.designation?.name || 'N/A',
       joiningDate: user?.employee?.joiningDate || new Date(),
       email: user?.email || 'N/A',
       phone: user?.profile?.phone || 'N/A',
@@ -317,7 +324,7 @@ export class EmployeeDashboardService {
   private async getNotifications(userId: number) {
     const [unread, recent] = await Promise.all([
       this.prismaService.notification.count({
-        where: { userId, isRead: false },
+        where: { userId, readAt: null },
       }),
       this.prismaService.notification.findMany({
         where: { userId },
@@ -332,7 +339,6 @@ export class EmployeeDashboardService {
         type: notification.type,
         message: notification.message,
         timestamp: notification.createdAt,
-        isRead: notification.isRead,
       })),
     };
   }

@@ -41,14 +41,15 @@ export class LeavesService {
       include: {
         employee: {
           include: {
-            department: true,
+            departments: {
+              where: { isActive: true },
+              include: {
+                department: true,
+              },
+            },
           },
         },
-        business: {
-          select: {
-            ownerId: true,
-          },
-        },
+        business: true,
       },
     });
 
@@ -62,102 +63,103 @@ export class LeavesService {
     //   );
     // }
 
-    const leave = await this.prisma.leave.create({
-      data: {
-        ...createLeaveInput,
-        status: 'pending',
-        startDate: new Date(createLeaveInput.startDate),
-        endDate: createLeaveInput.endDate
-          ? new Date(createLeaveInput.endDate)
-          : null,
-      },
-      include: {
-        user: {
-          include: {
-            profile: true,
-          },
-        },
-        leaveType: true,
-        reviewer: true,
-      },
-    });
+    // const leave = await this.prisma.leave.create({
+    //   data: {
+    //     ...createLeaveInput,
+    //     status: 'pending',
+    //     startDate: new Date(createLeaveInput.startDate),
+    //     endDate: createLeaveInput.endDate
+    //       ? new Date(createLeaveInput.endDate)
+    //       : null,
+    //   },
+    //   include: {
+    //     user: {
+    //       include: {
+    //         profile: true,
+    //       },
+    //     },
+    //     leaveType: true,
+    //     reviewer: true,
+    //   },
+    // });
 
     // Send notification to user
-    try {
-      const startDate = new Date(leave.startDate).toLocaleDateString();
-      const endDate = leave.endDate
-        ? new Date(leave.endDate).toLocaleDateString()
-        : startDate;
+    // try {
+    //   const startDate = new Date(leave.startDate).toLocaleDateString();
+    //   const endDate = leave.endDate
+    //     ? new Date(leave.endDate).toLocaleDateString()
+    //     : startDate;
 
-      await this.notificationsService.create({
-        type: NotificationType.LEAVE,
-        title: 'Leave Requested',
-        message: `Your leave request from ${startDate} to ${endDate} has been submitted successfully and is pending review.`,
-        priority: 'NORMAL' as any,
-        userId:
-          (existingUser?.employee?.department?.managerId as number) ||
-          (existingUser?.business?.ownerId as number),
-        channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
-        businessId: user.businessId,
-        entityType: 'leave',
-        entityId: leave.id,
-      });
-    } catch (error) {
-      console.error('Failed to send leave notification:', error);
-    }
+    //   // Get the first active department's manager ID
+    //   const activeDepartment = existingUser?.employee?.departments?.[0];
+    //   const managerId = activeDepartment?.department?.managerId;
 
-    return leave;
+    //   await this.notificationsService.create({
+    //     type: NotificationType.LEAVE,
+    //     title: 'Leave Requested',
+    //     message: `Your leave request from ${startDate} to ${endDate} has been submitted successfully and is pending review.`,
+    //     priority: 'NORMAL' as any,
+    //     userId: managerId || user.userId,
+    //     channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
+    //     businessId: user.businessId,
+    //     entityType: 'leave',
+    //     entityId: leave.id,
+    //   });
+    // } catch (error) {
+    //   console.error('Failed to send leave notification:', error);
+    // }
+
+    return {};
   }
-  async create({
+  create({
     user,
     createLeaveInput,
   }: {
     user: JwtPayload;
     createLeaveInput: CreateLeaveInput;
   }) {
-    const leave = await this.prisma.leave.create({
-      data: {
-        ...createLeaveInput,
-        status: 'approved',
-        startDate: new Date(createLeaveInput.startDate),
-        endDate: createLeaveInput.endDate
-          ? new Date(createLeaveInput.endDate)
-          : null,
-      },
-      include: {
-        user: {
-          include: {
-            profile: true,
-          },
-        },
-        leaveType: true,
-        reviewer: true,
-      },
-    });
+    // const leave = await this.prisma.leave.create({
+    //   data: {
+    //     ...createLeaveInput,
+    //     status: 'approved',
+    //     startDate: new Date(createLeaveInput.startDate),
+    //     endDate: createLeaveInput.endDate
+    //       ? new Date(createLeaveInput.endDate)
+    //       : null,
+    //   },
+    //   include: {
+    //     user: {
+    //       include: {
+    //         profile: true,
+    //       },
+    //     },
+    //     leaveType: true,
+    //     reviewer: true,
+    //   },
+    // });
 
     // Send notification to user
     try {
-      const startDate = new Date(leave.startDate).toLocaleDateString();
-      const endDate = leave.endDate
-        ? new Date(leave.endDate).toLocaleDateString()
-        : startDate;
-
-      await this.notificationsService.create({
-        type: NotificationType.LEAVE,
-        title: 'Leave Recorded',
-        message: `Your leave request from ${startDate} to ${endDate} has been submitted successfully and is pending review.`,
-        priority: 'NORMAL' as any,
-        userId: createLeaveInput.userId,
-        channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
-        businessId: user.businessId,
-        entityType: 'leave',
-        entityId: leave.id,
-      });
+      // const startDate = new Date(leave.startDate).toLocaleDateString();
+      // const endDate = leave.endDate
+      //   ? new Date(leave.endDate).toLocaleDateString()
+      //   : startDate;
+      // await this.notificationsService.create({
+      //   type: NotificationType.LEAVE,
+      //   title: 'Leave Recorded',
+      //   message: `Your leave request from ${startDate} to ${endDate} has been submitted successfully and is pending review.`,
+      //   priority: 'NORMAL' as any,
+      //   userId: createLeaveInput.userId,
+      //   channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
+      //   businessId: user.businessId,
+      //   entityType: 'leave',
+      //   entityId: leave.id,
+      // });
     } catch (error) {
       console.error('Failed to send leave notification:', error);
     }
 
-    return leave;
+    return {};
   }
 
   async findAll({ user, query }: { user: JwtPayload; query: QueryLeaveInput }) {
@@ -383,38 +385,36 @@ export class LeavesService {
 
     // Send notification to user
     try {
-      const startDate = new Date(updatedLeave.startDate).toLocaleDateString();
-      const endDate = updatedLeave.endDate
-        ? new Date(updatedLeave.endDate).toLocaleDateString()
-        : startDate;
-      const reviewerName =
-        updatedLeave.reviewer?.profile?.fullName || 'Manager';
-
-      let title = '';
-      let message = '';
-
-      if (status === 'approved') {
-        title = 'Leave Request Approved';
-        message = `Your leave request from ${startDate} to ${endDate} has been approved by ${reviewerName}.`;
-      } else if (status === 'rejected') {
-        title = 'Leave Request Rejected';
-        message = `Your leave request from ${startDate} to ${endDate} has been rejected by ${reviewerName}.${reviewerNotes ? ` Reason: ${reviewerNotes}` : ''}`;
-      } else if (status === 'cancelled') {
-        title = 'Leave Request Cancelled';
-        message = `Your leave request from ${startDate} to ${endDate} has been cancelled.`;
-      }
-
-      await this.notificationsService.create({
-        type: NotificationType.LEAVE,
-        title,
-        message,
-        priority: 'HIGH' as any,
-        userId: updatedLeave.userId,
-        channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
-        businessId: leave.user.businessId || undefined,
-        entityType: 'leave',
-        entityId: updatedLeave.id,
-      });
+      // const startDate = new Date(updatedLeave.startDate).toLocaleDateString();
+      // const endDate = updatedLeave.endDate
+      //   ? new Date(updatedLeave.endDate).toLocaleDateString()
+      //   : startDate;
+      // const reviewerName =
+      //   updatedLeave.reviewer?.profile?.fullName || 'Manager';
+      // let title = '';
+      // let message = '';
+      // if (status === 'approved') {
+      //   title = 'Leave Request Approved';
+      //   message = `Your leave request from ${startDate} to ${endDate} has been approved by ${reviewerName}.`;
+      // } else if (status === 'rejected') {
+      //   title = 'Leave Request Rejected';
+      //   message = `Your leave request from ${startDate} to ${endDate} has been rejected by ${reviewerName}.${reviewerNotes ? ` Reason: ${reviewerNotes}` : ''}`;
+      // } else if (status === 'cancelled') {
+      //   title = 'Leave Request Cancelled';
+      //   message = `Your leave request from ${startDate} to ${endDate} has been cancelled.`;
+      // }
+      // await this.notificationsService.create(
+      //   {
+      //   type: NotificationType.LEAVE,
+      //   title,
+      //   message,
+      //   priority: 'HIGH' as any,
+      //   userId: updatedLeave.userId,
+      //   channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
+      //   businessId: leave.user.businessId || undefined,
+      //   entityType: 'leave',
+      //   entityId: updatedLeave.id,
+      // });
     } catch (error) {
       console.error('Failed to send leave status notification:', error);
     }
@@ -426,25 +426,46 @@ export class LeavesService {
   async getLeaveBalance({
     user,
     leaveTypeId,
-    employmentStatusId,
+    userId,
     year,
   }: {
     user: JwtPayload;
     leaveTypeId: number;
-    employmentStatusId: number;
+    userId: number;
     year: number;
   }) {
-    const userId = user.userId;
+    const existingUser = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        employee: {
+          include: {
+            employmentStatuses: {
+              where: { isActive: true },
+            },
+          },
+        },
+      },
+    });
 
+    if (!existingUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Get active employment status if needed
+    const activeEmploymentStatus =
+      existingUser?.employee?.employmentStatuses?.find((es) => es.isActive);
+    const employmentStatusId = activeEmploymentStatus?.employmentStatusId;
     // Get leave type with employment status validation
     const leaveType = await this.prisma.leaveType.findFirst({
       where: {
         id: leaveTypeId,
-        employmentStatuses: {
-          some: {
-            employmentStatusId: employmentStatusId,
-          },
-        },
+        // employmentStatuses: {
+        //   some: {
+        //     employmentStatusId: employmentStatusId,
+        //   },
+        // },
       },
     });
 
@@ -454,8 +475,8 @@ export class LeavesService {
       );
     }
 
-    // Get total used hours for the year
-    const usedHours = await this.prisma.leave.aggregate({
+    // Get total used minutes for the year
+    const usedMinutes = await this.prisma.leave.aggregate({
       where: {
         userId,
         leaveTypeId,
@@ -463,21 +484,21 @@ export class LeavesService {
         status: 'approved',
       },
       _sum: {
-        totalHours: true,
+        totalMinutes: true,
       },
     });
 
-    const allocatedHours = leaveType.leaveHours;
-    const used = usedHours._sum.totalHours || 0;
-    const remaining = allocatedHours - used;
+    const allocatedMinutes = leaveType.leaveMinutes;
+    const usedMinutesValue = usedMinutes._sum?.totalMinutes || 0;
+    const remaining = allocatedMinutes - usedMinutesValue;
 
     return {
       leaveTypeId,
       leaveTypeName: leaveType.name,
       year,
-      allocatedHours,
-      usedHours: used,
-      remainingHours: remaining,
+      allocatedMinutes,
+      usedMinutesValue,
+      remainingMinutes: remaining,
     };
   }
 

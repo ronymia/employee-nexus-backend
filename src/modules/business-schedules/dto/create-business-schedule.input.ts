@@ -9,7 +9,7 @@ export class CreateBusinessScheduleInput {
   @IsInt()
   @Min(0)
   @Max(6)
-  day: number;
+  dayOfWeek: number;
 
   @Field()
   @IsBoolean()

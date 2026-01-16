@@ -1,24 +1,17 @@
-import { IsArray, IsInt, ValidateNested } from 'class-validator';
-import { CreateAttendanceInput } from './create-attendance.input';
-import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
-import { Type } from 'class-transformer';
-import { CreateAttendancePunchInput } from './create-attendance-punch.input';
+import {
+  CreateAttendanceInput,
+  CreateAttendancePunchInput,
+} from './create-attendance.input';
+import { InputType, Field, ID } from '@nestjs/graphql';
 
 @InputType()
-export class UpdateAttendanceInput extends PartialType(CreateAttendanceInput) {
-  @Field(() => Int)
+export class UpdateAttendanceInput extends CreateAttendanceInput {
+  @Field(() => ID, { description: 'Attendance ID' })
   id: number;
-
-  @Field(() => Int, { description: 'User ID' })
-  @IsInt()
-  userId: number;
-
-  @Field(() => [CreateAttendancePunchInput], {
-    nullable: true,
-    description: 'Punch records for this attendance',
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateAttendancePunchInput)
-  punchRecords: CreateAttendancePunchInput[];
 }
+
+// @InputType()
+// export class UpdateAttendancePunchInput extends CreateAttendancePunchInput {
+//   @Field(() => ID, { description: 'Attendance Punch ID' })
+//   id: number;
+// }

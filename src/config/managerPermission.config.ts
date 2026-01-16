@@ -29,6 +29,10 @@ export const managerPermissions = [
     action: [PermissionAction.READ, PermissionAction.UPDATE],
   },
   {
+    resource: PermissionResource.BUSINESS_SUBSCRIPTION,
+    action: [PermissionAction.READ],
+  },
+  {
     resource: PermissionResource.JOB_TYPE,
     action: [PermissionAction.READ],
   },

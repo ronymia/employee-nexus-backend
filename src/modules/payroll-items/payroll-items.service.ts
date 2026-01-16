@@ -45,7 +45,7 @@ export class PayrollItemsService {
           presentDays: createPayrollItemInput.presentDays,
           absentDays: createPayrollItemInput.absentDays,
           leaveDays: createPayrollItemInput.leaveDays,
-          overtimeHours: createPayrollItemInput.overtimeHours,
+          overtimeMinutes: createPayrollItemInput.overtimeHours,
           notes: createPayrollItemInput.notes,
           status: PayrollItemStatus.PENDING,
           paymentMethod: createPayrollItemInput.paymentMethod,
@@ -141,11 +141,28 @@ export class PayrollItemsService {
             profile: true,
             employee: {
               include: {
-                designation: true,
-                department: true,
-                employmentStatus: true,
-                workSchedule: true,
-                workSite: true,
+                designations: {
+                  where: { isActive: true },
+                  include: { designation: true },
+                },
+                departments: {
+                  where: { isActive: true },
+                  include: { department: true },
+                },
+                employmentStatuses: {
+                  where: { isActive: true },
+                  include: { employmentStatus: true },
+                },
+                workSchedules: {
+                  where: { isActive: true },
+                  include: { workSchedule: true },
+                },
+                workSites: {
+                  where: { isActive: true },
+                  include: {
+                    workSite: true,
+                  },
+                },
               },
             },
             business: true,
@@ -171,8 +188,14 @@ export class PayrollItemsService {
             profile: true,
             employee: {
               include: {
-                designation: true,
-                department: true,
+                designations: {
+                  where: { isActive: true },
+                  include: { designation: true },
+                },
+                departments: {
+                  where: { isActive: true },
+                  include: { department: true },
+                },
               },
             },
           },
@@ -215,7 +238,6 @@ export class PayrollItemsService {
           type: input.type,
           description: input.description,
           amount: input.amount,
-          createdBy: user.userId,
         },
       });
 
@@ -302,17 +324,14 @@ export class PayrollItemsService {
       const payrollItemInput: CreatePayrollItemInput = {
         payrollCycleId: input.payrollCycleId,
         userId: employee.userId,
-        basicSalary: employee.salaryPerMonth,
+        basicSalary: 100,
         workingDays: attendanceData.workingDays,
         presentDays: attendanceData.presentDays,
         absentDays: attendanceData.absentDays,
         leaveDays: attendanceData.leaveDays,
         overtimeHours: attendanceData.overtimeHours,
         paymentMethod: '',
-        components: await this.calculateComponents(
-          employee.salaryPerMonth,
-          components,
-        ),
+        components: await this.calculateComponents(100, components),
       };
 
       const item = await this.create(user, payrollItemInput);
@@ -484,8 +503,8 @@ export class PayrollItemsService {
     let overtimeHours = 0;
 
     for (const attendance of attendances) {
-      if (attendance.totalHours && attendance.totalHours > 8) {
-        overtimeHours += attendance.totalHours - 8;
+      if (attendance.totalMinutes && attendance.totalMinutes > 8) {
+        overtimeHours += attendance.totalMinutes - 8;
       }
     }
 
@@ -651,8 +670,9 @@ export class PayrollItemsService {
           absentDays:
             updatePayrollItemInput.absentDays ?? existingItem.absentDays,
           leaveDays: updatePayrollItemInput.leaveDays ?? existingItem.leaveDays,
-          overtimeHours:
-            updatePayrollItemInput.overtimeHours ?? existingItem.overtimeHours,
+          overtimeMinutes:
+            updatePayrollItemInput.overtimeHours ??
+            existingItem.overtimeMinutes,
           components: updatePayrollItemInput.components,
           adjustments: updatePayrollItemInput.adjustments,
         };

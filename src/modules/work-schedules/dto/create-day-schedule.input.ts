@@ -19,7 +19,7 @@ export class CreateDayScheduleInput {
   @IsInt()
   @Min(0)
   @Max(6)
-  day: number;
+  dayOfWeek: number;
 
   @Field(() => Boolean, {
     description: 'Whether this day is a weekend',

@@ -1,4 +1,7 @@
-import { Injectable } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateEmployeeInput } from './dto/create-employee.input';
 import { UpdateEmployeeInput } from './dto/update-employee.input';
 import { QueryUserInput } from './dto/query-user.input';
@@ -131,7 +134,12 @@ export class UsersService {
     if (query?.departmentId) {
       andCondition.push({
         employee: {
-          departmentId: query.departmentId,
+          departments: {
+            some: {
+              departmentId: query.departmentId,
+              isActive: true,
+            },
+          },
         },
       });
     }
@@ -140,7 +148,12 @@ export class UsersService {
     if (query?.designationId) {
       andCondition.push({
         employee: {
-          designationId: query.designationId,
+          designations: {
+            some: {
+              designationId: query.designationId,
+              isActive: true,
+            },
+          },
         },
       });
     }
@@ -149,19 +162,28 @@ export class UsersService {
     if (query?.employmentStatusId) {
       andCondition.push({
         employee: {
-          employmentStatusId: query.employmentStatusId,
+          employmentStatuses: {
+            some: {
+              employmentStatusId: query.employmentStatusId,
+              isActive: true,
+            },
+          },
         },
       });
     }
 
-    // FILTER BY EMPLOYMENT STATUS
-    if (query?.workSiteId) {
-      andCondition.push({
-        employee: {
-          workSiteId: query.workSiteId,
-        },
-      });
-    }
+    // FILTER BY WORK SITE
+    // if (query?.workSiteId) {
+    //   andCondition.push({
+    //     employee: {
+    //       workSites: {
+    //         some: {
+    //           workSiteId: query.workSiteId,
+    //         },
+    //       },
+    //     },
+    //   });
+    // }
 
     const whereCondition: Prisma.UserWhereInput =
       andCondition.length > 0 ? { AND: andCondition } : {};
@@ -191,11 +213,31 @@ export class UsersService {
             },
             employee: {
               include: {
-                designation: true,
-                employmentStatus: true,
-                department: true,
-                workSite: true,
-                workSchedule: true,
+                designations: {
+                  include: {
+                    designation: true,
+                  },
+                },
+                employmentStatuses: {
+                  include: {
+                    employmentStatus: true,
+                  },
+                },
+                departments: {
+                  include: {
+                    department: true,
+                  },
+                },
+                workSites: {
+                  include: {
+                    workSite: true,
+                  },
+                },
+                workSchedules: {
+                  include: {
+                    workSchedule: true,
+                  },
+                },
               },
             },
             role: true,
@@ -216,11 +258,31 @@ export class UsersService {
             },
             employee: {
               include: {
-                designation: true,
-                employmentStatus: true,
-                department: true,
-                workSite: true,
-                workSchedule: true,
+                designations: {
+                  include: {
+                    designation: true,
+                  },
+                },
+                employmentStatuses: {
+                  include: {
+                    employmentStatus: true,
+                  },
+                },
+                departments: {
+                  include: {
+                    department: true,
+                  },
+                },
+                workSites: {
+                  include: {
+                    workSite: true,
+                  },
+                },
+                workSchedules: {
+                  include: {
+                    workSchedule: true,
+                  },
+                },
               },
             },
             role: true,
@@ -247,7 +309,7 @@ export class UsersService {
         profile: {
           include: {
             emergencyContact: true,
-            socialLinks: true,
+            socialLink: true,
           },
         },
         business: true,
@@ -331,45 +393,105 @@ export class UsersService {
 
   async createEmployee(
     createEmployeeInput: CreateEmployeeInput,
-    businessId: number,
+    authUser: JwtPayload,
   ) {
-    const { user, profile, emergencyContact, ...employeeData } =
-      createEmployeeInput;
+    const {
+      user,
+      profile,
+      emergencyContact,
+      workSiteIds,
+      workScheduleId,
+      departmentId,
+      designationId,
+      employmentStatusId,
+      salaryAmount,
+      salaryType,
+      salaryStartDate,
+      salaryReason,
+      salaryRemarks,
+      ...employeeData
+    } = createEmployeeInput;
 
     // Validate that all related entities belong to the business
-    const [designation, employmentStatus, department, workSite, workSchedule] =
+    const [designation, employmentStatus, department, workSchedule] =
       await Promise.all([
         this.prisma.designation.findUnique({
-          where: { id: employeeData.designationId, AND: { businessId } },
+          where: {
+            id: designationId,
+            AND: { businessId: authUser.businessId },
+          },
         }),
         this.prisma.employmentStatus.findUnique({
-          where: { id: employeeData.employmentStatusId, AND: { businessId } },
+          where: {
+            id: employmentStatusId,
+            AND: { businessId: authUser.businessId },
+          },
         }),
         this.prisma.department.findUnique({
-          where: { id: employeeData.departmentId, AND: { businessId } },
-        }),
-        this.prisma.workSite.findUnique({
-          where: { id: employeeData.workSiteId, AND: { businessId } },
+          where: {
+            id: departmentId,
+            AND: { businessId: authUser.businessId },
+          },
         }),
         this.prisma.workSchedule.findUnique({
-          where: { id: employeeData.workScheduleId, AND: { businessId } },
+          where: {
+            id: workScheduleId,
+            AND: { businessId: authUser.businessId },
+          },
         }),
       ]);
 
-    if (!designation) throw new Error('Invalid designation');
-    if (!employmentStatus) throw new Error('Invalid employment status');
-    if (!department) throw new Error('Invalid department');
-    if (!workSite) throw new Error('Invalid work site');
-    if (!workSchedule) throw new Error('Invalid work schedule');
+    if (!designation)
+      throw new HttpException(
+        'Invalid designation',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    if (!employmentStatus)
+      throw new HttpException(
+        'Invalid employment status',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    if (!department)
+      throw new HttpException(
+        'Invalid department',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    if (!workSchedule)
+      throw new HttpException(
+        'Invalid work schedule',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+
+    // Validate work sites if provided
+    if (workSiteIds && workSiteIds.length > 0) {
+      const workSites = await this.prisma.workSite.findMany({
+        where: { id: { in: workSiteIds }, businessId: authUser.businessId },
+      });
+      if (workSites.length !== workSiteIds.length) {
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+            message: 'Validation failed',
+            errors: {
+              workSiteIds: ['One or more work sites are invalid'],
+            },
+          },
+          HttpStatus.UNPROCESSABLE_ENTITY,
+        );
+      }
+    }
 
     // Validate role belongs to business
     const role = await this.prisma.role.findFirst({
-      where: { id: user.roleId, businessId },
+      where: { id: user.roleId, businessId: authUser.businessId },
     });
-    if (!role) throw new Error('Invalid role');
+    if (!role)
+      throw new HttpException('Invalid role', HttpStatus.UNPROCESSABLE_ENTITY);
 
     // Generate employeeId if not provided
-    const generatedEmployeeId = await this.generateEmployeeId(businessId);
+    const generatedEmployeeId = await this.generateEmployeeId(
+      authUser.businessId,
+    );
 
     // ADD DEFAULT PASSWORD
     let hashedPassword: string;
@@ -390,7 +512,7 @@ export class UsersService {
             email: user.email,
             password: hashedPassword,
             roleId: role.id,
-            businessId,
+            businessId: authUser.businessId,
             status: 'ACTIVE',
           },
         });
@@ -421,11 +543,85 @@ export class UsersService {
             userId: createdUser.id,
           },
         });
+        // ASSIGN WORK SCHEDULE
+        if (workScheduleId) {
+          await tx.employeeSchedule.create({
+            data: {
+              userId: createdUser.id,
+              workScheduleId,
+              startDate: new Date(),
+              assignedBy: authUser.userId,
+              notes: 'Initial schedule assignment upon employee creation',
+            },
+          });
+        }
+
+        // Create work site assignments if provided
+        if (Array.isArray(workSiteIds) && workSiteIds.length > 0) {
+          await tx.employeeWorkSite.createMany({
+            data: workSiteIds.map((workSiteId) => ({
+              userId: createdUser.id,
+              workSiteId,
+              startDate: new Date(),
+            })),
+          });
+        }
+
+        // ASSIGN DEPARTMENT
+        if (departmentId) {
+          await tx.employeeDepartment.create({
+            data: {
+              userId: createdUser.id,
+              departmentId,
+              startDate: new Date(),
+              isPrimary: true,
+            },
+          });
+        }
+
+        // ASSIGN DESIGNATION
+        if (designationId) {
+          await tx.employeeDesignation.create({
+            data: {
+              userId: createdUser.id,
+              designationId,
+              startDate: new Date(),
+              remarks: `Initial schedule assignment upon employee creation`,
+            },
+          });
+        }
+
+        // ASSIGN EMPLOYMENT STATUS
+        if (employmentStatusId) {
+          await tx.employeeStatus.create({
+            data: {
+              userId: createdUser.id,
+              employmentStatusId,
+              startDate: new Date(),
+              remarks: `Initial schedule assignment upon employee creation`,
+            },
+          });
+        }
+
+        // CREATE EMPLOYEE SALARY
+        await tx.employeeSalary.create({
+          data: {
+            userId: createdUser.id,
+            salaryAmount,
+            salaryType: salaryType as any,
+            startDate: salaryStartDate
+              ? salaryStartDate
+              : employeeData.joiningDate,
+            isActive: true,
+            reason: salaryReason || 'Initial salary upon employee creation',
+            remarks: salaryRemarks,
+          },
+        });
 
         const result = await tx.user.findUnique({
           where: {
             id: createdUser.id,
-            AND: { businessId },
+            AND: { businessId: authUser.businessId },
           },
           include: {
             profile: {
@@ -435,11 +631,36 @@ export class UsersService {
             },
             employee: {
               include: {
-                designation: true,
-                employmentStatus: true,
-                department: true,
-                workSite: true,
-                workSchedule: true,
+                designations: {
+                  include: {
+                    designation: true,
+                  },
+                },
+                employmentStatuses: {
+                  include: {
+                    employmentStatus: true,
+                  },
+                },
+                departments: {
+                  include: {
+                    department: true,
+                  },
+                },
+                workSchedules: {
+                  include: {
+                    workSchedule: true,
+                  },
+                },
+                workSites: {
+                  include: {
+                    workSite: true,
+                  },
+                },
+                salaries: {
+                  where: {
+                    isActive: true,
+                  },
+                },
               },
             },
             role: true,
@@ -531,11 +752,31 @@ export class UsersService {
             },
             employee: {
               include: {
-                designation: true,
-                employmentStatus: true,
-                department: true,
-                workSite: true,
-                workSchedule: true,
+                designations: {
+                  include: {
+                    designation: true,
+                  },
+                },
+                employmentStatuses: {
+                  include: {
+                    employmentStatus: true,
+                  },
+                },
+                departments: {
+                  include: {
+                    department: true,
+                  },
+                },
+                workSchedules: {
+                  include: {
+                    workSchedule: true,
+                  },
+                },
+                workSites: {
+                  include: {
+                    workSite: true,
+                  },
+                },
               },
             },
             role: true,
@@ -560,11 +801,31 @@ export class UsersService {
             },
             employee: {
               include: {
-                designation: true,
-                employmentStatus: true,
-                department: true,
-                workSite: true,
-                workSchedule: true,
+                designations: {
+                  include: {
+                    designation: true,
+                  },
+                },
+                employmentStatuses: {
+                  include: {
+                    employmentStatus: true,
+                  },
+                },
+                departments: {
+                  include: {
+                    department: true,
+                  },
+                },
+                workSchedules: {
+                  include: {
+                    workSchedule: true,
+                  },
+                },
+                workSites: {
+                  include: {
+                    workSite: true,
+                  },
+                },
               },
             },
             role: true,
@@ -594,11 +855,31 @@ export class UsersService {
         },
         employee: {
           include: {
-            designation: true,
-            employmentStatus: true,
-            department: true,
-            workSite: true,
-            workSchedule: true,
+            designations: {
+              include: {
+                designation: true,
+              },
+            },
+            employmentStatuses: {
+              include: {
+                employmentStatus: true,
+              },
+            },
+            departments: {
+              include: {
+                department: true,
+              },
+            },
+            workSchedules: {
+              include: {
+                workSchedule: true,
+              },
+            },
+            workSites: {
+              include: {
+                workSite: true,
+              },
+            },
           },
         },
         role: true,
@@ -615,6 +896,7 @@ export class UsersService {
       user: userData,
       profile,
       emergencyContact,
+      workSiteIds,
       ...employmentDetails
     } = updateEmployeeInput;
 
@@ -686,147 +968,188 @@ export class UsersService {
       if (!department) {
         throw new Error('Invalid department');
       }
+    }
 
-      // VALIDATE WORK SITE
-      if (employmentDetails?.workSiteId) {
-        const workSite = await this.prisma.workSite.findUnique({
-          where: { id: employmentDetails.workSiteId, AND: { businessId } },
-        });
-        if (!workSite) {
-          throw new Error('Invalid work site');
-        }
+    // VALIDATE WORK SITES
+    if (workSiteIds && workSiteIds.length > 0) {
+      const workSites = await this.prisma.workSite.findMany({
+        where: {
+          id: { in: workSiteIds },
+          businessId,
+        },
+      });
+      if (workSites.length !== workSiteIds.length) {
+        throw new Error('One or more work sites are invalid');
       }
+    }
 
-      // VALIDATE WORK SCHEDULE
-      if (employmentDetails?.workScheduleId) {
-        const workSchedule = await this.prisma.workSchedule.findUnique({
-          where: { id: employmentDetails.workScheduleId, AND: { businessId } },
-        });
-        if (!workSchedule) {
-          throw new Error('Invalid work schedule');
-        }
+    // VALIDATE WORK SCHEDULE
+    if (employmentDetails?.workScheduleId) {
+      const workSchedule = await this.prisma.workSchedule.findUnique({
+        where: { id: employmentDetails.workScheduleId, AND: { businessId } },
+      });
+      if (!workSchedule) {
+        throw new Error('Invalid work schedule');
       }
+    }
 
-      // ADD DEFAULT PASSWORD
-      // let hashedPassword: string;
+    // ADD DEFAULT PASSWORD
+    // let hashedPassword: string;
 
-      // if (userData?.password) {
-      //   hashedPassword = await PasswordHelpers.passwordHash(userData.password);
-      // }
-      // Use transaction for atomicity
-      return this.prisma.$transaction(
-        async (tx) => {
-          // Update user if userData is provided
-          // UPDATE USERS DATA
-          if (userData) {
-            if (Object.keys(userData).length > 0) {
-              await tx.user.update({
-                where: { id },
-                data: {
-                  email: userData.email,
-                  // password: userData.password,
-                  roleId: userData.roleId,
-                },
-              });
-            }
-          }
-
-          // Update profile if profile data is provided
-          if (profile && existingUser.profile) {
-            const profileUpdateData: Partial<Profile> = {};
-            if (profile.fullName) profileUpdateData.fullName = profile.fullName;
-            if (profile.phone) profileUpdateData.phone = profile.phone;
-            if (profile.profilePicture !== undefined)
-              profileUpdateData.profilePicture = profile.profilePicture;
-            if (profile.dateOfBirth)
-              profileUpdateData.dateOfBirth = profile.dateOfBirth;
-            if (profile.gender) profileUpdateData.gender = profile.gender;
-            if (profile.maritalStatus)
-              profileUpdateData.maritalStatus = profile.maritalStatus;
-            if (profile.address) profileUpdateData.address = profile.address;
-            if (profile.city) profileUpdateData.city = profile.city;
-            if (profile.country) profileUpdateData.country = profile.country;
-            if (profile.postcode) profileUpdateData.postcode = profile.postcode;
-
-            if (Object.keys(profileUpdateData).length > 0) {
-              await tx.profile.update({
-                where: { userId: existingUser.id },
-                data: profileUpdateData,
-              });
-            }
-          }
-
-          // Update or create emergency contact if provided
-          if (emergencyContact) {
-            if (existingUser.profile?.emergencyContact) {
-              const emergencyUpdateData: Partial<EmergencyContact> = {};
-              if (emergencyContact.name)
-                emergencyUpdateData.name = emergencyContact.name;
-              if (emergencyContact.phone)
-                emergencyUpdateData.phone = emergencyContact.phone;
-              if (emergencyContact.relation)
-                emergencyUpdateData.relation = emergencyContact.relation;
-
-              if (Object.keys(emergencyUpdateData).length > 0) {
-                await tx.emergencyContact.update({
-                  where: { userId: existingUser.id },
-                  data: emergencyUpdateData,
-                });
-              }
-            } else if (
-              existingUser.profile &&
-              emergencyContact.name &&
-              emergencyContact.phone &&
-              emergencyContact.relation
-            ) {
-              await tx.emergencyContact.create({
-                data: {
-                  name: emergencyContact.name,
-                  phone: emergencyContact.phone,
-                  relation: emergencyContact.relation,
-                  userId: existingUser.id,
-                },
-              });
-            }
-          }
-
-          // Update employee if employee data is provided
-          if (employmentDetails && existingUser?.employee?.userId) {
-            await tx.employee.update({
-              where: { userId: existingUser.id },
-              data: employmentDetails,
+    // if (userData?.password) {
+    //   hashedPassword = await PasswordHelpers.passwordHash(userData.password);
+    // }
+    // Use transaction for atomicity
+    return this.prisma.$transaction(
+      async (tx) => {
+        // Update user if userData is provided
+        // UPDATE USERS DATA
+        if (userData) {
+          if (Object.keys(userData).length > 0) {
+            await tx.user.update({
+              where: { id },
+              data: {
+                email: userData.email,
+                // password: userData.password,
+                roleId: userData.roleId,
+              },
             });
           }
+        }
 
-          // Return updated employee with all relations
-          const result = await tx.user.findUnique({
-            where: {
-              id: existingUser.id,
-              AND: { businessId },
-            },
-            include: {
-              profile: {
-                include: {
-                  emergencyContact: true,
-                },
+        // Update profile if profile data is provided
+        if (profile && existingUser.profile) {
+          const profileUpdateData: Partial<Profile> = {};
+          if (profile.fullName) profileUpdateData.fullName = profile.fullName;
+          if (profile.phone) profileUpdateData.phone = profile.phone;
+          if (profile.profilePicture !== undefined)
+            profileUpdateData.profilePicture = profile.profilePicture;
+          if (profile.dateOfBirth)
+            profileUpdateData.dateOfBirth = profile.dateOfBirth;
+          if (profile.gender) profileUpdateData.gender = profile.gender;
+          if (profile.maritalStatus)
+            profileUpdateData.maritalStatus = profile.maritalStatus;
+          if (profile.address) profileUpdateData.address = profile.address;
+          if (profile.city) profileUpdateData.city = profile.city;
+          if (profile.country) profileUpdateData.country = profile.country;
+          if (profile.postcode) profileUpdateData.postcode = profile.postcode;
+          // console.log({ profile });
+          if (Object.keys(profileUpdateData).length > 0) {
+            await tx.profile.update({
+              where: { userId: existingUser.id },
+              data: profileUpdateData,
+            });
+          }
+        }
+
+        // Update or create emergency contact if provided
+        if (emergencyContact) {
+          if (existingUser.profile?.emergencyContact) {
+            const emergencyUpdateData: Partial<EmergencyContact> = {};
+            if (emergencyContact.name)
+              emergencyUpdateData.name = emergencyContact.name;
+            if (emergencyContact.phone)
+              emergencyUpdateData.phone = emergencyContact.phone;
+            if (emergencyContact.relation)
+              emergencyUpdateData.relation = emergencyContact.relation;
+
+            if (Object.keys(emergencyUpdateData).length > 0) {
+              await tx.emergencyContact.update({
+                where: { userId: existingUser.id },
+                data: emergencyUpdateData,
+              });
+            }
+          } else if (
+            existingUser.profile &&
+            emergencyContact.name &&
+            emergencyContact.phone &&
+            emergencyContact.relation
+          ) {
+            await tx.emergencyContact.create({
+              data: {
+                name: emergencyContact.name,
+                phone: emergencyContact.phone,
+                relation: emergencyContact.relation,
+                userId: existingUser.id,
               },
-              employee: {
-                include: {
-                  designation: true,
-                  employmentStatus: true,
-                  department: true,
-                  workSite: true,
-                  workSchedule: true,
-                },
-              },
-              role: true,
-            },
+            });
+          }
+        }
+
+        // Update employee if employee data is provided
+        if (employmentDetails && existingUser?.employee?.userId) {
+          await tx.employee.update({
+            where: { userId: existingUser.id },
+            data: employmentDetails,
           });
-          return result;
-        },
-        { timeout: 10000 * 60 * 5, maxWait: 10000 * 60 * 5 },
-      );
-    }
+        }
+
+        // Update work site assignments if workSiteIds is provided
+        if (workSiteIds !== undefined) {
+          // Delete existing work site assignments
+          await tx.employeeWorkSite.deleteMany({
+            where: { userId: existingUser.id },
+          });
+
+          // Create new work site assignments
+          // if (workSiteIds.length > 0) {
+          //   await tx.employeeWorkSite.createMany({
+          //     data: workSiteIds.map((workSiteId) => ({
+          //       userId: existingUser.id,
+          //       workSiteId,
+          //     })),
+          //   });
+          // }
+        }
+
+        // Return updated employee with all relations
+        const result = await tx.user.findUnique({
+          where: {
+            id: existingUser.id,
+            AND: { businessId },
+          },
+          include: {
+            profile: {
+              include: {
+                emergencyContact: true,
+              },
+            },
+            employee: {
+              include: {
+                designations: {
+                  include: {
+                    designation: true,
+                  },
+                },
+                employmentStatuses: {
+                  include: {
+                    employmentStatus: true,
+                  },
+                },
+                departments: {
+                  include: {
+                    department: true,
+                  },
+                },
+                workSchedules: {
+                  include: {
+                    workSchedule: true,
+                  },
+                },
+                workSites: {
+                  include: {
+                    workSite: true,
+                  },
+                },
+              },
+            },
+            role: true,
+          },
+        });
+        return result;
+      },
+      { timeout: 10000 * 60 * 5, maxWait: 10000 * 60 * 5 },
+    );
   }
 
   async removeEmployee(id: number, businessId: number) {
@@ -854,11 +1177,31 @@ export class UsersService {
         },
         employee: {
           include: {
-            designation: true,
-            employmentStatus: true,
-            department: true,
-            workSite: true,
-            workSchedule: true,
+            designations: {
+              include: {
+                designation: true,
+              },
+            },
+            employmentStatuses: {
+              include: {
+                employmentStatus: true,
+              },
+            },
+            departments: {
+              include: {
+                department: true,
+              },
+            },
+            workSchedules: {
+              include: {
+                workSchedule: true,
+              },
+            },
+            workSites: {
+              include: {
+                workSite: true,
+              },
+            },
           },
         },
         role: true,
@@ -942,7 +1285,7 @@ export class UsersService {
     statuses.forEach((status, index) => {
       const camelCaseStatus = status
         .toLowerCase()
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+
         .replace(/_([a-z])/g, (match, letter) => letter?.toUpperCase());
       statusStats[camelCaseStatus + 'Users'] = statusCounts[index] || 0;
     });
@@ -954,5 +1297,89 @@ export class UsersService {
       totalAdmins: totalAdmins || 0,
       ...statusStats,
     };
+  }
+
+  // GET ACTIVE DEPARTMENT FOR USER
+  async getActiveDepartment(userId: number) {
+    const employeeDepartment = await this.prisma.employeeDepartment.findFirst({
+      where: {
+        userId,
+        isActive: true,
+      },
+      include: {
+        department: true,
+      },
+    });
+
+    return employeeDepartment?.department || null;
+  }
+
+  // GET ACTIVE DESIGNATION FOR USER
+  async getActiveDesignation(userId: number) {
+    const employeeDesignation = await this.prisma.employeeDesignation.findFirst(
+      {
+        where: {
+          userId,
+          isActive: true,
+        },
+        include: {
+          designation: true,
+        },
+      },
+    );
+
+    return employeeDesignation?.designation || null;
+  }
+
+  // GET ACTIVE EMPLOYMENT STATUS FOR USER
+  async getActiveEmploymentStatus(userId: number) {
+    const employeeStatus = await this.prisma.employeeStatus.findFirst({
+      where: {
+        userId,
+        isActive: true,
+      },
+      include: {
+        employmentStatus: true,
+      },
+    });
+
+    return employeeStatus?.employmentStatus || null;
+  }
+
+  // GET ACTIVE WORK SITE FOR USER
+  async getActiveWorkSites(userId: number) {
+    const employeeWorkSite = await this.prisma.employeeWorkSite.findMany({
+      where: {
+        userId,
+        isActive: true,
+      },
+      include: {
+        workSite: true,
+      },
+    });
+    return employeeWorkSite?.map((ews) => ews.workSite) || [];
+  }
+
+  // GET ACTIVE WORK SCHEDULE FOR USER
+  async getActiveWorkSchedule(userId: number) {
+    const employeeSchedule = await this.prisma.employeeSchedule.findFirst({
+      where: {
+        userId,
+        isActive: true,
+      },
+      include: {
+        workSchedule: {
+          include: {
+            schedules: {
+              include: {
+                timeSlots: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return employeeSchedule?.workSchedule || null;
   }
 }

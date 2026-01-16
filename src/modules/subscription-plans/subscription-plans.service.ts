@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { ConsoleLogger, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSubscriptionPlanInput } from './dto/create-subscription-plan.input';
 import { UpdateSubscriptionPlanInput } from './dto/update-subscription-plan.input';
@@ -46,10 +43,8 @@ export class SubscriptionPlansService {
           await prismaTransaction.subscriptionPlan.create({
             data: {
               ...rest,
-              createdBy: user?.userId,
               status: 'ACTIVE',
             },
-            include: { creator: true },
           });
 
         // if subscription plan not created
@@ -74,7 +69,6 @@ export class SubscriptionPlansService {
             where: { id: newSubscriptionPlan.id },
             include: {
               features: { include: { feature: true } },
-              creator: true,
             },
           });
 

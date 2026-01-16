@@ -1,4 +1,4 @@
-import { ObjectType, Field, Int, ID, Float } from '@nestjs/graphql';
+import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
 import { User } from 'src/modules/users/entities/user.entity';
 import { AttendancePunch } from './attendance-punch.entity';
 import {
@@ -14,27 +14,39 @@ export class Attendance {
   @Field(() => Int, { description: 'User ID' })
   userId: number;
 
-  @Field(() => User, { description: 'User associated with this attendance' })
-  user: User;
+  @Field(() => User, {
+    description: 'User associated with this attendance',
+    nullable: true,
+  })
+  user?: User;
 
   @Field(() => Date, { description: 'Date of attendance' })
   date: Date;
 
-  @Field(() => Float, {
-    nullable: true,
-    description: 'Total working hours for the day',
+  @Field(() => Int, {
+    description: 'Total work schedule minutes for the day',
   })
-  totalHours?: number;
+  scheduleMinutes: number;
 
-  @Field(() => Float, {
-    nullable: true,
-    description: 'Total break hours for the day',
+  @Field(() => Int, {
+    description: 'Total working minutes for the day',
   })
-  breakHours?: number;
+  totalMinutes: number;
+
+  @Field(() => Int, {
+    description: 'Total break minutes for the day',
+  })
+  breakMinutes: number;
+
+  @Field(() => Int, {
+    description: 'Overtime minutes beyond regular schedule',
+    defaultValue: 0,
+  })
+  overtimeMinutes: number;
 
   @Field(() => String, {
     description: 'Attendance status',
-    defaultValue: 'present',
+    defaultValue: 'pending',
   })
   status: string;
 

@@ -1,5 +1,5 @@
 // ATTENDANCE SETTING ENTITY - DEFINES GRAPHQL TYPES AND RESPONSE STRUCTURES FOR ATTENDANCE SETTING
-import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Business } from 'src/modules/businesses/entities/business.entity';
 import {
   BaseQueryResponse,
@@ -52,7 +52,7 @@ export class AttendanceSetting {
     description: 'Whether geo location is enabled',
     defaultValue: false,
   })
-  isGeoLocationEnabled: boolean;
+  isGeoFencingEnabled: boolean;
 }
 
 @ObjectType()

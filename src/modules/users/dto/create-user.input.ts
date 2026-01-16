@@ -12,7 +12,4 @@ export class CreateUserInput {
 
   @Field(() => Int, { nullable: true })
   roleId?: number;
-
-  @Field(() => Int, { nullable: true })
-  businessId?: number;
 }

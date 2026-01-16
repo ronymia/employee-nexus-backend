@@ -11,7 +11,7 @@ export class BusinessSchedule {
 
   /** 0–6; define your own convention (e.g., 0=Sun) */
   @Field(() => Int)
-  day: number;
+  dayOfWeek: number;
 
   @Field()
   isWeekend: boolean;

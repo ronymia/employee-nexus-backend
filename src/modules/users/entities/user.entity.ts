@@ -50,12 +50,6 @@ export class User {
   @Field(() => Employee, { nullable: true })
   employee?: Employee | null;
 
-  @Field(() => Int, {
-    nullable: true,
-    description: 'ID of the user who deleted the user account',
-  })
-  deletedBy?: number | null;
-
   @Field(() => Date, { description: 'Date when the user was created' })
   createdAt: Date;
 

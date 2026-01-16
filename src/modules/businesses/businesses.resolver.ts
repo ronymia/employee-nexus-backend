@@ -1,4 +1,12 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  Int,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { BusinessesService } from './businesses.service';
 import {
   Business,
@@ -15,10 +23,35 @@ import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { PasswordHelpers } from 'src/helpers/passwordHelpers';
 import { QueryBusinessInput } from './dto/query-business.input';
+import { BusinessSubscription } from '../business-subscriptions/entities/business-subscription.entity';
+import { PrismaService } from '../prisma/prisma.service';
+import { BusinessSubscriptionStatus } from '../subscription-plans/enums';
 
 @Resolver(() => Business)
 export class BusinessesResolver {
-  constructor(private readonly businessesService: BusinessesService) {}
+  constructor(
+    private readonly businessesService: BusinessesService,
+    private readonly prisma: PrismaService,
+  ) {}
+
+  @ResolveField(() => BusinessSubscription, {
+    nullable: true,
+    description: 'Active subscription for the business',
+  })
+  async subscription(
+    @Parent() business: Business,
+  ): Promise<BusinessSubscription | null> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return (await this.prisma.businessSubscription.findFirst({
+      where: {
+        businessId: business.id,
+        status: BusinessSubscriptionStatus.ACTIVE,
+      },
+      include: {
+        subscriptionPlan: true,
+      },
+    })) as any;
+  }
 
   // REGISTER USER WITH BUSINESS
   @Mutation(() => Business, { name: 'createUserWithBusiness' })

@@ -1,13 +1,12 @@
 import { PrismaClient } from 'generated/prisma';
 import {
-  NotificationChannel,
   NotificationPriority,
   NotificationType,
 } from 'src/modules/notifications/enums';
 
 const prisma = new PrismaClient();
 
-export async function seedNotificationTemplates() {
+export async function seedNotificationTemplates(businessId: number) {
   console.log('🔔 Seeding notification templates...');
 
   const templates = [
@@ -19,9 +18,8 @@ export async function seedNotificationTemplates() {
       message:
         '{{employeeName}} has requested {{leaveType}} leave from {{startDate}} to {{endDate}}.',
       priority: NotificationPriority.NORMAL,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null, // Global template
+      businessId,
     },
     {
       name: 'leave_approved',
@@ -30,9 +28,8 @@ export async function seedNotificationTemplates() {
       message:
         'Your {{leaveType}} leave request from {{startDate}} to {{endDate}} has been approved by {{approverName}}.',
       priority: NotificationPriority.HIGH,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null,
+      businessId,
     },
     {
       name: 'leave_rejected',
@@ -41,9 +38,8 @@ export async function seedNotificationTemplates() {
       message:
         'Your {{leaveType}} leave request from {{startDate}} to {{endDate}} has been rejected. Reason: {{reason}}',
       priority: NotificationPriority.HIGH,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null,
+      businessId,
     },
 
     // Payroll Notifications
@@ -54,12 +50,59 @@ export async function seedNotificationTemplates() {
       message:
         'Your payslip for {{month}} {{year}} is now available. Net pay: {{netPay}}',
       priority: NotificationPriority.HIGH,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null,
+      businessId,
     },
 
     // Attendance Notifications
+    {
+      name: 'attendance_created',
+      type: NotificationType.ATTENDANCE,
+      title: 'New Attendance Record',
+      message:
+        '{{employeeName}} created an attendance record for {{date}} with {{workTime}} work time.',
+      priority: NotificationPriority.NORMAL,
+      isActive: true,
+      businessId,
+    },
+    {
+      name: 'attendance_updated',
+      type: NotificationType.ATTENDANCE,
+      title: 'Attendance Record Updated',
+      message:
+        '{{employeeName}} updated attendance record for {{date}}. Total work time: {{workTime}}.',
+      priority: NotificationPriority.NORMAL,
+      isActive: true,
+      businessId,
+    },
+    {
+      name: 'attendance_deleted',
+      type: NotificationType.ATTENDANCE,
+      title: 'Attendance Record Deleted',
+      message: '{{employeeName}} deleted attendance record for {{date}}.',
+      priority: NotificationPriority.HIGH,
+      isActive: true,
+      businessId,
+    },
+    {
+      name: 'attendance_punch_in',
+      type: NotificationType.ATTENDANCE,
+      title: 'Employee Punched In',
+      message: '{{employeeName}} punched in at {{checkInTime}} on {{date}}.',
+      priority: NotificationPriority.LOW,
+      isActive: true,
+      businessId,
+    },
+    {
+      name: 'attendance_punch_out',
+      type: NotificationType.ATTENDANCE,
+      title: 'Employee Punched Out',
+      message:
+        '{{employeeName}} punched out at {{checkOutTime}}. Total work time: {{workTime}}.',
+      priority: NotificationPriority.LOW,
+      isActive: true,
+      businessId,
+    },
     {
       name: 'attendance_late',
       type: NotificationType.ATTENDANCE,
@@ -67,9 +110,8 @@ export async function seedNotificationTemplates() {
       message:
         'You checked in at {{checkInTime}} on {{date}}. Expected check-in time was {{expectedTime}}.',
       priority: NotificationPriority.NORMAL,
-      channels: [NotificationChannel.IN_APP],
       isActive: true,
-      businessId: null,
+      businessId,
     },
     {
       name: 'attendance_absent',
@@ -78,9 +120,8 @@ export async function seedNotificationTemplates() {
       message:
         'You were marked absent on {{date}}. Please contact HR if this is incorrect.',
       priority: NotificationPriority.HIGH,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null,
+      businessId,
     },
     {
       name: 'attendance_reminder',
@@ -89,9 +130,8 @@ export async function seedNotificationTemplates() {
       message:
         'Remember to check out for the day. Your check-in time was {{checkInTime}}.',
       priority: NotificationPriority.LOW,
-      channels: [NotificationChannel.IN_APP],
       isActive: true,
-      businessId: null,
+      businessId,
     },
 
     // Asset Management
@@ -102,9 +142,8 @@ export async function seedNotificationTemplates() {
       message:
         '{{assetType}} - {{assetName}} has been assigned to you. Please confirm receipt.',
       priority: NotificationPriority.NORMAL,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null,
+      businessId,
     },
 
     // Project Management
@@ -115,9 +154,8 @@ export async function seedNotificationTemplates() {
       message:
         'You have been assigned to project: {{projectName}}. Role: {{role}}',
       priority: NotificationPriority.NORMAL,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null,
+      businessId,
     },
 
     // Holiday Announcements
@@ -127,9 +165,8 @@ export async function seedNotificationTemplates() {
       title: 'Holiday Announcement',
       message: 'Holiday on {{date}}: {{holidayName}}. {{description}}',
       priority: NotificationPriority.NORMAL,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null,
+      businessId,
     },
 
     // System Reminders
@@ -140,9 +177,8 @@ export async function seedNotificationTemplates() {
       message:
         'Your {{documentType}} will expire on {{expiryDate}}. Please renew it soon.',
       priority: NotificationPriority.HIGH,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
-      businessId: null,
+      businessId,
     },
     {
       name: 'profile_incomplete',
@@ -151,9 +187,8 @@ export async function seedNotificationTemplates() {
       message:
         'Your profile is {{completionPercentage}}% complete. Please update: {{missingFields}}',
       priority: NotificationPriority.LOW,
-      channels: [NotificationChannel.IN_APP],
       isActive: true,
-      businessId: null,
+      businessId,
     },
   ];
 
@@ -166,7 +201,7 @@ export async function seedNotificationTemplates() {
       const existing = await prisma.notificationTemplate.findFirst({
         where: {
           name: template.name,
-          businessId: null, // Global templates
+          businessId,
         },
       });
 

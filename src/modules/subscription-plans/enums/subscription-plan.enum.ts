@@ -1,14 +1,16 @@
 import { registerEnumType } from '@nestjs/graphql';
 
-export enum SubscriptionStatus {
+export enum BusinessSubscriptionStatus {
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
   TRIAL = 'TRIAL',
   EXPIRED = 'EXPIRED',
+  SUSPENDED = 'SUSPENDED',
   CANCELLED = 'CANCELLED',
+  PENDING = 'PENDING',
 }
 
-registerEnumType(SubscriptionStatus, {
-  name: 'SubscriptionStatus',
+registerEnumType(BusinessSubscriptionStatus, {
+  name: 'BusinessSubscriptionStatusonStatus',
   description: 'Status of the Subscription Plan',
 });

@@ -79,15 +79,14 @@ export class UpdateEmploymentDetailsInput {
   })
   @IsInt()
   @IsOptional()
-  departmentId?: number;
+  departmentId: number;
 
-  @Field(() => Int, {
-    description: 'Work Site ID',
+  @Field(() => [Int], {
+    description: 'Work Site IDs',
     nullable: true,
   })
-  @IsInt()
-  @IsOptional()
-  workSiteId?: number;
+  @IsInt({ each: true })
+  workSiteIds: number[];
 
   @Field(() => Int, {
     description: 'Work Schedule ID',

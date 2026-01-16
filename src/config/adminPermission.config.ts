@@ -39,6 +39,15 @@ export const adminPermissions = [
     ],
   },
   {
+    resource: PermissionResource.BUSINESS_SUBSCRIPTION,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
+  {
     resource: PermissionResource.JOB_TYPE,
     action: [
       PermissionAction.CREATE,

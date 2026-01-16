@@ -21,12 +21,12 @@ export class CreateLeaveTypeInput {
   leaveType: LeaveTypeEnum;
 
   @Field(() => Int, {
-    description: 'Number of leave hours allocated',
+    description: 'Number of leave minutes allocated',
     defaultValue: 0,
   })
   @IsInt()
   @Min(0)
-  leaveHours: number;
+  leaveMinutes: number;
 
   @Field(() => LeaveRolloverType, {
     description: 'Leave rollover policy type',

@@ -1,4 +1,12 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  Int,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { WorkSitesService } from './work-sites.service';
 import {
   WorkSite,
@@ -116,5 +124,17 @@ export class WorkSitesResolver {
       message: `Work Site deleted successfully`,
       data: result,
     };
+  }
+
+  // RESOLVE IS_DEFAULT FIELD
+  @ResolveField(() => Boolean, { name: 'isDefault' })
+  async isDefault(
+    @Parent() workSite: WorkSite,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<boolean> {
+    return await this.workSitesService.isDefault({
+      workSiteId: workSite.id,
+      businessId: user.businessId,
+    });
   }
 }

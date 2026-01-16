@@ -5,206 +5,160 @@ import {
   AttendanceResponse,
   AttendanceQueryResponse,
 } from './entities/attendance.entity';
-import { AttendancePunch } from './entities/attendance-punch.entity';
-import { CreateAttendanceInput } from './dto/create-attendance.input';
-import { UpdateAttendanceInput } from './dto/update-attendance.input';
 import { QueryAttendanceInput } from './dto/query-attendance.input';
-import { CreateAttendancePunchInput } from './dto/create-attendance-punch.input';
-import { UpdateAttendancePunchInput } from './dto/update-attendance-punch.input';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
-import { RequestAttendanceInput } from './dto/request-attendance.input';
-import { ApproveAttendanceInput } from './dto/approve-attendance.input';
+import { AttendancePunchResponse } from './entities/attendance-punch.entity';
+import { PunchInInput, PunchOutInput } from './dto/attendance-punch.input';
+import { CreateAttendanceInput } from './dto/create-attendance.input';
+import { UpdateAttendanceInput } from './dto/update-attendance.input';
+
+// Punch In/Out Input Types
 
 @Resolver(() => Attendance)
-@UseGuards(GqlAuthGuard, PermissionsGuard)
 export class AttendancesResolver {
   constructor(private readonly attendancesService: AttendancesService) {}
 
   // CREATE ATTENDANCE
-  @Mutation(() => AttendanceResponse, { name: 'attendanceRequest' })
+  @Mutation(() => AttendanceResponse, { name: 'createAttendance' })
+  @UseGuards(PermissionsGuard)
   @RequirePermissions('Attendance:create')
-  async attendanceRequest(
-    @CurrentUser() user: JwtPayload,
-    @Args('createAttendanceInput')
-    createAttendanceInput: RequestAttendanceInput,
-  ) {
-    const result = await this.attendancesService.attendanceRequest({
-      user,
-      createAttendanceInput,
-    });
-
-    return {
-      success: true,
-      statusCode: HttpStatus.CREATED,
-      message: 'Attendance request submitted successfully',
-      data: result,
-    };
-  }
-  // CREATE ATTENDANCE
-  @Mutation(() => AttendanceResponse)
-  @RequirePermissions('Attendance:create')
+  @UseGuards(GqlAuthGuard)
   async createAttendance(
+    @Args('createAttendanceInput')
+    createAttendanceInput: CreateAttendanceInput,
     @CurrentUser() user: JwtPayload,
-    @Args('createAttendanceInput') createAttendanceInput: CreateAttendanceInput,
   ) {
     const result = await this.attendancesService.create({
       user,
       createAttendanceInput,
     });
-
     return {
       success: true,
-      statusCode: HttpStatus.CREATED,
-      message: 'Attendance created successfully',
+      statusCode: HttpStatus.OK,
+      message: `Attendance created successfully`,
       data: result,
     };
   }
 
-  // QUERY ALL ATTENDANCES
+  // FIND ALL ATTENDANCES
   @Query(() => AttendanceQueryResponse, { name: 'attendances' })
+  @UseGuards(PermissionsGuard)
   @RequirePermissions('Attendance:read')
+  @UseGuards(GqlAuthGuard)
   async findAll(
     @CurrentUser() user: JwtPayload,
-    @Args('query', { nullable: true }) query?: QueryAttendanceInput,
+    @Args('query', { nullable: true }) query: QueryAttendanceInput,
   ) {
-    const result = await this.attendancesService.findAll({
-      user,
-      query: query ?? {},
-    });
-
+    const result = await this.attendancesService.findAll({ user, query });
     return {
       success: true,
       statusCode: HttpStatus.OK,
-      message: 'Attendances retrieved successfully',
-      ...result,
+      message: `Attendances retrieved successfully`,
+      meta: result?.meta,
+      data: result?.data,
     };
   }
 
-  // QUERY SINGLE ATTENDANCE
+  // FIND ONE ATTENDANCE
   @Query(() => AttendanceResponse, { name: 'attendanceById' })
+  @UseGuards(PermissionsGuard)
   @RequirePermissions('Attendance:read')
+  @UseGuards(GqlAuthGuard)
   async findOne(
-    // @CurrentUser() user: JwtPayload,
     @Args('id', { type: () => Int }) id: number,
+    @CurrentUser() user: JwtPayload,
   ) {
-    const result = await this.attendancesService.findOne({ id });
+    const result = await this.attendancesService.findOne({ user, id });
 
     return {
       success: true,
       statusCode: HttpStatus.OK,
-      message: 'Attendance retrieved successfully',
+      message: `Attendance retrieved successfully`,
       data: result,
     };
   }
 
   // UPDATE ATTENDANCE
-  @Mutation(() => AttendanceResponse)
+  @Mutation(() => AttendanceResponse, { name: 'updateAttendance' })
+  @UseGuards(PermissionsGuard)
   @RequirePermissions('Attendance:update')
+  @UseGuards(GqlAuthGuard)
   async updateAttendance(
-    // @CurrentUser() user: JwtPayload,
-    @Args('updateAttendanceInput') updateAttendanceInput: UpdateAttendanceInput,
+    @CurrentUser() user: JwtPayload,
+    @Args('updateAttendanceInput')
+    updateAttendanceInput: UpdateAttendanceInput,
   ) {
     const result = await this.attendancesService.update({
+      user,
       updateAttendanceInput,
     });
-
     return {
       success: true,
       statusCode: HttpStatus.OK,
-      message: 'Attendance updated successfully',
+      message: `Attendance updated successfully`,
       data: result,
     };
   }
 
   // DELETE ATTENDANCE
   @Mutation(() => AttendanceResponse, { name: 'deleteAttendance' })
+  @UseGuards(PermissionsGuard)
   @RequirePermissions('Attendance:delete')
+  @UseGuards(GqlAuthGuard)
   async removeAttendance(
-    // @CurrentUser() user: JwtPayload,
     @Args('id', { type: () => Int }) id: number,
+    @CurrentUser() user: JwtPayload,
   ) {
-    const result = await this.attendancesService.remove({ id });
-
+    const result = await this.attendancesService.remove({ user, id });
     return {
       success: true,
       statusCode: HttpStatus.OK,
-      message: 'Attendance deleted successfully',
+      message: `Attendance deleted successfully`,
       data: result,
     };
   }
 
-  // CREATE PUNCH RECORD
-  @Mutation(() => AttendancePunch)
-  @RequirePermissions('Attendance:create')
-  async createAttendancePunch(
-    // @CurrentUser() user: JwtPayload,
-    @Args('createAttendancePunchInput')
-    createAttendancePunchInput: CreateAttendancePunchInput,
-  ) {
-    return await this.attendancesService.createPunch({
-      createAttendancePunchInput,
-    });
-  }
-
-  // UPDATE PUNCH RECORD
-  @Mutation(() => AttendancePunch)
-  @RequirePermissions('Attendance:update')
-  async updateAttendancePunch(
+  // PUNCH IN
+  @Mutation(() => AttendancePunchResponse, { name: 'punchIn' })
+  @UseGuards(GqlAuthGuard)
+  async punchIn(
     @CurrentUser() user: JwtPayload,
-    @Args('updateAttendancePunchInput')
-    updateAttendancePunchInput: UpdateAttendancePunchInput,
+    @Args('punchInInput') punchInInput: PunchInInput,
   ) {
-    return await this.attendancesService.updatePunch({
+    const result = await this.attendancesService.punchIn({
       user,
-      updateAttendancePunchInput,
-    });
-  }
-
-  // DELETE PUNCH RECORD
-  @Mutation(() => AttendancePunch)
-  @RequirePermissions('Attendance:delete')
-  async removeAttendancePunch(
-    @CurrentUser() user: JwtPayload,
-    @Args('id', { type: () => Int }) id: number,
-  ) {
-    return await this.attendancesService.removePunch({ user, id });
-  }
-
-  // APPROVE ATTENDANCE
-  @Mutation(() => AttendanceResponse, { name: 'approveAttendance' })
-  @RequirePermissions('Attendance:update')
-  async approveAttendance(
-    @Args('attendanceId', { type: () => Int }) attendanceId: number,
-  ) {
-    const result = await this.attendancesService.approveAttendance({
-      attendanceId,
+      data: punchInInput,
     });
     return {
       success: true,
       statusCode: HttpStatus.OK,
-      message: 'Attendance approved successfully',
+      message: `Punched in successfully`,
       data: result,
     };
   }
 
-  // REJECT ATTENDANCE
-  @Mutation(() => AttendanceResponse, { name: 'rejectAttendance' })
-  @RequirePermissions('Attendance:update')
-  async rejectAttendance(
-    @Args('attendanceId', { type: () => Int }) attendanceId: number,
+  // PUNCH OUT
+  @Mutation(() => AttendancePunchResponse, { name: 'punchOut' })
+  @UseGuards(GqlAuthGuard)
+  async punchOut(
+    @CurrentUser() user: JwtPayload,
+    @Args('punchOutInput') punchOutInput: PunchOutInput,
   ) {
-    const result = await this.attendancesService.rejectAttendance({
-      attendanceId,
+    const { punchId, ...data } = punchOutInput;
+    const result = await this.attendancesService.punchOut({
+      user,
+      punchId,
+      data,
     });
     return {
       success: true,
       statusCode: HttpStatus.OK,
-      message: 'Attendance rejected successfully',
+      message: `Punched out successfully`,
       data: result,
     };
   }
