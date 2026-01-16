@@ -6,6 +6,8 @@ import { QueryBusinessSubscriptionInput } from './dto/query-business-subscriptio
 import { RenewBusinessSubscriptionInput } from './dto/renew-business-subscription.input';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
+import { SubscriptionStatusHelper } from './helpers/subscription-status.helper';
+import { BusinessSubscriptionStatus } from 'generated/prisma';
 
 @Injectable()
 export class BusinessSubscriptionsService {
@@ -19,17 +21,16 @@ export class BusinessSubscriptionsService {
     createBusinessSubscriptionInput: CreateBusinessSubscriptionInput;
   }) {
     const {
-      businessId,
+      // businessId,
       subscriptionPlanId,
       trialEndDate,
       startDate,
       endDate,
-      status,
     } = createBusinessSubscriptionInput;
 
     // Verify business exists
     const business = await this.prisma.business.findUnique({
-      where: { id: businessId },
+      where: { id: 1 /* businessId */ },
     });
     if (!business) {
       throw new NotAcceptableException('Business not found');
@@ -43,15 +44,27 @@ export class BusinessSubscriptionsService {
       throw new NotAcceptableException('Subscription plan not found');
     }
 
+    // Calculate status and isActive from dates
+    const { status: calculatedStatus, isActive } =
+      SubscriptionStatusHelper.calculateStatus({
+        status,
+        trialEndDate,
+        startDate,
+        endDate,
+      });
+
     // Create business subscription
     return await this.prisma.businessSubscription.create({
       data: {
-        businessId,
+        businessId: 1, // businessId,
         subscriptionPlanId,
         trialEndDate,
         startDate,
         endDate,
-        status,
+        status: calculatedStatus,
+        isActive,
+        numberOfEmployeesAllowed:
+          createBusinessSubscriptionInput.numberOfEmployeesAllowed || 0,
       },
       include: {
         business: true,
@@ -186,7 +199,7 @@ export class BusinessSubscriptionsService {
     return await this.prisma.businessSubscription.findFirst({
       where: {
         businessId: targetBusinessId,
-        status: 'active',
+        status: BusinessSubscriptionStatus.ACTIVE,
       },
       include: {
         business: true,
@@ -213,13 +226,23 @@ export class BusinessSubscriptionsService {
       throw new NotAcceptableException('Business subscription not found');
     }
 
+    // Calculate status and isActive from dates
+    const { status: calculatedStatus, isActive } =
+      SubscriptionStatusHelper.calculateStatus({
+        status: status || subscription.status,
+        trialEndDate: trialEndDate || subscription.trialEndDate,
+        startDate: startDate || subscription.startDate,
+        endDate: endDate || subscription.endDate,
+      });
+
     return await this.prisma.businessSubscription.update({
       where: { id },
       data: {
         trialEndDate,
         startDate,
         endDate,
-        status,
+        status: BusinessSubscriptionStatus.ACTIVE,
+        isActive,
       },
       include: {
         business: true,

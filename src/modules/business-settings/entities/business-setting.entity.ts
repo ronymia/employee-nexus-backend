@@ -31,12 +31,6 @@ export class BusinessSetting {
   })
   currency: string;
 
-  @Field(() => Boolean, {
-    description: 'Whether self-registration is enabled',
-    defaultValue: false,
-  })
-  isSelfRegistered: boolean;
-
   @Field(() => String, {
     description: 'Business time zone',
     nullable: true,

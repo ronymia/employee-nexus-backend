@@ -24,7 +24,7 @@ export class UpdateBusinessScheduleInput extends PartialType(
   @IsInt()
   @Min(0)
   @Max(6)
-  day?: number;
+  dayOfWeek?: number;
 
   @Field({ nullable: true })
   @IsOptional()

@@ -1,11 +1,12 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
-import { IsDate, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsDate, IsEnum, IsInt, IsOptional } from 'class-validator';
+import { BusinessSubscriptionStatus } from 'src/modules/subscription-plans/enums';
 
 @InputType()
 export class CreateBusinessSubscriptionInput {
-  @Field(() => Int, { description: 'ID of the business' })
+  @Field(() => Int, { description: 'Number of employees allowed' })
   @IsInt()
-  businessId: number;
+  numberOfEmployeesAllowed: number;
 
   @Field(() => Int, { description: 'ID of the subscription plan' })
   @IsInt()
@@ -21,9 +22,7 @@ export class CreateBusinessSubscriptionInput {
 
   @Field(() => Date, {
     description: 'Subscription start date',
-    nullable: true,
   })
-  @IsOptional()
   @IsDate()
   startDate: Date;
 
@@ -34,8 +33,4 @@ export class CreateBusinessSubscriptionInput {
   @IsOptional()
   @IsDate()
   endDate?: Date;
-
-  @Field(() => String, { description: 'Status of the subscription' })
-  @IsString()
-  status: string;
 }

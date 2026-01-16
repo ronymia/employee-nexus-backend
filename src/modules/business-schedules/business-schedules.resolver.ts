@@ -3,6 +3,7 @@ import { BusinessSchedulesService } from './business-schedules.service';
 import {
   BusinessSchedule,
   BusinessScheduleResponse,
+  BusinessScheduleQueryResponse,
 } from './entities/business-schedule.entity';
 import { UpdateBusinessScheduleInput } from './dto/update-business-schedule.input';
 import { HttpStatus, UseGuards } from '@nestjs/common';
@@ -16,19 +17,43 @@ export class BusinessSchedulesResolver {
     private readonly businessSchedulesService: BusinessSchedulesService,
   ) {}
 
-  @Query(() => BusinessSchedule, { name: 'businessScheduleByBusinessId' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.businessSchedulesService.findOne(id);
+  @Query(() => BusinessSchedule, { name: 'businessScheduleById' })
+  async findOne(@Args('id', { type: () => Int }) id: number) {
+    const result = await this.businessSchedulesService.findOne(id);
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Business schedule retrieve successfully',
+      data: result,
+    };
+  }
+
+  @Query(() => BusinessScheduleQueryResponse, {
+    name: 'businessSchedulesByBusinessId',
+  })
+  @UseGuards(GqlAuthGuard)
+  async findByBusinessId(
+    @Args('businessId', { type: () => Int }) businessId: number,
+  ) {
+    const result =
+      await this.businessSchedulesService.findByBusinessId(businessId);
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Business schedules updated successfully',
+      data: result,
+    };
   }
 
   @Mutation(() => BusinessScheduleResponse, { name: 'updateBusinessSchedule' })
   @UseGuards(GqlAuthGuard)
   async updateBusinessSchedule(
-    @CurrentUser() user: JwtPayload,
+    @Args('businessId', { type: () => Int }) businessId: number,
     @Args('updateBusinessScheduleInput') data: UpdateBusinessScheduleInput,
   ) {
     const result = await this.businessSchedulesService.update({
-      user,
+      businessId,
       updateBusinessScheduleInput: data,
     });
 

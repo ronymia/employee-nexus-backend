@@ -33,6 +33,8 @@ import { businessSearchableFields } from './businesses.constant';
 import { BusinessStatus } from './enums';
 import { Status } from 'src/common/enums';
 import { UserAccountStatus } from '../users/enums';
+import { SubscriptionStatusHelper } from '../business-subscriptions/helpers/subscription-status.helper';
+import { BusinessSubscriptionStatus } from '../subscription-plans/enums';
 
 @Injectable()
 export class BusinessesService {
@@ -70,12 +72,14 @@ export class BusinessesService {
     createProfileInput: CreateProfileInput,
     createBusinessInput: CreateBusinessInput,
   ) {
+    const { subscription, ...createBusinessData } = createBusinessInput;
+
     // START DATABASE TRANSACTION
     const newBusiness = await this.prisma.$transaction(
       async (prismaTransaction: Prisma.TransactionClient) => {
         // STEP 0: VALIDATE SUBSCRIPTION PLAN
         const servicePlan = await prismaTransaction.subscriptionPlan.findFirst({
-          where: { id: createBusinessInput.subscriptionPlanId },
+          where: { id: subscription.subscriptionPlanId },
         });
         if (!servicePlan) {
           throw new NotAcceptableException('Service plan not found');
@@ -103,9 +107,10 @@ export class BusinessesService {
         }
 
         // STEP 3: CREATE BUSINESS
+
         const createdBusiness = await prismaTransaction.business.create({
           data: {
-            ...createBusinessInput,
+            ...createBusinessData,
             ownerId: createdUser.id,
             status: BusinessStatus.ACTIVE,
           },
@@ -115,6 +120,29 @@ export class BusinessesService {
         }
 
         const businessId = createdBusiness.id;
+
+        // STEP 4: CREATE BUSINESS SUBSCRIPTION
+        // Calculate status and isActive from dates
+        const { status, isActive } = SubscriptionStatusHelper.calculateStatus({
+          trialEndDate: subscription.trialEndDate,
+          startDate: subscription.startDate,
+          endDate: subscription.endDate,
+        });
+
+        const createdSubscription =
+          await prismaTransaction.businessSubscription.create({
+            data: {
+              ...subscription,
+              businessId,
+              status,
+              isActive,
+            },
+          });
+        if (!createdSubscription) {
+          throw new NotImplementedException(
+            'Business subscription creation failed',
+          );
+        }
 
         // STEP 4: CREATE DEFAULT BUSINESS ROLES
         const roleNames = [ROLE.OWNER, ROLE.MANAGER, ROLE.ADMIN, ROLE.EMPLOYEE];
@@ -331,7 +359,11 @@ export class BusinessesService {
         return await prismaTransaction.business.findUnique({
           where: { id: createdBusiness.id },
           include: {
-            subscriptions: true,
+            subscriptions: {
+              where: {
+                status: BusinessSubscriptionStatus.ACTIVE,
+              },
+            },
             businessSchedules: true,
             businessSettings: true,
             attendanceSettings: true,
@@ -382,7 +414,17 @@ export class BusinessesService {
       : {};
 
     const result = !limit
-      ? await this.prisma.business.findMany()
+      ? await this.prisma.business.findMany({
+          include: {
+            subscriptions: {
+              where: {
+                status: BusinessSubscriptionStatus.ACTIVE,
+              },
+            },
+            businessSchedules: true,
+            businessSettings: true,
+          },
+        })
       : await this.prisma.business.findMany({
           where: {
             ...whereCondition,
@@ -393,6 +435,11 @@ export class BusinessesService {
             [sortBy]: sortOrder,
           },
           include: {
+            subscriptions: {
+              where: {
+                status: BusinessSubscriptionStatus.ACTIVE,
+              },
+            },
             businessSchedules: true,
             businessSettings: true,
           },
@@ -421,7 +468,11 @@ export class BusinessesService {
       include: {
         businessSchedules: true,
         businessSettings: true,
-        subscriptions: true,
+        subscriptions: {
+          where: {
+            status: BusinessSubscriptionStatus.ACTIVE,
+          },
+        },
       },
     });
     return business;
@@ -433,21 +484,24 @@ export class BusinessesService {
     // userInput: UpdateUserInput,
     // profileInput: UpdateProfileInput,
   ) {
-    const { id, ...restData } = updateBusinessInput;
+    const { id, subscription, ...restData } = updateBusinessInput;
     // CHECK IF BUSINESS EXISTS
     await this.findOne(id);
 
     // Start a database transaction
     const newBusiness = await this.prisma.$transaction(
       async (prismaTransaction: Prisma.TransactionClient) => {
-        // step 1 : check service plan
-        const servicePlan = await prismaTransaction.subscriptionPlan.findFirst({
-          where: {
-            id: restData.subscriptionPlanId,
-          },
-        });
-        if (!servicePlan) {
-          throw new NotImplementedException('Service plan not found');
+        // step 1 : check service plan if subscription is being updated
+        if (subscription) {
+          const servicePlan =
+            await prismaTransaction.subscriptionPlan.findFirst({
+              where: {
+                id: subscription.subscriptionPlanId,
+              },
+            });
+          if (!servicePlan) {
+            throw new NotImplementedException('Service plan not found');
+          }
         }
 
         // Step 2: update the business
@@ -457,9 +511,52 @@ export class BusinessesService {
           include: {
             businessSchedules: true,
             businessSettings: true,
-            subscriptions: true,
+            subscriptions: {
+              where: {
+                status: BusinessSubscriptionStatus.ACTIVE,
+              },
+            },
           },
         });
+
+        // Step 3: update subscription if provided
+        if (subscription) {
+          // Calculate status and isActive from dates
+          const { status, isActive } = SubscriptionStatusHelper.calculateStatus(
+            {
+              trialEndDate: subscription.trialEndDate,
+              startDate: subscription.startDate,
+              endDate: subscription.endDate,
+            },
+          );
+
+          await prismaTransaction.businessSubscription.upsert({
+            where: {
+              businessId_subscriptionPlanId: {
+                businessId: id,
+                subscriptionPlanId: subscription.subscriptionPlanId,
+              },
+            },
+            update: {
+              subscriptionPlanId: subscription.subscriptionPlanId,
+              trialEndDate: subscription.trialEndDate,
+              startDate: subscription.startDate,
+              endDate: subscription.endDate,
+              status,
+              isActive,
+            },
+            create: {
+              businessId: id,
+              subscriptionPlanId: subscription.subscriptionPlanId,
+              trialEndDate: subscription.trialEndDate,
+              startDate: subscription.startDate,
+              endDate: subscription.endDate,
+              status: BusinessSubscriptionStatus.ACTIVE,
+              isActive,
+              numberOfEmployeesAllowed: 0, // Will be updated from service plan
+            },
+          });
+        }
 
         return updateBusiness;
       },

@@ -1,6 +1,7 @@
-import { InputType, Field, Int } from '@nestjs/graphql';
-import { IsDate, IsEmail, IsInt, IsString } from 'class-validator';
+import { InputType, Field } from '@nestjs/graphql';
+import { IsDate, IsEmail, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
+import { CreateBusinessSubscriptionInput } from 'src/modules/business-subscriptions/dto/create-business-subscription.input';
 
 @InputType()
 export class CreateBusinessInput {
@@ -37,11 +38,8 @@ export class CreateBusinessInput {
   @Type(() => Date)
   registrationDate: Date;
 
-  @Field(() => Int)
-  @IsInt()
-  numberOfEmployeesAllowed: number;
-
-  @Field(() => Int)
-  @IsInt()
-  subscriptionPlanId: number;
+  @Field(() => CreateBusinessSubscriptionInput, {
+    description: 'Business Subscription Details',
+  })
+  subscription: CreateBusinessSubscriptionInput;
 }

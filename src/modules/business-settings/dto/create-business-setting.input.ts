@@ -37,12 +37,12 @@ export class CreateBusinessSettingInput {
   @IsString()
   currency: string;
 
-  @Field(() => Boolean, {
-    description: 'Whether self-registration is enabled',
-    defaultValue: false,
-  })
-  @IsBoolean()
-  isSelfRegistered: boolean;
+  // @Field(() => Boolean, {
+  //   description: 'Whether self-registration is enabled',
+  //   defaultValue: false,
+  // })
+  // @IsBoolean()
+  // isSelfRegistered: boolean;
 
   @Field(() => String, {
     description: 'Business time zone',

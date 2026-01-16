@@ -507,18 +507,15 @@ type Business {
   createdAt: DateTime!
   email: String!
   id: Int!
-  lat: Float
-  lng: Float
   name: String!
-  numberOfEmployeesAllowed: Int!
   owner: User
   ownerId: Int!
   phone: String!
   postcode: String!
-  registrationDate: String!
+  registrationDate: DateTime!
   status: String!
-  subscriptionPlan: SubscriptionPlan
-  subscriptionPlanId: Int!
+  subscription: BusinessSubscription!
+  subscriptions: [BusinessSubscription!]!
   updatedAt: DateTime!
   website: String
 }
@@ -552,11 +549,19 @@ type BusinessResponse {
 
 type BusinessSchedule {
   businessId: Int!
-  day: Int!
+  dayOfWeek: Int!
   endTime: String!
   id: Int!
   isWeekend: Boolean!
   startTime: String!
+}
+
+type BusinessScheduleQueryResponse {
+  data: [BusinessSchedule!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type BusinessScheduleResponse {
@@ -588,9 +593,6 @@ type BusinessSetting {
 
   """Prefix for business identifiers"""
   identifierPrefix: String!
-
-  """Whether self-registration is enabled"""
-  isSelfRegistered: Boolean!
 
   """Business theme"""
   theme: String
@@ -625,11 +627,17 @@ type BusinessSubscription {
   """Unique identifier for the business subscription"""
   id: ID!
 
+  """Whether the subscription is active"""
+  isActive: Boolean!
+
+  """Number of employees allowed in this subscription"""
+  numberOfEmployeesAllowed: Int!
+
   """Subscription start date"""
   startDate: DateTime
 
   """Status of the subscription"""
-  status: String!
+  status: BusinessSubscriptionStatus!
 
   """Subscription plan details"""
   subscriptionPlan: SubscriptionPlan!
@@ -650,6 +658,16 @@ type BusinessSubscriptionResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
+}
+
+"""status of business subscription plan"""
+enum BusinessSubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PENDING
+  SUSPENDED
+  TRIAL
 }
 
 type BusinessSubscriptionsQueryResponse {
@@ -767,25 +785,23 @@ input CreateBusinessInput {
   country: String!
   email: String!
   name: String!
-  numberOfEmployeesAllowed: Int!
   phone: String!
   postcode: String!
   registrationDate: DateTime!
-  subscriptionPlanId: Int!
+
+  """Business Subscription Details"""
+  subscription: CreateBusinessSubscriptionInput!
 }
 
 input CreateBusinessSubscriptionInput {
-  """ID of the business"""
-  businessId: Int!
-
   """Subscription end date"""
   endDate: DateTime
 
-  """Subscription start date"""
-  startDate: DateTime
+  """Number of employees allowed"""
+  numberOfEmployeesAllowed: Int!
 
-  """Status of the subscription"""
-  status: String!
+  """Subscription start date"""
+  startDate: DateTime!
 
   """ID of the subscription plan"""
   subscriptionPlanId: Int!
@@ -2380,8 +2396,8 @@ type Mutation {
   updateAttendance(updateAttendanceInput: UpdateAttendanceInput!): AttendanceResponse!
   updateAttendanceSetting(updateAttendanceSettingInput: UpdateAttendanceSettingInput!): AttendanceSettingResponse!
   updateBusiness(updateBusinessInput: UpdateBusinessInput!): BusinessResponse!
-  updateBusinessSchedule(updateBusinessScheduleInput: UpdateBusinessScheduleInput!): BusinessScheduleResponse!
-  updateBusinessSetting(updateBusinessSettingInput: UpdateBusinessSettingInput!): BusinessSettingResponse!
+  updateBusinessSchedule(businessId: Int!, updateBusinessScheduleInput: UpdateBusinessScheduleInput!): BusinessScheduleResponse!
+  updateBusinessSetting(businessId: Int!, updateBusinessSettingInput: UpdateBusinessSettingInput!): BusinessSettingResponse!
   updateBusinessSubscription(updateBusinessSubscriptionInput: UpdateBusinessSubscriptionInput!): BusinessSubscriptionResponse!
   updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): DepartmentResponse!
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
@@ -3035,8 +3051,9 @@ type Query {
   attendanceSettingsByBusiness: AttendanceSettingResponse!
   attendances(query: QueryAttendanceInput): AttendanceQueryResponse!
   businessById(id: Int!): BusinessResponse!
-  businessScheduleByBusinessId(id: Int!): BusinessSchedule!
-  businessSettingByBusinessId: BusinessSettingResponse!
+  businessScheduleById(id: Int!): BusinessSchedule!
+  businessSchedulesByBusinessId(businessId: Int!): BusinessScheduleQueryResponse!
+  businessSettingByBusinessId(businessId: Int!): BusinessSettingResponse!
   businessSubscriptionById(id: Int!): BusinessSubscriptionResponse!
   businessSubscriptions(query: QueryBusinessSubscriptionInput): BusinessSubscriptionsQueryResponse!
   businesses(query: QueryBusinessInput): BusinessQueryResponse!
@@ -3589,7 +3606,7 @@ type SubscriptionPlan {
   setupFee: Int!
 
   """Status of the service plan"""
-  status: SubscriptionStatus!
+  status: String!
 
   """Timestamp when the service plan was last updated"""
   updatedAt: DateTime!
@@ -3609,15 +3626,6 @@ type SubscriptionPlanResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
-}
-
-"""Status of the Subscription Plan"""
-enum SubscriptionStatus {
-  ACTIVE
-  CANCELLED
-  EXPIRED
-  INACTIVE
-  TRIAL
 }
 
 type TaskOverview {
@@ -3726,15 +3734,16 @@ input UpdateBusinessInput {
   email: String
   id: Int!
   name: String
-  numberOfEmployeesAllowed: Int
   phone: String
   postcode: String
   registrationDate: DateTime
-  subscriptionPlanId: Int
+
+  """Business Subscription Details"""
+  subscription: CreateBusinessSubscriptionInput
 }
 
 input UpdateBusinessScheduleInput {
-  day: Int
+  dayOfWeek: Int
 
   """HH:MM:SS"""
   endTime: String
@@ -3762,9 +3771,6 @@ input UpdateBusinessSettingInput {
 
   """Prefix for business identifiers"""
   identifierPrefix: String
-
-  """Whether self-registration is enabled"""
-  isSelfRegistered: Boolean = false
 
   """Business theme"""
   theme: String

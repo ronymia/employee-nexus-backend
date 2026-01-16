@@ -3,7 +3,7 @@ export const businessSettings = {
   identifierPrefix: null,
   businessStartDay: 0,
   currency: 'BDT',
-  isSelfRegistered: true,
+  // isSelfRegistered: true,
   theme: '',
   deleteReadNotifications: '30_days',
   businessTimeZone: 'Asia/Dhaka',
