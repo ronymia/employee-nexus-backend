@@ -883,6 +883,29 @@ input CreateEmployeeInput {
   workingHoursPerWeek: Int
 }
 
+input CreateEmployeeSalaryInput {
+  """End date of the salary (YYYY-MM-DD)"""
+  endDate: String
+
+  """Reason for salary change"""
+  reason: String
+
+  """Additional remarks"""
+  remarks: String
+
+  """Salary amount"""
+  salaryAmount: Float!
+
+  """Type of salary (HOURLY, DAILY, MONTHLY)"""
+  salaryType: SalaryType!
+
+  """Start date of the salary (YYYY-MM-DD)"""
+  startDate: String!
+
+  """User ID of the employee"""
+  userId: Int!
+}
+
 input CreateEmploymentStatusInput {
   """Description of the employment status"""
   description: String!
@@ -1433,21 +1456,33 @@ type EmergencyContactResponse {
 
 type Employee {
   createdAt: DateTime!
+
+  """Active department of the user"""
+  department: Department
   departments: [EmployeeDepartment!]
+
+  """Active designation of the user"""
+  designation: Designation
   designations: [EmployeeDesignation!]
   employeeId: String!
+
+  """Active employment status of the user"""
+  employmentStatus: EmploymentStatus
   employmentStatuses: [EmployeeEmploymentStatus!]
   joiningDate: DateTime!
   nidNumber: String!
-  rotaType: String!
-  salaryPerMonth: Float!
+  salaries: [EmployeeSalary!]
   updatedAt: DateTime!
   user: User!
   userId: Int!
+
+  """Active work schedule of the user"""
+  workSchedule: WorkSchedule
   workSchedules: [EmployeeWorkSchedule!]
+
+  """Active work site of the user"""
+  workSite: WorkSite
   workSites: [EmployeeWorkSite!]
-  workingDaysPerWeek: Int
-  workingHoursPerWeek: Int
 }
 
 type EmployeeDashboard {
@@ -1589,6 +1624,60 @@ type EmployeeEmploymentStatus {
 
 type EmployeeEmploymentStatusResponse {
   data: EmployeeEmploymentStatus!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EmployeeSalariesQueryResponse {
+  data: [EmployeeSalary!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EmployeeSalary {
+  """Date when the salary record was created"""
+  createdAt: DateTime!
+
+  """End date of the salary"""
+  endDate: DateTime
+
+  """Unique identifier for the salary record"""
+  id: Int!
+
+  """Whether this salary is currently active"""
+  isActive: Boolean!
+
+  """Reason for salary change (e.g., Annual Increment, Promotion)"""
+  reason: String
+
+  """Additional remarks about the salary"""
+  remarks: String
+
+  """Salary amount"""
+  salaryAmount: Float!
+
+  """Type of salary (HOURLY, DAILY, MONTHLY)"""
+  salaryType: SalaryType!
+
+  """Start date of the salary"""
+  startDate: DateTime!
+
+  """Date when the salary record was last updated"""
+  updatedAt: DateTime!
+
+  """Employee user details"""
+  user: User
+
+  """User ID of the employee"""
+  userId: Int!
+}
+
+type EmployeeSalaryResponse {
+  data: EmployeeSalary!
   message: String!
   meta: PaginationMeta
   statusCode: Float!
@@ -2348,6 +2437,7 @@ type Mutation {
   createPayrollItem(createPayrollItemInput: CreatePayrollItemInput!): PayrollItemResponse!
   createProject(createProjectInput: CreateProjectInput!): ProjectResponse!
   createRecruitmentProcess(createRecruitmentProcessInput: CreateRecruitmentProcessInput!): RecruitmentProcessResponse!
+  createSalary(createEmployeeSalaryInput: CreateEmployeeSalaryInput!): EmployeeSalaryResponse!
   createSocialLink(createSocialLinkInput: CreateSocialLinkInput!): SocialLinkResponse!
   createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
   createUserWithBusiness(createBusinessInput: CreateBusinessInput!, createProfileInput: CreateProfileInput!, createUserInput: CreateUserInput!): Business!
@@ -2373,6 +2463,7 @@ type Mutation {
   deletePayrollItem(id: Int!): PayrollItemResponse!
   deleteProject(id: Int!): ProjectResponse!
   deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
+  deleteSalary(id: Int!): EmployeeSalaryResponse!
   deleteSocialLink(userId: Int!): SocialLinkResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
   deleteUser(id: Int!): UserResponse!
@@ -2424,6 +2515,7 @@ type Mutation {
   updateProfile(updateProfileInput: UpdateProfileInput!): ProfileResponse!
   updateProject(updateProjectInput: UpdateProjectInput!): ProjectResponse!
   updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
+  updateSalary(updateEmployeeSalaryInput: UpdateEmployeeSalaryInput!): EmployeeSalaryResponse!
   updateSocialLink(updateSocialLinkInput: UpdateSocialLinkInput!): SocialLinkResponse!
   updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
   updateWorkSchedule(updateWorkScheduleInput: UpdateWorkScheduleInput!): WorkScheduleResponse!
@@ -3027,6 +3119,7 @@ type Query {
   FeatureById(id: Int!): FeatureResponse!
   activeBusinessSubscription(businessId: Int): BusinessSubscriptionResponse!
   activePayrollComponents(businessId: Int!): PayrollComponentsQueryResponse!
+  activeSalaryByUserId(userId: Int!): EmployeeSalaryResponse!
   allFeatures: FeatureQueryResponse!
   asset(id: Int!): AssetResponse!
   assetType(id: Int!): AssetTypeResponse!
@@ -3109,6 +3202,9 @@ type Query {
   recruitmentProcessById(id: Int!): RecruitmentProcessResponse!
   recruitmentProcesses(query: QueryRecruitmentProcessInput): RecruitmentProcessesQueryResponse!
   roles: RoleResponse!
+  salaries(query: QueryEmployeeSalaryInput): EmployeeSalariesQueryResponse!
+  salaryById(id: Int!): EmployeeSalaryResponse!
+  salaryHistory(userId: Int!): EmployeeSalariesQueryResponse!
   socialLink(userId: Int!): SocialLinkResponse!
   socialLinksByProfileId(profileId: Int): SocialLinkResponse!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
@@ -3184,6 +3280,18 @@ input QueryDocumentInput {
   pagination: BasePaginationInput
   searchTerm: String
   title: String
+}
+
+input QueryEmployeeSalaryInput {
+  """Filter by active status"""
+  isActive: Boolean
+  pagination: BasePaginationInput
+
+  """Filter by salary type"""
+  salaryType: SalaryType
+
+  """Filter by user ID"""
+  userId: Int
 }
 
 input QueryEmployeeWorkSitesInput {
@@ -3508,6 +3616,13 @@ type RoleResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
+}
+
+"""Type of salary payment"""
+enum SalaryType {
+  DAILY
+  HOURLY
+  MONTHLY
 }
 
 enum ScheduleBreakType {
@@ -3848,6 +3963,32 @@ input UpdateEmployeeInput {
   workSiteIds: [Int!]
   workingDaysPerWeek: Int
   workingHoursPerWeek: Int
+}
+
+input UpdateEmployeeSalaryInput {
+  """End date of the salary (YYYY-MM-DD)"""
+  endDate: String
+
+  """Unique identifier of the salary record"""
+  id: Int!
+
+  """Whether this salary is currently active"""
+  isActive: Boolean
+
+  """Reason for salary change"""
+  reason: String
+
+  """Additional remarks"""
+  remarks: String
+
+  """Salary amount"""
+  salaryAmount: Float
+
+  """Type of salary (HOURLY, DAILY, MONTHLY)"""
+  salaryType: SalaryType
+
+  """Start date of the salary (YYYY-MM-DD)"""
+  startDate: String
 }
 
 input UpdateEmploymentDetailsInput {
@@ -4244,10 +4385,13 @@ type User {
 
   """Date when the user was created"""
   createdAt: DateTime!
+  department: Department
+  designation: Designation
 
   """Email of the user"""
   email: String!
   employee: Employee
+  employmentStatus: EmploymentStatus
   id: ID!
 
   """Formatted permissions as ["Resource:action"]"""
@@ -4266,6 +4410,8 @@ type User {
   """Date when the user was last updated"""
   updatedAt: DateTime!
   userPermissions: [UserPermission!]
+  workSchedule: WorkSchedule
+  workSite: WorkSite
 }
 
 """Account status of the user"""

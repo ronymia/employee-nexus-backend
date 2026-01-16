@@ -24,6 +24,11 @@ import { JwtPayload } from '../auth/jwt.strategy';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
+import { Department } from '../departments/entities/department.entity';
+import { Designation } from '../designations/entities/designation.entity';
+import { EmploymentStatus } from '../employment-status/entities/employment-status.entity';
+import { WorkSite } from '../work-sites/entities/work-site.entity';
+import { WorkSchedule } from '../work-schedules/entities/work-schedule.entity';
 
 @Resolver(() => User)
 @UseGuards(GqlAuthGuard, PermissionsGuard)
@@ -37,6 +42,31 @@ export class UsersResolver {
   permissions(@Parent() user: User): string[] {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return PermissionUtils.formatUserPermissions(user as any);
+  }
+
+  @ResolveField(() => Department, { nullable: true })
+  async department(@Parent() user: User) {
+    return await this.usersService.getActiveDepartment(user.id);
+  }
+
+  @ResolveField(() => Designation, { nullable: true })
+  async designation(@Parent() user: User) {
+    return await this.usersService.getActiveDesignation(user.id);
+  }
+
+  @ResolveField(() => EmploymentStatus, { nullable: true })
+  async employmentStatus(@Parent() user: User) {
+    return await this.usersService.getActiveEmploymentStatus(user.id);
+  }
+
+  @ResolveField(() => WorkSite, { nullable: true })
+  async workSite(@Parent() user: User) {
+    return await this.usersService.getActiveWorkSite(user.id);
+  }
+
+  @ResolveField(() => WorkSchedule, { nullable: true })
+  async workSchedule(@Parent() user: User) {
+    return await this.usersService.getActiveWorkSchedule(user.id);
   }
 
   // @Mutation(() => User)

@@ -1273,4 +1273,89 @@ export class UsersService {
       ...statusStats,
     };
   }
+
+  // GET ACTIVE DEPARTMENT FOR USER
+  async getActiveDepartment(userId: number) {
+    const employeeDepartment = await this.prisma.employeeDepartment.findFirst({
+      where: {
+        userId,
+        isActive: true,
+      },
+      include: {
+        department: true,
+      },
+    });
+
+    return employeeDepartment?.department || null;
+  }
+
+  // GET ACTIVE DESIGNATION FOR USER
+  async getActiveDesignation(userId: number) {
+    const employeeDesignation = await this.prisma.employeeDesignation.findFirst(
+      {
+        where: {
+          userId,
+          isActive: true,
+        },
+        include: {
+          designation: true,
+        },
+      },
+    );
+
+    return employeeDesignation?.designation || null;
+  }
+
+  // GET ACTIVE EMPLOYMENT STATUS FOR USER
+  async getActiveEmploymentStatus(userId: number) {
+    const employeeStatus = await this.prisma.employeeStatus.findFirst({
+      where: {
+        userId,
+        isActive: true,
+      },
+      include: {
+        employmentStatus: true,
+      },
+    });
+
+    return employeeStatus?.employmentStatus || null;
+  }
+
+  // GET ACTIVE WORK SITE FOR USER
+  async getActiveWorkSite(userId: number) {
+    const employeeWorkSite = await this.prisma.employeeWorkSite.findFirst({
+      where: {
+        userId,
+        isActive: true,
+      },
+      include: {
+        workSite: true,
+      },
+    });
+
+    return employeeWorkSite?.workSite || null;
+  }
+
+  // GET ACTIVE WORK SCHEDULE FOR USER
+  async getActiveWorkSchedule(userId: number) {
+    const employeeSchedule = await this.prisma.employeeSchedule.findFirst({
+      where: {
+        userId,
+        isActive: true,
+      },
+      include: {
+        workSchedule: {
+          include: {
+            schedules: {
+              include: {
+                timeSlots: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return employeeSchedule?.workSchedule || null;
+  }
 }
