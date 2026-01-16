@@ -103,6 +103,12 @@ export class WorkSchedule {
     description: 'Last update timestamp',
   })
   updatedAt: Date;
+
+  @Field(() => Boolean, {
+    description:
+      'Whether this work schedule is set as default in SystemDefaults',
+  })
+  isDefault: boolean;
 }
 
 @ObjectType()

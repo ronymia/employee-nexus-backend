@@ -13,7 +13,7 @@ export class DaySchedule {
   @Field(() => Int, {
     description: 'Day of the week (0-6, where 0=Sunday)',
   })
-  day: number;
+  dayOfWeek: number;
 
   @Field(() => Boolean, {
     description: 'Whether this day is a weekend',

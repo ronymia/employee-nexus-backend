@@ -244,6 +244,22 @@ export class DepartmentsService {
     });
   }
 
+  // CHECK IF DEPARTMENT IS DEFAULT - VERIFIES IF DEPARTMENT IS SET AS DEFAULT IN SYSTEM DEFAULTS
+  async isDefault({
+    departmentId,
+    businessId,
+  }: {
+    departmentId: number;
+    businessId: number;
+  }): Promise<boolean> {
+    const systemDefaults = await this.prisma.systemDefaults.findUnique({
+      where: { businessId },
+      select: { defaultDepartmentId: true },
+    });
+
+    return systemDefaults?.defaultDepartmentId === departmentId;
+  }
+
   // DELETE DEPARTMENT - REMOVES A DEPARTMENT RECORD FROM DATABASE
   async remove({ user, id }: { user: JwtPayload; id: number }) {
     await this.findOne({ user, id }); // Ensure the department exists

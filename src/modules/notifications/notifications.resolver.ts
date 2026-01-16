@@ -175,41 +175,4 @@ export class NotificationsResolver {
   //       data: template,
   //     };
   //   }
-
-  // ============ NOTIFICATION PREFERENCE OPERATIONS ============
-
-  @Query(() => NotificationPreferenceResponse, {
-    name: 'notificationPreferences',
-  })
-  @RequirePermissions('Notification:read')
-  async notificationPreferences(@CurrentUser() user: JwtPayload) {
-    const preferences = await this.notificationsService.getPreferences(
-      user.userId,
-    );
-    return {
-      success: true,
-      statusCode: HttpStatus.OK,
-      message: 'Notification preferences retrieved successfully',
-      data: preferences,
-    };
-  }
-
-  @Mutation(() => NotificationPreferenceResponse)
-  @RequirePermissions('Notification:update')
-  async updateNotificationPreferences(
-    @CurrentUser() user: JwtPayload,
-    @Args('updateNotificationPreferenceInput')
-    input: UpdateNotificationPreferenceInput,
-  ) {
-    const preferences = await this.notificationsService.updatePreferences(
-      user.userId,
-      input,
-    );
-    return {
-      success: true,
-      statusCode: HttpStatus.OK,
-      message: 'Notification preferences updated successfully',
-      data: preferences,
-    };
-  }
 }

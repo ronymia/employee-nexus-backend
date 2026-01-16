@@ -35,7 +35,6 @@ export class SubscriptionStatusCron {
         select: {
           id: true,
           status: true,
-          isActive: true,
           trialEndDate: true,
           startDate: true,
           endDate: true,
@@ -58,15 +57,11 @@ export class SubscriptionStatusCron {
           });
 
         // Update if status or isActive has changed
-        if (
-          subscription.status !== calculatedStatus ||
-          subscription.isActive !== calculatedIsActive
-        ) {
+        if (subscription.status !== calculatedStatus) {
           await this.prisma.businessSubscription.update({
             where: { id: subscription.id },
             data: {
               status: calculatedStatus,
-              isActive: calculatedIsActive,
             },
           });
 
@@ -74,8 +69,7 @@ export class SubscriptionStatusCron {
 
           this.logger.log(
             `Updated subscription ${subscription.id} for business ${subscription.businessId}: ` +
-              `${subscription.status} → ${calculatedStatus}, ` +
-              `isActive: ${subscription.isActive} → ${calculatedIsActive}`,
+              `${subscription.status} → ${calculatedStatus}, `,
           );
         }
       }
@@ -116,15 +110,11 @@ export class SubscriptionStatusCron {
           endDate: subscription.endDate,
         });
 
-      if (
-        subscription.status !== calculatedStatus ||
-        subscription.isActive !== calculatedIsActive
-      ) {
+      if (subscription.status !== calculatedStatus) {
         await this.prisma.businessSubscription.update({
           where: { id: subscription.id },
           data: {
             status: calculatedStatus,
-            isActive: calculatedIsActive,
           },
         });
         updatedCount++;

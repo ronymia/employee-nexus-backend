@@ -35,6 +35,7 @@ import { Status } from 'src/common/enums';
 import { UserAccountStatus } from '../users/enums';
 import { SubscriptionStatusHelper } from '../business-subscriptions/helpers/subscription-status.helper';
 import { BusinessSubscriptionStatus } from '../subscription-plans/enums';
+import { defaultWorkSchedule } from 'src/Database/work-schedule';
 
 @Injectable()
 export class BusinessesService {
@@ -135,7 +136,6 @@ export class BusinessesService {
               ...subscription,
               businessId,
               status,
-              isActive,
             },
           });
         if (!createdSubscription) {
@@ -355,6 +355,67 @@ export class BusinessesService {
           data: this.getDefaultBusinessSchedules(createdBusiness.id),
         });
 
+        // CREATE DEFAULT WORK SCHEDULE
+        const { schedules, ...defaultSchedules } = defaultWorkSchedule;
+
+        const createdWorkSchedule = await prismaTransaction.workSchedule.create(
+          {
+            data: { ...defaultSchedules, businessId: createdBusiness.id },
+          },
+        );
+
+        for (const schedule of schedules) {
+          const { timeSlots, ...restSchedule } = schedule;
+          await prismaTransaction.daySchedule.create({
+            data: {
+              ...restSchedule,
+              workSchedule: {
+                connect: { id: createdWorkSchedule.id },
+              },
+              timeSlots: {
+                createMany: {
+                  data: timeSlots.map((slot) => ({
+                    ...slot,
+                  })),
+                },
+              },
+            },
+          });
+        }
+
+        //
+        const createDepartments = await prismaTransaction.department.create({
+          data: {
+            businessId,
+            name: createBusinessData.name,
+            status: Status.ACTIVE,
+            description: 'Default Department',
+            managerId: null,
+          },
+        });
+
+        //
+        const createWorkSites = await prismaTransaction.workSite.create({
+          data: {
+            businessId,
+            name: createBusinessData.name,
+            address: createdBusiness.address,
+            status: Status.ACTIVE,
+            description: 'Head Office',
+          },
+        });
+
+        //
+
+        await prismaTransaction.systemDefaults.create({
+          data: {
+            businessId,
+            defaultDepartmentId: createDepartments.id,
+            defaultWorkSiteId: createWorkSites.id,
+            defaultWorkScheduleId: createdWorkSchedule.id,
+          },
+        });
+
         // STEP 11: RETURN CREATED BUSINESS WITH RELATIONS
         return await prismaTransaction.business.findUnique({
           where: { id: createdBusiness.id },
@@ -522,13 +583,11 @@ export class BusinessesService {
         // Step 3: update subscription if provided
         if (subscription) {
           // Calculate status and isActive from dates
-          const { status, isActive } = SubscriptionStatusHelper.calculateStatus(
-            {
-              trialEndDate: subscription.trialEndDate,
-              startDate: subscription.startDate,
-              endDate: subscription.endDate,
-            },
-          );
+          const { status } = SubscriptionStatusHelper.calculateStatus({
+            trialEndDate: subscription.trialEndDate,
+            startDate: subscription.startDate,
+            endDate: subscription.endDate,
+          });
 
           await prismaTransaction.businessSubscription.upsert({
             where: {
@@ -543,7 +602,6 @@ export class BusinessesService {
               startDate: subscription.startDate,
               endDate: subscription.endDate,
               status,
-              isActive,
             },
             create: {
               businessId: id,
@@ -552,7 +610,6 @@ export class BusinessesService {
               startDate: subscription.startDate,
               endDate: subscription.endDate,
               status: BusinessSubscriptionStatus.ACTIVE,
-              isActive,
               numberOfEmployeesAllowed: 0, // Will be updated from service plan
             },
           });

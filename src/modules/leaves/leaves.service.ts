@@ -488,17 +488,17 @@ export class LeavesService {
       },
     });
 
-    const allocatedHours = leaveType.leaveHours;
-    const usedHours = (usedMinutes._sum?.totalMinutes || 0) / 60;
-    const remaining = allocatedHours - usedHours;
+    const allocatedMinutes = leaveType.leaveMinutes;
+    const usedMinutesValue = usedMinutes._sum?.totalMinutes || 0;
+    const remaining = allocatedMinutes - usedMinutesValue;
 
     return {
       leaveTypeId,
       leaveTypeName: leaveType.name,
       year,
-      allocatedHours,
-      usedHours,
-      remainingHours: remaining,
+      allocatedMinutes,
+      usedMinutesValue,
+      remainingMinutes: remaining,
     };
   }
 

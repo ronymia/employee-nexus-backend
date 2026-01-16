@@ -591,6 +591,9 @@ type BusinessSetting {
   """Delete read notifications setting"""
   deleteReadNotifications: String!
 
+  """Business theme"""
+  googleApiKey: String
+
   """Prefix for business identifiers"""
   identifierPrefix: String!
 
@@ -626,9 +629,6 @@ type BusinessSubscription {
 
   """Unique identifier for the business subscription"""
   id: ID!
-
-  """Whether the subscription is active"""
-  isActive: Boolean!
 
   """Number of employees allowed in this subscription"""
   numberOfEmployeesAllowed: Int!
@@ -812,7 +812,7 @@ input CreateBusinessSubscriptionInput {
 
 input CreateDayScheduleInput {
   """Day of the week (0-6, where 0 is Sunday)"""
-  day: Int!
+  dayOfWeek: Int!
 
   """Whether this day is a weekend"""
   isWeekend: Boolean!
@@ -998,8 +998,8 @@ input CreateLeaveTypeInput {
   """Array of employment status IDs to associate with this leave type"""
   employmentStatuses: [Int!] = []
 
-  """Number of leave hours allocated"""
-  leaveHours: Int! = 0
+  """Number of leave minutes allocated"""
+  leaveMinutes: Int! = 0
 
   """Leave rollover policy type"""
   leaveRolloverType: LeaveRolloverType! = NONE
@@ -1256,7 +1256,7 @@ scalar DateTime
 
 type DaySchedule {
   """Day of the week (0-6, where 0=Sunday)"""
-  day: Int!
+  dayOfWeek: Int!
 
   """Unique identifier for the day schedule"""
   id: ID!
@@ -1292,6 +1292,9 @@ type Department {
 
   """Unique identifier for the department"""
   id: ID!
+
+  """Whether this department is set as default in SystemDefaults"""
+  isDefault: Boolean!
 
   """Manager of the department"""
   manager: User
@@ -2213,8 +2216,8 @@ type LeaveType {
   """Unique identifier for the leave type"""
   id: ID!
 
-  """Number of leave hours allocated"""
-  leaveHours: Int!
+  """Number of leave minutes allocated"""
+  leaveMinutes: Int!
 
   """Leave rollover policy type"""
   leaveRolloverType: LeaveRolloverType!
@@ -2414,7 +2417,6 @@ type Mutation {
   updateLeaveSetting(updateLeaveSettingInput: UpdateLeaveSettingInput!): LeaveSettingResponse!
   updateLeaveType(updateLeaveTypeInput: UpdateLeaveTypeInput!): LeaveTypeResponse!
   updateNote(updateNoteInput: UpdateNoteInput!): NoteResponse!
-  updateNotificationPreferences(updateNotificationPreferenceInput: UpdateNotificationPreferenceInput!): NotificationPreferenceResponse!
   updateNotificationTemplate(updateNotificationTemplateInput: UpdateNotificationTemplateInput!): NotificationTemplateResponse!
   updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
   updatePayrollComponent(updatePayrollComponentInput: UpdatePayrollComponentInput!): PayrollComponentResponse!
@@ -2480,21 +2482,16 @@ type NotesQueryResponse {
 }
 
 type Notification {
-  actionUrl: String
   businessId: Int
-  channels: [NotificationChannel!]!
   createdAt: DateTime!
   entityId: Int
   entityType: String
-  expiresAt: DateTime
   id: Int!
-  isRead: Boolean!
   message: String!
   metadata: String
   notificationTemplateId: Int
   priority: NotificationPriority!
   readAt: DateTime
-  sentVia: [NotificationChannel!]!
   title: String!
   type: NotificationType!
   updatedAt: DateTime!
@@ -2518,14 +2515,6 @@ type NotificationPreference {
   userId: Int!
 }
 
-type NotificationPreferenceResponse {
-  data: NotificationPreference!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
 enum NotificationPriority {
   HIGH
   LOW
@@ -2544,10 +2533,8 @@ type NotificationResponse {
 
 type NotificationTemplate {
   businessId: Int
-  channels: [NotificationChannel!]!
   createdAt: DateTime!
   id: Int!
-  isActive: Boolean!
   message: String!
   name: String!
   priority: NotificationPriority!
@@ -2679,7 +2666,6 @@ type PayrollComponent {
   description: String
   displayOrder: Int
   id: Int!
-  isActive: Boolean!
   isStatutory: Boolean!
   isTaxable: Boolean!
   name: String!
@@ -3103,7 +3089,6 @@ type Query {
   note(id: Int!, userId: Int!): NoteResponse!
   notesByUserId(query: QueryNoteInput, userId: Int!): NotesQueryResponse!
   notificationById(id: Int!): NotificationResponse!
-  notificationPreferences: NotificationPreferenceResponse!
   notificationTemplates: NotificationTemplatesQueryResponse!
   notifications(query: QueryNotificationInput): NotificationsQueryResponse!
   onboardingProcessById(id: Int!): OnboardingProcessResponse!
@@ -4036,8 +4021,8 @@ input UpdateLeaveTypeInput {
   employmentStatuses: [Int!] = []
   id: Int!
 
-  """Number of leave hours allocated"""
-  leaveHours: Int = 0
+  """Number of leave minutes allocated"""
+  leaveMinutes: Int = 0
 
   """Leave rollover policy type"""
   leaveRolloverType: LeaveRolloverType = NONE
@@ -4065,12 +4050,6 @@ input UpdateNoteInput {
 
   """ID of the user this note is about"""
   userId: Int
-}
-
-input UpdateNotificationPreferenceInput {
-  muteAll: Boolean
-  mutedUntil: DateTime
-  preferences: String
 }
 
 input UpdateNotificationTemplateInput {
@@ -4415,6 +4394,9 @@ type WorkSchedule {
   """Unique identifier for the work schedule"""
   id: ID!
 
+  """Whether this work schedule is set as default in SystemDefaults"""
+  isDefault: Boolean!
+
   """Name of the work schedule"""
   name: String!
 
@@ -4468,6 +4450,9 @@ type WorkSite {
 
   """IP address for IP-based tracking"""
   ipAddress: String
+
+  """Whether this work site is set as default in SystemDefaults"""
+  isDefault: Boolean!
 
   """Latitude for geo_fencing"""
   lat: Float

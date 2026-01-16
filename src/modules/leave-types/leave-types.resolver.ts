@@ -35,6 +35,8 @@ export class LeaveTypesResolver {
       user,
       createLeaveTypeInput,
     });
+
+    console.log({ employmentStatuses: result.employmentStatuses });
     return {
       success: true,
       statusCode: HttpStatus.OK,
@@ -53,6 +55,7 @@ export class LeaveTypesResolver {
     @Args('query', { nullable: true }) query: QueryLeaveTypeInput,
   ) {
     const result = await this.leaveTypesService.findAll({ user, query });
+
     return {
       success: true,
       statusCode: HttpStatus.OK,

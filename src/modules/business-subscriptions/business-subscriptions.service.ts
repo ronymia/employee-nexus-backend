@@ -62,7 +62,6 @@ export class BusinessSubscriptionsService {
         startDate,
         endDate,
         status: calculatedStatus,
-        isActive,
         numberOfEmployeesAllowed:
           createBusinessSubscriptionInput.numberOfEmployeesAllowed || 0,
       },
@@ -242,7 +241,6 @@ export class BusinessSubscriptionsService {
         startDate,
         endDate,
         status: BusinessSubscriptionStatus.ACTIVE,
-        isActive,
       },
       include: {
         business: true,

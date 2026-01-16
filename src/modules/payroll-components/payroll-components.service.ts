@@ -20,7 +20,6 @@ export class PayrollComponentsService {
         componentType: input.componentType,
         calculationType: input.calculationType,
         defaultValue: input.defaultValue,
-        isActive: input.isActive ?? true,
         isTaxable: input.isTaxable ?? true,
         isStatutory: input.isStatutory ?? false,
         displayOrder: input.displayOrder,
@@ -60,7 +59,6 @@ export class PayrollComponentsService {
     return this.prisma.payrollComponent.findMany({
       where: {
         businessId,
-        isActive: true,
       },
       orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }],
     });

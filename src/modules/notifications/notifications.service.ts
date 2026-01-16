@@ -97,7 +97,6 @@ export class NotificationsService {
     return await this.prisma.notification.update({
       where: { id },
       data: {
-        isRead: true,
         readAt: new Date(),
       },
     });
@@ -105,9 +104,13 @@ export class NotificationsService {
 
   async markAllAsRead(userId: number) {
     return await this.prisma.notification.updateMany({
-      where: { userId, isRead: false },
+      where: {
+        userId,
+        readAt: {
+          not: null,
+        },
+      },
       data: {
-        isRead: true,
         readAt: new Date(),
       },
     });
@@ -121,7 +124,7 @@ export class NotificationsService {
 
   async getUnreadCount(userId: number): Promise<number> {
     return await this.prisma.notification.count({
-      where: { userId, isRead: false },
+      where: { userId, readAt: null },
     });
   }
 
@@ -155,7 +158,6 @@ export class NotificationsService {
       where: {
         name,
         OR: [{ businessId }],
-        isActive: true,
       },
     });
   }
@@ -175,49 +177,6 @@ export class NotificationsService {
   }
 
   // ============ NOTIFICATION PREFERENCE OPERATIONS ============
-
-  async getPreferences(userId: number) {
-    const preference = await this.prisma.notificationPreference.findUnique({
-      where: { userId },
-    });
-
-    if (!preference) {
-      // Return default preferences
-      return {
-        userId,
-        preferences: JSON.stringify(this.getDefaultPreferences()),
-        muteAll: false,
-        mutedUntil: null,
-      };
-    }
-
-    return {
-      ...preference,
-      preferences: JSON.stringify(preference.preferences),
-    };
-  }
-
-  async updatePreferences(
-    userId: number,
-    input: UpdateNotificationPreferenceInput,
-  ) {
-    const { preferences, ...data } = input;
-
-    const updateData: any = { ...data };
-    if (preferences) {
-      updateData.preferences = JSON.parse(preferences);
-    }
-
-    return await this.prisma.notificationPreference.upsert({
-      where: { userId },
-      update: updateData,
-      create: {
-        userId,
-        ...updateData,
-        preferences: updateData.preferences || this.getDefaultPreferences(),
-      },
-    });
-  }
 
   // ============ HELPER METHODS ============
 
@@ -268,7 +227,6 @@ export class NotificationsService {
       message,
       priority: template.priority,
       notificationTemplateId: template.id,
-      channels: template.channels,
       userId,
       businessId,
       metadata: JSON.stringify(variables),

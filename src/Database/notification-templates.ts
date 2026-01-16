@@ -1,6 +1,5 @@
 import { PrismaClient } from 'generated/prisma';
 import {
-  NotificationChannel,
   NotificationPriority,
   NotificationType,
 } from 'src/modules/notifications/enums';
@@ -19,7 +18,6 @@ export async function seedNotificationTemplates(businessId: number) {
       message:
         '{{employeeName}} has requested {{leaveType}} leave from {{startDate}} to {{endDate}}.',
       priority: NotificationPriority.NORMAL,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
       businessId,
     },
@@ -30,7 +28,6 @@ export async function seedNotificationTemplates(businessId: number) {
       message:
         'Your {{leaveType}} leave request from {{startDate}} to {{endDate}} has been approved by {{approverName}}.',
       priority: NotificationPriority.HIGH,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
       businessId,
     },
@@ -41,7 +38,6 @@ export async function seedNotificationTemplates(businessId: number) {
       message:
         'Your {{leaveType}} leave request from {{startDate}} to {{endDate}} has been rejected. Reason: {{reason}}',
       priority: NotificationPriority.HIGH,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
       businessId,
     },
@@ -54,7 +50,6 @@ export async function seedNotificationTemplates(businessId: number) {
       message:
         'Your payslip for {{month}} {{year}} is now available. Net pay: {{netPay}}',
       priority: NotificationPriority.HIGH,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
       businessId,
     },
@@ -67,7 +62,6 @@ export async function seedNotificationTemplates(businessId: number) {
       message:
         '{{employeeName}} created an attendance record for {{date}} with {{workTime}} work time.',
       priority: NotificationPriority.NORMAL,
-      channels: [NotificationChannel.IN_APP],
       isActive: true,
       businessId,
     },
@@ -78,7 +72,6 @@ export async function seedNotificationTemplates(businessId: number) {
       message:
         '{{employeeName}} updated attendance record for {{date}}. Total work time: {{workTime}}.',
       priority: NotificationPriority.NORMAL,
-      channels: [NotificationChannel.IN_APP],
       isActive: true,
       businessId,
     },
@@ -88,7 +81,6 @@ export async function seedNotificationTemplates(businessId: number) {
       title: 'Attendance Record Deleted',
       message: '{{employeeName}} deleted attendance record for {{date}}.',
       priority: NotificationPriority.HIGH,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
       businessId,
     },
@@ -98,7 +90,6 @@ export async function seedNotificationTemplates(businessId: number) {
       title: 'Employee Punched In',
       message: '{{employeeName}} punched in at {{checkInTime}} on {{date}}.',
       priority: NotificationPriority.LOW,
-      channels: [NotificationChannel.IN_APP],
       isActive: true,
       businessId,
     },
@@ -109,7 +100,6 @@ export async function seedNotificationTemplates(businessId: number) {
       message:
         '{{employeeName}} punched out at {{checkOutTime}}. Total work time: {{workTime}}.',
       priority: NotificationPriority.LOW,
-      channels: [NotificationChannel.IN_APP],
       isActive: true,
       businessId,
     },
@@ -120,7 +110,6 @@ export async function seedNotificationTemplates(businessId: number) {
       message:
         'You checked in at {{checkInTime}} on {{date}}. Expected check-in time was {{expectedTime}}.',
       priority: NotificationPriority.NORMAL,
-      channels: [NotificationChannel.IN_APP],
       isActive: true,
       businessId,
     },
@@ -131,7 +120,6 @@ export async function seedNotificationTemplates(businessId: number) {
       message:
         'You were marked absent on {{date}}. Please contact HR if this is incorrect.',
       priority: NotificationPriority.HIGH,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
       businessId,
     },
@@ -142,7 +130,6 @@ export async function seedNotificationTemplates(businessId: number) {
       message:
         'Remember to check out for the day. Your check-in time was {{checkInTime}}.',
       priority: NotificationPriority.LOW,
-      channels: [NotificationChannel.IN_APP],
       isActive: true,
       businessId,
     },
@@ -155,7 +142,6 @@ export async function seedNotificationTemplates(businessId: number) {
       message:
         '{{assetType}} - {{assetName}} has been assigned to you. Please confirm receipt.',
       priority: NotificationPriority.NORMAL,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
       businessId,
     },
@@ -168,7 +154,6 @@ export async function seedNotificationTemplates(businessId: number) {
       message:
         'You have been assigned to project: {{projectName}}. Role: {{role}}',
       priority: NotificationPriority.NORMAL,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
       businessId,
     },
@@ -180,7 +165,6 @@ export async function seedNotificationTemplates(businessId: number) {
       title: 'Holiday Announcement',
       message: 'Holiday on {{date}}: {{holidayName}}. {{description}}',
       priority: NotificationPriority.NORMAL,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
       businessId,
     },
@@ -193,7 +177,6 @@ export async function seedNotificationTemplates(businessId: number) {
       message:
         'Your {{documentType}} will expire on {{expiryDate}}. Please renew it soon.',
       priority: NotificationPriority.HIGH,
-      channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
       isActive: true,
       businessId,
     },
@@ -204,7 +187,6 @@ export async function seedNotificationTemplates(businessId: number) {
       message:
         'Your profile is {{completionPercentage}}% complete. Please update: {{missingFields}}',
       priority: NotificationPriority.LOW,
-      channels: [NotificationChannel.IN_APP],
       isActive: true,
       businessId,
     },

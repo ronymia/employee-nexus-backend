@@ -3,11 +3,7 @@ import {
   BaseResponse,
   BaseQueryResponse,
 } from '../../../common/dto/base-response.type';
-import {
-  NotificationChannel,
-  NotificationPriority,
-  NotificationType,
-} from '../enums';
+import { NotificationPriority, NotificationType } from '../enums';
 
 @ObjectType()
 export class NotificationTemplate {
@@ -28,12 +24,6 @@ export class NotificationTemplate {
 
   @Field(() => NotificationPriority)
   priority: NotificationPriority;
-
-  @Field(() => [NotificationChannel])
-  channels: NotificationChannel[];
-
-  @Field()
-  isActive: boolean;
 
   @Field(() => Int, { nullable: true })
   businessId?: number;

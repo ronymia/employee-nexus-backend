@@ -475,7 +475,7 @@ export class OwnerDashboardService {
         this.prismaService.notification.count({
           where: {
             user: { businessId },
-            isRead: false,
+            readAt: null,
           },
         }),
         this.prismaService.leave.findMany({

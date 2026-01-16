@@ -63,6 +63,11 @@ export class Department {
     description: 'Date when the department was last updated',
   })
   updatedAt: Date;
+
+  @Field(() => Boolean, {
+    description: 'Whether this department is set as default in SystemDefaults',
+  })
+  isDefault: boolean;
 }
 
 @ObjectType()

@@ -324,7 +324,7 @@ export class EmployeeDashboardService {
   private async getNotifications(userId: number) {
     const [unread, recent] = await Promise.all([
       this.prismaService.notification.count({
-        where: { userId, isRead: false },
+        where: { userId, readAt: null },
       }),
       this.prismaService.notification.findMany({
         where: { userId },
@@ -339,7 +339,6 @@ export class EmployeeDashboardService {
         type: notification.type,
         message: notification.message,
         timestamp: notification.createdAt,
-        isRead: notification.isRead,
       })),
     };
   }

@@ -8,36 +8,79 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum LocationTrackingType {
+  NONE // No location validation
+  MANUAL // Manual selection
+  GEO_FENCING // GPS-based radius check
+  IP_WHITELIST // IP address validation
+}
+
+enum SalaryType {
+  HOURLY // Paid per hour
+  DAILY // Paid per day
+  MONTHLY // Paid per month
+}
+
+enum BusinessSubscriptionStatus {
+  TRIAL // During trial period before subscription starts
+  ACTIVE // Active paid subscription
+  EXPIRED // Subscription has ended (past endDate)
+  CANCELLED // Manually cancelled by admin/user
+  SUSPENDED // Temporarily suspended (payment issues, etc.)
+  PENDING // Awaiting activation (before startDate)
+}
+
+enum NotificationTemplateStatus {
+  DRAFT // Template in draft state
+  ACTIVE // Active and can be used
+  ARCHIVED // No longer in use
+}
+
+enum PayrollComponentStatus {
+  DRAFT // Component in draft state
+  ACTIVE // Active and can be used
+  PUBLISHED // Published for use in payroll
+  ARCHIVED // No longer in use
+  DISABLED // Temporarily disabled
+}
+
+enum CommonStatus {
+  DRAFT // Component in draft state
+  ACTIVE // Active and can be used
+  PUBLISHED // Published for use in payroll
+  ARCHIVED // No longer in use
+  DISABLED // Temporarily disabled
+}
+
 model User {
-  id                      Int                     @id @default(autoincrement())
-  email                   String                  @unique
-  password                String
-  status                  String
-  profile                 Profile?                @relation(name: "userProfile")
-  employee                Employee?               @relation(name: "userEmployee")
-  roleId                  Int                     @map("role_id")
-  role                    Role                    @relation(fields: [roleId], references: [id], onDelete: Restrict)
-  businessId              Int?                    @map("business_id")
-  business                Business?               @relation(name: "userBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  ownedBusiness           Business?               @relation(name: "ownedBusiness")
-  userPermissions         UserPermission[]
-  managedDepartments      Department[]            @relation(name: "managedDepartments")
-  assetAssignments        AssetAssignment[]       @relation(name: "assetAssignmentsAssignedToUser")
-  assetAssignmentsBy      AssetAssignment[]       @relation(name: "assetAssignmentsAssignedByUser")
-  projectCreated          Project[]               @relation(name: "projectCreated")
-  projects                ProjectMember[]         @relation(name: "projectMembersInUser")
-  educationHistory        EducationHistory[]      @relation(name: "userEducationHistory")
-  jobHistory              JobHistory[]            @relation(name: "userJobHistory")
-  scheduleAssignmentsBy   EmployeeSchedule[]      @relation(name: "scheduleAssignmentsByUser")
-  documents               Document[]              @relation(name: "userDocuments")
-  notes                   Note[]                  @relation(name: "userNotes")
-  notesCreated            Note[]                  @relation(name: "noteCreatedBy")
-  attendances             Attendance[]            @relation(name: "userAttendance")
-  leaves                  Leave[]                 @relation(name: "userLeaves")
-  reviewedLeaves          Leave[]                 @relation(name: "leaveReviewedBy")
-  payrollItems            PayrollItem[]           @relation(name: "userPayrollItems")
-  notifications           Notification[]          @relation(name: "userNotifications")
-  notificationPreferences NotificationPreference? @relation(name: "userNotificationPreferences")
+  id                    Int                @id @default(autoincrement())
+  email                 String             @unique
+  password              String
+  status                String
+  profile               Profile?           @relation(name: "userProfile")
+  employee              Employee?          @relation(name: "userEmployee")
+  roleId                Int                @map("role_id")
+  role                  Role               @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  businessId            Int?               @map("business_id")
+  business              Business?          @relation(name: "userBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  ownedBusiness         Business?          @relation(name: "ownedBusiness")
+  userPermissions       UserPermission[]
+  managedDepartments    Department[]       @relation(name: "managedDepartments")
+  assetAssignments      AssetAssignment[]  @relation(name: "assetAssignmentsAssignedToUser")
+  assetAssignmentsBy    AssetAssignment[]  @relation(name: "assetAssignmentsAssignedByUser")
+  projectCreated        Project[]          @relation(name: "projectCreated")
+  projects              ProjectMember[]    @relation(name: "projectMembersInUser")
+  educationHistory      EducationHistory[] @relation(name: "userEducationHistory")
+  jobHistory            JobHistory[]       @relation(name: "userJobHistory")
+  scheduleAssignmentsBy EmployeeSchedule[] @relation(name: "scheduleAssignmentsByUser")
+  documents             Document[]         @relation(name: "userDocuments")
+  notes                 Note[]             @relation(name: "userNotes")
+  notesCreated          Note[]             @relation(name: "noteCreatedBy")
+  attendances           Attendance[]       @relation(name: "userAttendance")
+  leaves                Leave[]            @relation(name: "userLeaves")
+  reviewedLeaves        Leave[]            @relation(name: "leaveReviewedBy")
+  payrollItems          PayrollItem[]      @relation(name: "userPayrollItems")
+  notifications         Notification[]     @relation(name: "userNotifications")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -112,6 +155,7 @@ model Business {
   notifications         Notification[]         @relation(name: "businessNotifications")
   notificationTemplates NotificationTemplate[] @relation(name: "notificationTemplates")
   assets                Asset[]                @relation(name: "businessAssets")
+  systemDefaults        SystemDefaults?        @relation(name: "businessSystemDefaults")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -309,7 +353,6 @@ model BusinessSubscription {
   endDate                  DateTime?                  @map("end_date") @db.Date
   status                   BusinessSubscriptionStatus
   numberOfEmployeesAllowed Int                        @default(0) @map("number_of_employees_allowed")
-  isActive                 Boolean                    @default(true) @map("is_active")
   remarks                  String?                    @map("remarks") @db.Text
   notes                    String?                    @map("notes") @db.Text
 
@@ -425,43 +468,22 @@ model OnboardingProcess {
   @@map("onboarding_processes")
 }
 
-enum LocationTrackingType {
-  NONE // No location validation
-  MANUAL // Manual selection
-  GEO_FENCING // GPS-based radius check
-  IP_WHITELIST // IP address validation
-}
-
-enum SalaryType {
-  HOURLY // Paid per hour
-  DAILY // Paid per day
-  MONTHLY // Paid per month
-}
-
-enum BusinessSubscriptionStatus {
-  TRIAL // During trial period before subscription starts
-  ACTIVE // Active paid subscription
-  EXPIRED // Subscription has ended (past endDate)
-  CANCELLED // Manually cancelled by admin/user
-  SUSPENDED // Temporarily suspended (payment issues, etc.)
-  PENDING // Awaiting activation (before startDate)
-}
-
 model WorkSite {
-  id                   Int                  @id @default(autoincrement())
-  name                 String               @unique
-  description          String               @db.Text
-  status               String
-  address              String?
-  lat                  Float?
-  lng                  Float?
-  locationTrackingType LocationTrackingType @default(NONE) @map("location_tracking_type")
-  maxRadius            Int?                 @map("max_radius")
-  ipAddress            String?              @map("ip_address")
-  businessId           Int                  @map("business_id")
-  business             Business             @relation(name: "workSitesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  attendancePunches    AttendancePunch[]    @relation(name: "attendancePunchWorkSite")
-  employees            EmployeeWorkSite[]   @relation(name: "workSiteUsers")
+  id                       Int                  @id @default(autoincrement())
+  name                     String               @unique
+  description              String               @db.Text
+  status                   String
+  address                  String?
+  lat                      Float?
+  lng                      Float?
+  locationTrackingType     LocationTrackingType @default(NONE) @map("location_tracking_type")
+  maxRadius                Int?                 @map("max_radius")
+  ipAddress                String?              @map("ip_address")
+  businessId               Int                  @map("business_id")
+  business                 Business             @relation(name: "workSitesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  attendancePunches        AttendancePunch[]    @relation(name: "attendancePunchWorkSite")
+  employees                EmployeeWorkSite[]   @relation(name: "workSiteUsers")
+  systemDefaultsAsWorkSite SystemDefaults[]     @relation(name: "defaultWorkSiteInSystemDefaults")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -495,18 +517,19 @@ model EmployeeWorkSite {
 }
 
 model Department {
-  id          Int                  @id @default(autoincrement())
-  parentId    Int?                 @map("parent_id")
-  parent      Department?          @relation(name: "DepartmentHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
-  name        String               @unique
-  description String               @db.Text
-  status      String
-  businessId  Int                  @map("business_id")
-  business    Business             @relation(name: "departmentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  managerId   Int?                 @map("manager_id")
-  manager     User?                @relation(name: "managedDepartments", fields: [managerId], references: [id], onDelete: Restrict)
-  children    Department[]         @relation("DepartmentHierarchy")
-  employees   EmployeeDepartment[] @relation(name: "employeeDepartment")
+  id                         Int                  @id @default(autoincrement())
+  parentId                   Int?                 @map("parent_id")
+  parent                     Department?          @relation(name: "DepartmentHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  name                       String               @unique
+  description                String               @db.Text
+  status                     String
+  businessId                 Int                  @map("business_id")
+  business                   Business             @relation(name: "departmentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  managerId                  Int?                 @map("manager_id")
+  manager                    User?                @relation(name: "managedDepartments", fields: [managerId], references: [id], onDelete: Restrict)
+  children                   Department[]         @relation("DepartmentHierarchy")
+  employees                  EmployeeDepartment[] @relation(name: "employeeDepartment")
+  systemDefaultsAsDepartment SystemDefaults[]     @relation(name: "defaultDepartmentInSystemDefaults")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -545,17 +568,18 @@ model EmployeeDepartment {
 }
 
 model WorkSchedule {
-  id           Int                @id @default(autoincrement())
-  name         String             @unique
-  description  String             @db.Text
-  status       String
-  scheduleType String
-  breakType    String
-  breakMinutes Int                @default(0) @map("break_minutes")
-  businessId   Int                @map("business_id")
-  business     Business           @relation(name: "workSchedulesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  schedules    DaySchedule[]      @relation(name: "daySchedule")
-  employees    EmployeeSchedule[] @relation(name: "workSchedules")
+  id                           Int                @id @default(autoincrement())
+  name                         String             @unique
+  description                  String             @db.Text
+  status                       String
+  scheduleType                 String
+  breakType                    String
+  breakMinutes                 Int                @default(0) @map("break_minutes")
+  businessId                   Int                @map("business_id")
+  business                     Business           @relation(name: "workSchedulesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  schedules                    DaySchedule[]      @relation(name: "daySchedule")
+  employees                    EmployeeSchedule[] @relation(name: "workSchedules")
+  systemDefaultsAsWorkSchedule SystemDefaults[]   @relation(name: "defaultWorkScheduleInSystemDefaults")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -671,7 +695,7 @@ model LeaveType {
   id                 Int                         @id @default(autoincrement())
   name               String                      @unique
   leaveType          String                      @map("leave_type")
-  leaveHours         Int                         @default(0) @map("leave_hours")
+  leaveMinutes       Int                         @default(0) @map("leave_minutes")
   leaveRolloverType  String                      @map("leave_rollover_type")
   carryOverLimit     Int?                        @map("carry_over_limit")
   status             String
@@ -1059,19 +1083,19 @@ model Holiday {
 }
 
 model PayrollComponent {
-  id              Int      @id @default(autoincrement())
+  id              Int                    @id @default(autoincrement())
   name            String
   code            String
-  description     String?  @db.Text
-  componentType   String   @map("component_type")
-  calculationType String   @map("calculation_type")
-  defaultValue    Float?   @map("default_value")
-  isActive        Boolean  @default(true) @map("is_active")
-  isTaxable       Boolean  @default(true) @map("is_taxable")
-  isStatutory     Boolean  @default(false) @map("is_statutory")
-  displayOrder    Int?     @map("display_order")
-  businessId      Int      @map("business_id")
-  business        Business @relation(name: "payrollComponentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  description     String?                @db.Text
+  componentType   String                 @map("component_type")
+  calculationType String                 @map("calculation_type")
+  defaultValue    Float?                 @map("default_value")
+  status          PayrollComponentStatus @default(ACTIVE)
+  isTaxable       Boolean                @default(true) @map("is_taxable")
+  isStatutory     Boolean                @default(false) @map("is_statutory")
+  displayOrder    Int?                   @map("display_order")
+  businessId      Int                    @map("business_id")
+  business        Business               @relation(name: "payrollComponentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
 
   payrollItemComponents PayrollItemComponent[] @relation(name: "componentInPayrollItem")
 
@@ -1081,8 +1105,8 @@ model PayrollComponent {
   @@unique([code, businessId])
   @@index([businessId])
   @@index([componentType])
-  @@index([isActive])
-  @@index([businessId, isActive])
+  @@index([status])
+  @@index([businessId, status])
   @@map("payroll_components")
 }
 
@@ -1193,16 +1217,15 @@ model PayslipAdjustment {
 // ============ NOTIFICATION MANAGEMENT ============
 
 model NotificationTemplate {
-  id         Int      @id @default(autoincrement())
+  id         Int                        @id @default(autoincrement())
   name       String // "leave_approved", "payslip_generated", "attendance_late"
   type       String
   title      String // "Leave Request {{status}}"
-  message    String   @db.Text // "Your leave from {{startDate}} to {{endDate}} has been {{status}}"
+  message    String                     @db.Text // "Your leave from {{startDate}} to {{endDate}} has been {{status}}"
   priority   String
-  channels   String[] // Default channels for this template
-  isActive   Boolean  @default(true) @map("is_active")
-  businessId Int      @map("business_id")
-  business   Business @relation(name: "notificationTemplates", fields: [businessId], references: [id], onDelete: Cascade)
+  status     NotificationTemplateStatus @default(ACTIVE)
+  businessId Int                        @map("business_id")
+  business   Business                   @relation(name: "notificationTemplates", fields: [businessId], references: [id], onDelete: Cascade)
 
   notifications Notification[] @relation(name: "templateNotifications")
 
@@ -1212,7 +1235,7 @@ model NotificationTemplate {
   @@unique([name, businessId])
   @@index([businessId])
   @@index([type])
-  @@index([isActive])
+  @@index([status])
   @@map("notification_templates")
 }
 
@@ -1230,55 +1253,48 @@ model Notification {
   // Related entity (optional - for deep linking)
   entityType String? @map("entity_type") // "Leave", "Attendance", "Payroll"
   entityId   Int?    @map("entity_id") // ID of the related entity
-  actionUrl  String? @map("action_url") // Deep link URL
 
   // Recipient
   userId Int  @map("user_id")
   user   User @relation(name: "userNotifications", fields: [userId], references: [id], onDelete: Cascade)
 
   // Status tracking
-  isRead Boolean   @default(false) @map("is_read")
   readAt DateTime? @map("read_at")
-
-  // Multi-channel delivery
-  channels String[] // Which channels to send on
-  sentVia  String[] @map("sent_via") // Which channels were actually sent
 
   // Business context
   businessId Int      @map("business_id")
   business   Business @relation(name: "businessNotifications", fields: [businessId], references: [id], onDelete: Cascade)
 
   // Metadata
-  metadata  Json? // Additional data (JSON) - template variables, extra info
-  expiresAt DateTime? @map("expires_at") // Optional expiry
+  metadata Json? // Additional data (JSON) - template variables, extra info
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@index([userId, isRead])
+  @@index([userId, readAt])
   @@index([userId, createdAt])
   @@index([businessId])
   @@index([type])
   @@index([notificationTemplateId])
-  @@index([expiresAt])
   @@map("notifications")
 }
 
-model NotificationPreference {
-  id     Int  @id @default(autoincrement())
-  userId Int  @unique @map("user_id")
-  user   User @relation(name: "userNotificationPreferences", fields: [userId], references: [id], onDelete: Cascade)
-
-  // Channel preferences per notification type
-  // Example: { "LEAVE": ["IN_APP", "EMAIL"], "PAYROLL": ["IN_APP", "EMAIL", "SMS"] }
-  preferences Json
-
-  // Global settings
-  muteAll    Boolean   @default(false) @map("mute_all")
-  mutedUntil DateTime? @map("muted_until") // Temporary mute
+model SystemDefaults {
+  businessId            Int          @id @map("business_id")
+  business              Business     @relation(name: "businessSystemDefaults", fields: [businessId], references: [id], onDelete: Cascade)
+  defaultDepartmentId   Int          @map("default_department_id")
+  defaultDepartment     Department   @relation(name: "defaultDepartmentInSystemDefaults", fields: [defaultDepartmentId], references: [id], onDelete: Restrict)
+  defaultWorkSiteId     Int          @map("default_work_site_id")
+  defaultWorkSite       WorkSite     @relation(name: "defaultWorkSiteInSystemDefaults", fields: [defaultWorkSiteId], references: [id], onDelete: Restrict)
+  defaultWorkScheduleId Int          @map("default_work_schedule_id")
+  defaultWorkSchedule   WorkSchedule @relation(name: "defaultWorkScheduleInSystemDefaults", fields: [defaultWorkScheduleId], references: [id], onDelete: Restrict)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@map("notification_preferences")
+  @@unique([businessId])
+  @@index([defaultDepartmentId])
+  @@index([defaultWorkSiteId])
+  @@index([defaultWorkScheduleId])
+  @@map("system_defaults")
 }

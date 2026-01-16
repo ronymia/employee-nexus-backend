@@ -145,6 +145,21 @@ export class WorkSitesService {
       data: updateWorkSiteInput,
     });
   }
+  async isDefault({
+    workSiteId,
+    businessId,
+  }: {
+    workSiteId: number;
+    businessId: number;
+  }): Promise<boolean> {
+    const systemDefaults = await this.prisma.systemDefaults.findUnique({
+      where: { businessId },
+      select: { defaultWorkSiteId: true },
+    });
+
+    return systemDefaults?.defaultWorkSiteId === workSiteId;
+  }
+
   async remove({ user, id }: { user: JwtPayload; id: number }) {
     await this.findOne({ user, id }); // Ensure the work site exists
     return await this.prisma.workSite.delete({

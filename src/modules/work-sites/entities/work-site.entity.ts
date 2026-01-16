@@ -72,6 +72,11 @@ export class WorkSite {
     description: 'Date when the work site was last updated',
   })
   updatedAt: Date;
+
+  @Field(() => Boolean, {
+    description: 'Whether this work site is set as default in SystemDefaults',
+  })
+  isDefault: boolean;
 }
 
 @ObjectType()

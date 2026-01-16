@@ -1,10 +1,10 @@
 export const businessSettings = {
   // businessId: null,
   identifierPrefix: null,
-  businessStartDay: 0,
+  businessStartDay: 6,
   currency: 'BDT',
-  // isSelfRegistered: true,
   theme: '',
-  deleteReadNotifications: '30_days',
+  deleteReadNotifications: 30,
   businessTimeZone: 'Asia/Dhaka',
+  googleApiKey: '',
 };

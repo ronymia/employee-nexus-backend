@@ -1,5 +1,13 @@
 // WORK SCHEDULES RESOLVER - HANDLES GRAPHQL OPERATIONS FOR WORK SCHEDULE MANAGEMENT
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  Int,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { WorkSchedulesService } from './work-schedules.service';
 import {
   WorkSchedule,
@@ -110,6 +118,7 @@ export class WorkSchedulesResolver {
     @Args('updateWorkScheduleInput')
     updateWorkScheduleInput: UpdateWorkScheduleInput,
   ) {
+    // console.log({ updateWorkScheduleInput });
     const result = await this.workSchedulesService.update({
       user,
       updateWorkScheduleInput,
@@ -159,5 +168,17 @@ export class WorkSchedulesResolver {
       message: `User work schedule retrieved successfully`,
       data: result,
     };
+  }
+
+  // RESOLVE IS_DEFAULT FIELD
+  @ResolveField(() => Boolean, { name: 'isDefault' })
+  async isDefault(
+    @Parent() workSchedule: WorkSchedule,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<boolean> {
+    return await this.workSchedulesService.isDefault({
+      workScheduleId: workSchedule.id,
+      businessId: user.businessId,
+    });
   }
 }

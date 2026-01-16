@@ -30,9 +30,6 @@ export class PayrollComponent {
   defaultValue?: number;
 
   @Field()
-  isActive: boolean;
-
-  @Field()
   isTaxable: boolean;
 
   @Field()

@@ -1,5 +1,5 @@
 import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
-import { IsDate, IsInt, IsBoolean, IsEnum } from 'class-validator';
+import { IsDate, IsInt, IsEnum } from 'class-validator';
 import {
   BaseQueryResponse,
   BaseResponse,
@@ -52,10 +52,6 @@ export class BusinessSubscription {
   })
   @IsEnum(BusinessSubscriptionStatus)
   status: BusinessSubscriptionStatus;
-
-  @Field(() => Boolean, { description: 'Whether the subscription is active' })
-  @IsBoolean()
-  isActive: boolean;
 
   @Field(() => Int, {
     description: 'Number of employees allowed in this subscription',

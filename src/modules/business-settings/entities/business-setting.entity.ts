@@ -48,6 +48,11 @@ export class BusinessSetting {
     nullable: true,
   })
   theme: string;
+  @Field(() => String, {
+    description: 'Business theme',
+    nullable: true,
+  })
+  googleApiKey?: string;
 }
 
 @ObjectType()
