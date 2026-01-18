@@ -29,7 +29,7 @@ import { Designation } from '../designations/entities/designation.entity';
 import { EmploymentStatus } from '../employment-status/entities/employment-status.entity';
 import { WorkSite } from '../work-sites/entities/work-site.entity';
 import { WorkSchedule } from '../work-schedules/entities/work-schedule.entity';
-import { Employee } from './entities/employee.entity';
+import { Employee, EmployeeResponse } from './entities/employee.entity';
 import { EmployeeSalariesService } from '../employee-salaries/employee-salary.service';
 import { EmployeeSalary } from '../employee-salaries/entities/employee-salary.entity';
 
@@ -202,6 +202,37 @@ export class UsersResolver {
       success: true,
       statusCode: HttpStatus.OK,
       message: 'User retrieved successfully',
+      data: result,
+    };
+  }
+
+  // @Mutation(() => UserResponse, { name: 'updateEmploymentDetails' })
+  // @RequirePermissions('User:read')
+  // async updateEmploymentDetails(
+  //   @Args('updateEmploymentDetailsInput')
+  //   updateEmploymentDetailsInput: UpdateEmploymentDetailsInput,
+  //   @CurrentUser() user: JwtPayload,
+  // ) {
+  //   const result = await this.usersService.findOne(user.userId);
+  //   return {
+  //     success: true,
+  //     statusCode: HttpStatus.OK,
+  //     message: 'Employment details retrieved successfully',
+  //     data: result,
+  //   };
+  // }
+
+  @Query(() => EmployeeResponse, { name: 'getEmploymentDetails' })
+  @RequirePermissions('User:read')
+  async getEmploymentDetails(
+    @Args('id', { type: () => Int }) id: number,
+    // @CurrentUser() user: JwtPayload,
+  ) {
+    const result = await this.usersService.getEmploymentDetails(id);
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Employment details retrieved successfully',
       data: result,
     };
   }

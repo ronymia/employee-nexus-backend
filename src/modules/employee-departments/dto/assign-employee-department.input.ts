@@ -61,3 +61,61 @@ export class AssignEmployeeDepartmentInput {
   @IsOptional()
   remarks?: string;
 }
+
+@InputType()
+export class UpdateEmployeeDepartmentInput {
+  @Field(() => Int, { description: 'User ID of the employee' })
+  @IsInt()
+  userId: number;
+
+  @Field(() => Int, { description: 'Department ID to assign' })
+  @IsInt()
+  departmentId: number;
+
+  @Field(() => Date, {
+    nullable: true,
+    description: 'Start date of department assignment',
+  })
+  @IsDate()
+  @IsOptional()
+  @Type(() => Date)
+  startDate?: Date;
+
+  @Field(() => Date, {
+    nullable: true,
+    description: 'End date of department assignment',
+  })
+  @IsDate()
+  @IsOptional()
+  @Type(() => Date)
+  endDate: Date;
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Whether this is the primary department',
+  })
+  @IsBoolean()
+  @IsOptional()
+  isPrimary?: boolean;
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Whether this assignment is active',
+  })
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Role in department',
+  })
+  @IsString()
+  @IsOptional()
+  roleInDept?: string;
+
+  @Field(() => String, { nullable: true, description: 'Additional remarks' })
+  @IsString()
+  @IsOptional()
+  remarks?: string;
+}

@@ -6,7 +6,10 @@ import {
   IsBoolean,
   IsString,
 } from 'class-validator';
-import { BaseResponse } from 'src/common/dto/base-response.type';
+import {
+  BaseQueryResponse,
+  BaseResponse,
+} from 'src/common/dto/base-response.type';
 import { Department } from 'src/modules/departments/entities/department.entity';
 import { Employee } from 'src/modules/users/entities/employee.entity';
 
@@ -69,5 +72,10 @@ export class EmployeeDepartment {
 
 @ObjectType()
 export class EmployeeDepartmentResponse extends BaseResponse(
+  EmployeeDepartment,
+) {}
+
+@ObjectType()
+export class EmployeeDepartmentsArrayResponse extends BaseQueryResponse(
   EmployeeDepartment,
 ) {}

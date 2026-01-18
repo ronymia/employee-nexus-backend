@@ -1,6 +1,9 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { IsDate, IsInt, IsOptional, IsBoolean } from 'class-validator';
-import { BaseResponse } from 'src/common/dto/base-response.type';
+import {
+  BaseQueryResponse,
+  BaseResponse,
+} from 'src/common/dto/base-response.type';
 import { WorkSite } from 'src/modules/work-sites/entities/work-site.entity';
 import { Employee } from 'src/modules/users/entities/employee.entity';
 
@@ -45,16 +48,9 @@ export class EmployeeWorkSite {
 }
 
 @ObjectType()
-export class EmployeeWorkSiteResponse {
-  @Field(() => Boolean, { description: 'Base response data' })
-  success: boolean;
+export class EmployeeWorkSiteResponse extends BaseResponse(EmployeeWorkSite) {}
 
-  @Field(() => Int, { description: 'Response status code' })
-  statusCode: number;
-
-  @Field(() => String, { description: 'Response message' })
-  message: string;
-
-  @Field(() => [EmployeeWorkSite], { description: 'Employee Work Site data' })
-  data: EmployeeWorkSite[] | [];
-}
+@ObjectType()
+export class EmployeeWorkSitesArrayResponse extends BaseQueryResponse(
+  EmployeeWorkSite,
+) {}

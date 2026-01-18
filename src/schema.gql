@@ -174,9 +174,6 @@ input AssignEmployeeDesignationInput {
   """Additional remarks"""
   remarks: String
 
-  """Salary for this designation"""
-  salary: Int!
-
   """Start date of designation"""
   startDate: DateTime!
 
@@ -1563,6 +1560,14 @@ type EmployeeDepartmentResponse {
   success: Boolean!
 }
 
+type EmployeeDepartmentsArrayResponse {
+  data: [EmployeeDepartment!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type EmployeeDesignation {
   """Created timestamp"""
   createdAt: DateTime!
@@ -1581,9 +1586,6 @@ type EmployeeDesignation {
   isActive: Boolean!
   remarks: String
 
-  """Salary of employee"""
-  salary: Int!
-
   """Start Date"""
   startDate: DateTime!
 
@@ -1596,6 +1598,14 @@ type EmployeeDesignation {
 
 type EmployeeDesignationResponse {
   data: EmployeeDesignation!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EmployeeDesignationsArrayResponse {
+  data: [EmployeeDesignation!]!
   message: String!
   meta: PaginationMeta
   statusCode: Float!
@@ -1639,6 +1649,22 @@ type EmployeeEmploymentStatus {
 
 type EmployeeEmploymentStatusResponse {
   data: EmployeeEmploymentStatus!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EmployeeEmploymentStatusesArrayResponse {
+  data: [EmployeeEmploymentStatus!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EmployeeResponse {
+  data: Employee!
   message: String!
   meta: PaginationMeta
   statusCode: Float!
@@ -1745,6 +1771,14 @@ type EmployeeWorkScheduleResponse {
   success: Boolean!
 }
 
+type EmployeeWorkSchedulesArrayResponse {
+  data: [EmployeeWorkSchedule!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type EmployeeWorkSite {
   """Created timestamp"""
   createdAt: DateTime!
@@ -1775,16 +1809,18 @@ type EmployeeWorkSite {
 }
 
 type EmployeeWorkSiteResponse {
-  """Employee Work Site data"""
-  data: [EmployeeWorkSite!]!
-
-  """Response message"""
+  data: EmployeeWorkSite!
   message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
 
-  """Response status code"""
-  statusCode: Int!
-
-  """Base response data"""
+type EmployeeWorkSitesArrayResponse {
+  data: [EmployeeWorkSite!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
   success: Boolean!
 }
 
@@ -2513,6 +2549,21 @@ type Mutation {
   updateDocument(updateDocumentInput: UpdateDocumentInput!): DocumentResponse!
   updateEmergencyContact(updateEmergencyContactInput: UpdateEmergencyContactInput!): EmergencyContactResponse!
   updateEmployee(updateEmployeeInput: UpdateEmployeeInput!): UserResponse!
+
+  """Update an employee department assignment"""
+  updateEmployeeDepartment(updateEmployeeDepartmentInput: UpdateEmployeeDepartmentInput!): EmployeeDepartmentResponse!
+
+  """Update an employee designation assignment"""
+  updateEmployeeDesignation(updateEmployeeDesignationInput: UpdateEmployeeDesignationInput!): EmployeeDesignationResponse!
+
+  """Update an employee work schedule assignment"""
+  updateEmployeeSchedule(updateEmployeeScheduleInput: UpdateEmployeeScheduleInput!): EmployeeWorkScheduleResponse!
+
+  """Update an employee employment status assignment"""
+  updateEmployeeStatus(updateEmployeeStatusInput: UpdateEmployeeStatusInput!): EmployeeEmploymentStatusResponse!
+
+  """Update an employee work site assignment"""
+  updateEmployeeWorkSite(updateEmployeeWorkSiteInput: UpdateEmployeeWorkSiteInput!): EmployeeWorkSiteResponse!
   updateEmploymentDetails(updateEmploymentDetailsInput: UpdateEmploymentDetailsInput!): EmploymentDetailsResponse!
   updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
   updateHoliday(updateHolidayInput: UpdateHolidayInput!): HolidayResponse!
@@ -3152,8 +3203,14 @@ type Query {
   businessSubscriptions(query: QueryBusinessSubscriptionInput): BusinessSubscriptionsQueryResponse!
   businesses(query: QueryBusinessInput): BusinessQueryResponse!
   departmentById(id: Int!): DepartmentResponse!
+
+  """Get complete department history for an employee"""
+  departmentHistory(userId: Int!): EmployeeDepartmentsArrayResponse!
   departments(query: QueryDepartmentInput): DepartmentsQueryResponse!
   designationById(id: Int!): DesignationResponse!
+
+  """Get complete designation history for an employee"""
+  designationHistory(userId: Int!): EmployeeDesignationsArrayResponse!
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
   document(id: Int!, userId: Int!): DocumentResponse!
   documentsByUserId(query: QueryDocumentInput, userId: Int!): DocumentsQueryResponse!
@@ -3161,8 +3218,32 @@ type Query {
   employeeDashboard: EmployeeDashboardResponse!
   employees(query: QueryUserInput): UsersQueryResponse!
   employmentStatusById(id: Int!): EmploymentStatusResponse!
+
+  """Get complete employment status history for an employee"""
+  employmentStatusHistory(userId: Int!): EmployeeEmploymentStatusesArrayResponse!
   employmentStatuses(query: QueryEmploymentStatusInput): EmploymentStatusesQueryResponse!
   generateEmployeeId: String!
+
+  """Get active department for an employee"""
+  getActiveDepartment(userId: Int!): EmployeeDepartmentResponse!
+
+  """Get active designation for an employee"""
+  getActiveDesignation(userId: Int!): EmployeeDesignationResponse!
+
+  """Get active employment status for an employee"""
+  getActiveEmploymentStatus(userId: Int!): EmployeeEmploymentStatusResponse!
+
+  """Get active work schedule for an employee"""
+  getActiveWorkSchedule(userId: Int!): EmployeeWorkScheduleResponse!
+
+  """Get active work sites for an employee"""
+  getActiveWorkSites(userId: Int!): EmployeeWorkSitesArrayResponse!
+
+  """Get specific department assignment by composite ID"""
+  getDepartmentById(departmentId: Int!, userId: Int!): EmployeeDepartmentResponse!
+
+  """Get specific designation assignment by composite ID"""
+  getDesignationById(designationId: Int!, userId: Int!): EmployeeDesignationResponse!
 
   """Get employee departments with optional filters"""
   getEmployeeDepartments(getEmployeeDepartmentsInput: GetEmployeeDepartmentsInput): EmployeeDepartmentResponse!
@@ -3178,8 +3259,18 @@ type Query {
 
   """Get employee work sites with optional filters"""
   getEmployeeWorkSites(queryEmployeeWorkSitesInput: QueryEmployeeWorkSitesInput): EmployeeWorkSiteResponse!
+  getEmploymentDetails(id: Int!): EmployeeResponse!
+
+  """Get specific employment status assignment by composite ID"""
+  getEmploymentStatusById(employmentStatusId: Int!, userId: Int!): EmployeeEmploymentStatusResponse!
   getMyProfile: UserResponse!
   getUserWorkSchedule(userId: Int!): WorkScheduleResponse!
+
+  """Get specific work schedule assignment by composite ID"""
+  getWorkScheduleById(userId: Int!, workScheduleId: Int!): EmployeeWorkScheduleResponse!
+
+  """Get specific work site assignment by composite ID"""
+  getWorkSiteById(userId: Int!, workSiteId: Int!): EmployeeWorkSiteResponse!
   holidayById(id: Int!): HolidayResponse!
   holidays(query: QueryHolidayInput): HolidaysQueryResponse!
   jobHistory(id: Int!, userId: Int!): JobHistoryResponse!
@@ -3231,8 +3322,14 @@ type Query {
   userStatistics: UserStatisticsResponse!
   users(query: QueryUserInput): UsersQueryResponse!
   workScheduleById(id: Int!): WorkScheduleResponse!
+
+  """Get complete work schedule history for an employee"""
+  workScheduleHistory(userId: Int!): EmployeeWorkSchedulesArrayResponse!
   workSchedules(query: QueryWorkScheduleInput): WorkSchedulesQueryResponse!
   workSiteById(id: Int!): WorkSiteResponse!
+
+  """Get complete work site history for an employee"""
+  workSiteHistory(userId: Int!): EmployeeWorkSitesArrayResponse!
   workSites(query: QueryWorkSiteInput): WorkSitesQueryResponse!
 }
 
@@ -3961,6 +4058,52 @@ input UpdateEmergencyContactInput {
   userId: Int!
 }
 
+input UpdateEmployeeDepartmentInput {
+  """Department ID to assign"""
+  departmentId: Int!
+
+  """End date of department assignment"""
+  endDate: DateTime
+
+  """Whether this assignment is active"""
+  isActive: Boolean
+
+  """Whether this is the primary department"""
+  isPrimary: Boolean
+
+  """Additional remarks"""
+  remarks: String
+
+  """Role in department"""
+  roleInDept: String
+
+  """Start date of department assignment"""
+  startDate: DateTime
+
+  """User ID of the employee"""
+  userId: Int!
+}
+
+input UpdateEmployeeDesignationInput {
+  """Designation ID to assign"""
+  designationId: Int!
+
+  """End date of designation"""
+  endDate: DateTime
+
+  """Whether this is the active designation"""
+  isActive: Boolean! = true
+
+  """Additional remarks"""
+  remarks: String
+
+  """Start date of designation"""
+  startDate: DateTime!
+
+  """User ID of the employee"""
+  userId: Int!
+}
+
 input UpdateEmployeeInput {
   departmentId: Int
   designationId: Int
@@ -4017,6 +4160,66 @@ input UpdateEmployeeSalaryInput {
 
   """Start date of the salary (YYYY-MM-DD)"""
   startDate: String
+}
+
+input UpdateEmployeeScheduleInput {
+  """End date of schedule assignment"""
+  endDate: DateTime
+
+  """Whether this assignment is active"""
+  isActive: Boolean! = true
+
+  """Additional notes"""
+  notes: String
+
+  """Start date of schedule assignment"""
+  startDate: DateTime!
+
+  """User ID of the employee"""
+  userId: Int!
+
+  """Work Schedule ID to assign"""
+  workScheduleId: Int!
+}
+
+input UpdateEmployeeStatusInput {
+  """Employment Status ID to assign"""
+  employmentStatusId: Int!
+
+  """End date of employment status"""
+  endDate: DateTime
+
+  """Whether this status is active"""
+  isActive: Boolean! = true
+
+  """Reason for status change"""
+  reason: String
+
+  """Additional remarks"""
+  remarks: String
+
+  """Start date of employment status"""
+  startDate: DateTime!
+
+  """User ID of the employee"""
+  userId: Int!
+}
+
+input UpdateEmployeeWorkSiteInput {
+  """End date of work site assignment"""
+  endDate: DateTime
+
+  """Whether this assignment is active"""
+  isActive: Boolean! = true
+
+  """Start date of work site assignment"""
+  startDate: DateTime!
+
+  """User ID of the employee"""
+  userId: Int!
+
+  """Work Site ID to assign"""
+  workSiteId: Int!
 }
 
 input UpdateEmploymentDetailsInput {

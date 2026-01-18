@@ -7,6 +7,7 @@ import {
   IsInt,
   ValidateNested,
   IsArray,
+  IsDate,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -17,7 +18,7 @@ export class CreateAttendanceInput {
   userId: number;
 
   @Field(() => Date, { description: 'Date of attendance' })
-  @IsDateString()
+  @IsDate()
   date: Date;
 
   @Field(() => Int, {

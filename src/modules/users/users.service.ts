@@ -1382,4 +1382,10 @@ export class UsersService {
 
     return employeeSchedule?.workSchedule || null;
   }
+
+  async getEmploymentDetails(userId: number) {
+    return this.prisma.employee.findUnique({
+      where: { userId },
+    });
+  }
 }
