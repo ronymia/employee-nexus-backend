@@ -70,11 +70,7 @@ model User {
   assetAssignmentsBy    AssetAssignment[]  @relation(name: "assetAssignmentsAssignedByUser")
   projectCreated        Project[]          @relation(name: "projectCreated")
   projects              ProjectMember[]    @relation(name: "projectMembersInUser")
-  educationHistory      EducationHistory[] @relation(name: "userEducationHistory")
-  jobHistory            JobHistory[]       @relation(name: "userJobHistory")
   scheduleAssignmentsBy EmployeeSchedule[] @relation(name: "scheduleAssignmentsByUser")
-  documents             Document[]         @relation(name: "userDocuments")
-  notes                 Note[]             @relation(name: "userNotes")
   notesCreated          Note[]             @relation(name: "noteCreatedBy")
   attendances           Attendance[]       @relation(name: "userAttendance")
   leaves                Leave[]            @relation(name: "userLeaves")
@@ -815,9 +811,10 @@ model ProjectMember {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([projectId, userId])
+  @@unique([projectId, userId, role])
   @@index([projectId])
   @@index([userId])
+  @@index([role])
   @@map("project_members")
 }
 
@@ -833,6 +830,10 @@ model Employee {
   workSites          EmployeeWorkSite[]    @relation(name: "employeeWorkSites")
   workSchedules      EmployeeSchedule[]    @relation(name: "employeeSchedules")
   departments        EmployeeDepartment[]  @relation(name: "employeeDepartment")
+  educationHistory   EducationHistory[]    @relation(name: "employeeEducationHistory")
+  jobHistory         JobHistory[]          @relation(name: "employeeJobHistory")
+  documents          Document[]            @relation(name: "employeeDocuments")
+  notes              Note[]                @relation(name: "employeeNotes")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -879,7 +880,7 @@ model EmergencyContact {
 model EducationHistory {
   id                  Int       @id @default(autoincrement())
   userId              Int       @map("user_id")
-  user                User      @relation(name: "userEducationHistory", fields: [userId], references: [id], onDelete: Cascade)
+  employee            Employee  @relation(name: "employeeEducationHistory", fields: [userId], references: [userId], onDelete: Cascade)
   degree              String
   fieldOfStudy        String    @map("field_of_study")
   institution         String
@@ -901,7 +902,7 @@ model EducationHistory {
 model JobHistory {
   id               Int       @id @default(autoincrement())
   userId           Int       @map("user_id")
-  user             User      @relation(name: "userJobHistory", fields: [userId], references: [id], onDelete: Cascade)
+  employee         Employee  @relation(name: "employeeJobHistory", fields: [userId], references: [userId], onDelete: Cascade)
   jobTitle         String    @map("job_title") // e.g., "Software Engineer", "Project Manager"
   companyName      String    @map("company_name") // Name of the company/organization
   employmentType   String    @map("employment_type") // e.g., "Full-time", "Part-time", "Contract", "Freelance"
@@ -920,12 +921,12 @@ model JobHistory {
 }
 
 model Document {
-  id          Int     @id @default(autoincrement())
-  userId      Int     @map("user_id")
-  user        User    @relation(name: "userDocuments", fields: [userId], references: [id], onDelete: Cascade)
-  title       String  @map("title")
-  description String? @map("description") @db.Text
-  attachment  String  @map("attachment")
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  employee    Employee @relation(name: "employeeDocuments", fields: [userId], references: [userId], onDelete: Cascade)
+  title       String   @map("title")
+  description String?  @map("description") @db.Text
+  attachment  String   @map("attachment")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -935,15 +936,15 @@ model Document {
 }
 
 model Note {
-  id        Int     @id @default(autoincrement())
-  userId    Int     @map("user_id")
-  user      User    @relation(name: "userNotes", fields: [userId], references: [id], onDelete: Cascade)
-  createdBy Int?    @map("created_by")
-  creator   User?   @relation(name: "noteCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
-  title     String  @map("title")
-  content   String  @map("content") @db.Text
-  category  String? @map("category") // e.g., "Performance", "Incident", "General", "Feedback"
-  isPrivate Boolean @default(true) @map("is_private")
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  employee  Employee @relation(name: "employeeNotes", fields: [userId], references: [userId], onDelete: Cascade)
+  createdBy Int?     @map("created_by")
+  creator   User?    @relation(name: "noteCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  title     String   @map("title")
+  content   String   @map("content") @db.Text
+  category  String?  @map("category") // e.g., "Performance", "Incident", "General", "Feedback"
+  isPrivate Boolean  @default(true) @map("is_private")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

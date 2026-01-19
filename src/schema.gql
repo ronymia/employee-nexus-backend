@@ -856,6 +856,41 @@ input CreateDocumentInput {
   userId: Int!
 }
 
+input CreateEducationHistoryInput {
+  """City where institution is located"""
+  city: String!
+
+  """Country where institution is located"""
+  country: String!
+
+  """Degree or qualification"""
+  degree: String!
+
+  """Additional details or achievements"""
+  description: String!
+
+  """End/graduation date (MM-YYYY or YYYY)"""
+  endDate: String
+
+  """Field of study or major"""
+  fieldOfStudy: String!
+
+  """Grade, GPA, or percentage"""
+  grade: String
+
+  """Institution or university name"""
+  institution: String!
+
+  """Whether currently studying"""
+  isCurrentlyStudying: Boolean! = false
+
+  """Start date (MM-YYYY or YYYY)"""
+  startDate: String!
+
+  """ID of the employee"""
+  userId: Int!
+}
+
 input CreateEmergencyContactInput {
   name: String!
   phone: String!
@@ -1416,6 +1451,9 @@ type Document {
   """Description of the document"""
   description: String
 
+  """Employee who owns this document"""
+  employee: Employee
+
   """Unique identifier for the document"""
   id: ID!
 
@@ -1425,10 +1463,7 @@ type Document {
   """Date when the document was last updated"""
   updatedAt: DateTime!
 
-  """User who owns this document"""
-  user: User
-
-  """ID of the user who owns the document"""
+  """ID of the employee who owns the document"""
   userId: Int!
 }
 
@@ -1442,6 +1477,67 @@ type DocumentResponse {
 
 type DocumentsQueryResponse {
   data: [Document!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EducationHistoriesQueryResponse {
+  data: [EducationHistory!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EducationHistory {
+  """City where institution is located"""
+  city: String
+
+  """Country where institution is located"""
+  country: String!
+
+  """Date when the record was created"""
+  createdAt: DateTime!
+
+  """Degree or qualification"""
+  degree: String!
+
+  """Additional details or achievements"""
+  description: String
+
+  """Employee who owns this education history"""
+  employee: Employee
+
+  """End/graduation date (MM-YYYY or YYYY)"""
+  endDate: DateTime
+
+  """Field of study or major"""
+  fieldOfStudy: String!
+
+  """Grade, GPA, or percentage"""
+  grade: String
+  id: ID!
+
+  """Institution or university name"""
+  institution: String!
+
+  """Whether currently studying"""
+  isCurrentlyStudying: Boolean!
+
+  """Start date (MM-YYYY or YYYY)"""
+  startDate: DateTime!
+
+  """Date when the record was last updated"""
+  updatedAt: DateTime!
+
+  """ID of the employee"""
+  userId: Int!
+}
+
+type EducationHistoryResponse {
+  data: EducationHistory!
   message: String!
   meta: PaginationMeta
   statusCode: Float!
@@ -2064,6 +2160,9 @@ type JobHistory {
   """Date when the record was created"""
   createdAt: DateTime!
 
+  """Employee who owns this job history"""
+  employee: Employee
+
   """Employment type"""
   employmentType: String!
 
@@ -2083,10 +2182,7 @@ type JobHistory {
   """Date when the record was last updated"""
   updatedAt: DateTime!
 
-  """User who owns this job history"""
-  user: User
-
-  """ID of the user"""
+  """ID of the employee"""
   userId: Int!
 }
 
@@ -2471,6 +2567,7 @@ type Mutation {
   createDepartment(createDepartmentInput: CreateDepartmentInput!): DepartmentResponse!
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
   createDocument(createDocumentInput: CreateDocumentInput!): DocumentResponse!
+  createEducationHistory(createEducationHistoryInput: CreateEducationHistoryInput!): EducationHistoryResponse!
   createEmployee(createEmployeeInput: CreateEmployeeInput!): UserResponse!
   createEmploymentStatus(createEmploymentStatusInput: CreateEmploymentStatusInput!): EmploymentStatusResponse!
   createHoliday(createHolidayInput: CreateHolidayInput!): HolidayResponse!
@@ -2499,6 +2596,7 @@ type Mutation {
   deleteDepartment(id: Int!): DepartmentResponse!
   deleteDesignation(id: Int!): DesignationResponse!
   deleteDocument(id: Int!, userId: Int!): DocumentResponse!
+  deleteEducationHistory(id: Int!, userId: Int!): EducationHistoryResponse!
   deleteEmployee(id: Int!): UserResponse!
   deleteEmploymentStatus(id: Int!): EmploymentStatusResponse!
   deleteHoliday(id: Int!): HolidayResponse!
@@ -2547,6 +2645,7 @@ type Mutation {
   updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): DepartmentResponse!
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
   updateDocument(updateDocumentInput: UpdateDocumentInput!): DocumentResponse!
+  updateEducationHistory(updateEducationHistoryInput: UpdateEducationHistoryInput!): EducationHistoryResponse!
   updateEmergencyContact(updateEmergencyContactInput: UpdateEmergencyContactInput!): EmergencyContactResponse!
   updateEmployee(updateEmployeeInput: UpdateEmployeeInput!): UserResponse!
 
@@ -2604,6 +2703,9 @@ type Note {
   """User who created this note"""
   creator: User
 
+  """Employee this note is about"""
+  employee: Employee
+
   """Unique identifier for the note"""
   id: ID!
 
@@ -2616,10 +2718,7 @@ type Note {
   """Date when the note was last updated"""
   updatedAt: DateTime!
 
-  """User this note is about"""
-  user: User
-
-  """ID of the user this note is about"""
+  """ID of the employee this note is about"""
   userId: Int!
 }
 
@@ -3214,6 +3313,8 @@ type Query {
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
   document(id: Int!, userId: Int!): DocumentResponse!
   documentsByUserId(query: QueryDocumentInput, userId: Int!): DocumentsQueryResponse!
+  educationHistory(id: Int!, userId: Int!): EducationHistoryResponse!
+  educationHistoryByUserId(userId: Int!): EducationHistoriesQueryResponse!
   employeeById(id: Int!): UserResponse!
   employeeDashboard: EmployeeDashboardResponse!
   employees(query: QueryUserInput): UsersQueryResponse!
@@ -3312,7 +3413,7 @@ type Query {
   salaryById(id: Int!): EmployeeSalaryResponse!
   salaryHistory(userId: Int!): EmployeeSalariesQueryResponse!
   socialLink(userId: Int!): SocialLinkResponse!
-  socialLinksByProfileId(profileId: Int): SocialLinkResponse!
+  socialLinksByProfileId(userId: Int): SocialLinkResponse!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
   unreadNotificationCount: Int!
@@ -3767,14 +3868,14 @@ type SocialLink {
   """Profile associated with these social links"""
   profile: Profile
 
-  """Profile ID (primary key)"""
-  profileId: ID!
-
   """Twitter profile URL"""
   twitter: String
 
   """Date when the social links were last updated"""
   updatedAt: DateTime!
+
+  """Profile ID (primary key)"""
+  userId: ID!
 }
 
 type SocialLinkResponse {
@@ -3864,6 +3965,7 @@ type TimeSlot {
 
 input UnassignProjectMemberInput {
   projectId: Int!
+  role: String!
   userId: Int!
 }
 
@@ -4041,6 +4143,42 @@ input UpdateDocumentInput {
   title: String
 
   """ID of the user"""
+  userId: Int
+}
+
+input UpdateEducationHistoryInput {
+  """City where institution is located"""
+  city: String
+
+  """Country where institution is located"""
+  country: String
+
+  """Degree or qualification"""
+  degree: String
+
+  """Additional details or achievements"""
+  description: String
+
+  """End/graduation date (MM-YYYY or YYYY)"""
+  endDate: String
+
+  """Field of study or major"""
+  fieldOfStudy: String
+
+  """Grade, GPA, or percentage"""
+  grade: String
+  id: Int!
+
+  """Institution or university name"""
+  institution: String
+
+  """Whether currently studying"""
+  isCurrentlyStudying: Boolean = false
+
+  """Start date (MM-YYYY or YYYY)"""
+  startDate: String
+
+  """ID of the employee"""
   userId: Int
 }
 

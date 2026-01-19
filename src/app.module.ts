@@ -40,6 +40,7 @@ import { AssetTypesModule } from './modules/asset-types/asset-types.module';
 import { AssetsModule } from './modules/assets/assets.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { JobHistoriesModule } from './modules/job-histories/job-histories.module';
+import { EducationHistoriesModule } from './modules/education-histories/education-histories.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { NotesModule } from './modules/notes/notes.module';
 import { SocialLinksModule } from './modules/social-links/social-links.module';
@@ -108,6 +109,7 @@ import { EmployeeSalariesModule } from './modules/employee-salaries/employee-sal
     AssetsModule,
     ProjectsModule,
     JobHistoriesModule,
+    EducationHistoriesModule,
     DocumentsModule,
     NotesModule,
     SocialLinksModule,

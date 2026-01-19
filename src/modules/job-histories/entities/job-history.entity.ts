@@ -1,5 +1,5 @@
 import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
-import { User } from 'src/modules/users/entities/user.entity';
+import { Employee } from 'src/modules/users/entities/employee.entity';
 import {
   BaseQueryResponse,
   BaseResponse,
@@ -10,14 +10,14 @@ export class JobHistory {
   @Field(() => ID)
   id: number;
 
-  @Field(() => Int, { description: 'ID of the user' })
+  @Field(() => Int, { description: 'ID of the employee' })
   userId: number;
 
-  @Field(() => User, {
+  @Field(() => Employee, {
     nullable: true,
-    description: 'User who owns this job history',
+    description: 'Employee who owns this job history',
   })
-  user?: User;
+  employee?: Employee;
 
   @Field(() => String, { description: 'Job title or position' })
   jobTitle: string;

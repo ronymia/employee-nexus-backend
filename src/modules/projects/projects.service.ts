@@ -176,20 +176,38 @@ export class ProjectsService {
     }
 
     // Check if user is already assigned to this project
-    const existingMember = await this.prisma.projectMember.findUnique({
-      where: {
-        projectId_userId: {
-          projectId,
-          userId,
-        },
-      },
-    });
+    // const existingMember = await this.prisma.projectMember.findUnique({
+    //   where: {
+    //     projectId_userId: {
+    //       projectId,
+    //       userId,
+    //     },
+    //   },
+    // });
 
-    if (existingMember) {
-      throw new NotFoundException(
-        `User ${userId} is already assigned to project ${projectId}`,
-      );
-    }
+    // if (existingMember) {
+    //   // Update the existing member's role to track their progress
+    //   // (e.g., Team Lead promoted to Project Manager)
+    //   return this.prisma.projectMember.update({
+    //     where: {
+    //       projectId_userId: {
+    //         projectId,
+    //         userId,
+    //       },
+    //     },
+    //     data: {
+    //       role,
+    //     },
+    //     include: {
+    //       project: true,
+    //       user: {
+    //         include: {
+    //           profile: true,
+    //         },
+    //       },
+    //     },
+    //   });
+    // }
 
     // Create the project member assignment
     return this.prisma.projectMember.create({
@@ -200,7 +218,11 @@ export class ProjectsService {
       },
       include: {
         project: true,
-        user: true,
+        user: {
+          include: {
+            profile: true,
+          },
+        },
       },
     });
   }
@@ -215,9 +237,10 @@ export class ProjectsService {
     // Check if the assignment exists
     const existingMember = await this.prisma.projectMember.findUnique({
       where: {
-        projectId_userId: {
+        projectId_userId_role: {
           projectId,
           userId,
+          role: unassignProjectMemberInput.role as string,
         },
       },
     });
@@ -231,9 +254,10 @@ export class ProjectsService {
     // Remove the project member assignment
     return this.prisma.projectMember.delete({
       where: {
-        projectId_userId: {
+        projectId_userId_role: {
           projectId,
           userId,
+          role: existingMember.role as string,
         },
       },
       include: {

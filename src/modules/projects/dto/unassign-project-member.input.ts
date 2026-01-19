@@ -7,4 +7,7 @@ export class UnassignProjectMemberInput {
 
   @Field(() => Int)
   userId: number;
+
+  @Field(() => String)
+  role?: string;
 }

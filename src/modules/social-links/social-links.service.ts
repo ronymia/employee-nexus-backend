@@ -39,13 +39,13 @@ export class SocialLinksService {
     });
   }
 
-  async findAll({ profileId }: { profileId?: number }) {
+  async findAll({ userId }: { userId?: number }) {
     // QUERY BUILDER
     const andCondition: any[] = [];
 
     // Filter by specific profileId if provided
-    if (profileId) {
-      andCondition.push({ profileId });
+    if (userId) {
+      andCondition.push({ userId });
     }
 
     const whereCondition: Prisma.SocialLinkWhereInput = andCondition.length

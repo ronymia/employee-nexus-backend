@@ -4,20 +4,21 @@ import {
   BaseResponse,
 } from 'src/common/dto/base-response.type';
 import { User } from 'src/modules/users/entities/user.entity';
+import { Employee } from 'src/modules/users/entities/employee.entity';
 
 @ObjectType()
 export class Note {
   @Field(() => ID, { description: 'Unique identifier for the note' })
   id: number;
 
-  @Field(() => Int, { description: 'ID of the user this note is about' })
+  @Field(() => Int, { description: 'ID of the employee this note is about' })
   userId: number;
 
-  @Field(() => User, {
+  @Field(() => Employee, {
     nullable: true,
-    description: 'User this note is about',
+    description: 'Employee this note is about',
   })
-  user?: User;
+  employee?: Employee;
 
   @Field(() => Int, { description: 'ID of the user who created this note' })
   createdBy: number;
