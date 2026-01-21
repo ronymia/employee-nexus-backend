@@ -296,6 +296,9 @@ export class AttendancesService {
     const result = !limit
       ? await this.prisma.attendance.findMany({
           where: whereCondition,
+          orderBy: {
+            date: 'asc',
+          },
           include: {
             user: {
               include: {
@@ -476,7 +479,7 @@ export class AttendancesService {
     const { id, punchRecords, ...attendanceData } = updateAttendanceInput;
 
     // Verify attendance exists and user has access
-    await this.findOne({ user, id });
+    await this.findOne({ user, id: Number(id) });
 
     // If punch records are updated, recalculate totals
     let totalMinutes = 0;
@@ -490,12 +493,12 @@ export class AttendancesService {
       // Handle punch record updates
       // Delete existing punch records and create new ones
       await this.prisma.attendancePunch.deleteMany({
-        where: { attendanceId: id },
+        where: { attendanceId: Number(id) },
       });
 
       // Get employee's active schedule and apply break deduction if unpaid
       const attendance = await this.prisma.attendance.findUnique({
-        where: { id },
+        where: { id: Number(id) },
         select: { userId: true, date: true },
       });
 
@@ -509,7 +512,7 @@ export class AttendancesService {
     }
 
     const updatedAttendance = await this.prisma.attendance.update({
-      where: { id },
+      where: { id: Number(id) },
       data: {
         ...attendanceData,
         totalMinutes,

@@ -1,9 +1,8 @@
-import { InputType, Field, Int, Float } from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
 import {
   IsDateString,
   IsEnum,
   IsInt,
-  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -29,23 +28,17 @@ export class CreateLeaveInput {
   @IsEnum(LeaveDuration)
   leaveDuration: LeaveDuration;
 
-  @Field(() => String, { description: 'Leave start date' })
+  @Field(() => Date, { description: 'Leave start date' })
   @IsDateString()
   startDate: string;
 
-  @Field(() => String, {
+  @Field(() => Date, {
     description: 'Leave end date (required for MULTI_DAY)',
     nullable: true,
   })
   @IsDateString()
   @IsOptional()
   endDate?: string;
-
-  @Field(() => Float, {
-    description: 'Total leave hours deducted from balance',
-  })
-  @IsNumber()
-  totalHours: number;
 
   @Field(() => String, {
     description: 'Supporting documents (JSON array or URLs)',

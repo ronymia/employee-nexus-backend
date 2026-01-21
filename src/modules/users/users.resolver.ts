@@ -32,6 +32,8 @@ import { WorkSchedule } from '../work-schedules/entities/work-schedule.entity';
 import { Employee, EmployeeResponse } from './entities/employee.entity';
 import { EmployeeSalariesService } from '../employee-salaries/employee-salary.service';
 import { EmployeeSalary } from '../employee-salaries/entities/employee-salary.entity';
+import { EmployeeCalendarResponse } from './entities/employee-calendar.entity';
+import { QueryEmployeeCalendarInput } from './dto/query-employee-calendar.input';
 
 @Resolver(() => User)
 @UseGuards(GqlAuthGuard, PermissionsGuard)
@@ -248,6 +250,21 @@ export class UsersResolver {
       success: true,
       statusCode: HttpStatus.OK,
       message: 'User statistics retrieved successfully',
+      data: result,
+    };
+  }
+
+  @Query(() => EmployeeCalendarResponse, { name: 'employeeCalendar' })
+  @RequirePermissions('User:read')
+  async employeeCalendar(
+    @CurrentUser() user: JwtPayload,
+    @Args('query', { nullable: true }) query?: QueryEmployeeCalendarInput,
+  ) {
+    const result = await this.usersService.getEmployeeCalendar({ user, query });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Employee calendar retrieved successfully',
       data: result,
     };
   }

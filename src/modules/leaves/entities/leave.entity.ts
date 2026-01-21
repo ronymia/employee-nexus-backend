@@ -49,7 +49,7 @@ export class Leave {
   @Field(() => Float, {
     description: 'Total leave hours deducted from balance',
   })
-  totalHours: number;
+  totalMinutes: number;
 
   @Field(() => String, {
     description: 'Leave status (pending, approved, rejected, cancelled)',

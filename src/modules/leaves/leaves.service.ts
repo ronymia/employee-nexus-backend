@@ -10,6 +10,7 @@ import { leaveSearchableFields } from './leave.constant';
 import { NotificationsService } from '../notifications/notifications.service';
 import { RequestLeaveInput } from './dto/request-leave.input';
 import { NotificationChannel, NotificationType } from '../notifications/enums';
+import { calculateLeaveDurationInMinutes } from 'src/utils/time.utils';
 
 @Injectable()
 export class LeavesService {
@@ -111,32 +112,40 @@ export class LeavesService {
 
     return {};
   }
-  create({
+  async create({
     user,
     createLeaveInput,
   }: {
     user: JwtPayload;
     createLeaveInput: CreateLeaveInput;
   }) {
-    // const leave = await this.prisma.leave.create({
-    //   data: {
-    //     ...createLeaveInput,
-    //     status: 'approved',
-    //     startDate: new Date(createLeaveInput.startDate),
-    //     endDate: createLeaveInput.endDate
-    //       ? new Date(createLeaveInput.endDate)
-    //       : null,
-    //   },
-    //   include: {
-    //     user: {
-    //       include: {
-    //         profile: true,
-    //       },
-    //     },
-    //     leaveType: true,
-    //     reviewer: true,
-    //   },
-    // });
+    if (!user.businessId) {
+      throw new NotFoundException('Business not found for the user');
+    }
+    const totalMinutes = calculateLeaveDurationInMinutes(
+      createLeaveInput.leaveDuration,
+      createLeaveInput.startDate,
+      createLeaveInput.endDate,
+    );
+
+    const leave = await this.prisma.leave.create({
+      data: {
+        ...createLeaveInput,
+        status: 'approved',
+        totalMinutes: totalMinutes,
+        startDate: createLeaveInput.startDate,
+        endDate: createLeaveInput.endDate ? createLeaveInput.endDate : null,
+      },
+      include: {
+        user: {
+          include: {
+            profile: true,
+          },
+        },
+        leaveType: true,
+        reviewer: true,
+      },
+    });
 
     // Send notification to user
     try {
@@ -159,7 +168,7 @@ export class LeavesService {
       console.error('Failed to send leave notification:', error);
     }
 
-    return {};
+    return leave;
   }
 
   async findAll({ user, query }: { user: JwtPayload; query: QueryLeaveInput }) {

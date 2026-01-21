@@ -242,8 +242,13 @@ input AssignEmployeeWorkSiteInput {
 }
 
 input AssignProjectMemberInput {
+  endDate: DateTime
+  isActive: Boolean! = true
+  notes: String
   projectId: Int!
+  remarks: String
   role: String
+  startDate: DateTime!
   userId: Int!
 }
 
@@ -290,6 +295,23 @@ type AttendanceAnalytics {
   thisWeek: AttendanceThisWeek!
   today: AttendanceToday!
   trend: [AttendanceTrend!]!
+}
+
+type AttendanceDateInfo {
+  """Break minutes"""
+  breakMinutes: Int!
+
+  """Attendance date"""
+  date: DateTime!
+
+  """Overtime minutes"""
+  overtimeMinutes: Int!
+
+  """Attendance status (present, absent, late, half_day, on_leave)"""
+  status: String!
+
+  """Total minutes worked"""
+  totalMinutes: Int!
 }
 
 type AttendancePunch {
@@ -1035,7 +1057,7 @@ input CreateLeaveInput {
   attachments: String
 
   """Leave end date (required for MULTI_DAY)"""
-  endDate: String
+  endDate: DateTime
 
   """Leave duration type (SINGLE_DAY, MULTI_DAY, HALF_DAY)"""
   leaveDuration: LeaveDuration!
@@ -1050,10 +1072,7 @@ input CreateLeaveInput {
   notes: String
 
   """Leave start date"""
-  startDate: String!
-
-  """Total leave hours deducted from balance"""
-  totalHours: Float!
+  startDate: DateTime!
 
   """User ID"""
   userId: Int!
@@ -1593,6 +1612,31 @@ type Employee {
   workSites: [WorkSite!]
 }
 
+type EmployeeCalendarData {
+  """List of attendance dates"""
+  attendances: [AttendanceDateInfo!]!
+
+  """List of holidays"""
+  holidays: [HolidayDateInfo!]!
+
+  """Employee joining date"""
+  joiningDate: DateTime
+
+  """List of leave dates"""
+  leaves: [LeaveDateInfo!]!
+
+  """Business registration date"""
+  registrationDate: DateTime
+}
+
+type EmployeeCalendarResponse {
+  data: EmployeeCalendarData!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Int!
+  success: Boolean!
+}
+
 type EmployeeDashboard {
   attendanceSummary: AttendanceSummary!
   leaveSummary: LeaveSummary!
@@ -2078,12 +2122,6 @@ type Holiday {
   """Date when the holiday was created"""
   createdAt: DateTime!
 
-  """ID of the creator"""
-  createdBy: Int!
-
-  """ID of the updater"""
-  creator: User!
-
   """Description of the holiday"""
   description: String
 
@@ -2110,6 +2148,29 @@ type Holiday {
 
   """Date when the holiday was last updated"""
   updatedAt: DateTime!
+}
+
+type HolidayDateInfo {
+  """Holiday description"""
+  description: String
+
+  """Holiday end date"""
+  endDate: DateTime!
+
+  """Holiday type (PUBLIC, RELIGIOUS, COMPANY_SPECIFIC, REGIONAL)"""
+  holidayType: String!
+
+  """Is paid holiday"""
+  isPaid: Boolean!
+
+  """Is recurring holiday"""
+  isRecurring: Boolean!
+
+  """Holiday name"""
+  name: String!
+
+  """Holiday start date"""
+  startDate: DateTime!
 }
 
 type HolidayResponse {
@@ -2332,7 +2393,7 @@ type Leave {
   status: String!
 
   """Total leave hours deducted from balance"""
-  totalHours: Float!
+  totalMinutes: Float!
 
   """Date when the leave was last updated"""
   updatedAt: DateTime!
@@ -2363,6 +2424,23 @@ type LeaveBalanceResponse {
 type LeaveByType {
   count: Int!
   leaveType: String!
+}
+
+type LeaveDateInfo {
+  """Leave end date"""
+  endDate: DateTime
+
+  """Leave duration (SINGLE_DAY, MULTI_DAY, HALF_DAY)"""
+  leaveDuration: String!
+
+  """Leave start date"""
+  startDate: DateTime!
+
+  """Leave status (pending, approved, rejected, cancelled)"""
+  status: String!
+
+  """Total minutes for this leave"""
+  totalMinutes: Float!
 }
 
 """Duration type of the leave"""
@@ -3204,12 +3282,17 @@ type Project {
 
 type ProjectMember {
   createdAt: DateTime!
+  employee: Employee!
+  endDate: DateTime
   id: Int!
+  isActive: Boolean!
+  notes: String
   project: Project!
   projectId: Int!
+  remarks: String
   role: String
+  startDate: DateTime!
   updatedAt: DateTime!
-  user: User!
   userId: Int!
 }
 
@@ -3316,6 +3399,7 @@ type Query {
   educationHistory(id: Int!, userId: Int!): EducationHistoryResponse!
   educationHistoryByUserId(userId: Int!): EducationHistoriesQueryResponse!
   employeeById(id: Int!): UserResponse!
+  employeeCalendar(query: QueryEmployeeCalendarInput): EmployeeCalendarResponse!
   employeeDashboard: EmployeeDashboardResponse!
   employees(query: QueryUserInput): UsersQueryResponse!
   employmentStatusById(id: Int!): EmploymentStatusResponse!
@@ -3493,6 +3577,23 @@ input QueryDocumentInput {
   pagination: BasePaginationInput
   searchTerm: String
   title: String
+}
+
+input QueryEmployeeCalendarInput {
+  """End date (YYYY-MM-DD)"""
+  endDate: String
+
+  """Month filter (1-12)"""
+  month: Int
+
+  """Start date (YYYY-MM-DD)"""
+  startDate: String
+
+  """Employee user ID"""
+  userId: Int
+
+  """Year filter (e.g., 2026)"""
+  year: Int
 }
 
 input QueryEmployeeSalaryInput {
@@ -3785,9 +3886,6 @@ input RequestLeaveInput {
   """Leave start date"""
   startDate: String!
 
-  """Total leave hours deducted from balance"""
-  totalHours: Float!
-
   """User ID"""
   userId: Int!
 }
@@ -3964,7 +4062,9 @@ type TimeSlot {
 }
 
 input UnassignProjectMemberInput {
+  endDate: String
   projectId: Int!
+  remarks: String
   role: String!
   userId: Int!
 }
@@ -4008,17 +4108,52 @@ input UpdateAttendanceInput {
   """Total break minutes for the day"""
   breakMinutes: Int
 
-  """Date of attendance"""
-  date: DateTime!
-
   """Attendance ID"""
   id: ID!
 
   """Punch records for this attendance"""
-  punchRecords: [CreateAttendancePunchInput!]!
+  punchRecords: [UpdateAttendancePunchInput!]!
 
   """User ID"""
   userId: Int!
+}
+
+input UpdateAttendancePunchInput {
+  """Attendance ID"""
+  attendanceId: Int!
+
+  """Break minutes for this session"""
+  breakMinutes: Float
+
+  """Attendance record ID"""
+  id: Int!
+
+  """Notes for this punch session"""
+  notes: String
+
+  """Project ID if working on a project"""
+  projectId: Int!
+
+  """Clock in timestamp"""
+  punchIn: DateTime!
+
+  """Device used for punch in"""
+  punchInDevice: String!
+  punchInIp: String
+  punchInLat: Float
+  punchInLng: Float
+
+  """Clock out timestamp"""
+  punchOut: DateTime!
+
+  """Device used for punch out"""
+  punchOutDevice: String!
+  punchOutIp: String
+  punchOutLat: Float
+  punchOutLng: Float
+
+  """Work site ID"""
+  workSiteId: Int!
 }
 
 input UpdateAttendanceSettingInput {
@@ -4490,7 +4625,7 @@ input UpdateLeaveInput {
   attachments: String
 
   """Leave end date (required for MULTI_DAY)"""
-  endDate: String
+  endDate: DateTime
   id: Int!
 
   """Leave duration type (SINGLE_DAY, MULTI_DAY, HALF_DAY)"""
@@ -4506,10 +4641,7 @@ input UpdateLeaveInput {
   notes: String
 
   """Leave start date"""
-  startDate: String
-
-  """Total leave hours deducted from balance"""
-  totalHours: Float
+  startDate: DateTime
 
   """User ID"""
   userId: Int

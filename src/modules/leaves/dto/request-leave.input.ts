@@ -41,12 +41,6 @@ export class RequestLeaveInput {
   @IsOptional()
   endDate?: string;
 
-  @Field(() => Float, {
-    description: 'Total leave hours deducted from balance',
-  })
-  @IsNumber()
-  totalHours: number;
-
   @Field(() => String, {
     description: 'Supporting documents (JSON array or URLs)',
     nullable: true,

@@ -5,6 +5,12 @@ import { UpdateProjectInput } from './dto/update-project.input';
 import { AssignProjectMemberInput } from './dto/assign-project-member.input';
 import { UnassignProjectMemberInput } from './dto/unassign-project-member.input';
 import { JwtPayload } from '../auth/jwt.strategy';
+import * as dayjs from 'dayjs';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+import * as utc from 'dayjs/plugin/utc';
+
+dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
 @Injectable()
 export class ProjectsService {
@@ -28,10 +34,14 @@ export class ProjectsService {
         creator: true,
         projectMembers: {
           include: {
-            user: {
+            employee: {
               include: {
-                profile: true,
-                role: true,
+                user: {
+                  include: {
+                    profile: true,
+                    role: true,
+                  },
+                },
               },
             },
           },
@@ -56,10 +66,14 @@ export class ProjectsService {
         creator: true,
         projectMembers: {
           include: {
-            user: {
+            employee: {
               include: {
-                profile: true,
-                role: true,
+                user: {
+                  include: {
+                    profile: true,
+                    role: true,
+                  },
+                },
               },
             },
           },
@@ -82,10 +96,14 @@ export class ProjectsService {
         },
         projectMembers: {
           include: {
-            user: {
+            employee: {
               include: {
-                profile: true,
-                role: true,
+                user: {
+                  include: {
+                    profile: true,
+                    role: true,
+                  },
+                },
               },
             },
           },
@@ -120,10 +138,14 @@ export class ProjectsService {
         creator: true,
         projectMembers: {
           include: {
-            user: {
+            employee: {
               include: {
-                profile: true,
-                role: true,
+                user: {
+                  include: {
+                    profile: true,
+                    role: true,
+                  },
+                },
               },
             },
           },
@@ -142,10 +164,14 @@ export class ProjectsService {
         creator: true,
         projectMembers: {
           include: {
-            user: {
+            employee: {
               include: {
-                profile: true,
-                role: true,
+                user: {
+                  include: {
+                    profile: true,
+                    role: true,
+                  },
+                },
               },
             },
           },
@@ -161,18 +187,27 @@ export class ProjectsService {
     assignProjectMemberInput: AssignProjectMemberInput;
     user: JwtPayload;
   }) {
-    const { projectId, userId, role } = assignProjectMemberInput;
+    const {
+      projectId,
+      userId,
+      role,
+      startDate,
+      endDate,
+      isActive,
+      remarks,
+      notes,
+    } = assignProjectMemberInput;
 
     // Check if project exists and belongs to user's business
     await this.findOne({ user, id: projectId });
 
-    // Check if user exists (basic validation - you might want to add more business logic)
-    const targetUser = await this.prisma.user.findUnique({
-      where: { id: userId },
+    // Check if employee exists (basic validation - you might want to add more business logic)
+    const targetEmployee = await this.prisma.employee.findUnique({
+      where: { userId },
     });
 
-    if (!targetUser) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
+    if (!targetEmployee) {
+      throw new NotFoundException(`Employee with user ID ${userId} not found`);
     }
 
     // Check if user is already assigned to this project
@@ -215,12 +250,22 @@ export class ProjectsService {
         projectId,
         userId,
         role,
+        startDate: dayjs(startDate).toISOString(),
+        endDate: endDate ? dayjs(endDate).toISOString() : null,
+        isActive: isActive ?? true,
+        remarks,
+        notes,
       },
       include: {
         project: true,
-        user: {
+        employee: {
           include: {
-            profile: true,
+            user: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
           },
         },
       },
@@ -232,7 +277,7 @@ export class ProjectsService {
   }: {
     unassignProjectMemberInput: UnassignProjectMemberInput;
   }) {
-    const { projectId, userId } = unassignProjectMemberInput;
+    const { projectId, userId, endDate, remarks } = unassignProjectMemberInput;
 
     // Check if the assignment exists
     const existingMember = await this.prisma.projectMember.findUnique({
@@ -251,8 +296,8 @@ export class ProjectsService {
       );
     }
 
-    // Remove the project member assignment
-    return this.prisma.projectMember.delete({
+    // Update the project member to mark as inactive and set end date
+    return this.prisma.projectMember.update({
       where: {
         projectId_userId_role: {
           projectId,
@@ -260,9 +305,23 @@ export class ProjectsService {
           role: existingMember.role as string,
         },
       },
+      data: {
+        isActive: false,
+        endDate: endDate ? dayjs(endDate).toISOString() : dayjs().toISOString(),
+        remarks: remarks || existingMember.remarks,
+      },
       include: {
         project: true,
-        user: true,
+        employee: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -284,20 +343,28 @@ export class ProjectsService {
             },
             projectMembers: {
               include: {
-                user: {
+                employee: {
                   include: {
-                    profile: true,
-                    role: true,
+                    user: {
+                      include: {
+                        profile: true,
+                        role: true,
+                      },
+                    },
                   },
                 },
               },
             },
           },
         },
-        user: {
+        employee: {
           include: {
-            profile: true,
-            role: true,
+            user: {
+              include: {
+                profile: true,
+                role: true,
+              },
+            },
           },
         },
       },

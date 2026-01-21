@@ -69,7 +69,6 @@ model User {
   assetAssignments      AssetAssignment[]  @relation(name: "assetAssignmentsAssignedToUser")
   assetAssignmentsBy    AssetAssignment[]  @relation(name: "assetAssignmentsAssignedByUser")
   projectCreated        Project[]          @relation(name: "projectCreated")
-  projects              ProjectMember[]    @relation(name: "projectMembersInUser")
   scheduleAssignmentsBy EmployeeSchedule[] @relation(name: "scheduleAssignmentsByUser")
   notesCreated          Note[]             @relation(name: "noteCreatedBy")
   attendances           Attendance[]       @relation(name: "userAttendance")
@@ -801,12 +800,17 @@ model Project {
 }
 
 model ProjectMember {
-  id        Int     @id @default(autoincrement())
-  projectId Int     @map("project_id")
-  project   Project @relation(name: "projectMembersInProject", fields: [projectId], references: [id], onDelete: Cascade)
-  userId    Int     @map("user_id")
-  user      User    @relation(name: "projectMembersInUser", fields: [userId], references: [id], onDelete: Cascade)
+  id        Int       @id @default(autoincrement())
+  projectId Int       @map("project_id")
+  project   Project   @relation(name: "projectMembersInProject", fields: [projectId], references: [id], onDelete: Cascade)
+  userId    Int       @map("user_id")
+  employee  Employee  @relation(name: "projectMembersInEmployee", fields: [userId], references: [userId], onDelete: Cascade)
   role      String?
+  startDate DateTime  @map("start_date") @db.Date
+  endDate   DateTime? @map("end_date") @db.Date
+  isActive  Boolean   @default(true) @map("is_active")
+  remarks   String?   @map("remarks") @db.Text
+  notes     String?   @map("notes") @db.Text
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -815,6 +819,8 @@ model ProjectMember {
   @@index([projectId])
   @@index([userId])
   @@index([role])
+  @@index([userId, isActive])
+  @@index([startDate, endDate])
   @@map("project_members")
 }
 
@@ -834,6 +840,7 @@ model Employee {
   jobHistory         JobHistory[]          @relation(name: "employeeJobHistory")
   documents          Document[]            @relation(name: "employeeDocuments")
   notes              Note[]                @relation(name: "employeeNotes")
+  projectMembers     ProjectMember[]       @relation(name: "projectMembersInEmployee")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
