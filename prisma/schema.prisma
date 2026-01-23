@@ -53,30 +53,31 @@ enum CommonStatus {
 }
 
 model User {
-  id                    Int                @id @default(autoincrement())
-  email                 String             @unique
-  password              String
-  status                String
-  profile               Profile?           @relation(name: "userProfile")
-  employee              Employee?          @relation(name: "userEmployee")
-  roleId                Int                @map("role_id")
-  role                  Role               @relation(fields: [roleId], references: [id], onDelete: Restrict)
-  businessId            Int?               @map("business_id")
-  business              Business?          @relation(name: "userBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  ownedBusiness         Business?          @relation(name: "ownedBusiness")
-  userPermissions       UserPermission[]
-  managedDepartments    Department[]       @relation(name: "managedDepartments")
-  assetAssignments      AssetAssignment[]  @relation(name: "assetAssignmentsAssignedToUser")
-  assetAssignmentsBy    AssetAssignment[]  @relation(name: "assetAssignmentsAssignedByUser")
-  projectCreated        Project[]          @relation(name: "projectCreated")
-  scheduleAssignmentsBy EmployeeSchedule[] @relation(name: "scheduleAssignmentsByUser")
-  notesCreated          Note[]             @relation(name: "noteCreatedBy")
-  attendances           Attendance[]       @relation(name: "userAttendance")
-  reviewedAttendances   Attendance[]       @relation(name: "attendanceReviewedBy")
-  leaves                Leave[]            @relation(name: "userLeaves")
-  reviewedLeaves        Leave[]            @relation(name: "leaveReviewedBy")
-  payrollItems          PayrollItem[]      @relation(name: "userPayrollItems")
-  notifications         Notification[]     @relation(name: "userNotifications")
+  id                                  Int                        @id @default(autoincrement())
+  email                               String                     @unique
+  password                            String
+  status                              String
+  profile                             Profile?                   @relation(name: "userProfile")
+  employee                            Employee?                  @relation(name: "userEmployee")
+  roleId                              Int                        @map("role_id")
+  role                                Role                       @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  businessId                          Int?                       @map("business_id")
+  business                            Business?                  @relation(name: "userBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  ownedBusiness                       Business?                  @relation(name: "ownedBusiness")
+  userPermissions                     UserPermission[]
+  managedDepartments                  Department[]               @relation(name: "managedDepartments")
+  assetAssignments                    AssetAssignment[]          @relation(name: "assetAssignmentsAssignedToUser")
+  assetAssignmentsBy                  AssetAssignment[]          @relation(name: "assetAssignmentsAssignedByUser")
+  projectCreated                      Project[]                  @relation(name: "projectCreated")
+  scheduleAssignmentsBy               EmployeeSchedule[]         @relation(name: "scheduleAssignmentsByUser")
+  notesCreated                        Note[]                     @relation(name: "noteCreatedBy")
+  attendances                         Attendance[]               @relation(name: "userAttendance")
+  reviewedAttendances                 Attendance[]               @relation(name: "attendanceReviewedBy")
+  leaves                              Leave[]                    @relation(name: "userLeaves")
+  reviewedLeaves                      Leave[]                    @relation(name: "leaveReviewedBy")
+  payrollItems                        PayrollItem[]              @relation(name: "userPayrollItems")
+  notifications                       Notification[]             @relation(name: "userNotifications")
+  employeePayrollComponentAssignments EmployeePayrollComponent[] @relation(name: "employeePayrollComponentAssignments")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -826,25 +827,27 @@ model ProjectMember {
 }
 
 model Employee {
-  userId             Int                   @id @map("user_id")
-  user               User                  @relation(name: "userEmployee", fields: [userId], references: [id], onDelete: Cascade)
-  employeeId         String                @unique @map("employee_id")
-  nidNumber          String                @unique @map("nid_number")
-  joiningDate        DateTime              @map("joining_date") @db.Date
-  employmentStatuses EmployeeStatus[]      @relation(name: "employeeEmploymentStatus")
-  designations       EmployeeDesignation[] @relation(name: "employeeDesignation")
-  salaries           EmployeeSalary[]      @relation(name: "employeeSalaries")
-  workSites          EmployeeWorkSite[]    @relation(name: "employeeWorkSites")
-  workSchedules      EmployeeSchedule[]    @relation(name: "employeeSchedules")
-  departments        EmployeeDepartment[]  @relation(name: "employeeDepartment")
-  educationHistory   EducationHistory[]    @relation(name: "employeeEducationHistory")
-  jobHistory         JobHistory[]          @relation(name: "employeeJobHistory")
-  documents          Document[]            @relation(name: "employeeDocuments")
-  notes              Note[]                @relation(name: "employeeNotes")
-  projectMembers     ProjectMember[]       @relation(name: "projectMembersInEmployee")
+  userId                    Int                        @id @map("user_id")
+  user                      User                       @relation(name: "userEmployee", fields: [userId], references: [id], onDelete: Cascade)
+  employeeId                String                     @unique @map("employee_id")
+  nidNumber                 String                     @unique @map("nid_number")
+  joiningDate               DateTime                   @map("joining_date") @db.Date
+  employmentStatuses        EmployeeStatus[]           @relation(name: "employeeEmploymentStatus")
+  designations              EmployeeDesignation[]      @relation(name: "employeeDesignation")
+  salaries                  EmployeeSalary[]           @relation(name: "employeeSalaries")
+  workSites                 EmployeeWorkSite[]         @relation(name: "employeeWorkSites")
+  workSchedules             EmployeeSchedule[]         @relation(name: "employeeSchedules")
+  departments               EmployeeDepartment[]       @relation(name: "employeeDepartment")
+  educationHistory          EducationHistory[]         @relation(name: "employeeEducationHistory")
+  jobHistory                JobHistory[]               @relation(name: "employeeJobHistory")
+  documents                 Document[]                 @relation(name: "employeeDocuments")
+  notes                     Note[]                     @relation(name: "employeeNotes")
+  projectMembers            ProjectMember[]            @relation(name: "projectMembersInEmployee")
+  employeePayrollComponents EmployeePayrollComponent[] @relation(name: "employeePayrollComponents")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  attendances Attendance[]
 
   @@index([joiningDate])
   @@map("employees")
@@ -993,8 +996,10 @@ model Attendance {
   remarks         String?           @map("remarks") // remarks for status action
   punchRecords    AttendancePunch[] @relation(name: "attendancePunchRecords")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  employee       Employee? @relation(fields: [employeeUserId], references: [userId])
+  employeeUserId Int?
 
   @@unique([userId, date])
   @@index([userId])
@@ -1111,7 +1116,8 @@ model PayrollComponent {
   businessId      Int                    @map("business_id")
   business        Business               @relation(name: "payrollComponentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
 
-  payrollItemComponents PayrollItemComponent[] @relation(name: "componentInPayrollItem")
+  payrollItemComponents     PayrollItemComponent[]     @relation(name: "componentInPayrollItem")
+  employeePayrollComponents EmployeePayrollComponent[] @relation(name: "employeePayrollComponents")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1189,6 +1195,32 @@ model PayrollItem {
   @@index([userId])
   @@index([status])
   @@map("payroll_items")
+}
+
+model EmployeePayrollComponent {
+  id             Int              @id @default(autoincrement())
+  userId         Int              @map("user_id")
+  employee       Employee         @relation(name: "employeePayrollComponents", fields: [userId], references: [userId], onDelete: Cascade)
+  componentId    Int              @map("component_id")
+  component      PayrollComponent @relation(name: "employeePayrollComponents", fields: [componentId], references: [id], onDelete: Cascade)
+  value          Float? // Custom value for this employee (if null, uses component's defaultValue)
+  isActive       Boolean          @default(true) @map("is_active")
+  effectiveFrom  DateTime         @map("effective_from") @db.Date // When this component becomes effective
+  effectiveTo    DateTime?        @map("effective_to") @db.Date // When this component ends (null = ongoing)
+  isOverride     Boolean          @default(false) @map("is_override") // Whether this overrides the default component value
+  assignedBy     Int?             @map("assigned_by") // User who assigned this component
+  assignedByUser User?            @relation(name: "employeePayrollComponentAssignments", fields: [assignedBy], references: [id], onDelete: SetNull)
+  notes          String?          @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, componentId, effectiveFrom])
+  @@index([userId])
+  @@index([componentId])
+  @@index([userId, isActive])
+  @@index([effectiveFrom, effectiveTo])
+  @@map("employee_payroll_components")
 }
 
 model PayrollItemComponent {

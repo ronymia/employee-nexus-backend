@@ -62,6 +62,7 @@ import { EmployeeWorkSchedulesModule } from './modules/employee-work-schedules/e
 import { EmployeeEmploymentStatusesModule } from './modules/employee-employment-statuses/employee-employment-statuses.module';
 import { BusinessSubscriptionsModule } from './modules/business-subscriptions/business-subscriptions.module';
 import { EmployeeSalariesModule } from './modules/employee-salaries/employee-salary.module';
+import { EmployeePayrollComponentsModule } from './modules/employee-payroll-components/employee-payroll-components.module';
 
 @Module({
   imports: [
@@ -130,6 +131,7 @@ import { EmployeeSalariesModule } from './modules/employee-salaries/employee-sal
     EmployeeEmploymentStatusesModule,
     BusinessSubscriptionsModule,
     EmployeeSalariesModule,
+    EmployeePayrollComponentsModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

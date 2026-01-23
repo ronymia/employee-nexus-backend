@@ -197,6 +197,18 @@ input AssignEmployeeDesignationInput {
   userId: Int!
 }
 
+input AssignEmployeePayrollComponentInput {
+  componentId: Int!
+  effectiveFrom: DateTime!
+  effectiveTo: DateTime
+  isOverride: Boolean
+  notes: String
+  userId: Int!
+
+  """The value of the payroll component for the employee"""
+  value: Float!
+}
+
 input AssignEmployeeScheduleInput {
   """End date of schedule assignment"""
   endDate: DateTime
@@ -1849,6 +1861,40 @@ type EmployeeEmploymentStatusesArrayResponse {
   success: Boolean!
 }
 
+type EmployeePayrollComponent {
+  assignedBy: Int
+  assignedByUser: User
+  component: PayrollComponent
+  componentId: Int!
+  createdAt: DateTime!
+  effectiveFrom: DateTime!
+  effectiveTo: DateTime
+  employee: User
+  id: Int!
+  isActive: Boolean!
+  isOverride: Boolean!
+  notes: String
+  updatedAt: DateTime!
+  userId: Int!
+  value: Float
+}
+
+type EmployeePayrollComponentResponse {
+  data: EmployeePayrollComponent!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EmployeePayrollComponentsQueryResponse {
+  data: [EmployeePayrollComponent!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type EmployeeResponse {
   data: Employee!
   message: String!
@@ -2710,6 +2756,7 @@ type Mutation {
 
   """Assign a designation to an employee"""
   assignEmployeeDesignation(assignEmployeeDesignationInput: AssignEmployeeDesignationInput!): EmployeeDesignationResponse!
+  assignEmployeePayrollComponent(assignEmployeePayrollComponentInput: AssignEmployeePayrollComponentInput!): EmployeePayrollComponentResponse!
 
   """Assign a work schedule to an employee"""
   assignEmployeeSchedule(assignEmployeeScheduleInput: AssignEmployeeScheduleInput!): EmployeeWorkScheduleResponse!
@@ -2818,6 +2865,7 @@ type Mutation {
 
   """Update an employee designation assignment"""
   updateEmployeeDesignation(updateEmployeeDesignationInput: UpdateEmployeeDesignationInput!): EmployeeDesignationResponse!
+  updateEmployeePayrollComponent(updateEmployeePayrollComponentInput: UpdateEmployeePayrollComponentInput!): EmployeePayrollComponentResponse!
 
   """Update an employee work schedule assignment"""
   updateEmployeeSchedule(updateEmployeeScheduleInput: UpdateEmployeeScheduleInput!): EmployeeWorkScheduleResponse!
@@ -3485,6 +3533,7 @@ input PunchOutInput {
 type Query {
   FeatureById(id: Int!): FeatureResponse!
   activeBusinessSubscription(businessId: Int): BusinessSubscriptionResponse!
+  activeEmployeePayrollComponents(query: QueryEmployeePayrollComponentInput): EmployeePayrollComponentsQueryResponse!
   activePayrollComponents(businessId: Int!): PayrollComponentsQueryResponse!
   activeSalaryByUserId(userId: Int!): EmployeeSalaryResponse!
   allFeatures: FeatureQueryResponse!
@@ -3521,6 +3570,9 @@ type Query {
   employeeById(id: Int!): UserResponse!
   employeeCalendar(query: QueryEmployeeCalendarInput): EmployeeCalendarResponse!
   employeeDashboard: EmployeeDashboardResponse!
+  employeePayrollComponent(id: Int!): EmployeePayrollComponentResponse!
+  employeePayrollComponentHistory(query: QueryEmployeePayrollComponentInput): EmployeePayrollComponentsQueryResponse!
+  employeePayrollComponents(query: QueryEmployeePayrollComponentInput): EmployeePayrollComponentsQueryResponse!
   employees(query: QueryUserInput): UsersQueryResponse!
   employmentStatusById(id: Int!): EmploymentStatusResponse!
 
@@ -3717,6 +3769,12 @@ input QueryEmployeeCalendarInput {
 
   """Year filter (e.g., 2026)"""
   year: Int
+}
+
+input QueryEmployeePayrollComponentInput {
+  componentId: Int
+  isActive: Boolean
+  userId: Int
 }
 
 input QueryEmployeeSalaryInput {
@@ -4550,6 +4608,19 @@ input UpdateEmployeeInput {
   user: CreateUserInput
   workScheduleId: Int
   workSiteIds: [Int!]
+}
+
+input UpdateEmployeePayrollComponentInput {
+  componentId: Int!
+  effectiveFrom: DateTime!
+  effectiveTo: DateTime
+  id: Int!
+  isOverride: Boolean
+  notes: String
+  userId: Int!
+
+  """The value of the payroll component for the employee"""
+  value: Float!
 }
 
 input UpdateEmployeeSalaryInput {
