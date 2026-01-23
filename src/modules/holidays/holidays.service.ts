@@ -8,6 +8,7 @@ import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { holidaySearchableFields } from './holiday.constant';
 import { NotificationsService } from '../notifications/notifications.service';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class HolidaysService {
@@ -15,6 +16,55 @@ export class HolidaysService {
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
   ) {}
+
+  // HOLIDAY OVERVIEW
+  async getHolidayOverview({ user }: { user: JwtPayload }) {
+    const businessId = user.businessId;
+
+    // Execute all queries in parallel for single round trip
+    const [total, typeGroups, recurringCount, paidCount, unpaidCount] =
+      await Promise.all([
+        this.prisma.holiday.count({ where: { businessId } }),
+        this.prisma.holiday.groupBy({
+          by: ['holidayType'],
+          where: { businessId },
+          _count: { holidayType: true },
+        }),
+        this.prisma.holiday.count({
+          where: { businessId, isRecurring: true },
+        }),
+        this.prisma.holiday.count({ where: { businessId, isPaid: true } }),
+        this.prisma.holiday.count({ where: { businessId, isPaid: false } }),
+      ]);
+
+    const overview = {
+      total,
+      public: 0,
+      religious: 0,
+      companySpecific: 0,
+      regional: 0,
+      recurring: recurringCount,
+      paid: paidCount,
+      unpaid: unpaidCount,
+    };
+
+    typeGroups.forEach((item) => {
+      // Map holiday type to camelCase property names
+      const typeMap = {
+        PUBLIC: 'public',
+        RELIGIOUS: 'religious',
+        COMPANY_SPECIFIC: 'companySpecific',
+        REGIONAL: 'regional',
+      };
+      const key = typeMap[item.holidayType];
+      if (key) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        overview[key] = item._count.holidayType;
+      }
+    });
+
+    return overview;
+  }
 
   async create({
     user,
@@ -26,8 +76,8 @@ export class HolidaysService {
     const holiday = await this.prisma.holiday.create({
       data: {
         ...createHolidayInput,
-        startDate: new Date(createHolidayInput.startDate),
-        endDate: new Date(createHolidayInput.endDate),
+        startDate: createHolidayInput.startDate,
+        endDate: createHolidayInput.endDate,
         businessId: user.businessId,
       },
     });
@@ -39,8 +89,8 @@ export class HolidaysService {
         select: { id: true },
       });
 
-      const startDate = new Date(holiday.startDate).toLocaleDateString();
-      const endDate = new Date(holiday.endDate).toLocaleDateString();
+      const startDate = dayjs(holiday.startDate).format('MMMM D, YYYY');
+      const endDate = dayjs(holiday.endDate).format('MMMM D, YYYY');
       const dateDisplay =
         startDate === endDate ? startDate : `${startDate} to ${endDate}`;
 
@@ -77,8 +127,13 @@ export class HolidaysService {
     const { pagination, ...filters } = query ?? {};
 
     // PAGINATION
-    const { page, skip, limit, sortBy, sortOrder } =
-      paginationHelpers.calculatePagination(pagination || {});
+    const {
+      page,
+      skip,
+      limit,
+      sortBy = 'startDate',
+      sortOrder = 'desc',
+    } = paginationHelpers.calculatePagination(pagination || {});
 
     // FILTER
     const { searchTerm, holidayType, isRecurring, isPaid, startDate, endDate } =
@@ -139,6 +194,9 @@ export class HolidaysService {
       ? await this.prisma.holiday.findMany({
           where: {
             businessId,
+          },
+          orderBy: {
+            startDate: 'desc',
           },
           include: {
             business: true,

@@ -225,8 +225,13 @@ export class LeavesService {
     const { pagination, ...filters } = query ?? {};
 
     // PAGINATION
-    const { page, skip, limit, sortBy, sortOrder } =
-      paginationHelpers.calculatePagination(pagination || {});
+    const {
+      page,
+      skip,
+      limit,
+      sortBy = 'startDate',
+      sortOrder = 'asc',
+    } = paginationHelpers.calculatePagination(pagination || {});
 
     // FILTER
     const {
@@ -299,6 +304,9 @@ export class LeavesService {
     const result = !limit
       ? await this.prisma.leave.findMany({
           where: whereCondition,
+          orderBy: {
+            startDate: 'asc',
+          },
           include: {
             user: {
               include: {

@@ -2222,6 +2222,25 @@ type HolidayDateInfo {
   startDate: DateTime!
 }
 
+type HolidayOverview {
+  companySpecific: Int!
+  paid: Int!
+  public: Int!
+  recurring: Int!
+  regional: Int!
+  religious: Int!
+  total: Int!
+  unpaid: Int!
+}
+
+type HolidayOverviewResponse {
+  data: HolidayOverview!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type HolidayResponse {
   data: Holiday!
   message: String!
@@ -3528,6 +3547,7 @@ type Query {
   """Get specific work site assignment by composite ID"""
   getWorkSiteById(userId: Int!, workSiteId: Int!): EmployeeWorkSiteResponse!
   holidayById(id: Int!): HolidayResponse!
+  holidayOverview: HolidayOverviewResponse!
   holidays(query: QueryHolidayInput): HolidaysQueryResponse!
   jobHistory(id: Int!, userId: Int!): JobHistoryResponse!
   jobHistoryByUserId(userId: Int!): JobHistoriesQueryResponse!
