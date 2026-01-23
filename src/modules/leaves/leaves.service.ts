@@ -11,6 +11,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { RequestLeaveInput } from './dto/request-leave.input';
 import { NotificationChannel, NotificationType } from '../notifications/enums';
 import { calculateLeaveDurationInMinutes } from 'src/utils/time.utils';
+import { ApproveLeaveInput, RejectLeaveInput } from './dto/approve-leave.input';
 
 @Injectable()
 export class LeavesService {
@@ -18,6 +19,53 @@ export class LeavesService {
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
   ) {}
+
+  // LEAVE OVERVIEW
+  async getLeaveOverview() {
+    // Execute all queries in parallel for single round trip
+    const [total, statusGroups, durationGroups] = await Promise.all([
+      this.prisma.leave.count(),
+      this.prisma.leave.groupBy({
+        by: ['status'],
+        _count: { status: true },
+      }),
+      this.prisma.leave.groupBy({
+        by: ['leaveDuration'],
+        _count: { leaveDuration: true },
+      }),
+    ]);
+
+    const overview = {
+      total,
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+      cancelled: 0,
+      singleDay: 0,
+      multiDay: 0,
+      halfDay: 0,
+    };
+
+    statusGroups.forEach((item) => {
+      overview[item.status] = item._count.status;
+    });
+
+    durationGroups.forEach((item) => {
+      // Map duration values to camelCase property names
+      const durationMap = {
+        SINGLE_DAY: 'singleDay',
+        MULTI_DAY: 'multiDay',
+        HALF_DAY: 'halfDay',
+      };
+      const key = durationMap[item.leaveDuration];
+      if (key) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        overview[key] = item._count.leaveDuration;
+      }
+    });
+
+    return overview;
+  }
 
   async leaveRequest({
     user,
@@ -511,40 +559,55 @@ export class LeavesService {
     };
   }
 
-  // APPROVE ATTENDANCE
-  async approveLeave({ leaveId: id }: { leaveId: number }) {
+  // APPROVE LEAVE
+  async approveLeave({
+    user,
+    approveLeaveInput,
+  }: {
+    user: JwtPayload;
+    approveLeaveInput: ApproveLeaveInput;
+  }) {
     // Verify punch exists and belongs to user's attendance
-    const leave = await this.prisma.leave.findUnique({
+    await this.prisma.leave.findUniqueOrThrow({
       where: {
-        id: id,
+        id: Number(approveLeaveInput.leaveId),
       },
     });
 
-    if (!leave) {
-      throw new NotFoundException(`Leave with ID ${id} not found`);
-    }
-
     return await this.prisma.leave.update({
-      where: { id: id },
-      data: { status: 'approved' },
+      where: { id: Number(approveLeaveInput.leaveId) },
+      data: {
+        status: 'approved',
+        reviewedAt: new Date().toISOString(),
+        reviewedBy: user.userId,
+        remarks: approveLeaveInput.remarks,
+      },
     });
   }
-  // APPROVE ATTENDANCE
-  async rejectLeave({ leaveId: id }: { leaveId: number }) {
+
+  // REJECT LEAVE
+  async rejectLeave({
+    user,
+    rejectLeaveInput,
+  }: {
+    user: JwtPayload;
+    rejectLeaveInput: RejectLeaveInput;
+  }) {
     // Verify punch exists and belongs to user's attendance
-    const leave = await this.prisma.leave.findUnique({
+    await this.prisma.leave.findUniqueOrThrow({
       where: {
-        id: id,
+        id: Number(rejectLeaveInput.leaveId),
       },
     });
 
-    if (!leave) {
-      throw new NotFoundException(`Leave with ID ${id} not found`);
-    }
-
     return await this.prisma.leave.update({
-      where: { id: id },
-      data: { status: 'rejected' },
+      where: { id: Number(rejectLeaveInput.leaveId) },
+      data: {
+        status: 'rejected',
+        reviewedAt: new Date().toISOString(),
+        reviewedBy: user.userId,
+        remarks: rejectLeaveInput.remarks,
+      },
     });
   }
 }

@@ -6,6 +6,7 @@ import {
 import { LeaveType } from 'src/modules/leave-types/entities/leave-type.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import { LeaveDuration } from '../enums';
+import { IsOptional } from 'class-validator';
 
 @ObjectType()
 export class Leave {
@@ -60,25 +61,29 @@ export class Leave {
     description: 'When leave was approved/rejected',
     nullable: true,
   })
-  reviewedAt?: Date;
+  @IsOptional()
+  reviewedAt?: Date | null;
 
   @Field(() => Int, {
     description: 'ID of manager/admin who reviewed',
     nullable: true,
   })
-  reviewedBy?: number;
+  @IsOptional()
+  reviewedBy?: number | null;
 
   @Field(() => User, {
     description: 'Manager/admin who reviewed the leave',
     nullable: true,
   })
-  reviewer?: User;
+  @IsOptional()
+  reviewer?: User | null;
 
   @Field(() => String, {
     description: 'Reason for rejection if rejected',
     nullable: true,
   })
-  rejectionReason?: string;
+  @IsOptional()
+  remarks?: string;
 
   @Field(() => String, {
     description: 'Supporting documents (JSON array or URLs)',
