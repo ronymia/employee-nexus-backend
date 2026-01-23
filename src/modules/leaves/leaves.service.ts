@@ -375,7 +375,7 @@ export class LeavesService {
         status,
         reviewedBy: reviewerId,
         reviewedAt: new Date(),
-        rejectionReason: reviewerNotes || null,
+        remarks: reviewerNotes || null,
       },
       include: {
         user: {

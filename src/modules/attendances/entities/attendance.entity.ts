@@ -5,6 +5,7 @@ import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
+import { IsOptional } from 'class-validator';
 
 @ObjectType()
 export class Attendance {
@@ -49,6 +50,36 @@ export class Attendance {
     defaultValue: 'pending',
   })
   status: string;
+  @Field(() => String, {
+    description: 'Attendance type such as regular, late, partial',
+    defaultValue: 'regular',
+  })
+  type: string;
+
+  @Field(() => Date, { nullable: true, description: 'Reviewed timestamp' })
+  @IsOptional()
+  reviewedAt?: Date | null;
+
+  @Field(() => Int, {
+    nullable: true,
+    description: 'Reviewer ID who reviewed this attendance',
+  })
+  @IsOptional()
+  reviewedBy: number | null;
+
+  @Field(() => User, {
+    nullable: true,
+    description: 'User who reviewed this attendance',
+  })
+  @IsOptional()
+  reviewer?: User | null;
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'Remarks for this attendance',
+  })
+  @IsOptional()
+  remarks?: string | null;
 
   @Field(() => [AttendancePunch], {
     description: 'Punch records for this attendance',

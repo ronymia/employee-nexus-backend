@@ -9,6 +9,14 @@ input AddPayslipAdjustmentInput {
   type: String!
 }
 
+input ApproveAttendanceInput {
+  """Attendance ID"""
+  attendanceId: Int!
+
+  """Remarks"""
+  remarks: String
+}
+
 input ApprovePayrollCycleInput {
   id: Int!
 }
@@ -271,6 +279,18 @@ type Attendance {
   """Punch records for this attendance"""
   punchRecords: [AttendancePunch!]
 
+  """Remarks for this attendance"""
+  remarks: String
+
+  """Reviewed timestamp"""
+  reviewedAt: DateTime
+
+  """Reviewer ID who reviewed this attendance"""
+  reviewedBy: Int
+
+  """User who reviewed this attendance"""
+  reviewer: User
+
   """Total work schedule minutes for the day"""
   scheduleMinutes: Int!
 
@@ -279,6 +299,9 @@ type Attendance {
 
   """Total working minutes for the day"""
   totalMinutes: Int!
+
+  """Attendance type such as regular, late, partial"""
+  type: String!
 
   """Last update timestamp"""
   updatedAt: DateTime!
@@ -312,6 +335,16 @@ type AttendanceDateInfo {
 
   """Total minutes worked"""
   totalMinutes: Int!
+}
+
+type AttendanceOverview {
+  absent: Int!
+  approved: Int!
+  late: Int!
+  partial: Int!
+  pending: Int!
+  rejected: Int!
+  total: Int!
 }
 
 type AttendancePunch {
@@ -455,6 +488,14 @@ type AttendanceSummary {
   recentAttendance: [RecentAttendanceItem!]!
   thisMonth: AttendanceThisMonths!
   today: AttendanceTodays!
+}
+
+type AttendanceSummaryAttendanceOverview {
+  data: AttendanceOverview!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type AttendanceThisMonth {
@@ -2615,6 +2656,7 @@ type MonthAmount {
 
 type Mutation {
   addPayslipAdjustment(addPayslipAdjustmentInput: AddPayslipAdjustmentInput!): PayrollItemResponse!
+  approveAttendance(approveAttendanceInput: ApproveAttendanceInput!): AttendanceResponse!
   approveLeave(leaveId: Int!): LeaveResponse!
   approvePayrollCycle(approvePayrollCycleInput: ApprovePayrollCycleInput!): PayrollCycleResponse!
   approvePayrollItem(id: Int!): PayrollItemResponse!
@@ -2706,6 +2748,7 @@ type Mutation {
   processPayrollCycle(processPayrollCycleInput: ProcessPayrollCycleInput!): PayrollCycleResponse!
   punchIn(punchInInput: PunchInInput!): AttendancePunchResponse!
   punchOut(punchOutInput: PunchOutInput!): AttendancePunchResponse!
+  rejectAttendance(rejectAttendanceInput: RejectAttendanceInput!): AttendanceResponse!
   rejectLeave(leaveId: Int!): LeaveResponse!
   removeAsset(id: Int!): AssetResponse!
   removeAssetType(id: Int!): AssetTypeResponse!
@@ -3375,6 +3418,7 @@ type Query {
   assets(query: QueryAssetInput): AssetsQueryResponse!
   assetsByUserId(userId: Int!): AssetsQueryResponse!
   attendanceById(id: Int!): AttendanceResponse!
+  attendanceOverview: AttendanceSummaryAttendanceOverview!
   attendanceSettingsByBusiness: AttendanceSettingResponse!
   attendances(query: QueryAttendanceInput): AttendanceQueryResponse!
   businessById(id: Int!): BusinessResponse!
@@ -3851,6 +3895,14 @@ type RecruitmentProcessesQueryResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
+}
+
+input RejectAttendanceInput {
+  """Attendance ID"""
+  attendanceId: Int!
+
+  """Remarks"""
+  remarks: String!
 }
 
 input RenewBusinessSubscriptionInput {

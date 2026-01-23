@@ -203,7 +203,7 @@ export class EmployeeDashboardService {
         startDate: leave.startDate,
         endDate: leave.endDate || new Date(),
         status: leave.status,
-        reason: leave.rejectionReason || undefined,
+        reason: leave.remarks || undefined,
       })),
     };
   }

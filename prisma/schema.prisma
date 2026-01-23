@@ -72,6 +72,7 @@ model User {
   scheduleAssignmentsBy EmployeeSchedule[] @relation(name: "scheduleAssignmentsByUser")
   notesCreated          Note[]             @relation(name: "noteCreatedBy")
   attendances           Attendance[]       @relation(name: "userAttendance")
+  reviewedAttendances   Attendance[]       @relation(name: "attendanceReviewedBy")
   leaves                Leave[]            @relation(name: "userLeaves")
   reviewedLeaves        Leave[]            @relation(name: "leaveReviewedBy")
   payrollItems          PayrollItem[]      @relation(name: "userPayrollItems")
@@ -984,7 +985,12 @@ model Attendance {
   totalMinutes    Int               @default(0) @map("total_minutes") // Calculated total working hours for the day
   breakMinutes    Int               @default(0) @map("break_minutes") // Calculated total break hours for the day
   overtimeMinutes Int               @default(0) @map("overtime_minutes") // Calculated overtime minutes beyond regular schedule
-  status          String            @default("pending") @map("status") // present, absent, late, half_day, on_leave
+  status          String            @default("pending") @map("status") // pending, present, absent, on_leave
+  type            String            @default("regular") @map("type") // partial, late, regular
+  reviewedAt      DateTime?         @map("reviewed_at") // When attendance was approved/rejected
+  reviewedBy      Int?              @map("reviewed_by") // Manager/admin who reviewed
+  reviewer        User?             @relation(name: "attendanceReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  remarks         String?           @map("remarks") // remarks for status action
   punchRecords    AttendancePunch[] @relation(name: "attendancePunchRecords")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -1036,23 +1042,23 @@ model AttendancePunch {
 }
 
 model Leave {
-  id              Int       @id @default(autoincrement())
-  userId          Int       @map("user_id")
-  user            User      @relation(name: "userLeaves", fields: [userId], references: [id], onDelete: Cascade)
-  leaveTypeId     Int       @map("leave_type_id")
-  leaveType       LeaveType @relation(name: "leaveTypeInLeave", fields: [leaveTypeId], references: [id], onDelete: Restrict)
-  leaveYear       Int       @map("leave_year")
-  leaveDuration   String    @map("leave_duration") // SINGLE_DAY, MULTI_DAY, HALF_DAY
-  startDate       DateTime  @map("start_date") @db.Date
-  endDate         DateTime? @map("end_date") @db.Date
-  totalMinutes    Float     @map("total_minutes") // Total leave minutes deducted from balance
-  status          String    @default("pending") @map("status") // pending, approved, rejected, cancelled
-  reviewedAt      DateTime? @map("reviewed_at") // When leave was approved/rejected
-  reviewedBy      Int?      @map("reviewed_by") // Manager/admin who reviewed
-  reviewer        User?     @relation(name: "leaveReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
-  rejectionReason String?   @map("rejection_reason") // Reason for rejection if rejected
-  attachments     String?   @map("attachments") // Supporting documents (JSON array or comma-separated URLs)
-  notes           String?   @map("notes") @db.Text // Additional notes or comments
+  id            Int       @id @default(autoincrement())
+  userId        Int       @map("user_id")
+  user          User      @relation(name: "userLeaves", fields: [userId], references: [id], onDelete: Cascade)
+  leaveTypeId   Int       @map("leave_type_id")
+  leaveType     LeaveType @relation(name: "leaveTypeInLeave", fields: [leaveTypeId], references: [id], onDelete: Restrict)
+  leaveYear     Int       @map("leave_year")
+  leaveDuration String    @map("leave_duration") // SINGLE_DAY, MULTI_DAY, HALF_DAY
+  startDate     DateTime  @map("start_date") @db.Date
+  endDate       DateTime? @map("end_date") @db.Date
+  totalMinutes  Float     @map("total_minutes") // Total leave minutes deducted from balance
+  status        String    @default("pending") @map("status") // pending, approved, rejected, cancelled
+  reviewedAt    DateTime? @map("reviewed_at") // When leave was approved/rejected
+  reviewedBy    Int?      @map("reviewed_by") // Manager/admin who reviewed
+  reviewer      User?     @relation(name: "leaveReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  remarks       String?   @map("remarks") // remarks for status action
+  attachments   String?   @map("attachments") // Supporting documents (JSON array or comma-separated URLs)
+  notes         String?   @map("notes") @db.Text // Additional notes or comments
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

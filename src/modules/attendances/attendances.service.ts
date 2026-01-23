@@ -12,6 +12,10 @@ import { minutesToHoursAndMinutes } from 'src/utils/time.utils';
 import * as isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import * as isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+import {
+  ApproveAttendanceInput,
+  RejectAttendanceInput,
+} from './dto/approve-attendance.input';
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
@@ -146,6 +150,44 @@ export class AttendancesService {
     return totalMinutes;
   }
 
+  // ATTENDANCE OVERVIEW
+  async getAttendanceOverview() {
+    // Execute all queries in parallel for single round trip
+    const [total, statusGroups, typeGroups] = await Promise.all([
+      this.prisma.attendance.count(),
+      this.prisma.attendance.groupBy({
+        by: ['status'],
+        _count: { status: true },
+      }),
+      this.prisma.attendance.groupBy({
+        by: ['type'],
+        _count: { type: true },
+      }),
+    ]);
+
+    const overview = {
+      total,
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+      absent: 0,
+      regular: 0,
+      late: 0,
+      partial: 0,
+    };
+
+    statusGroups.forEach((item) => {
+      overview[item.status] = item._count.status;
+    });
+
+    typeGroups.forEach((item) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      overview[item.type] = item._count.type;
+    });
+
+    return overview;
+  }
+
   // CREATE ATTENDANCE
   async create({
     user,
@@ -159,6 +201,7 @@ export class AttendancesService {
     // Calculate totals if punch records are provided
     let totalMinutes = 0;
     let breakMinutes = 0;
+    let overtimeMinutes = 0;
 
     if (punchRecords && punchRecords.length > 0) {
       const calculated = this.calculateTotalMinutes(punchRecords);
@@ -171,12 +214,25 @@ export class AttendancesService {
       attendanceData.userId,
       attendanceData.date,
     );
-    totalMinutes = this.applyBreakDeduction(totalMinutes, employeeSchedule);
+
+    if (employeeSchedule === null) {
+      overtimeMinutes = totalMinutes;
+    }
+
+    totalMinutes =
+      employeeSchedule !== null
+        ? this.applyBreakDeduction(totalMinutes, employeeSchedule)
+        : 0;
+
+    if (totalMinutes > 480) {
+      overtimeMinutes = totalMinutes - 480;
+    }
 
     const attendance = await this.prisma.attendance.create({
       data: {
         ...attendanceData,
         totalMinutes,
+        overtimeMinutes,
         breakMinutes,
         punchRecords: punchRecords
           ? {
@@ -879,5 +935,69 @@ export class AttendancesService {
       summary,
       attendances,
     };
+  }
+
+  // APPROVE ATTENDANCE
+  async approveAttendance({
+    user,
+    approveAttendanceInput,
+  }: {
+    approveAttendanceInput: ApproveAttendanceInput;
+    user: JwtPayload;
+  }) {
+    if (!user.businessId) {
+      throw new NotFoundException('User does not belong to any business');
+    }
+
+    // Check if attendance exists
+    await this.prisma.attendance.findUniqueOrThrow({
+      where: { id: Number(approveAttendanceInput.attendanceId) },
+    });
+
+    // Update attendance status to approved
+    const updatedAttendance = await this.prisma.attendance.update({
+      where: { id: Number(approveAttendanceInput.attendanceId) },
+      data: {
+        status: 'approved',
+        reviewedBy: user.userId,
+        reviewedAt: new Date().toISOString(),
+        remarks: approveAttendanceInput.remarks
+          ? approveAttendanceInput.remarks
+          : null,
+      },
+    });
+
+    return updatedAttendance;
+  }
+
+  // REJECT ATTENDANCE
+  async rejectAttendance({
+    user,
+    rejectAttendanceInput,
+  }: {
+    rejectAttendanceInput: RejectAttendanceInput;
+    user: JwtPayload;
+  }) {
+    if (!user.businessId) {
+      throw new NotFoundException('User does not belong to any business');
+    }
+
+    // Check if attendance exists
+    await this.prisma.attendance.findUniqueOrThrow({
+      where: { id: Number(rejectAttendanceInput.attendanceId) },
+    });
+
+    // Update attendance status to approved
+    const updatedAttendance = await this.prisma.attendance.update({
+      where: { id: Number(rejectAttendanceInput.attendanceId) },
+      data: {
+        status: 'rejected',
+        remarks: rejectAttendanceInput.remarks,
+        reviewedBy: user.userId,
+        reviewedAt: new Date().toISOString(),
+      },
+    });
+
+    return updatedAttendance;
   }
 }
