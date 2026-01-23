@@ -6,6 +6,7 @@ import {
   PayrollComponentResponse,
   PayrollComponentsQueryResponse,
 } from './entities/payroll-component.entity';
+import { PayrollComponentOverviewResponse } from './entities/payroll-component-overview.entity';
 import {
   CreatePayrollComponentInput,
   UpdatePayrollComponentInput,
@@ -23,6 +24,24 @@ export class PayrollComponentsResolver {
   constructor(
     private readonly payrollComponentsService: PayrollComponentsService,
   ) {}
+
+  // PAYROLL COMPONENT OVERVIEW
+  @Query(() => PayrollComponentOverviewResponse, {
+    name: 'payrollComponentOverview',
+  })
+  @RequirePermissions('Payroll Component:read')
+  async payrollComponentOverview(@CurrentUser() user: JwtPayload) {
+    const result =
+      await this.payrollComponentsService.getPayrollComponentOverview({
+        user,
+      });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `Payroll component overview retrieved successfully`,
+      data: result,
+    };
+  }
 
   @Mutation(() => PayrollComponentResponse, { name: 'createPayrollComponent' })
   @RequirePermissions('Payroll Component:create')
@@ -45,12 +64,12 @@ export class PayrollComponentsResolver {
     @CurrentUser() user: JwtPayload,
     @Args('query', { nullable: true }) query: QueryPayrollComponentInput,
   ) {
-    const components = await this.payrollComponentsService.findAll(user, query);
+    const result = await this.payrollComponentsService.findAll(user, query);
     return {
       success: true,
       statusCode: HttpStatus.OK,
       message: 'Payroll components retrieved successfully',
-      data: components,
+      data: result,
     };
   }
 

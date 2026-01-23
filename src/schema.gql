@@ -1203,14 +1203,11 @@ input CreateOnboardingProcessInput {
 }
 
 input CreatePayrollComponentInput {
-  businessId: Int
   calculationType: CalculationType!
   code: String!
   componentType: ComponentType!
   defaultValue: Float
   description: String
-  displayOrder: Int
-  isActive: Boolean! = true
   isStatutory: Boolean! = false
   isTaxable: Boolean! = true
   name: String!
@@ -3093,7 +3090,31 @@ type PayrollComponent {
   isStatutory: Boolean!
   isTaxable: Boolean!
   name: String!
+  status: String!
   updatedAt: DateTime!
+}
+
+type PayrollComponentOverview {
+  active: Int!
+  deduction: Int!
+  disabled: Int!
+  draft: Int!
+  earning: Int!
+  fixedAmount: Int!
+  nonStatutory: Int!
+  nonTaxable: Int!
+  percentageOfBasic: Int!
+  statutory: Int!
+  taxable: Int!
+  total: Int!
+}
+
+type PayrollComponentOverviewResponse {
+  data: PayrollComponentOverview!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type PayrollComponentResponse {
@@ -3102,6 +3123,15 @@ type PayrollComponentResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
+}
+
+"""Status of the payroll component"""
+enum PayrollComponentStatus {
+  ACTIVE
+  ARCHIVED
+  DISABLED
+  DRAFT
+  PUBLISHED
 }
 
 type PayrollComponentsQueryResponse {
@@ -3572,6 +3602,7 @@ type Query {
   ownerDashboard: OwnerDashboardResponse!
   payrollComponentByCode(businessId: Int!, code: String!): PayrollComponentResponse!
   payrollComponentById(id: Int!): PayrollComponentResponse!
+  payrollComponentOverview: PayrollComponentOverviewResponse!
   payrollComponents(query: QueryPayrollComponentInput): PayrollComponentsQueryResponse!
   payrollCycleById(id: Int!): PayrollCycleResponse!
   payrollCycles(query: QueryPayrollCycleInput): PayrollCyclesQueryResponse!
@@ -3796,8 +3827,12 @@ input QueryOnboardingProcessInput {
 }
 
 input QueryPayrollComponentInput {
-  businessId: Int
+  calculationType: CalculationType
   componentType: ComponentType
+  isStatutory: Boolean
+  isTaxable: Boolean
+  searchTerm: String
+  status: PayrollComponentStatus
 }
 
 input QueryPayrollCycleInput {
@@ -4827,15 +4862,12 @@ input UpdateOnboardingProcessInput {
 }
 
 input UpdatePayrollComponentInput {
-  businessId: Int
   calculationType: CalculationType
   code: String
   componentType: ComponentType
   defaultValue: Float
   description: String
-  displayOrder: Int
   id: Int!
-  isActive: Boolean = true
   isStatutory: Boolean = false
   isTaxable: Boolean = true
   name: String
