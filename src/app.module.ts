@@ -63,6 +63,7 @@ import { EmployeeEmploymentStatusesModule } from './modules/employee-employment-
 import { BusinessSubscriptionsModule } from './modules/business-subscriptions/business-subscriptions.module';
 import { EmployeeSalariesModule } from './modules/employee-salaries/employee-salary.module';
 import { EmployeePayrollComponentsModule } from './modules/employee-payroll-components/employee-payroll-components.module';
+import { EmployeePayslipAdjustmentsModule } from './modules/employee-payslip-adjustments/employee-payslip-adjustments.module';
 
 @Module({
   imports: [
@@ -132,6 +133,7 @@ import { EmployeePayrollComponentsModule } from './modules/employee-payroll-comp
     BusinessSubscriptionsModule,
     EmployeeSalariesModule,
     EmployeePayrollComponentsModule,
+    EmployeePayslipAdjustmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

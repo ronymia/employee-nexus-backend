@@ -26,7 +26,7 @@ export class EmployeePayrollComponentsService {
     // Verify component exists and belongs to same business
     await this.prisma.payrollComponent.findUniqueOrThrow({
       where: {
-        id: input.componentId,
+        id: input.payrollComponentId,
         businessId: user.businessId,
       },
     });
@@ -54,7 +54,7 @@ export class EmployeePayrollComponentsService {
             },
           },
         },
-        component: true,
+        payrollComponent: true,
         assignedByUser: {
           include: {
             profile: true,
@@ -93,7 +93,7 @@ export class EmployeePayrollComponentsService {
             user: true,
           },
         },
-        component: true,
+        payrollComponent: true,
         assignedByUser: {
           include: {
             profile: true,
@@ -115,7 +115,7 @@ export class EmployeePayrollComponentsService {
     const { ...filters } = query ?? {};
 
     // FILTER
-    const { userId, componentId, isActive } = filters;
+    const { userId, payrollComponentId } = filters;
 
     // QUERY BUILDER
     const andCondition: Prisma.EmployeePayrollComponentWhereInput[] = [];
@@ -125,15 +125,15 @@ export class EmployeePayrollComponentsService {
       andCondition.push({ userId });
     }
 
-    // Filter by componentId
-    if (componentId) {
-      andCondition.push({ componentId });
+    // Filter by payrollComponentId
+    if (payrollComponentId) {
+      andCondition.push({ payrollComponentId });
     }
 
     // Filter by isActive
-    if (isActive !== undefined) {
-      andCondition.push({ isActive });
-    }
+    // if (isActive !== undefined) {
+    //   andCondition.push({ isActive });
+    // }
 
     // Only show assignments for employees in the same business
     andCondition.push({
@@ -160,7 +160,7 @@ export class EmployeePayrollComponentsService {
             },
           },
         },
-        component: true,
+        payrollComponent: true,
         assignedByUser: {
           include: {
             profile: true,
@@ -192,7 +192,7 @@ export class EmployeePayrollComponentsService {
               },
             },
           },
-          component: true,
+          payrollComponent: true,
           assignedByUser: {
             include: {
               profile: true,
@@ -218,7 +218,7 @@ export class EmployeePayrollComponentsService {
     today.setHours(0, 0, 0, 0);
 
     // FILTER
-    const { userId, componentId } = filters;
+    const { userId, payrollComponentId } = filters;
 
     // QUERY BUILDER
     const andCondition: Prisma.EmployeePayrollComponentWhereInput[] = [];
@@ -229,8 +229,8 @@ export class EmployeePayrollComponentsService {
     }
 
     // Filter by componentId
-    if (componentId) {
-      andCondition.push({ componentId });
+    if (payrollComponentId) {
+      andCondition.push({ payrollComponentId });
     }
 
     // Active components: effectiveTo is null OR effectiveTo >= today
@@ -239,7 +239,7 @@ export class EmployeePayrollComponentsService {
     });
 
     // Only active components
-    andCondition.push({ isActive: true });
+    // andCondition.push({ isActive: true });
 
     // Only show assignments for employees in the same business
     andCondition.push({
@@ -266,7 +266,7 @@ export class EmployeePayrollComponentsService {
             },
           },
         },
-        component: true,
+        payrollComponent: true,
         assignedByUser: {
           include: {
             profile: true,
@@ -292,7 +292,7 @@ export class EmployeePayrollComponentsService {
     today.setHours(0, 0, 0, 0);
 
     // FILTER
-    const { userId, componentId } = filters;
+    const { userId, payrollComponentId } = filters;
 
     // QUERY BUILDER
     const andCondition: Prisma.EmployeePayrollComponentWhereInput[] = [];
@@ -302,9 +302,9 @@ export class EmployeePayrollComponentsService {
       andCondition.push({ userId });
     }
 
-    // Filter by componentId
-    if (componentId) {
-      andCondition.push({ componentId });
+    // Filter by payrollComponentId
+    if (payrollComponentId) {
+      andCondition.push({ payrollComponentId });
     }
 
     // Historical components: effectiveTo < today
@@ -337,7 +337,7 @@ export class EmployeePayrollComponentsService {
             },
           },
         },
-        component: true,
+        payrollComponent: true,
         assignedByUser: {
           include: {
             profile: true,

@@ -9,6 +9,17 @@ input AddPayslipAdjustmentInput {
   type: String!
 }
 
+"""
+Status of payslip adjustment - PENDING, APPROVED, REJECTED, APPLIED, or CANCELLED
+"""
+enum AdjustmentStatus {
+  APPLIED
+  APPROVED
+  CANCELLED
+  PENDING
+  REJECTED
+}
+
 input ApproveAttendanceInput {
   """Attendance ID"""
   attendanceId: Int!
@@ -27,6 +38,12 @@ input ApproveLeaveInput {
 
 input ApprovePayrollCycleInput {
   id: Int!
+}
+
+input ApproveRejectPayslipAdjustmentInput {
+  id: Int!
+  notes: String
+  status: AdjustmentStatus!
 }
 
 type Asset {
@@ -198,11 +215,10 @@ input AssignEmployeeDesignationInput {
 }
 
 input AssignEmployeePayrollComponentInput {
-  componentId: Int!
   effectiveFrom: DateTime!
   effectiveTo: DateTime
-  isOverride: Boolean
   notes: String
+  payrollComponentId: Int!
   userId: Int!
 
   """The value of the payroll component for the employee"""
@@ -1253,6 +1269,14 @@ input CreatePayrollItemInput {
   workingDays: Int!
 }
 
+input CreatePayslipAdjustmentInput {
+  notes: String
+  payrollComponentId: Int
+  remarks: String!
+  userId: Int!
+  value: Float!
+}
+
 input CreateProfileInput {
   address: String!
   city: String!
@@ -1864,16 +1888,14 @@ type EmployeeEmploymentStatusesArrayResponse {
 type EmployeePayrollComponent {
   assignedBy: Int
   assignedByUser: User
-  component: PayrollComponent
-  componentId: Int!
   createdAt: DateTime!
   effectiveFrom: DateTime!
   effectiveTo: DateTime
   employee: User
   id: Int!
-  isActive: Boolean!
-  isOverride: Boolean!
   notes: String
+  payrollComponent: PayrollComponent
+  payrollComponentId: Int!
   updatedAt: DateTime!
   userId: Int!
   value: Float
@@ -2749,6 +2771,7 @@ type Mutation {
   approveLeave(approveLeaveInput: ApproveLeaveInput!): LeaveResponse!
   approvePayrollCycle(approvePayrollCycleInput: ApprovePayrollCycleInput!): PayrollCycleResponse!
   approvePayrollItem(id: Int!): PayrollItemResponse!
+  approveRejectPayslipAdjustment(approveRejectPayslipAdjustmentInput: ApproveRejectPayslipAdjustmentInput!): PayslipAdjustmentResponse!
   assignAsset(assignAssetInput: AssignAssetInput!): AssetAssignmentResponse!
 
   """Assign a department to an employee"""
@@ -2793,6 +2816,7 @@ type Mutation {
   createPayrollComponent(createPayrollComponentInput: CreatePayrollComponentInput!): PayrollComponentResponse!
   createPayrollCycle(createPayrollCycleInput: CreatePayrollCycleInput!): PayrollCycleResponse!
   createPayrollItem(createPayrollItemInput: CreatePayrollItemInput!): PayrollItemResponse!
+  createPayslipAdjustment(createPayslipAdjustmentInput: CreatePayslipAdjustmentInput!): PayslipAdjustmentResponse!
   createProject(createProjectInput: CreateProjectInput!): ProjectResponse!
   createRecruitmentProcess(createRecruitmentProcessInput: CreateRecruitmentProcessInput!): RecruitmentProcessResponse!
   createSalary(createEmployeeSalaryInput: CreateEmployeeSalaryInput!): EmployeeSalaryResponse!
@@ -2889,6 +2913,7 @@ type Mutation {
   updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
   updatePayrollComponent(updatePayrollComponentInput: UpdatePayrollComponentInput!): PayrollComponentResponse!
   updatePayrollItem(updatePayrollItemInput: UpdatePayrollItemInput!): PayrollItemResponse!
+  updatePayslipAdjustment(updatePayslipAdjustmentInput: UpdatePayslipAdjustmentInput!): PayslipAdjustmentResponse!
   updateProfile(updateProfileInput: UpdateProfileInput!): ProfileResponse!
   updateProject(updateProjectInput: UpdateProjectInput!): ProjectResponse!
   updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
@@ -3262,10 +3287,8 @@ enum PayrollFrequency {
 
 type PayrollItem {
   absentDays: Float!
-  adjustments: [PayslipAdjustment!]
   bankAccount: String
   basicSalary: Float!
-  components: [PayrollItemComponent!]
   createdAt: DateTime!
   grossPay: Float!
   id: Int!
@@ -3288,26 +3311,11 @@ type PayrollItem {
   workingDays: Int!
 }
 
-type PayrollItemComponent {
-  amount: Float!
-  calculationBase: Float
-
-  """Payroll Component"""
-  component: PayrollComponent!
-  componentId: Int!
-  id: Int!
-  notes: String
-
-  """Payroll Item"""
-  payrollItem: PayrollItem!
-  payrollItemId: Int!
-}
-
 input PayrollItemComponentInput {
   amount: Float!
   calculationBase: Float
-  componentId: Int!
   notes: String
+  payrollComponentId: Int!
 }
 
 type PayrollItemResponse {
@@ -3361,17 +3369,24 @@ type PayrollYearToDate {
 }
 
 type PayslipAdjustment {
-  amount: Float!
-  createdBy: Int!
-  description: String!
+  appliedMonth: DateTime
+  createdAt: DateTime!
   id: Int!
-  isRecurring: Boolean!
   notes: String
-
-  """Payroll Item"""
-  payrollItem: PayrollItem!
-  payrollItemId: Int!
-  type: String!
+  payrollComponent: PayrollComponent
+  payrollComponentId: Int
+  payrollItemId: Int
+  remarks: String!
+  requestedBy: Int!
+  requestedByUser: User
+  reviewedAt: DateTime
+  reviewedBy: Int
+  reviewedByUser: User
+  status: AdjustmentStatus!
+  updatedAt: DateTime!
+  user: User
+  userId: Int!
+  value: Float!
 }
 
 input PayslipAdjustmentInput {
@@ -3380,6 +3395,22 @@ input PayslipAdjustmentInput {
   isRecurring: Boolean! = false
   notes: String
   type: String!
+}
+
+type PayslipAdjustmentResponse {
+  data: PayslipAdjustment!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type PayslipAdjustmentsQueryResponse {
+  data: [PayslipAdjustment!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type Permission {
@@ -3537,6 +3568,7 @@ type Query {
   activePayrollComponents(businessId: Int!): PayrollComponentsQueryResponse!
   activeSalaryByUserId(userId: Int!): EmployeeSalaryResponse!
   allFeatures: FeatureQueryResponse!
+  approvedPayslipAdjustments(query: QueryPayslipAdjustmentInput): PayslipAdjustmentsQueryResponse!
   asset(id: Int!): AssetResponse!
   assetType(id: Int!): AssetTypeResponse!
   assetTypes(query: QueryAssetTypeInput): AssetTypesQueryResponse!
@@ -3661,6 +3693,9 @@ type Query {
   payrollItemById(id: Int!): PayrollItemResponse!
   payrollItemByUserId(payrollCycleId: Int!, userId: Int!): PayrollItemsQueryResponse!
   payrollItems(query: QueryPayrollItemInput!): PayrollItemsQueryResponse!
+  payslipAdjustment(id: Int!): PayslipAdjustmentResponse!
+  payslipAdjustments(query: QueryPayslipAdjustmentInput): PayslipAdjustmentsQueryResponse!
+  pendingPayslipAdjustments(query: QueryPayslipAdjustmentInput): PayslipAdjustmentsQueryResponse!
   permissionById(id: Int!): Permission!
   permissions: [Permission!]!
   projectById(id: Int!): ProjectResponse!
@@ -3772,8 +3807,7 @@ input QueryEmployeeCalendarInput {
 }
 
 input QueryEmployeePayrollComponentInput {
-  componentId: Int
-  isActive: Boolean
+  payrollComponentId: Int
   userId: Int
 }
 
@@ -3902,6 +3936,12 @@ input QueryPayrollCycleInput {
 input QueryPayrollItemInput {
   payrollCycleId: Int
   status: PayrollItemStatus
+  userId: Int
+}
+
+input QueryPayslipAdjustmentInput {
+  payrollComponentId: Int
+  status: AdjustmentStatus
   userId: Int
 }
 
@@ -4611,12 +4651,11 @@ input UpdateEmployeeInput {
 }
 
 input UpdateEmployeePayrollComponentInput {
-  componentId: Int!
   effectiveFrom: DateTime!
   effectiveTo: DateTime
   id: Int!
-  isOverride: Boolean
   notes: String
+  payrollComponentId: Int!
   userId: Int!
 
   """The value of the payroll component for the employee"""
@@ -4958,6 +4997,15 @@ input UpdatePayrollItemInput {
   presentDays: Float
   transactionRef: String
   workingDays: Int
+}
+
+input UpdatePayslipAdjustmentInput {
+  id: Int!
+  notes: String
+  payrollComponentId: Int
+  remarks: String!
+  userId: Int!
+  value: Float!
 }
 
 input UpdateProfileInput {

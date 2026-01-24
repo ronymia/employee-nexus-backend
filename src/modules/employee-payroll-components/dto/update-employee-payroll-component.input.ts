@@ -1,5 +1,5 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
-import { IsInt, IsOptional, IsBoolean } from 'class-validator';
+import { IsInt, IsOptional } from 'class-validator';
 import { AssignEmployeePayrollComponentInput } from './create-employee-payroll-component.input';
 
 @InputType()
@@ -12,12 +12,12 @@ export class QueryEmployeePayrollComponentInput {
   @Field(() => Int, { nullable: true })
   @IsInt()
   @IsOptional()
-  componentId?: number;
+  payrollComponentId?: number;
 
-  @Field(() => Boolean, { nullable: true })
-  @IsBoolean()
-  @IsOptional()
-  isActive?: boolean;
+  // @Field(() => Boolean, { nullable: true })
+  // @IsBoolean()
+  // @IsOptional()
+  // isActive?: boolean;
 }
 
 @InputType()

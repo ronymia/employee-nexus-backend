@@ -5,7 +5,7 @@ import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 export class PayrollItemComponentInput {
   @Field(() => Int)
   @IsNumber()
-  componentId: number;
+  payrollComponentId: number;
 
   @Field(() => Float)
   @IsNumber()

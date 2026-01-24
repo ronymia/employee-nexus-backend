@@ -66,17 +66,6 @@ export class PayrollCyclesService {
                 },
               },
             },
-            components: {
-              include: {
-                component: true,
-                payrollItem: true,
-              },
-            },
-            adjustments: {
-              include: {
-                payrollItem: true,
-              },
-            },
           },
         },
       },

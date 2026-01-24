@@ -79,6 +79,9 @@ model User {
   notifications                       Notification[]             @relation(name: "userNotifications")
   employeePayrollComponentAssignments EmployeePayrollComponent[] @relation(name: "employeePayrollComponentAssignments")
 
+  payslipAdjustmentRequests  PayslipAdjustment[] @relation(name: "payslipAdjustmentRequester")
+  payslipAdjustmentApprovals PayslipAdjustment[] @relation(name: "payslipAdjustmentReviewer")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -827,23 +830,24 @@ model ProjectMember {
 }
 
 model Employee {
-  userId                    Int                        @id @map("user_id")
-  user                      User                       @relation(name: "userEmployee", fields: [userId], references: [id], onDelete: Cascade)
-  employeeId                String                     @unique @map("employee_id")
-  nidNumber                 String                     @unique @map("nid_number")
-  joiningDate               DateTime                   @map("joining_date") @db.Date
-  employmentStatuses        EmployeeStatus[]           @relation(name: "employeeEmploymentStatus")
-  designations              EmployeeDesignation[]      @relation(name: "employeeDesignation")
-  salaries                  EmployeeSalary[]           @relation(name: "employeeSalaries")
-  workSites                 EmployeeWorkSite[]         @relation(name: "employeeWorkSites")
-  workSchedules             EmployeeSchedule[]         @relation(name: "employeeSchedules")
-  departments               EmployeeDepartment[]       @relation(name: "employeeDepartment")
-  educationHistory          EducationHistory[]         @relation(name: "employeeEducationHistory")
-  jobHistory                JobHistory[]               @relation(name: "employeeJobHistory")
-  documents                 Document[]                 @relation(name: "employeeDocuments")
-  notes                     Note[]                     @relation(name: "employeeNotes")
-  projectMembers            ProjectMember[]            @relation(name: "projectMembersInEmployee")
-  employeePayrollComponents EmployeePayrollComponent[] @relation(name: "employeePayrollComponents")
+  userId                     Int                        @id @map("user_id")
+  user                       User                       @relation(name: "userEmployee", fields: [userId], references: [id], onDelete: Cascade)
+  employeeId                 String                     @unique @map("employee_id")
+  nidNumber                  String                     @unique @map("nid_number")
+  joiningDate                DateTime                   @map("joining_date") @db.Date
+  employmentStatuses         EmployeeStatus[]           @relation(name: "employeeEmploymentStatus")
+  designations               EmployeeDesignation[]      @relation(name: "employeeDesignation")
+  salaries                   EmployeeSalary[]           @relation(name: "employeeSalaries")
+  workSites                  EmployeeWorkSite[]         @relation(name: "employeeWorkSites")
+  workSchedules              EmployeeSchedule[]         @relation(name: "employeeSchedules")
+  departments                EmployeeDepartment[]       @relation(name: "employeeDepartment")
+  educationHistory           EducationHistory[]         @relation(name: "employeeEducationHistory")
+  jobHistory                 JobHistory[]               @relation(name: "employeeJobHistory")
+  documents                  Document[]                 @relation(name: "employeeDocuments")
+  notes                      Note[]                     @relation(name: "employeeNotes")
+  projectMembers             ProjectMember[]            @relation(name: "projectMembersInEmployee")
+  employeePayrollComponents  EmployeePayrollComponent[] @relation(name: "employeePayrollComponents")
+  employeePayslipAdjustments PayslipAdjustment[]        @relation(name: "employeePayslipAdjustments")
 
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
@@ -1116,8 +1120,8 @@ model PayrollComponent {
   businessId      Int                    @map("business_id")
   business        Business               @relation(name: "payrollComponentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
 
-  payrollItemComponents     PayrollItemComponent[]     @relation(name: "componentInPayrollItem")
   employeePayrollComponents EmployeePayrollComponent[] @relation(name: "employeePayrollComponents")
+  payslipAdjustments        PayslipAdjustment[]        @relation(name: "payslipAdjustmentComponent")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1163,29 +1167,27 @@ model PayrollCycle {
 }
 
 model PayrollItem {
-  id              Int          @id @default(autoincrement())
-  payrollCycleId  Int          @map("payroll_cycle_id")
-  payrollCycle    PayrollCycle @relation(name: "payrollItemsInCycle", fields: [payrollCycleId], references: [id], onDelete: Cascade)
-  userId          Int          @map("user_id")
-  user            User         @relation(name: "userPayrollItems", fields: [userId], references: [id], onDelete: Cascade)
-  basicSalary     Float        @map("basic_salary")
-  grossPay        Float        @map("gross_pay")
-  totalDeductions Float        @map("total_deductions")
-  netPay          Float        @map("net_pay")
-  workingDays     Int          @map("working_days")
-  presentDays     Int          @map("present_days")
-  absentDays      Int          @map("absent_days")
-  leaveDays       Int          @map("leave_days")
-  overtimeMinutes Int?         @map("overtime_minutes")
-  status          String
-  paymentMethod   String       @map("payment_method")
-  bankAccount     String?      @map("bank_account")
-  transactionRef  String?      @map("transaction_ref")
-  paidAt          DateTime?    @map("paid_at")
-  notes           String?      @db.Text
-
-  components  PayrollItemComponent[] @relation(name: "payrollItemComponents")
-  adjustments PayslipAdjustment[]    @relation(name: "payslipAdjustments")
+  id                 Int                 @id @default(autoincrement())
+  payrollCycleId     Int                 @map("payroll_cycle_id")
+  payrollCycle       PayrollCycle        @relation(name: "payrollItemsInCycle", fields: [payrollCycleId], references: [id], onDelete: Cascade)
+  userId             Int                 @map("user_id")
+  user               User                @relation(name: "userPayrollItems", fields: [userId], references: [id], onDelete: Cascade)
+  basicSalary        Float               @map("basic_salary")
+  grossPay           Float               @map("gross_pay")
+  totalDeductions    Float               @map("total_deductions")
+  netPay             Float               @map("net_pay")
+  workingDays        Int                 @map("working_days")
+  presentDays        Int                 @map("present_days")
+  absentDays         Int                 @map("absent_days")
+  leaveDays          Int                 @map("leave_days")
+  overtimeMinutes    Int?                @map("overtime_minutes")
+  status             String
+  paymentMethod      String              @map("payment_method")
+  bankAccount        String?             @map("bank_account")
+  transactionRef     String?             @map("transaction_ref")
+  paidAt             DateTime?           @map("paid_at")
+  notes              String?             @db.Text
+  payslipAdjustments PayslipAdjustment[] @relation(name: "payslipAdjustments")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1198,66 +1200,76 @@ model PayrollItem {
 }
 
 model EmployeePayrollComponent {
-  id             Int              @id @default(autoincrement())
-  userId         Int              @map("user_id")
-  employee       Employee         @relation(name: "employeePayrollComponents", fields: [userId], references: [userId], onDelete: Cascade)
-  componentId    Int              @map("component_id")
-  component      PayrollComponent @relation(name: "employeePayrollComponents", fields: [componentId], references: [id], onDelete: Cascade)
-  value          Float? // Custom value for this employee (if null, uses component's defaultValue)
-  isActive       Boolean          @default(true) @map("is_active")
-  effectiveFrom  DateTime         @map("effective_from") @db.Date // When this component becomes effective
-  effectiveTo    DateTime?        @map("effective_to") @db.Date // When this component ends (null = ongoing)
-  isOverride     Boolean          @default(false) @map("is_override") // Whether this overrides the default component value
-  assignedBy     Int?             @map("assigned_by") // User who assigned this component
-  assignedByUser User?            @relation(name: "employeePayrollComponentAssignments", fields: [assignedBy], references: [id], onDelete: SetNull)
-  notes          String?          @db.Text
+  id                 Int              @id @default(autoincrement())
+  userId             Int              @map("user_id")
+  employee           Employee         @relation(name: "employeePayrollComponents", fields: [userId], references: [userId], onDelete: Cascade)
+  payrollComponentId Int              @map("payroll_component_id")
+  payrollComponent   PayrollComponent @relation(name: "employeePayrollComponents", fields: [payrollComponentId], references: [id], onDelete: Cascade)
+  value              Float? // Custom value for this employee (if null, uses component's defaultValue)
+  effectiveFrom      DateTime         @map("effective_from") @db.Date // When this component becomes effective
+  effectiveTo        DateTime?        @map("effective_to") @db.Date // When this component ends (null = ongoing)
+  assignedBy         Int?             @map("assigned_by") // User who assigned this component
+  assignedByUser     User?            @relation(name: "employeePayrollComponentAssignments", fields: [assignedBy], references: [id], onDelete: SetNull)
+  notes              String?          @db.Text
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([userId, componentId, effectiveFrom])
+  @@unique([userId, payrollComponentId])
   @@index([userId])
-  @@index([componentId])
-  @@index([userId, isActive])
+  @@index([payrollComponentId])
   @@index([effectiveFrom, effectiveTo])
   @@map("employee_payroll_components")
 }
 
-model PayrollItemComponent {
-  id              Int              @id @default(autoincrement())
-  payrollItemId   Int              @map("payroll_item_id")
-  payrollItem     PayrollItem      @relation(name: "payrollItemComponents", fields: [payrollItemId], references: [id], onDelete: Cascade)
-  componentId     Int              @map("component_id")
-  component       PayrollComponent @relation(name: "componentInPayrollItem", fields: [componentId], references: [id], onDelete: Restrict)
-  amount          Float
-  calculationBase Float?           @map("calculation_base") // calculation type eg : percentage base , fixed amount base
-  notes           String?          @db.Text
+model PayslipAdjustment {
+  id Int @id @default(autoincrement())
+
+  // Link to employee and payroll cycle
+  userId   Int      @map("user_id")
+  employee Employee @relation(name: "employeePayslipAdjustments", fields: [userId], references: [userId], onDelete: Cascade)
+
+  payrollItemId Int?         @map("payroll_item_id")
+  payrollItem   PayrollItem? @relation(name: "payslipAdjustments", fields: [payrollItemId], references: [id], onDelete: Cascade)
+
+  // Reference to component (optional - for categorization)
+  payrollComponentId Int?              @map("payroll_component_id")
+  payrollComponent   PayrollComponent? @relation(name: "payslipAdjustmentComponent", fields: [payrollComponentId], references: [id], onDelete: SetNull)
+
+  // Adjustment details
+  remarks      String    @db.Text
+  value        Float
+  appliedMonth DateTime? @map("applied_month") @db.Date // Specific month for one-time adjustments
+
+  // Approval workflow
+  status          AdjustmentStatus @default(APPROVED)
+  requestedBy     Int              @map("requested_by")
+  requestedByUser User             @relation(name: "payslipAdjustmentRequester", fields: [requestedBy], references: [id], onDelete: Restrict)
+
+  reviewedBy Int?      @map("reviewed_by")
+  reviewer   User?     @relation(name: "payslipAdjustmentReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  reviewedAt DateTime? @map("reviewed_at")
+
+  // Metadata
+  notes String? @db.Text
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([payrollItemId, componentId])
+  @@index([userId])
   @@index([payrollItemId])
-  @@index([componentId])
-  @@map("payroll_item_components")
+  @@index([status])
+  @@index([appliedMonth])
+  @@index([userId, appliedMonth])
+  @@map("payslip_adjustments")
 }
 
-model PayslipAdjustment {
-  id            Int         @id @default(autoincrement())
-  payrollItemId Int         @map("payroll_item_id")
-  payrollItem   PayrollItem @relation(name: "payslipAdjustments", fields: [payrollItemId], references: [id], onDelete: Cascade)
-  type          String
-  description   String      @db.Text
-  amount        Float
-  isRecurring   Boolean     @default(false) @map("is_recurring")
-  notes         String?     @db.Text
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@index([payrollItemId])
-  @@index([type])
-  @@map("payslip_adjustments")
+enum AdjustmentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  APPLIED
+  CANCELLED
 }
 
 // ============ NOTIFICATION MANAGEMENT ============

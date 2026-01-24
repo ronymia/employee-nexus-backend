@@ -1,11 +1,5 @@
 import { InputType, Field, Int, Float } from '@nestjs/graphql';
-import {
-  IsInt,
-  IsOptional,
-  IsBoolean,
-  IsDateString,
-  IsNumber,
-} from 'class-validator';
+import { IsInt, IsOptional, IsDateString, IsNumber } from 'class-validator';
 
 @InputType()
 export class AssignEmployeePayrollComponentInput {
@@ -15,18 +9,13 @@ export class AssignEmployeePayrollComponentInput {
 
   @Field(() => Int)
   @IsInt()
-  componentId: number;
+  payrollComponentId: number;
 
   @Field(() => Float, {
     description: 'The value of the payroll component for the employee',
   })
   @IsNumber()
   value: number;
-
-  @Field(() => Boolean, { nullable: true })
-  @IsBoolean()
-  @IsOptional()
-  isOverride?: boolean;
 
   @Field(() => Date)
   @IsDateString()

@@ -5,9 +5,10 @@ import {
 } from 'src/common/dto/base-response.type';
 import { User } from 'src/modules/users/entities/user.entity';
 import { PayrollComponent } from 'src/modules/payroll-components/entities/payroll-component.entity';
+import { AdjustmentStatus } from '../enums/adjustment-status.enum';
 
 @ObjectType()
-export class EmployeePayrollComponent {
+export class PayslipAdjustment {
   @Field(() => Int)
   id: number;
 
@@ -15,28 +16,43 @@ export class EmployeePayrollComponent {
   userId: number;
 
   @Field(() => User, { nullable: true })
-  employee?: User;
+  user?: User;
 
-  @Field(() => Int)
-  payrollComponentId: number;
+  @Field(() => Int, { nullable: true })
+  payrollItemId?: number;
+
+  @Field(() => Int, { nullable: true })
+  payrollComponentId?: number;
 
   @Field(() => PayrollComponent, { nullable: true })
   payrollComponent?: PayrollComponent;
 
-  @Field(() => Float, { nullable: true })
-  value?: number;
+  @Field(() => String)
+  remarks: string;
 
-  @Field(() => Date)
-  effectiveFrom: Date;
+  @Field(() => Float)
+  value: number;
 
   @Field(() => Date, { nullable: true })
-  effectiveTo?: Date;
+  appliedMonth?: Date;
 
-  @Field(() => Int, { nullable: true })
-  assignedBy?: number;
+  @Field(() => AdjustmentStatus)
+  status: AdjustmentStatus;
+
+  @Field(() => Int)
+  requestedBy: number;
 
   @Field(() => User, { nullable: true })
-  assignedByUser?: User;
+  requestedByUser?: User;
+
+  @Field(() => Int, { nullable: true })
+  reviewedBy?: number;
+
+  @Field(() => User, { nullable: true })
+  reviewedByUser?: User;
+
+  @Field(() => Date, { nullable: true })
+  reviewedAt?: Date;
 
   @Field(() => String, { nullable: true })
   notes?: string;
@@ -49,11 +65,11 @@ export class EmployeePayrollComponent {
 }
 
 @ObjectType()
-export class EmployeePayrollComponentResponse extends BaseResponse(
-  EmployeePayrollComponent,
+export class PayslipAdjustmentResponse extends BaseResponse(
+  PayslipAdjustment,
 ) {}
 
 @ObjectType()
-export class EmployeePayrollComponentsQueryResponse extends BaseQueryResponse(
-  EmployeePayrollComponent,
+export class PayslipAdjustmentsQueryResponse extends BaseQueryResponse(
+  PayslipAdjustment,
 ) {}

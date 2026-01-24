@@ -71,12 +71,6 @@ export class PayrollItem {
 
   @Field()
   updatedAt: Date;
-
-  @Field(() => [PayrollItemComponent], { nullable: true })
-  components?: PayrollItemComponent[];
-
-  @Field(() => [PayslipAdjustment], { nullable: true })
-  adjustments?: PayslipAdjustment[];
 }
 
 @ObjectType()
@@ -91,46 +85,16 @@ export class PayrollItemComponent {
   payrollItem: PayrollItem;
 
   @Field(() => Int)
-  componentId: number;
+  payrollComponentId: number;
 
   @Field(() => PayrollComponent, { description: 'Payroll Component' })
-  component: PayrollComponent;
+  payrollComponent: PayrollComponent;
 
   @Field(() => Float)
   amount: number;
 
   @Field(() => Float, { nullable: true })
   calculationBase?: number;
-
-  @Field({ nullable: true })
-  notes?: string;
-}
-
-@ObjectType()
-export class PayslipAdjustment {
-  @Field(() => Int)
-  id: number;
-
-  @Field(() => Int)
-  payrollItemId: number;
-
-  @Field(() => PayrollItem, { description: 'Payroll Item' })
-  payrollItem: PayrollItem;
-
-  @Field()
-  type: string;
-
-  @Field()
-  description: string;
-
-  @Field(() => Float)
-  amount: number;
-
-  @Field()
-  isRecurring: boolean;
-
-  @Field(() => Int)
-  createdBy: number;
 
   @Field({ nullable: true })
   notes?: string;
