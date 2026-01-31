@@ -2417,11 +2417,11 @@ type Leave {
 }
 
 type LeaveBalanceData {
-  allocatedHours: Int!
+  allocatedMinutes: Int!
   leaveTypeId: Int!
   leaveTypeName: String!
-  remainingHours: Int!
-  usedHours: Int!
+  remainingMinutes: Int!
+  usedMinutes: Int!
   year: Int!
 }
 

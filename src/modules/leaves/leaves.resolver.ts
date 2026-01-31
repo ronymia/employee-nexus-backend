@@ -38,13 +38,13 @@ class LeaveBalanceData {
   year: number;
 
   @Field(() => Int)
-  allocatedHours: number;
+  allocatedMinutes: number;
 
   @Field(() => Int)
-  usedHours: number;
+  usedMinutes: number;
 
   @Field(() => Int)
-  remainingHours: number;
+  remainingMinutes: number;
 }
 
 @ObjectType()
