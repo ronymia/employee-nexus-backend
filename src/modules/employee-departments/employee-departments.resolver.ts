@@ -12,11 +12,13 @@ import {
 import { GetEmployeeDepartmentsInput } from './dto/get-employee-departments.input';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
+import { PermissionsGuard } from '../permissions/guards/permission.guard';
+import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
 
 @Resolver(() => EmployeeDepartment)
-@UseGuards(GqlAuthGuard)
+@UseGuards(GqlAuthGuard, PermissionsGuard)
 export class EmployeeDepartmentsResolver {
   constructor(
     private readonly employeeDepartmentsService: EmployeeDepartmentsService,
@@ -26,6 +28,7 @@ export class EmployeeDepartmentsResolver {
   @Mutation(() => EmployeeDepartmentResponse, {
     description: 'Assign a department to an employee',
   })
+  @RequirePermissions('Department:create')
   async assignEmployeeDepartment(
     @CurrentUser() user: JwtPayload,
     @Args('assignEmployeeDepartmentInput')
@@ -50,6 +53,7 @@ export class EmployeeDepartmentsResolver {
     name: 'getEmployeeDepartments',
     description: 'Get employee departments with optional filters',
   })
+  @RequirePermissions('Department:read')
   async getEmployeeDepartments(
     @CurrentUser() user: JwtPayload,
     @Args('getEmployeeDepartmentsInput', { nullable: true })

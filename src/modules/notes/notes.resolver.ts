@@ -18,7 +18,7 @@ export class NotesResolver {
   // CREATE NOTE
   @Mutation(() => NoteResponse, { name: 'createNote' })
   // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Note:create')
+  @RequirePermissions('Note:create')
   @UseGuards(GqlAuthGuard)
   async createNote(
     @Args('createNoteInput') createNoteInput: CreateNoteInput,
@@ -39,7 +39,7 @@ export class NotesResolver {
   // FIND ALL NOTES
   @Query(() => NotesQueryResponse, { name: 'notesByUserId' })
   // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Note:read')
+  @RequirePermissions('Note:read')
   @UseGuards(GqlAuthGuard)
   async findAll(
     @CurrentUser() user: JwtPayload,
@@ -59,7 +59,7 @@ export class NotesResolver {
   // FIND ONE NOTE
   @Query(() => NoteResponse, { name: 'note' })
   // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Note:read')
+  @RequirePermissions('Note:read')
   @UseGuards(GqlAuthGuard)
   async findOne(
     @Args('id', { type: () => Int }) id: number,
@@ -78,7 +78,7 @@ export class NotesResolver {
   // UPDATE NOTE
   @Mutation(() => NoteResponse, { name: 'updateNote' })
   // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Note:update')
+  @RequirePermissions('Note:update')
   @UseGuards(GqlAuthGuard)
   async updateNote(@Args('updateNoteInput') updateNoteInput: UpdateNoteInput) {
     const result = await this.notesService.update({
@@ -96,7 +96,7 @@ export class NotesResolver {
   // REMOVE NOTE
   @Mutation(() => NoteResponse, { name: 'deleteNote' })
   // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Note:delete')
+  @RequirePermissions('Note:delete')
   @UseGuards(GqlAuthGuard)
   async removeNote(
     @Args('id', { type: () => Int }) id: number,

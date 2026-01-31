@@ -51,7 +51,7 @@ export class BusinessSubscriptionsResolver {
     name: 'businessSubscriptions',
   })
   @UseGuards(PermissionsGuard)
-  // @RequirePermissions('BusinessSubscription:read')
+  @RequirePermissions('BusinessSubscription:read')
   @UseGuards(GqlAuthGuard)
   async findAll(
     @CurrentUser() user: JwtPayload,

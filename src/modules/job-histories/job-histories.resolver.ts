@@ -9,6 +9,8 @@ import { CreateJobHistoryInput } from './dto/create-job-history.input';
 import { UpdateJobHistoryInput } from './dto/update-job-history.input';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
+import { PermissionsGuard } from '../permissions/guards/permission.guard';
+import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
@@ -20,7 +22,8 @@ export class JobHistoriesResolver {
   @Mutation(() => JobHistoryResponse, {
     name: 'createJobHistory',
   })
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, PermissionsGuard)
+  @RequirePermissions('Job History:create')
   async createJobHistory(
     @Args('createJobHistoryInput')
     createJobHistoryInput: CreateJobHistoryInput,
@@ -42,7 +45,8 @@ export class JobHistoriesResolver {
   @Query(() => JobHistoriesQueryResponse, {
     name: 'jobHistoryByUserId',
   })
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, PermissionsGuard)
+  @RequirePermissions('Job History:read')
   async findAll(
     @CurrentUser() user: JwtPayload,
     @Args('userId', { type: () => Int }) userId: number,
@@ -58,7 +62,8 @@ export class JobHistoriesResolver {
 
   // FIND ONE JOB HISTORY
   @Query(() => JobHistoryResponse, { name: 'jobHistory' })
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, PermissionsGuard)
+  @RequirePermissions('Job History:read')
   async findOne(
     @Args('id', { type: () => Int }) id: number,
     @Args('userId', { type: () => Int }) userId: number,
@@ -77,7 +82,8 @@ export class JobHistoriesResolver {
   @Mutation(() => JobHistoryResponse, {
     name: 'updateJobHistory',
   })
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, PermissionsGuard)
+  @RequirePermissions('Job History:update')
   async updateJobHistory(
     @Args('updateJobHistoryInput')
     updateJobHistoryInput: UpdateJobHistoryInput,
@@ -98,7 +104,8 @@ export class JobHistoriesResolver {
   @Mutation(() => JobHistoryResponse, {
     name: 'deleteJobHistory',
   })
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, PermissionsGuard)
+  @RequirePermissions('Job History:delete')
   async removeJobHistory(
     @Args('id', { type: () => Int }) id: number,
     @Args('userId', { type: () => Int }) userId: number,
