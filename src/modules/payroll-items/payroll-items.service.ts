@@ -4,13 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PayrollComponentsService } from '../payroll-components/payroll-components.service';
 import { PayrollCyclesService } from '../payroll-cycles/payroll-cycles.service';
-import {
-  CreatePayrollItemInput,
-  UpdatePayrollItemInput,
-  QueryPayrollItemInput,
-  AddPayslipAdjustmentInput,
-  GeneratePayrollItemsInput,
-} from './dto';
+import { QueryPayrollItemInput } from './dto';
 import { PayrollItemStatus } from './enums';
 import { CalculationType } from '../payroll-components/enums';
 import { JwtPayload } from '../auth/jwt.strategy';
@@ -23,89 +17,716 @@ export class PayrollItemsService {
     private readonly payrollCyclesService: PayrollCyclesService,
   ) {}
 
-  async create(
-    user: JwtPayload,
-    createPayrollItemInput: CreatePayrollItemInput,
-  ) {
-    return this.prisma.$transaction(async (prisma) => {
-      // Calculate gross pay, deductions, and net pay
-      const calculations = await this.calculatePayrollItem(
-        createPayrollItemInput,
-      );
-      // Create the payroll item
-      const payrollItem = await prisma.payrollItem.create({
-        data: {
-          payrollCycleId: createPayrollItemInput.payrollCycleId,
-          userId: createPayrollItemInput.userId,
-          basicSalary: createPayrollItemInput.basicSalary,
-          grossPay: calculations.grossPay,
-          totalDeductions: calculations.totalDeductions,
-          netPay: calculations.netPay,
-          workingDays: createPayrollItemInput.workingDays,
-          presentDays: createPayrollItemInput.presentDays,
-          absentDays: createPayrollItemInput.absentDays,
-          leaveDays: createPayrollItemInput.leaveDays,
-          overtimeMinutes: createPayrollItemInput.overtimeHours,
-          notes: createPayrollItemInput.notes,
-          status: PayrollItemStatus.PENDING,
-          paymentMethod: createPayrollItemInput.paymentMethod,
+  async createPayrollItem({
+    user,
+    userId,
+    payrollCycleId,
+  }: {
+    user: JwtPayload;
+    userId: number;
+    payrollCycleId: number;
+  }) {
+    const businessId = user.businessId;
+    const overtimeRate = 70; // Example overtime rate per hour
+
+    // Verify user belongs to business
+    const targetUser = await this.prisma.user.findUniqueOrThrow({
+      where: {
+        id: userId,
+        AND: {
+          businessId,
+        },
+      },
+      select: {
+        id: true,
+        employee: {
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
+
+    if (!targetUser.employee) {
+      throw new Error('User is not an employee');
+    }
+
+    // Get payroll cycle details
+    const payrollCycle = await this.prisma.payrollCycle.findUniqueOrThrow({
+      where: {
+        id: payrollCycleId,
+        AND: {
+          businessId,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        frequency: true,
+        periodStart: true,
+        periodEnd: true,
+        paymentDate: true,
+      },
+    });
+
+    const { periodStart, periodEnd } = payrollCycle;
+
+    // 1. Get active employee salary
+    const activeSalary = await this.prisma.employeeSalary.findFirst({
+      where: {
+        userId,
+        isActive: true,
+      },
+      select: {
+        salaryAmount: true,
+        salaryType: true,
+      },
+    });
+
+    if (!activeSalary) {
+      throw new Error('No active salary found for employee');
+    }
+
+    const basicSalary = activeSalary.salaryAmount;
+
+    // 5. Get employee active work schedule to calculate total working days
+    const activeSchedule = await this.prisma.employeeSchedule.findFirst({
+      where: {
+        userId,
+        isActive: true,
+      },
+      include: {
+        workSchedule: {
+          include: {
+            schedules: true,
+          },
+        },
+      },
+    });
+
+    // Calculate working days based on schedule
+    const workingDays = this.calculateWorkingDaysFromSchedule(
+      periodStart,
+      periodEnd,
+      activeSchedule?.workSchedule?.schedules || [],
+    );
+
+    // 2. Get approved attendances only (present, late, half_day)
+    const attendances = await this.prisma.attendance.findMany({
+      where: {
+        userId,
+        date: {
+          gte: periodStart,
+          lte: periodEnd,
+        },
+        status: {
+          in: ['present', 'late', 'half_day', 'approved'],
+        },
+      },
+      select: {
+        _count: true,
+        status: true,
+        overtimeMinutes: true,
+      },
+    });
+
+    // Calculate present days
+    const presentDays = attendances.length;
+    let totalOvertimeMinutes = 0;
+
+    for (const attendance of attendances) {
+      // 6. Calculate overtime
+      if (attendance.overtimeMinutes) {
+        totalOvertimeMinutes += attendance.overtimeMinutes;
+      }
+    }
+
+    // 3. Get absent days from attendance table
+    const absentCount = await this.prisma.attendance.count({
+      where: {
+        userId,
+        date: {
+          gte: periodStart,
+          lte: periodEnd,
+        },
+        status: 'absent',
+      },
+    });
+
+    const absentDays = absentCount;
+
+    // 4. Get approved leaves only
+    const approvedLeaves = await this.prisma.leave.findMany({
+      where: {
+        userId,
+        status: 'approved',
+        OR: [
+          {
+            startDate: {
+              gte: periodStart,
+              lte: periodEnd,
+            },
+          },
+          {
+            endDate: {
+              gte: periodStart,
+              lte: periodEnd,
+            },
+          },
+          {
+            AND: [
+              { startDate: { lte: periodStart } },
+              { endDate: { gte: periodEnd } },
+            ],
+          },
+        ],
+      },
+      select: {
+        startDate: true,
+        endDate: true,
+        totalMinutes: true,
+      },
+    });
+
+    // Calculate total leave days
+    const leaveDays = approvedLeaves.length;
+
+    // 7. Get employee active payroll components
+    const activePayrollComponents =
+      await this.prisma.employeePayrollComponent.findMany({
+        where: {
+          userId,
+          effectiveFrom: {
+            lte: periodEnd,
+          },
+          OR: [
+            { effectiveTo: null },
+            {
+              effectiveTo: {
+                gte: periodStart,
+              },
+            },
+          ],
+        },
+        include: {
+          payrollComponent: true,
         },
       });
 
-      // Create payroll item components if provided
-      // if (
-      //   createPayrollItemInput.components &&
-      //   createPayrollItemInput.components.length > 0
-      // ) {
-      //   await prisma.payrollItemComponent.createMany({
-      //     data: createPayrollItemInput.components.map((comp) => ({
-      //       payrollItemId: payrollItem.id,
-      //       componentId: comp.componentId,
-      //       amount: comp.amount,
-      //       calculationBase: comp.calculationBase,
-      //       notes: comp.notes,
-      //     })),
-      //   });
-      // }
+    // Calculate earnings and deductions from payroll components
+    let earnings = 0;
+    let deductions = 0;
 
-      // Create payslip adjustments if provided
-      if (
-        createPayrollItemInput.adjustments &&
-        createPayrollItemInput.adjustments.length > 0
-      ) {
-        // await prisma.payslipAdjustment.createMany({
-        //   data: createPayrollItemInput.adjustments.map((adj) => ({
-        //     payrollItemId: payrollItem.id,
-        //     type: adj.type,
-        //     description: adj.description,
-        //     amount: adj.amount,
-        //     isRecurring: adj.isRecurring ?? false,
-        //     createdBy: user.userId,
-        //     notes: adj.notes,
-        //   })),
-        // });
-        // Recalculate net pay if adjustments were added
-        // if (createPayrollItemInput.adjustments.length > 0) {
-        //   const adjustmentTotal = createPayrollItemInput.adjustments.reduce(
-        //     (sum, adj) => sum + adj.amount,
-        //     0,
-        //   );
-        //   await prisma.payrollItem.update({
-        //     where: { id: payrollItem.id },
-        //     data: {
-        //       netPay: payrollItem.netPay + adjustmentTotal,
-        //     },
-        //   });
-        // }
+    for (const empComponent of activePayrollComponents) {
+      const component = empComponent.payrollComponent;
+      const componentValue = empComponent.value ?? component.defaultValue ?? 0;
+
+      let calculatedAmount = 0;
+
+      // Calculate based on calculation type
+      switch (component.calculationType) {
+        case 'FIXED_AMOUNT':
+          calculatedAmount = componentValue;
+          break;
+
+        case 'PERCENTAGE_OF_BASIC':
+          calculatedAmount = (basicSalary * componentValue) / 100;
+          break;
+
+        // case 'PERCENTAGE_OF_GROSS':
+        //   // Calculate based on attendance ratio
+        //   const attendanceRatio = presentDays / (workingDays || 1);
+        //   const adjustedBasicSalary = basicSalary * attendanceRatio;
+        //   calculatedAmount = (adjustedBasicSalary * componentValue) / 100;
+        //   break;
+
+        default:
+          calculatedAmount = componentValue;
       }
 
-      // Update cycle totals
-      await this.payrollCyclesService.updateTotals(
-        createPayrollItemInput.payrollCycleId,
-      );
+      if (component.componentType === 'EARNING') {
+        earnings += calculatedAmount;
+      } else if (component.componentType === 'DEDUCTION') {
+        deductions += calculatedAmount;
+      }
+    }
 
-      return await this.findOne(payrollItem.id);
+    // 8. Get employee active payroll adjustments
+    const activeAdjustments = await this.prisma.payslipAdjustment.findMany({
+      where: {
+        userId,
+        status: 'APPROVED',
+        OR: [
+          {
+            appliedMonth: {
+              gte: periodStart,
+              lte: periodEnd,
+            },
+          },
+          {
+            appliedMonth: null, // Recurring adjustments
+          },
+        ],
+      },
+      include: {
+        payrollComponent: true,
+      },
     });
+
+    // Calculate adjustment totals
+    let adjustmentEarnings = 0;
+    let adjustmentDeductions = 0;
+
+    for (const adjustment of activeAdjustments) {
+      if (adjustment.payrollComponent?.componentType === 'EARNING') {
+        adjustmentEarnings += adjustment.value;
+      } else if (adjustment.payrollComponent?.componentType === 'DEDUCTION') {
+        adjustmentDeductions += adjustment.value;
+      }
+    }
+
+    // Calculate final payroll values
+    const overtimePay = (totalOvertimeMinutes / 60) * overtimeRate;
+    // const attendanceRatio = presentDays / (workingDays || 1);
+    // const proRatedBasicSalary = basicSalary * attendanceRatio;
+
+    const grossPay = basicSalary + earnings + adjustmentEarnings + overtimePay;
+    const totalDeductions = deductions + adjustmentDeductions;
+    const netPay = grossPay - totalDeductions;
+
+    // Create or update payroll item
+    const existingPayrollItem = await this.prisma.payrollItem.findUnique({
+      where: {
+        payrollCycleId_userId: {
+          payrollCycleId,
+          userId,
+        },
+      },
+    });
+
+    if (existingPayrollItem) {
+      // Update existing payroll item
+      return await this.prisma.payrollItem.update({
+        where: {
+          id: existingPayrollItem.id,
+        },
+        data: {
+          basicSalary: basicSalary,
+          grossPay,
+          totalDeductions,
+          netPay,
+          workingDays,
+          presentDays,
+          absentDays,
+          leaveDays,
+          overtimeMinutes: totalOvertimeMinutes,
+          status: PayrollItemStatus.PENDING,
+        },
+        include: {
+          user: {
+            include: {
+              profile: true,
+              employee: {
+                include: {
+                  designations: {
+                    where: { isActive: true },
+                    include: { designation: true },
+                  },
+                  departments: {
+                    where: { isActive: true },
+                    include: { department: true },
+                  },
+                },
+              },
+            },
+          },
+          payrollCycle: true,
+        },
+      });
+    } else {
+      // Create new payroll item
+      return await this.prisma.payrollItem.create({
+        data: {
+          payrollCycleId,
+          userId,
+          basicSalary: basicSalary,
+          grossPay,
+          totalDeductions,
+          netPay,
+          workingDays,
+          presentDays,
+          absentDays,
+          leaveDays,
+          overtimeMinutes: totalOvertimeMinutes,
+          status: PayrollItemStatus.PENDING,
+          paymentMethod: 'BANK_TRANSFER', // Default payment method
+        },
+        include: {
+          user: {
+            include: {
+              profile: true,
+              employee: {
+                include: {
+                  designations: {
+                    where: { isActive: true },
+                    include: { designation: true },
+                  },
+                  departments: {
+                    where: { isActive: true },
+                    include: { department: true },
+                  },
+                },
+              },
+            },
+          },
+          payrollCycle: true,
+        },
+      });
+    }
+  }
+
+  async previewPayrollItem({
+    user,
+    userId,
+    payrollCycleId,
+  }: {
+    user: JwtPayload;
+    userId: number;
+    payrollCycleId: number;
+  }) {
+    const businessId = user.businessId;
+    const overtimeRate = 70; // Example overtime rate per hour
+
+    // Verify user belongs to business
+    const targetUser = await this.prisma.user.findUniqueOrThrow({
+      where: {
+        id: userId,
+        AND: {
+          businessId,
+        },
+      },
+      select: {
+        id: true,
+        employee: {
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
+
+    if (!targetUser.employee) {
+      throw new Error('User is not an employee');
+    }
+
+    // Get payroll cycle details
+    const payrollCycle = await this.prisma.payrollCycle.findUniqueOrThrow({
+      where: {
+        id: payrollCycleId,
+        AND: {
+          businessId,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        frequency: true,
+        periodStart: true,
+        periodEnd: true,
+        paymentDate: true,
+      },
+    });
+
+    const { periodStart, periodEnd } = payrollCycle;
+
+    // 1. Get active employee salary
+    const activeSalary = await this.prisma.employeeSalary.findFirst({
+      where: {
+        userId,
+        isActive: true,
+      },
+      select: {
+        salaryAmount: true,
+        salaryType: true,
+      },
+    });
+
+    if (!activeSalary) {
+      throw new Error('No active salary found for employee');
+    }
+
+    const basicSalary = activeSalary.salaryAmount;
+
+    // 5. Get employee active work schedule to calculate total working days
+    const activeSchedule = await this.prisma.employeeSchedule.findFirst({
+      where: {
+        userId,
+        isActive: true,
+      },
+      include: {
+        workSchedule: {
+          include: {
+            schedules: true,
+          },
+        },
+      },
+    });
+
+    // Calculate working days based on schedule
+    const workingDays = this.calculateWorkingDaysFromSchedule(
+      periodStart,
+      periodEnd,
+      activeSchedule?.workSchedule?.schedules || [],
+    );
+
+    // 2. Get approved attendances only (present, late, half_day)
+    const attendances = await this.prisma.attendance.findMany({
+      where: {
+        userId,
+        date: {
+          gte: periodStart,
+          lte: periodEnd,
+        },
+        status: {
+          in: ['present', 'late', 'half_day', 'approved'],
+        },
+      },
+      select: {
+        _count: true,
+        status: true,
+        overtimeMinutes: true,
+      },
+    });
+
+    // Calculate present days
+    const presentDays = attendances.length;
+    let totalOvertimeMinutes = 0;
+
+    for (const attendance of attendances) {
+      // 6. Calculate overtime
+      if (attendance.overtimeMinutes) {
+        totalOvertimeMinutes += attendance.overtimeMinutes;
+      }
+    }
+
+    // 3. Get absent days from attendance table
+    const absentCount = await this.prisma.attendance.count({
+      where: {
+        userId,
+        date: {
+          gte: periodStart,
+          lte: periodEnd,
+        },
+        status: 'absent',
+      },
+    });
+
+    const absentDays = absentCount;
+
+    // 4. Get approved leaves only
+    const approvedLeaves = await this.prisma.leave.findMany({
+      where: {
+        userId,
+        status: 'approved',
+        OR: [
+          {
+            startDate: {
+              gte: periodStart,
+              lte: periodEnd,
+            },
+          },
+          {
+            endDate: {
+              gte: periodStart,
+              lte: periodEnd,
+            },
+          },
+          {
+            AND: [
+              { startDate: { lte: periodStart } },
+              { endDate: { gte: periodEnd } },
+            ],
+          },
+        ],
+      },
+      select: {
+        startDate: true,
+        endDate: true,
+        totalMinutes: true,
+      },
+    });
+
+    // Calculate total leave days
+    const leaveDays = approvedLeaves.length;
+
+    // 7. Get employee active payroll components
+    const activePayrollComponents =
+      await this.prisma.employeePayrollComponent.findMany({
+        where: {
+          userId,
+          effectiveFrom: {
+            lte: periodEnd,
+          },
+          OR: [
+            { effectiveTo: null },
+            {
+              effectiveTo: {
+                gte: periodStart,
+              },
+            },
+          ],
+        },
+        include: {
+          payrollComponent: true,
+        },
+      });
+
+    // Calculate earnings and deductions from payroll components
+    let earnings = 0;
+    let deductions = 0;
+
+    for (const empComponent of activePayrollComponents) {
+      const component = empComponent.payrollComponent;
+      const componentValue = empComponent.value ?? component.defaultValue ?? 0;
+
+      let calculatedAmount = 0;
+
+      // Calculate based on calculation type
+      switch (component.calculationType) {
+        case 'FIXED_AMOUNT':
+          calculatedAmount = componentValue;
+          break;
+
+        case 'PERCENTAGE_OF_BASIC':
+          calculatedAmount = (basicSalary * componentValue) / 100;
+          break;
+
+        // case 'PERCENTAGE_OF_GROSS':
+        //   // Calculate based on attendance ratio
+        //   const attendanceRatio = presentDays / (workingDays || 1);
+        //   const adjustedBasicSalary = basicSalary * attendanceRatio;
+        //   calculatedAmount = (adjustedBasicSalary * componentValue) / 100;
+        //   break;
+
+        default:
+          calculatedAmount = componentValue;
+      }
+
+      if (component.componentType === 'EARNING') {
+        earnings += calculatedAmount;
+      } else if (component.componentType === 'DEDUCTION') {
+        deductions += calculatedAmount;
+      }
+    }
+
+    // 8. Get employee active payroll adjustments
+    const activeAdjustments = await this.prisma.payslipAdjustment.findMany({
+      where: {
+        userId,
+        status: 'APPROVED',
+        OR: [
+          {
+            appliedMonth: {
+              gte: periodStart,
+              lte: periodEnd,
+            },
+          },
+          {
+            appliedMonth: null, // Recurring adjustments
+          },
+        ],
+      },
+      include: {
+        payrollComponent: true,
+      },
+    });
+
+    // Calculate adjustment totals
+    let adjustmentEarnings = 0;
+    let adjustmentDeductions = 0;
+
+    for (const adjustment of activeAdjustments) {
+      if (adjustment.payrollComponent?.componentType === 'EARNING') {
+        adjustmentEarnings += adjustment.value;
+      } else if (adjustment.payrollComponent?.componentType === 'DEDUCTION') {
+        adjustmentDeductions += adjustment.value;
+      }
+    }
+
+    // Calculate final payroll values
+    const overtimePay = (totalOvertimeMinutes / 60) * overtimeRate;
+    // const attendanceRatio = presentDays / (workingDays || 1);
+    // const proRatedBasicSalary = basicSalary * attendanceRatio;
+
+    const grossPay = basicSalary + earnings + adjustmentEarnings + overtimePay;
+    const totalDeductions = deductions + adjustmentDeductions;
+    const netPay = grossPay - totalDeductions;
+
+    // Return preview data (no database changes)
+    return {
+      userId,
+      payrollCycleId,
+      basicSalary,
+      grossPay,
+      totalDeductions,
+      netPay,
+      workingDays,
+      presentDays,
+      absentDays,
+      leaveDays,
+      overtimeMinutes: totalOvertimeMinutes,
+      overtimePay,
+      earnings,
+      deductions,
+      adjustmentEarnings,
+      adjustmentDeductions,
+      payrollCycle,
+      payrollComponents: activePayrollComponents,
+      payrollAdjustments: activeAdjustments,
+    };
+  }
+
+  /**
+   * Calculate working days based on employee's work schedule
+   */
+  private calculateWorkingDaysFromSchedule(
+    periodStart: Date,
+    periodEnd: Date,
+    schedules: any[],
+  ): number {
+    if (!schedules || schedules.length === 0) {
+      // If no schedule, assume Monday to Friday (5 days a week)
+      return this.calculateWorkingDays(periodStart, periodEnd);
+    }
+
+    let workingDays = 0;
+    const current = new Date(periodStart);
+
+    while (current <= periodEnd) {
+      const dayOfWeek = current.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+
+      // Check if this day is a working day in the schedule
+      const daySchedule = schedules.find((s) => {
+        const scheduleDayMap = {
+          SUNDAY: 0,
+          MONDAY: 1,
+          TUESDAY: 2,
+          WEDNESDAY: 3,
+          THURSDAY: 4,
+          FRIDAY: 5,
+          SATURDAY: 6,
+        };
+        return scheduleDayMap[s.dayOfWeek] === dayOfWeek;
+      });
+
+      if (daySchedule && !daySchedule.isWeekend) {
+        workingDays++;
+      }
+
+      current.setDate(current.getDate() + 1);
+    }
+
+    return workingDays;
   }
 
   async findAll(query: QueryPayrollItemInput) {
@@ -208,76 +829,6 @@ export class PayrollItemsService {
     });
   }
 
-  addAdjustment(user: JwtPayload, input: AddPayslipAdjustmentInput) {
-    return {};
-  }
-
-  async generatePayrollItems(
-    user: JwtPayload,
-    input: GeneratePayrollItemsInput,
-  ) {
-    // Get payroll cycle details
-    const cycle = await this.prisma.payrollCycle.findUnique({
-      where: { id: input.payrollCycleId },
-    });
-
-    if (!cycle) {
-      throw new Error('Payroll cycle not found');
-    }
-
-    // Get all active employees in the business
-    const employees = await this.prisma.employee.findMany({
-      where: {
-        user: {
-          businessId: input.businessId,
-          // status: 'ACTIVE',
-        },
-      },
-      include: {
-        user: {
-          include: {
-            profile: true,
-          },
-        },
-      },
-    });
-
-    // Get active payroll components
-    const components = await this.payrollComponentsService.findActiveComponents(
-      input.businessId,
-    );
-
-    const createdItems: any[] = [];
-
-    for (const employee of employees) {
-      // Calculate attendance data
-      const attendanceData = await this.calculateAttendanceData(
-        employee.userId,
-        cycle.periodStart,
-        cycle.periodEnd,
-      );
-
-      // Create payroll item input
-      const payrollItemInput: CreatePayrollItemInput = {
-        payrollCycleId: input.payrollCycleId,
-        userId: employee.userId,
-        basicSalary: 100,
-        workingDays: attendanceData.workingDays,
-        presentDays: attendanceData.presentDays,
-        absentDays: attendanceData.absentDays,
-        leaveDays: attendanceData.leaveDays,
-        overtimeHours: attendanceData.overtimeHours,
-        paymentMethod: '',
-        components: await this.calculateComponents(100, components),
-      };
-
-      const item = await this.create(user, payrollItemInput);
-      createdItems.push(item as any);
-    }
-
-    return createdItems;
-  }
-
   async approve(id: number) {
     return this.prisma.payrollItem.update({
       where: { id },
@@ -299,7 +850,7 @@ export class PayrollItemsService {
     });
   }
 
-  private async calculatePayrollItem(input: CreatePayrollItemInput) {
+  private async calculatePayrollItem(input: any) {
     let grossPay = input.basicSalary;
     let totalDeductions = 0;
 
@@ -487,127 +1038,6 @@ export class PayrollItemsService {
     }
 
     return result;
-  }
-
-  async update(
-    user: JwtPayload,
-    updatePayrollItemInput: UpdatePayrollItemInput,
-  ) {
-    return this.prisma.$transaction(async (prisma) => {
-      // Get existing payroll item
-      const existingItem = await prisma.payrollItem.findUnique({
-        where: { id: updatePayrollItemInput.id },
-        include: {
-          payslipAdjustments: true,
-        },
-      });
-
-      if (!existingItem) {
-        throw new Error('Payroll item not found');
-      }
-
-      // Check if payroll item can be updated (must be in PENDING or DRAFT status)
-      if (!['PENDING', 'DRAFT'].includes(existingItem.status)) {
-        throw new Error(
-          'Cannot update payroll item that is already approved or paid',
-        );
-      }
-
-      // Prepare update data
-      const updateData: any = {};
-      if (updatePayrollItemInput.basicSalary !== undefined) {
-        updateData.basicSalary = updatePayrollItemInput.basicSalary;
-      }
-      if (updatePayrollItemInput.workingDays !== undefined) {
-        updateData.workingDays = updatePayrollItemInput.workingDays;
-      }
-      if (updatePayrollItemInput.presentDays !== undefined) {
-        updateData.presentDays = updatePayrollItemInput.presentDays;
-      }
-      if (updatePayrollItemInput.absentDays !== undefined) {
-        updateData.absentDays = updatePayrollItemInput.absentDays;
-      }
-      if (updatePayrollItemInput.leaveDays !== undefined) {
-        updateData.leaveDays = updatePayrollItemInput.leaveDays;
-      }
-      if (updatePayrollItemInput.overtimeHours !== undefined) {
-        updateData.overtimeHours = updatePayrollItemInput.overtimeHours;
-      }
-      if (updatePayrollItemInput.notes !== undefined) {
-        updateData.notes = updatePayrollItemInput.notes;
-      }
-      if (updatePayrollItemInput.paymentMethod !== undefined) {
-        updateData.paymentMethod = updatePayrollItemInput.paymentMethod;
-      }
-      if (updatePayrollItemInput.bankAccount !== undefined) {
-        updateData.bankAccount = updatePayrollItemInput.bankAccount;
-      }
-      if (updatePayrollItemInput.transactionRef !== undefined) {
-        updateData.transactionRef = updatePayrollItemInput.transactionRef;
-      }
-
-      // Update components if provided
-
-      // Update adjustments if provided
-      if (updatePayrollItemInput.adjustments) {
-        // Delete existing adjustments
-        await prisma.payslipAdjustment.deleteMany({
-          where: { payrollItemId: updatePayrollItemInput.id },
-        });
-      }
-
-      // Recalculate gross pay, deductions, and net pay if anything affecting calculation changed
-      const shouldRecalculate =
-        updatePayrollItemInput.basicSalary !== undefined ||
-        updatePayrollItemInput.components !== undefined ||
-        updatePayrollItemInput.adjustments !== undefined;
-
-      if (shouldRecalculate) {
-        // Build the input for calculation with updated values
-        const calculationInput = {
-          payrollCycleId: existingItem.payrollCycleId,
-          userId: existingItem.userId,
-          basicSalary:
-            updatePayrollItemInput.basicSalary ?? existingItem.basicSalary,
-          workingDays:
-            updatePayrollItemInput.workingDays ?? existingItem.workingDays,
-          presentDays:
-            updatePayrollItemInput.presentDays ?? existingItem.presentDays,
-          absentDays:
-            updatePayrollItemInput.absentDays ?? existingItem.absentDays,
-          leaveDays: updatePayrollItemInput.leaveDays ?? existingItem.leaveDays,
-          overtimeMinutes:
-            updatePayrollItemInput.overtimeHours ??
-            existingItem.overtimeMinutes,
-          components: updatePayrollItemInput.components,
-          adjustments: updatePayrollItemInput.adjustments,
-        };
-
-        const calculations = await this.calculatePayrollItem(
-          calculationInput as any,
-        );
-
-        updateData.grossPay = calculations.grossPay;
-        updateData.totalDeductions = calculations.totalDeductions;
-        updateData.netPay = calculations.netPay;
-      }
-
-      // Update the payroll item
-      const updatedItem = await prisma.payrollItem.update({
-        where: { id: updatePayrollItemInput.id },
-        data: updateData,
-        include: {
-          user: {
-            include: {
-              profile: true,
-            },
-          },
-          payrollCycle: true,
-        },
-      });
-
-      return updatedItem;
-    });
   }
 
   async remove(id: number) {

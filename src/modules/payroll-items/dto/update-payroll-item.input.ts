@@ -1,9 +1,5 @@
 import { InputType, Field, Int, Float } from '@nestjs/graphql';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
-import {
-  PayrollItemComponentInput,
-  PayslipAdjustmentInput,
-} from './create-payroll-item.input';
 
 @InputType()
 export class UpdatePayrollItemInput {
@@ -60,12 +56,4 @@ export class UpdatePayrollItemInput {
   @IsString()
   @IsOptional()
   transactionRef?: string;
-
-  @Field(() => [PayrollItemComponentInput], { nullable: true })
-  @IsOptional()
-  components?: PayrollItemComponentInput[];
-
-  @Field(() => [PayslipAdjustmentInput], { nullable: true })
-  @IsOptional()
-  adjustments?: PayslipAdjustmentInput[];
 }

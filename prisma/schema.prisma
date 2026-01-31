@@ -922,7 +922,7 @@ model Attendance {
   totalMinutes    Int               @default(0) @map("total_minutes") // Calculated total working hours for the day
   breakMinutes    Int               @default(0) @map("break_minutes") // Calculated total break hours for the day
   overtimeMinutes Int               @default(0) @map("overtime_minutes") // Calculated overtime minutes beyond regular schedule
-  status          String            @default("pending") @map("status") // pending, present, absent, on_leave
+  status          String            @default("pending") @map("status") // pending, approved, absent, on_leave
   type            String            @default("regular") @map("type") // partial, late, regular
   reviewedAt      DateTime?         @map("reviewed_at") // When attendance was approved/rejected
   reviewedBy      Int?              @map("reviewed_by") // Manager/admin who reviewed

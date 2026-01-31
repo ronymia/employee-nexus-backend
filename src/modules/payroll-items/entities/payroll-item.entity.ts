@@ -5,7 +5,9 @@ import {
   BaseQueryResponse,
 } from '../../../common/dto/base-response.type';
 import { User } from 'src/modules/users/entities/user.entity';
-import { PayrollComponent } from 'src/modules/payroll-components/entities/payroll-component.entity';
+import { IsOptional } from 'class-validator';
+import { EmployeePayrollComponent } from 'src/modules/employee-payroll-components/entities/employee-payroll-component.entity';
+import { PayslipAdjustment } from 'src/modules/employee-payslip-adjustments/entities/payslip-adjustment.entity';
 
 @ObjectType()
 export class PayrollItem {
@@ -46,7 +48,7 @@ export class PayrollItem {
   leaveDays: number;
 
   @Field(() => Float, { nullable: true })
-  overtimeHours?: number;
+  overtimeMinutes?: number;
 
   @Field(() => PayrollItemStatus)
   status: PayrollItemStatus;
@@ -71,33 +73,20 @@ export class PayrollItem {
 
   @Field()
   updatedAt: Date;
-}
 
-@ObjectType()
-export class PayrollItemComponent {
-  @Field(() => Int)
-  id: number;
+  @Field(() => [EmployeePayrollComponent], {
+    nullable: true,
+    description: 'Payroll Components',
+  })
+  @IsOptional()
+  payrollComponents?: EmployeePayrollComponent[] | [];
 
-  @Field(() => Int)
-  payrollItemId: number;
-
-  @Field(() => PayrollItem, { description: 'Payroll Item' })
-  payrollItem: PayrollItem;
-
-  @Field(() => Int)
-  payrollComponentId: number;
-
-  @Field(() => PayrollComponent, { description: 'Payroll Component' })
-  payrollComponent: PayrollComponent;
-
-  @Field(() => Float)
-  amount: number;
-
-  @Field(() => Float, { nullable: true })
-  calculationBase?: number;
-
-  @Field({ nullable: true })
-  notes?: string;
+  @Field(() => [PayslipAdjustment], {
+    nullable: true,
+    description: 'Payroll Adjustments',
+  })
+  @IsOptional()
+  payrollAdjustments?: PayslipAdjustment[] | [];
 }
 
 @ObjectType()

@@ -2,13 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input AddPayslipAdjustmentInput {
-  amount: Float!
-  description: String!
-  payrollItemId: Int!
-  type: String!
-}
-
 """
 Status of payslip adjustment - PENDING, APPROVED, REJECTED, APPLIED, or CANCELLED
 """
@@ -1225,23 +1218,6 @@ input CreatePayrollCycleInput {
   periodStart: String!
 }
 
-input CreatePayrollItemInput {
-  absentDays: Float!
-  adjustments: [PayslipAdjustmentInput!]
-  bankAccount: String
-  basicSalary: Float!
-  components: [PayrollItemComponentInput!]
-  leaveDays: Float!
-  notes: String
-  overtimeHours: Float
-  paymentMethod: String
-  payrollCycleId: Int!
-  presentDays: Float!
-  transactionRef: String
-  userId: Int!
-  workingDays: Int!
-}
-
 input CreatePayslipAdjustmentInput {
   appliedMonth: DateTime!
   notes: String
@@ -2137,11 +2113,6 @@ enum Gender {
   MALE
 }
 
-input GeneratePayrollItemsInput {
-  businessId: Int!
-  payrollCycleId: Int!
-}
-
 input GetEmployeeDepartmentsInput {
   """Filter by department ID"""
   departmentId: Int
@@ -2645,7 +2616,6 @@ type MonthAmount {
 }
 
 type Mutation {
-  addPayslipAdjustment(addPayslipAdjustmentInput: AddPayslipAdjustmentInput!): PayrollItemResponse!
   approveAttendance(approveAttendanceInput: ApproveAttendanceInput!): AttendanceResponse!
   approveLeave(approveLeaveInput: ApproveLeaveInput!): LeaveResponse!
   approvePayrollCycle(approvePayrollCycleInput: ApprovePayrollCycleInput!): PayrollCycleResponse!
@@ -2691,7 +2661,7 @@ type Mutation {
   createNotificationTemplate(createNotificationTemplateInput: CreateNotificationTemplateInput!): NotificationTemplateResponse!
   createPayrollComponent(createPayrollComponentInput: CreatePayrollComponentInput!): PayrollComponentResponse!
   createPayrollCycle(createPayrollCycleInput: CreatePayrollCycleInput!): PayrollCycleResponse!
-  createPayrollItem(createPayrollItemInput: CreatePayrollItemInput!): PayrollItemResponse!
+  createPayrollItem(payrollCycleId: Int!, userId: Int!): PayrollItemResponse!
   createPayslipAdjustment(createPayslipAdjustmentInput: CreatePayslipAdjustmentInput!): PayslipAdjustmentResponse!
   createProject(createProjectInput: CreateProjectInput!): ProjectResponse!
   createSalary(createEmployeeSalaryInput: CreateEmployeeSalaryInput!): EmployeeSalaryResponse!
@@ -2723,13 +2693,13 @@ type Mutation {
   deleteUser(id: Int!): UserResponse!
   deleteWorkSchedule(id: Int!): WorkScheduleResponse!
   deleteWorkSite(id: Int!): WorkSiteResponse!
-  generatePayrollItems(generatePayrollItemsInput: GeneratePayrollItemsInput!): PayrollItemResponse!
   leaveRequest(createLeaveInput: RequestLeaveInput!): LeaveResponse!
   login(loginInput: LoginAuthInput!): Auth!
   markAllNotificationsAsRead: NotificationResponse!
   markNotificationAsRead(id: Int!): NotificationResponse!
   markPayrollCycleAsPaid(id: Int!): PayrollCycleResponse!
   markPayrollItemAsPaid(id: Int!, paymentMethod: String!, transactionRef: String): PayrollItemResponse!
+  previewPayrollItem(payrollCycleId: Int!, userId: Int!): PayrollItemResponse!
   processPayrollCycle(processPayrollCycleInput: ProcessPayrollCycleInput!): PayrollCycleResponse!
   punchIn(punchInInput: PunchInInput!): AttendancePunchResponse!
   punchOut(punchOutInput: PunchOutInput!): AttendancePunchResponse!
@@ -2780,7 +2750,6 @@ type Mutation {
   updateNote(updateNoteInput: UpdateNoteInput!): NoteResponse!
   updateNotificationTemplate(updateNotificationTemplateInput: UpdateNotificationTemplateInput!): NotificationTemplateResponse!
   updatePayrollComponent(updatePayrollComponentInput: UpdatePayrollComponentInput!): PayrollComponentResponse!
-  updatePayrollItem(updatePayrollItemInput: UpdatePayrollItemInput!): PayrollItemResponse!
   updatePayslipAdjustment(updatePayslipAdjustmentInput: UpdatePayslipAdjustmentInput!): PayslipAdjustmentResponse!
   updateProfile(updateProfileInput: UpdateProfileInput!): ProfileResponse!
   updateProject(updateProjectInput: UpdateProjectInput!): ProjectResponse!
@@ -3117,9 +3086,15 @@ type PayrollItem {
   leaveDays: Float!
   netPay: Float!
   notes: String
-  overtimeHours: Float
+  overtimeMinutes: Float
   paidAt: DateTime
   paymentMethod: String
+
+  """Payroll Adjustments"""
+  payrollAdjustments: [PayslipAdjustment!]
+
+  """Payroll Components"""
+  payrollComponents: [EmployeePayrollComponent!]
   payrollCycleId: Int!
   presentDays: Float!
   status: PayrollItemStatus!
@@ -3131,13 +3106,6 @@ type PayrollItem {
   user: User!
   userId: Int!
   workingDays: Int!
-}
-
-input PayrollItemComponentInput {
-  amount: Float!
-  calculationBase: Float
-  notes: String
-  payrollComponentId: Int!
 }
 
 type PayrollItemResponse {
@@ -3209,14 +3177,6 @@ type PayslipAdjustment {
   user: User
   userId: Int!
   value: Float!
-}
-
-input PayslipAdjustmentInput {
-  amount: Float!
-  description: String!
-  isRecurring: Boolean! = false
-  notes: String
-  type: String!
 }
 
 type PayslipAdjustmentResponse {
@@ -4691,22 +4651,6 @@ input UpdatePayrollComponentInput {
   isStatutory: Boolean = false
   isTaxable: Boolean = true
   name: String
-}
-
-input UpdatePayrollItemInput {
-  absentDays: Float
-  adjustments: [PayslipAdjustmentInput!]
-  bankAccount: String
-  basicSalary: Float
-  components: [PayrollItemComponentInput!]
-  id: Int!
-  leaveDays: Float
-  notes: String
-  overtimeHours: Float
-  paymentMethod: String
-  presentDays: Float
-  transactionRef: String
-  workingDays: Int
 }
 
 input UpdatePayslipAdjustmentInput {

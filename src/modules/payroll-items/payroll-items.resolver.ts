@@ -6,13 +6,7 @@ import {
   PayrollItemResponse,
   PayrollItemsQueryResponse,
 } from './entities/payroll-item.entity';
-import {
-  CreatePayrollItemInput,
-  UpdatePayrollItemInput,
-  QueryPayrollItemInput,
-  AddPayslipAdjustmentInput,
-  GeneratePayrollItemsInput,
-} from './dto';
+import { QueryPayrollItemInput } from './dto';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
@@ -28,9 +22,14 @@ export class PayrollItemsResolver {
   @RequirePermissions('Payroll Item:create')
   async createPayrollItem(
     @CurrentUser() user: JwtPayload,
-    @Args('createPayrollItemInput') input: CreatePayrollItemInput,
+    @Args('userId', { type: () => Int }) userId: number,
+    @Args('payrollCycleId', { type: () => Int }) payrollCycleId: number,
   ) {
-    const item = await this.payrollItemsService.create(user, input);
+    const item = await this.payrollItemsService.createPayrollItem({
+      user,
+      userId,
+      payrollCycleId,
+    });
     return {
       success: true,
       statusCode: HttpStatus.CREATED,
@@ -39,20 +38,26 @@ export class PayrollItemsResolver {
     };
   }
 
-  @Mutation(() => PayrollItemResponse, { name: 'generatePayrollItems' })
+  @Mutation(() => PayrollItemResponse, { name: 'previewPayrollItem' })
   @RequirePermissions('Payroll Item:create')
-  async generatePayrollItems(
+  async previewPayrollItem(
     @CurrentUser() user: JwtPayload,
-    @Args('generatePayrollItemsInput') input: GeneratePayrollItemsInput,
+    @Args('userId', { type: () => Int }) userId: number,
+    @Args('payrollCycleId', { type: () => Int }) payrollCycleId: number,
   ) {
-    const items = await this.payrollItemsService.generatePayrollItems(
+    const items = await this.payrollItemsService.previewPayrollItem({
       user,
-      input,
-    );
+      userId,
+      payrollCycleId,
+    });
+    console.log({
+      componet: items.payrollComponents,
+      adjustment: items.payrollAdjustments,
+    });
     return {
       success: true,
       statusCode: HttpStatus.CREATED,
-      message: `Generated ${items.length} payroll items successfully`,
+      message: `Previewed payroll items successfully`,
       data: items,
     };
   }
@@ -99,22 +104,6 @@ export class PayrollItemsResolver {
     };
   }
 
-  @Mutation(() => PayrollItemResponse, { name: 'addPayslipAdjustment' })
-  @RequirePermissions('Payroll Item:update')
-  async addPayslipAdjustment(
-    @CurrentUser() user: JwtPayload,
-    @Args('addPayslipAdjustmentInput') input: AddPayslipAdjustmentInput,
-  ) {
-    await this.payrollItemsService.addAdjustment(user, input);
-    const item = await this.payrollItemsService.findOne(input.payrollItemId);
-    return {
-      success: true,
-      statusCode: HttpStatus.OK,
-      message: 'Payslip adjustment added successfully',
-      data: item,
-    };
-  }
-
   @Mutation(() => PayrollItemResponse, { name: 'approvePayrollItem' })
   @RequirePermissions('Payroll Item:update')
   async approvePayrollItem(@Args('id', { type: () => Int }) id: number) {
@@ -147,20 +136,20 @@ export class PayrollItemsResolver {
     };
   }
 
-  @Mutation(() => PayrollItemResponse, { name: 'updatePayrollItem' })
-  @RequirePermissions('Payroll Item:update')
-  async updatePayrollItem(
-    @CurrentUser() user: JwtPayload,
-    @Args('updatePayrollItemInput') input: UpdatePayrollItemInput,
-  ) {
-    const item = await this.payrollItemsService.update(user, input);
-    return {
-      success: true,
-      statusCode: HttpStatus.OK,
-      message: 'Payroll item updated successfully',
-      data: item,
-    };
-  }
+  // @Mutation(() => PayrollItemResponse, { name: 'updatePayrollItem' })
+  // @RequirePermissions('Payroll Item:update')
+  // async updatePayrollItem(
+  //   @CurrentUser() user: JwtPayload,
+  //   @Args('updatePayrollItemInput') input: UpdatePayrollItemInput,
+  // ) {
+  //   const item = await this.payrollItemsService.update(user, input);
+  //   return {
+  //     success: true,
+  //     statusCode: HttpStatus.OK,
+  //     message: 'Payroll item updated successfully',
+  //     data: item,
+  //   };
+  // }
 
   @Mutation(() => PayrollItemResponse, { name: 'deletePayrollItem' })
   @RequirePermissions('Payroll Item:delete')
