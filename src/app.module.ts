@@ -23,11 +23,7 @@ import { SubscriptionPlansModule } from './modules/subscription-plans/subscripti
 import { SubscriptionFeaturesModule } from './modules/subscription-features/subscription-features.module';
 import { DesignationsModule } from './modules/designations/designations.module';
 import { FeaturesModule } from './modules/features/features.module';
-import { JobTypesModule } from './modules/job-types/job-types.module';
 import { BusinessSchedulesModule } from './modules/business-schedules/business-schedules.module';
-import { JobPlatformsModule } from './modules/job-platforms/job-platforms.module';
-import { RecruitmentProcessesModule } from './modules/recruitment-processes/recruitment-processes.module';
-import { OnboardingProcessesModule } from './modules/onboarding-processes/onboarding-processes.module';
 import { WorkSitesModule } from './modules/work-sites/work-sites.module';
 import { EmploymentStatusModule } from './modules/employment-status/employment-status.module';
 import { LeaveTypesModule } from './modules/leave-types/leave-types.module';
@@ -95,11 +91,7 @@ import { SeederModule } from './modules/seeder/seeder.module';
     BusinessesModule,
     FeaturesModule,
     DesignationsModule,
-    JobTypesModule,
     BusinessSchedulesModule,
-    JobPlatformsModule,
-    RecruitmentProcessesModule,
-    OnboardingProcessesModule,
     WorkSitesModule,
     EmploymentStatusModule,
     LeaveTypesModule,

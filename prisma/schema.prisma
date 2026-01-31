@@ -137,10 +137,6 @@ model Business {
   paymentSettings       PaymentSettings?       @relation(name: "paymentSettings")
   employmentStatuses    EmploymentStatus[]     @relation(name: "employmentStatusesInBusiness")
   designations          Designation[]          @relation(name: "designationsInBusiness")
-  jobTypes              JobType[]              @relation(name: "jobTypesInBusiness")
-  jobPlatforms          JobPlatform[]          @relation(name: "jobPlatformsInBusiness")
-  recruitmentProcesses  RecruitmentProcess[]   @relation(name: "recruitmentProcessesInBusiness")
-  onboardingProcesses   OnboardingProcess[]    @relation(name: "onboardingProcessesInBusiness")
   workSites             WorkSite[]             @relation(name: "workSitesInBusiness")
   departments           Department[]           @relation(name: "departmentsInBusiness")
   workSchedules         WorkSchedule[]         @relation(name: "workSchedulesInBusiness")
@@ -400,72 +396,6 @@ model EmployeeDesignation {
   @@index([userId, isActive])
   @@index([startDate, endDate])
   @@map("employee_designations")
-}
-
-model JobType {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String   @db.Text
-  status      String
-  businessId  Int      @map("business_id")
-  business    Business @relation(name: "jobTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@unique([name, businessId])
-  @@index([businessId])
-  @@map("job_types")
-}
-
-model JobPlatform {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique
-  description String    @db.Text
-  status      String
-  businessId  Int?      @map("business_id")
-  business    Business? @relation(name: "jobPlatformsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@unique([name, businessId])
-  @@index([businessId])
-  @@map("job_platforms")
-}
-
-model RecruitmentProcess {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String   @db.Text
-  status      String
-  isRequired  Boolean  @map("is_required")
-  businessId  Int      @map("business_id")
-  business    Business @relation(name: "recruitmentProcessesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@unique([name, businessId])
-  @@index([businessId])
-  @@map("recruitment_processes")
-}
-
-model OnboardingProcess {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String   @db.Text
-  status      String
-  isRequired  Boolean  @map("is_required")
-  businessId  Int      @map("business_id")
-  business    Business @relation(name: "onboardingProcessesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@unique([name, businessId])
-  @@index([businessId])
-  @@map("onboarding_processes")
 }
 
 model WorkSite {

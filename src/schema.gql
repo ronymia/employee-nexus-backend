@@ -1113,22 +1113,6 @@ input CreateJobHistoryInput {
   userId: Int!
 }
 
-input CreateJobPlatformInput {
-  """Description of the job platform"""
-  description: String!
-
-  """Name of the job platform"""
-  name: String!
-}
-
-input CreateJobTypeInput {
-  """Description of the job type"""
-  description: String!
-
-  """Name of the job type"""
-  name: String!
-}
-
 input CreateLeaveInput {
   """Supporting documents (JSON array or URLs)"""
   attachments: String
@@ -1219,17 +1203,6 @@ input CreateNotificationTemplateInput {
   type: NotificationType!
 }
 
-input CreateOnboardingProcessInput {
-  """Description of the onboarding process"""
-  description: String!
-
-  """Whether the onboarding process is required"""
-  isRequired: Boolean!
-
-  """Name of the onboarding process"""
-  name: String!
-}
-
 input CreatePayrollComponentInput {
   calculationType: CalculationType!
   code: String!
@@ -1296,17 +1269,6 @@ input CreateProjectInput {
   name: String!
   startDate: DateTime!
   status: String!
-}
-
-input CreateRecruitmentProcessInput {
-  """Description of the recruitment process"""
-  description: String!
-
-  """Whether the recruitment process is required"""
-  isRequired: Boolean!
-
-  """Name of the recruitment process"""
-  name: String!
 }
 
 input CreateSocialLinkInput {
@@ -2388,90 +2350,6 @@ type JobHistoryResponse {
   success: Boolean!
 }
 
-type JobPlatform {
-  """ID of the business"""
-  businessId: Int!
-
-  """Date when the job platform was created"""
-  createdAt: DateTime!
-
-  """ID of the creator"""
-  createdBy: Int!
-
-  """Description of the job platform"""
-  description: String!
-
-  """Unique identifier for the job platform"""
-  id: ID!
-
-  """Name of the job platform"""
-  name: String!
-
-  """Status of the job platform"""
-  status: Status!
-
-  """Date when the job platform was last updated"""
-  updatedAt: DateTime!
-}
-
-type JobPlatformResponse {
-  data: JobPlatform!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
-type JobPlatformsQueryResponse {
-  data: [JobPlatform!]!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
-type JobType {
-  """ID of the business"""
-  businessId: Int!
-
-  """Date when the job type was created"""
-  createdAt: DateTime!
-
-  """ID of the creator"""
-  createdBy: Int!
-
-  """Description of the job type"""
-  description: String!
-
-  """Unique identifier for the job type"""
-  id: ID!
-
-  """Name of the job type"""
-  name: String!
-
-  """Status of the job type"""
-  status: Status!
-
-  """Date when the job type was last updated"""
-  updatedAt: DateTime!
-}
-
-type JobTypeResponse {
-  data: JobType!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
-type JobTypesQueryResponse {
-  data: [JobType!]!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
 type LastPayment {
   grossPay: Float!
   month: String!
@@ -2805,20 +2683,16 @@ type Mutation {
   createEmploymentStatus(createEmploymentStatusInput: CreateEmploymentStatusInput!): EmploymentStatusResponse!
   createHoliday(createHolidayInput: CreateHolidayInput!): HolidayResponse!
   createJobHistory(createJobHistoryInput: CreateJobHistoryInput!): JobHistoryResponse!
-  createJobPlatform(createJobPlatformInput: CreateJobPlatformInput!): JobPlatformResponse!
-  createJobType(createJobTypeInput: CreateJobTypeInput!): JobTypeResponse!
   createLeave(createLeaveInput: CreateLeaveInput!): LeaveResponse!
   createLeaveType(createLeaveTypeInput: CreateLeaveTypeInput!): LeaveTypeResponse!
   createNote(createNoteInput: CreateNoteInput!): NoteResponse!
   createNotification(createNotificationInput: CreateNotificationInput!): NotificationResponse!
   createNotificationTemplate(createNotificationTemplateInput: CreateNotificationTemplateInput!): NotificationTemplateResponse!
-  createOnboardingProcess(createOnboardingProcessInput: CreateOnboardingProcessInput!): OnboardingProcessResponse!
   createPayrollComponent(createPayrollComponentInput: CreatePayrollComponentInput!): PayrollComponentResponse!
   createPayrollCycle(createPayrollCycleInput: CreatePayrollCycleInput!): PayrollCycleResponse!
   createPayrollItem(createPayrollItemInput: CreatePayrollItemInput!): PayrollItemResponse!
   createPayslipAdjustment(createPayslipAdjustmentInput: CreatePayslipAdjustmentInput!): PayslipAdjustmentResponse!
   createProject(createProjectInput: CreateProjectInput!): ProjectResponse!
-  createRecruitmentProcess(createRecruitmentProcessInput: CreateRecruitmentProcessInput!): RecruitmentProcessResponse!
   createSalary(createEmployeeSalaryInput: CreateEmployeeSalaryInput!): EmployeeSalaryResponse!
   createSocialLink(createSocialLinkInput: CreateSocialLinkInput!): SocialLinkResponse!
   createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
@@ -2835,17 +2709,13 @@ type Mutation {
   deleteEmploymentStatus(id: Int!): EmploymentStatusResponse!
   deleteHoliday(id: Int!): HolidayResponse!
   deleteJobHistory(id: Int!, userId: Int!): JobHistoryResponse!
-  deleteJobPlatform(id: Int!): JobPlatformResponse!
-  deleteJobType(id: Int!): JobTypeResponse!
   deleteLeave(id: Int!): LeaveResponse!
   deleteLeaveType(id: Int!): LeaveTypeResponse!
   deleteNote(id: Int!, userId: Int!): NoteResponse!
   deleteNotification(id: Int!): NotificationResponse!
-  deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
   deletePayrollComponent(id: Int!): PayrollComponentResponse!
   deletePayrollItem(id: Int!): PayrollItemResponse!
   deleteProject(id: Int!): ProjectResponse!
-  deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
   deleteSalary(id: Int!): EmployeeSalaryResponse!
   deleteSocialLink(userId: Int!): SocialLinkResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
@@ -2903,20 +2773,16 @@ type Mutation {
   updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
   updateHoliday(updateHolidayInput: UpdateHolidayInput!): HolidayResponse!
   updateJobHistory(updateJobHistoryInput: UpdateJobHistoryInput!): JobHistoryResponse!
-  updateJobPlatform(updateJobPlatformInput: UpdateJobPlatformInput!): JobPlatformResponse!
-  updateJobType(updateJobTypeInput: UpdateJobTypeInput!): JobTypeResponse!
   updateLeave(updateLeaveInput: UpdateLeaveInput!): LeaveResponse!
   updateLeaveSetting(updateLeaveSettingInput: UpdateLeaveSettingInput!): LeaveSettingResponse!
   updateLeaveType(updateLeaveTypeInput: UpdateLeaveTypeInput!): LeaveTypeResponse!
   updateNote(updateNoteInput: UpdateNoteInput!): NoteResponse!
   updateNotificationTemplate(updateNotificationTemplateInput: UpdateNotificationTemplateInput!): NotificationTemplateResponse!
-  updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
   updatePayrollComponent(updatePayrollComponentInput: UpdatePayrollComponentInput!): PayrollComponentResponse!
   updatePayrollItem(updatePayrollItemInput: UpdatePayrollItemInput!): PayrollItemResponse!
   updatePayslipAdjustment(updatePayslipAdjustmentInput: UpdatePayslipAdjustmentInput!): PayslipAdjustmentResponse!
   updateProfile(updateProfileInput: UpdateProfileInput!): ProfileResponse!
   updateProject(updateProjectInput: UpdateProjectInput!): ProjectResponse!
-  updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
   updateSalary(updateEmployeeSalaryInput: UpdateEmployeeSalaryInput!): EmployeeSalaryResponse!
   updateSocialLink(updateSocialLinkInput: UpdateSocialLinkInput!): SocialLinkResponse!
   updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
@@ -3074,51 +2940,6 @@ type Notifications {
 
 type NotificationsQueryResponse {
   data: [Notification!]!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
-type OnboardingProcess {
-  """ID of the business"""
-  businessId: Int!
-
-  """Date when the onboarding process was created"""
-  createdAt: DateTime!
-
-  """ID of the creator"""
-  createdBy: Int!
-
-  """Description of the onboarding process"""
-  description: String!
-
-  """Unique identifier for the onboarding process"""
-  id: ID!
-
-  """Whether the onboarding process is required"""
-  isRequired: Boolean!
-
-  """Name of the onboarding process"""
-  name: String!
-
-  """Status of the onboarding process"""
-  status: Status!
-
-  """Date when the onboarding process was last updated"""
-  updatedAt: DateTime!
-}
-
-type OnboardingProcessResponse {
-  data: OnboardingProcess!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
-type OnboardingProcessesQueryResponse {
-  data: [OnboardingProcess!]!
   message: String!
   meta: PaginationMeta
   statusCode: Float!
@@ -3665,10 +3486,6 @@ type Query {
   holidays(query: QueryHolidayInput): HolidaysQueryResponse!
   jobHistory(id: Int!, userId: Int!): JobHistoryResponse!
   jobHistoryByUserId(userId: Int!): JobHistoriesQueryResponse!
-  jobPlatformById(id: Int!): JobPlatformResponse!
-  jobPlatforms(query: QueryJobPlatformInput): JobPlatformsQueryResponse!
-  jobTypeById(id: Int!): JobTypeResponse!
-  jobTypes(query: QueryJobTypeInput): JobTypesQueryResponse!
   leaveBalance(leaveTypeId: Int!, userId: Int!, year: Int!): LeaveBalanceResponse!
   leaveById(id: Int!): LeaveResponse!
   leaveOverview: LeaveOverviewResponse!
@@ -3681,8 +3498,6 @@ type Query {
   notificationById(id: Int!): NotificationResponse!
   notificationTemplates: NotificationTemplatesQueryResponse!
   notifications(query: QueryNotificationInput): NotificationsQueryResponse!
-  onboardingProcessById(id: Int!): OnboardingProcessResponse!
-  onboardingProcesses(query: QueryOnboardingProcessInput): OnboardingProcessesQueryResponse!
   ownerDashboard: OwnerDashboardResponse!
   payrollComponentByCode(businessId: Int!, code: String!): PayrollComponentResponse!
   payrollComponentById(id: Int!): PayrollComponentResponse!
@@ -3700,8 +3515,6 @@ type Query {
   permissions: [Permission!]!
   projectById(id: Int!): ProjectResponse!
   projects(businessId: Int): ProjectsQueryResponse!
-  recruitmentProcessById(id: Int!): RecruitmentProcessResponse!
-  recruitmentProcesses(query: QueryRecruitmentProcessInput): RecruitmentProcessesQueryResponse!
   roles: RoleResponse!
   salaries(query: QueryEmployeeSalaryInput): EmployeeSalariesQueryResponse!
   salaryById(id: Int!): EmployeeSalaryResponse!
@@ -3855,20 +3668,6 @@ input QueryHolidayInput {
   startDate: String
 }
 
-input QueryJobPlatformInput {
-  name: String
-  pagination: BasePaginationInput
-  searchTerm: String
-  status: Status
-}
-
-input QueryJobTypeInput {
-  name: String
-  pagination: BasePaginationInput
-  searchTerm: String
-  status: Status
-}
-
 input QueryLeaveInput {
   """Filter leaves ending before this date"""
   endDate: String
@@ -3910,14 +3709,6 @@ input QueryNotificationInput {
   userId: Int
 }
 
-input QueryOnboardingProcessInput {
-  isRequired: Boolean
-  name: String
-  pagination: BasePaginationInput
-  searchTerm: String
-  status: Status
-}
-
 input QueryPayrollComponentInput {
   calculationType: CalculationType
   componentType: ComponentType
@@ -3943,14 +3734,6 @@ input QueryPayslipAdjustmentInput {
   payrollComponentId: Int
   status: AdjustmentStatus
   userId: Int
-}
-
-input QueryRecruitmentProcessInput {
-  isRequired: Boolean
-  name: String
-  pagination: BasePaginationInput
-  searchTerm: String
-  status: Status
 }
 
 input QuerySubscriptionPlanInput {
@@ -4033,51 +3816,6 @@ type RecentTask {
   project: String!
   status: String!
   title: String!
-}
-
-type RecruitmentProcess {
-  """ID of the business"""
-  businessId: Int!
-
-  """Date when the recruitment process was created"""
-  createdAt: DateTime!
-
-  """ID of the creator"""
-  createdBy: Int!
-
-  """Description of the recruitment process"""
-  description: String!
-
-  """Unique identifier for the recruitment process"""
-  id: ID!
-
-  """Whether the recruitment process is required"""
-  isRequired: Boolean!
-
-  """Name of the recruitment process"""
-  name: String!
-
-  """Status of the recruitment process"""
-  status: Status!
-
-  """Date when the recruitment process was last updated"""
-  updatedAt: DateTime!
-}
-
-type RecruitmentProcessResponse {
-  data: RecruitmentProcess!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
-type RecruitmentProcessesQueryResponse {
-  data: [RecruitmentProcess!]!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
 }
 
 input RejectAttendanceInput {
@@ -4227,7 +3965,6 @@ type SocialLinkResponse {
   success: Boolean!
 }
 
-"""Status of the Job Type"""
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -4857,24 +4594,6 @@ input UpdateJobHistoryInput {
   userId: Int
 }
 
-input UpdateJobPlatformInput {
-  """Description of the job platform"""
-  description: String
-  id: Int!
-
-  """Name of the job platform"""
-  name: String
-}
-
-input UpdateJobTypeInput {
-  """Description of the job type"""
-  description: String
-  id: Int!
-
-  """Name of the job type"""
-  name: String
-}
-
 input UpdateLeaveInput {
   """Supporting documents (JSON array or URLs)"""
   attachments: String
@@ -4961,18 +4680,6 @@ input UpdateNotificationTemplateInput {
   type: NotificationType!
 }
 
-input UpdateOnboardingProcessInput {
-  """Description of the onboarding process"""
-  description: String
-  id: Int!
-
-  """Whether the onboarding process is required"""
-  isRequired: Boolean
-
-  """Name of the onboarding process"""
-  name: String
-}
-
 input UpdatePayrollComponentInput {
   calculationType: CalculationType
   code: String
@@ -5033,18 +4740,6 @@ input UpdateProjectInput {
   name: String
   startDate: DateTime
   status: String
-}
-
-input UpdateRecruitmentProcessInput {
-  """Description of the recruitment process"""
-  description: String
-  id: Int!
-
-  """Whether the recruitment process is required"""
-  isRequired: Boolean
-
-  """Name of the recruitment process"""
-  name: String
 }
 
 input UpdateSocialLinkInput {
