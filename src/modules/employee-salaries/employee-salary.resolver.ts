@@ -13,6 +13,7 @@ import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
+import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 
 @Resolver(() => EmployeeSalary)
 @UseGuards(GqlAuthGuard, PermissionsGuard)
