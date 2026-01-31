@@ -3,21 +3,21 @@ import {
   BaseQueryResponse,
   BaseResponse,
 } from 'src/common/dto/base-response.type';
-import { User } from 'src/modules/users/entities/user.entity';
+import { Employee } from 'src/modules/users/entities/employee.entity';
 
 @ObjectType()
 export class Document {
   @Field(() => ID, { description: 'Unique identifier for the document' })
   id: number;
 
-  @Field(() => Int, { description: 'ID of the user who owns the document' })
+  @Field(() => Int, { description: 'ID of the employee who owns the document' })
   userId: number;
 
-  @Field(() => User, {
+  @Field(() => Employee, {
     nullable: true,
-    description: 'User who owns this document',
+    description: 'Employee who owns this document',
   })
-  user?: User;
+  employee?: Employee;
 
   @Field(() => String, { description: 'Title of the document' })
   title: string;

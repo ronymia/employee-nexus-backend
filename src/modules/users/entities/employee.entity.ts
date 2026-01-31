@@ -12,6 +12,7 @@ import { EmploymentStatus } from 'src/modules/employment-status/entities/employm
 import { WorkSite } from 'src/modules/work-sites/entities/work-site.entity';
 import { WorkSchedule } from 'src/modules/work-schedules/entities/work-schedule.entity';
 import { EmployeeSalary } from 'src/modules/employee-salaries/entities/employee-salary.entity';
+import { BaseResponse } from 'src/common/dto/base-response.type';
 
 @ObjectType()
 export class Employee {
@@ -94,3 +95,6 @@ export class Employee {
   @Field(() => Date)
   updatedAt: Date;
 }
+
+@ObjectType()
+export class EmployeeResponse extends BaseResponse(Employee) {}

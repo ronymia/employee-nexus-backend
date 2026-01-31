@@ -53,51 +53,50 @@ export class PayrollItemsService {
       });
 
       // Create payroll item components if provided
-      if (
-        createPayrollItemInput.components &&
-        createPayrollItemInput.components.length > 0
-      ) {
-        await prisma.payrollItemComponent.createMany({
-          data: createPayrollItemInput.components.map((comp) => ({
-            payrollItemId: payrollItem.id,
-            componentId: comp.componentId,
-            amount: comp.amount,
-            calculationBase: comp.calculationBase,
-            notes: comp.notes,
-          })),
-        });
-      }
+      // if (
+      //   createPayrollItemInput.components &&
+      //   createPayrollItemInput.components.length > 0
+      // ) {
+      //   await prisma.payrollItemComponent.createMany({
+      //     data: createPayrollItemInput.components.map((comp) => ({
+      //       payrollItemId: payrollItem.id,
+      //       componentId: comp.componentId,
+      //       amount: comp.amount,
+      //       calculationBase: comp.calculationBase,
+      //       notes: comp.notes,
+      //     })),
+      //   });
+      // }
 
       // Create payslip adjustments if provided
       if (
         createPayrollItemInput.adjustments &&
         createPayrollItemInput.adjustments.length > 0
       ) {
-        await prisma.payslipAdjustment.createMany({
-          data: createPayrollItemInput.adjustments.map((adj) => ({
-            payrollItemId: payrollItem.id,
-            type: adj.type,
-            description: adj.description,
-            amount: adj.amount,
-            isRecurring: adj.isRecurring ?? false,
-            createdBy: user.userId,
-            notes: adj.notes,
-          })),
-        });
-
+        // await prisma.payslipAdjustment.createMany({
+        //   data: createPayrollItemInput.adjustments.map((adj) => ({
+        //     payrollItemId: payrollItem.id,
+        //     type: adj.type,
+        //     description: adj.description,
+        //     amount: adj.amount,
+        //     isRecurring: adj.isRecurring ?? false,
+        //     createdBy: user.userId,
+        //     notes: adj.notes,
+        //   })),
+        // });
         // Recalculate net pay if adjustments were added
-        if (createPayrollItemInput.adjustments.length > 0) {
-          const adjustmentTotal = createPayrollItemInput.adjustments.reduce(
-            (sum, adj) => sum + adj.amount,
-            0,
-          );
-          await prisma.payrollItem.update({
-            where: { id: payrollItem.id },
-            data: {
-              netPay: payrollItem.netPay + adjustmentTotal,
-            },
-          });
-        }
+        // if (createPayrollItemInput.adjustments.length > 0) {
+        //   const adjustmentTotal = createPayrollItemInput.adjustments.reduce(
+        //     (sum, adj) => sum + adj.amount,
+        //     0,
+        //   );
+        //   await prisma.payrollItem.update({
+        //     where: { id: payrollItem.id },
+        //     data: {
+        //       netPay: payrollItem.netPay + adjustmentTotal,
+        //     },
+        //   });
+        // }
       }
 
       // Update cycle totals
@@ -168,12 +167,6 @@ export class PayrollItemsService {
             business: true,
           },
         },
-        components: {
-          include: {
-            component: true,
-          },
-        },
-        adjustments: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -200,12 +193,6 @@ export class PayrollItemsService {
             },
           },
         },
-        components: {
-          include: {
-            component: true,
-          },
-        },
-        adjustments: true,
       },
     });
   }
@@ -218,61 +205,11 @@ export class PayrollItemsService {
           userId,
         },
       },
-      include: {
-        components: {
-          include: {
-            component: true,
-          },
-        },
-        adjustments: true,
-      },
     });
   }
 
-  async addAdjustment(user: JwtPayload, input: AddPayslipAdjustmentInput) {
-    return this.prisma.$transaction(async (prisma) => {
-      // Create adjustment
-      const adjustment = await prisma.payslipAdjustment.create({
-        data: {
-          payrollItemId: input.payrollItemId,
-          type: input.type,
-          description: input.description,
-          amount: input.amount,
-        },
-      });
-
-      // Recalculate payroll item totals
-      const payrollItem = await prisma.payrollItem.findUnique({
-        where: { id: input.payrollItemId },
-        include: {
-          adjustments: true,
-        },
-      });
-
-      if (payrollItem) {
-        const adjustmentTotal = payrollItem.adjustments.reduce(
-          (sum, adj) => sum + adj.amount,
-          0,
-        );
-
-        const newNetPay =
-          payrollItem.grossPay - payrollItem.totalDeductions + adjustmentTotal;
-
-        await prisma.payrollItem.update({
-          where: { id: input.payrollItemId },
-          data: {
-            netPay: newNetPay,
-          },
-        });
-
-        // Update cycle totals
-        await this.payrollCyclesService.updateTotals(
-          payrollItem.payrollCycleId,
-        );
-      }
-
-      return adjustment;
-    });
+  addAdjustment(user: JwtPayload, input: AddPayslipAdjustmentInput) {
+    return {};
   }
 
   async generatePayrollItems(
@@ -375,7 +312,7 @@ export class PayrollItemsService {
     if (input.components && input.components.length > 0) {
       for (const comp of input.components) {
         const component = await this.payrollComponentsService.findOne(
-          comp.componentId,
+          comp.payrollComponentId,
         );
 
         if (component) {
@@ -543,7 +480,7 @@ export class PayrollItemsService {
       }
 
       result.push({
-        componentId: component.id,
+        payrollComponentId: component.id,
         amount,
         calculationBase,
       });
@@ -561,8 +498,7 @@ export class PayrollItemsService {
       const existingItem = await prisma.payrollItem.findUnique({
         where: { id: updatePayrollItemInput.id },
         include: {
-          components: true,
-          adjustments: true,
+          payslipAdjustments: true,
         },
       });
 
@@ -611,42 +547,12 @@ export class PayrollItemsService {
       }
 
       // Update components if provided
-      if (updatePayrollItemInput.components) {
-        // Delete existing components
-        await prisma.payrollItemComponent.deleteMany({
-          where: { payrollItemId: updatePayrollItemInput.id },
-        });
-
-        // Create new components
-        await prisma.payrollItemComponent.createMany({
-          data: updatePayrollItemInput.components.map((comp) => ({
-            payrollItemId: updatePayrollItemInput.id,
-            componentId: comp.componentId,
-            amount: comp.amount,
-            calculationBase: comp.calculationBase,
-            notes: comp.notes,
-          })),
-        });
-      }
 
       // Update adjustments if provided
       if (updatePayrollItemInput.adjustments) {
         // Delete existing adjustments
         await prisma.payslipAdjustment.deleteMany({
           where: { payrollItemId: updatePayrollItemInput.id },
-        });
-
-        // Create new adjustments
-        await prisma.payslipAdjustment.createMany({
-          data: updatePayrollItemInput.adjustments.map((adj) => ({
-            payrollItemId: updatePayrollItemInput.id,
-            type: adj.type,
-            description: adj.description,
-            amount: adj.amount,
-            isRecurring: adj.isRecurring ?? false,
-            notes: adj.notes,
-            createdBy: user.userId,
-          })),
         });
       }
 
@@ -697,12 +603,6 @@ export class PayrollItemsService {
             },
           },
           payrollCycle: true,
-          components: {
-            include: {
-              component: true,
-            },
-          },
-          adjustments: true,
         },
       });
 
@@ -729,9 +629,6 @@ export class PayrollItemsService {
       }
 
       // Delete related records first
-      await prisma.payrollItemComponent.deleteMany({
-        where: { payrollItemId: id },
-      });
 
       await prisma.payslipAdjustment.deleteMany({
         where: { payrollItemId: id },

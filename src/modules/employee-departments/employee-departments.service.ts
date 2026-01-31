@@ -171,4 +171,193 @@ export class EmployeeDepartmentsService {
       },
     });
   }
+
+  // GET DEPARTMENT HISTORY FOR USER
+  async getDepartmentHistory({
+    user,
+    userId,
+  }: {
+    user: JwtPayload;
+    userId: number;
+  }) {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    // Verify user belongs to business
+    const targetUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!targetUser || targetUser.businessId !== businessId) {
+      throw new NotFoundException(
+        `User with ID ${userId} not found in your business`,
+      );
+    }
+
+    return await this.prisma.employeeDepartment.findMany({
+      where: { userId },
+      orderBy: {
+        startDate: 'desc',
+      },
+      include: {
+        employee: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+        department: true,
+      },
+    });
+  }
+
+  // GET ACTIVE DEPARTMENT FOR USER
+  async getActiveDepartment({
+    user,
+    userId,
+  }: {
+    user: JwtPayload;
+    userId: number;
+  }) {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    // Verify user belongs to business
+    const targetUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!targetUser || targetUser.businessId !== businessId) {
+      throw new NotFoundException(
+        `User with ID ${userId} not found in your business`,
+      );
+    }
+
+    return await this.prisma.employeeDepartment.findFirst({
+      where: {
+        userId,
+        isActive: true,
+      },
+      include: {
+        employee: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+        department: true,
+      },
+    });
+  }
+
+  // GET EMPLOYEE DEPARTMENT BY COMPOSITE ID
+  async getByCompositeId({
+    user,
+    userId,
+    departmentId,
+  }: {
+    user: JwtPayload;
+    userId: number;
+    departmentId: number;
+  }) {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    const employeeDepartment = await this.prisma.employeeDepartment.findUnique({
+      where: {
+        userId_departmentId: {
+          userId,
+          departmentId,
+        },
+      },
+      include: {
+        employee: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+        department: true,
+      },
+    });
+
+    if (!employeeDepartment) {
+      throw new NotFoundException(`Employee department assignment not found`);
+    }
+
+    // Verify belongs to business
+    if (employeeDepartment.employee.user.businessId !== businessId) {
+      throw new NotFoundException(
+        `Employee department assignment not found in your business`,
+      );
+    }
+
+    return employeeDepartment;
+  }
+
+  // UPDATE EMPLOYEE DEPARTMENT
+  async updateEmployeeDepartment({
+    user,
+    userId,
+    departmentId,
+    updateData,
+  }: {
+    user: JwtPayload;
+    userId: number;
+    departmentId: number;
+    updateData: Partial<AssignEmployeeDepartmentInput>;
+  }) {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    // Verify assignment exists and belongs to business
+    await this.getByCompositeId({ user, userId, departmentId });
+
+    // If setting as primary, unset other primary departments
+    if (updateData.isPrimary) {
+      await this.prisma.employeeDepartment.updateMany({
+        where: {
+          userId,
+          isPrimary: true,
+          NOT: {
+            departmentId,
+          },
+        },
+        data: {
+          isPrimary: false,
+        },
+      });
+    }
+
+    return await this.prisma.employeeDepartment.update({
+      where: {
+        userId_departmentId: {
+          userId,
+          departmentId,
+        },
+      },
+      data: updateData,
+      include: {
+        employee: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+        department: true,
+      },
+    });
+  }
 }

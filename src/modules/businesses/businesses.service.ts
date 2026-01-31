@@ -11,10 +11,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from 'generated/prisma';
 import { defaultDesignations } from 'src/Database/designation';
 import { defaultEmploymentStatuses } from 'src/Database/employment-status';
-import { defaultJobTypes } from 'src/Database/job-type';
-import { defaultJobPlatforms } from 'src/Database/job-platform';
 import { defaultLeaveTypes } from 'src/Database/leave-type';
-import { defaultRecruitmentProcesses } from 'src/Database/recruitment-process';
 import { defaultAttendanceSettings } from 'src/Database/attendance-settings';
 import { leaveSettings } from 'src/Database/leave-settings';
 import { paymentSettings } from 'src/Database/payment-settings';
@@ -26,7 +23,6 @@ import {
   managerPermissions,
   ownerPermissions,
 } from 'src/config';
-import { defaultOnboardingProcesses } from 'src/Database/onboarding-process';
 import { QueryBusinessInput } from './dto/query-business.input';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { businessSearchableFields } from './businesses.constant';
@@ -259,62 +255,10 @@ export class BusinessesService {
           ),
         );
 
-        // CREATE DEFAULT JOB TYPES
-        await Promise.all(
-          defaultJobTypes.map((element) =>
-            prismaTransaction.jobType.create({
-              data: {
-                ...element,
-                status: Status.ACTIVE,
-                business: { connect: { id: businessId } },
-              },
-            }),
-          ),
-        );
-
-        // CREATE DEFAULT JOB PLATFORMS
-        await Promise.all(
-          defaultJobPlatforms.map((element) =>
-            prismaTransaction.jobPlatform.create({
-              data: {
-                ...element,
-                status: Status.ACTIVE,
-                business: { connect: { id: businessId } },
-              },
-            }),
-          ),
-        );
-
         // CREATE DEFAULT LEAVE TYPES
         await Promise.all(
           defaultLeaveTypes.map((element) =>
             prismaTransaction.leaveType.create({
-              data: {
-                ...element,
-                status: Status.ACTIVE,
-                business: { connect: { id: businessId } },
-              },
-            }),
-          ),
-        );
-
-        // CREATE DEFAULT RECRUITMENT PROCESSES
-        await Promise.all(
-          defaultRecruitmentProcesses.map((element) =>
-            prismaTransaction.recruitmentProcess.create({
-              data: {
-                ...element,
-                status: Status.ACTIVE,
-                business: { connect: { id: businessId } },
-              },
-            }),
-          ),
-        );
-
-        // CREATE DEFAULT ONBOARDING PROCESSES
-        await Promise.all(
-          defaultOnboardingProcesses.map((element) =>
-            prismaTransaction.onboardingProcess.create({
               data: {
                 ...element,
                 status: Status.ACTIVE,

@@ -6,7 +6,7 @@ import {
   AttendanceQueryResponse,
 } from './entities/attendance.entity';
 import { QueryAttendanceInput } from './dto/query-attendance.input';
-import { HttpStatus, UseGuards } from '@nestjs/common';
+import { HttpStatus, NotAcceptableException, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
@@ -16,12 +16,40 @@ import { AttendancePunchResponse } from './entities/attendance-punch.entity';
 import { PunchInInput, PunchOutInput } from './dto/attendance-punch.input';
 import { CreateAttendanceInput } from './dto/create-attendance.input';
 import { UpdateAttendanceInput } from './dto/update-attendance.input';
+import { AttendanceSummaryAttendanceOverview } from './entities/attendance-overview.entity';
+import {
+  ApproveAttendanceInput,
+  RejectAttendanceInput,
+} from './dto/approve-attendance.input';
 
 // Punch In/Out Input Types
 
 @Resolver(() => Attendance)
 export class AttendancesResolver {
   constructor(private readonly attendancesService: AttendancesService) {}
+
+  // ATTENDANCE OVERVIEW
+  @Query(() => AttendanceSummaryAttendanceOverview, {
+    name: 'attendanceOverview',
+  })
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('Attendance:read')
+  @UseGuards(GqlAuthGuard)
+  async attendanceOverview(@CurrentUser() user: JwtPayload) {
+    //
+    if (!user.businessId) {
+      throw new NotAcceptableException('User does not belong to any business');
+    }
+
+    //
+    const result = await this.attendancesService.getAttendanceOverview();
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `Attendance overview retrieved successfully`,
+      data: result,
+    };
+  }
 
   // CREATE ATTENDANCE
   @Mutation(() => AttendanceResponse, { name: 'createAttendance' })
@@ -159,6 +187,44 @@ export class AttendancesResolver {
       success: true,
       statusCode: HttpStatus.OK,
       message: `Punched out successfully`,
+      data: result,
+    };
+  }
+
+  // APPROVE ATTENDANCE
+  @Mutation(() => AttendanceResponse, { name: 'approveAttendance' })
+  @UseGuards(GqlAuthGuard)
+  async approveAttendance(
+    @CurrentUser() user: JwtPayload,
+    @Args('approveAttendanceInput')
+    approveAttendanceInput: ApproveAttendanceInput,
+  ) {
+    const result = await this.attendancesService.approveAttendance({
+      user,
+      approveAttendanceInput,
+    });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `Attendance approved successfully`,
+      data: result,
+    };
+  }
+  // APPROVE ATTENDANCE
+  @Mutation(() => AttendanceResponse, { name: 'rejectAttendance' })
+  @UseGuards(GqlAuthGuard)
+  async rejectAttendance(
+    @CurrentUser() user: JwtPayload,
+    @Args('rejectAttendanceInput') rejectAttendanceInput: RejectAttendanceInput,
+  ) {
+    const result = await this.attendancesService.rejectAttendance({
+      user,
+      rejectAttendanceInput: rejectAttendanceInput,
+    });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `Attendance rejected successfully`,
       data: result,
     };
   }

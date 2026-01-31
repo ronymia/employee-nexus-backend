@@ -53,3 +53,6 @@ export class AssignEmployeeStatusInput {
   @IsOptional()
   remarks?: string;
 }
+
+@InputType()
+export class UpdateEmployeeStatusInput extends AssignEmployeeStatusInput {}

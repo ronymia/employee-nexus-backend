@@ -6,7 +6,10 @@ import {
   IsBoolean,
   IsString,
 } from 'class-validator';
-import { BaseResponse } from 'src/common/dto/base-response.type';
+import {
+  BaseQueryResponse,
+  BaseResponse,
+} from 'src/common/dto/base-response.type';
 import { Designation } from 'src/modules/designations/entities/designation.entity';
 import { Employee } from 'src/modules/users/entities/employee.entity';
 
@@ -35,10 +38,6 @@ export class EmployeeDesignation {
   @IsOptional()
   endDate?: Date;
 
-  @Field(() => Int, { description: 'Salary of employee' })
-  @IsInt()
-  salary: number;
-
   @Field(() => Boolean, {
     description: 'true refer current active designation of employee',
   })
@@ -61,5 +60,10 @@ export class EmployeeDesignation {
 
 @ObjectType()
 export class EmployeeDesignationResponse extends BaseResponse(
+  EmployeeDesignation,
+) {}
+
+@ObjectType()
+export class EmployeeDesignationsArrayResponse extends BaseQueryResponse(
   EmployeeDesignation,
 ) {}

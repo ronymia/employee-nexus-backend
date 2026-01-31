@@ -172,4 +172,244 @@ export class EmployeeWorkSchedulesService {
       },
     });
   }
+
+  // GET WORK SCHEDULE HISTORY FOR USER
+  async getWorkScheduleHistory({
+    user,
+    userId,
+  }: {
+    user: JwtPayload;
+    userId: number;
+  }) {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    // Verify user belongs to business
+    const targetUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!targetUser || targetUser.businessId !== businessId) {
+      throw new NotFoundException(
+        `User with ID ${userId} not found in your business`,
+      );
+    }
+
+    return await this.prisma.employeeSchedule.findMany({
+      where: { userId },
+      orderBy: {
+        startDate: 'desc',
+      },
+      include: {
+        user: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+        workSchedule: {
+          include: {
+            schedules: {
+              include: {
+                timeSlots: true,
+              },
+            },
+          },
+        },
+        assignedByUser: {
+          include: {
+            profile: true,
+          },
+        },
+      },
+    });
+  }
+
+  // GET ACTIVE WORK SCHEDULE FOR USER
+  async getActiveWorkSchedule({
+    user,
+    userId,
+  }: {
+    user: JwtPayload;
+    userId: number;
+  }) {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    const targetUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!targetUser || targetUser.businessId !== businessId) {
+      throw new NotFoundException(
+        `User with ID ${userId} not found in your business`,
+      );
+    }
+
+    return await this.prisma.employeeSchedule.findFirst({
+      where: {
+        userId,
+        isActive: true,
+      },
+      include: {
+        user: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+        workSchedule: {
+          include: {
+            schedules: {
+              include: {
+                timeSlots: true,
+              },
+            },
+          },
+        },
+        assignedByUser: {
+          include: {
+            profile: true,
+          },
+        },
+      },
+    });
+  }
+
+  // GET BY COMPOSITE ID
+  async getByCompositeId({
+    user,
+    userId,
+    workScheduleId,
+  }: {
+    user: JwtPayload;
+    userId: number;
+    workScheduleId: number;
+  }) {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    const employeeSchedule = await this.prisma.employeeSchedule.findUnique({
+      where: {
+        userId_workScheduleId: {
+          userId,
+          workScheduleId,
+        },
+      },
+      include: {
+        user: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+        workSchedule: {
+          include: {
+            schedules: {
+              include: {
+                timeSlots: true,
+              },
+            },
+          },
+        },
+        assignedByUser: {
+          include: {
+            profile: true,
+          },
+        },
+      },
+    });
+
+    if (!employeeSchedule) {
+      throw new NotFoundException(`Employee schedule assignment not found`);
+    }
+
+    if (employeeSchedule.user.user.businessId !== businessId) {
+      throw new NotFoundException(
+        `Employee schedule assignment not found in your business`,
+      );
+    }
+
+    return employeeSchedule;
+  }
+
+  // UPDATE EMPLOYEE SCHEDULE
+  async updateEmployeeSchedule({
+    user,
+    userId,
+    workScheduleId,
+    updateData,
+  }: {
+    user: JwtPayload;
+    userId: number;
+    workScheduleId: number;
+    updateData: Partial<AssignEmployeeScheduleInput>;
+  }) {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    await this.getByCompositeId({ user, userId, workScheduleId });
+
+    if (updateData.isActive) {
+      await this.prisma.employeeSchedule.updateMany({
+        where: {
+          userId,
+          isActive: true,
+          NOT: {
+            workScheduleId,
+          },
+        },
+        data: {
+          isActive: false,
+        },
+      });
+    }
+
+    return await this.prisma.employeeSchedule.update({
+      where: {
+        userId_workScheduleId: {
+          userId,
+          workScheduleId,
+        },
+      },
+      data: {
+        ...updateData,
+        assignedBy: user.userId,
+      },
+      include: {
+        user: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+        workSchedule: {
+          include: {
+            schedules: {
+              include: {
+                timeSlots: true,
+              },
+            },
+          },
+        },
+        assignedByUser: {
+          include: {
+            profile: true,
+          },
+        },
+      },
+    });
+  }
 }

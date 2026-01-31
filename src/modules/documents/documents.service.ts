@@ -25,10 +25,13 @@ export class DocumentsService {
         ...createDocumentInput,
       },
       include: {
-        user: {
+        employee: {
           include: {
-            profile: true,
-            role: true,
+            user: {
+              include: {
+                profile: true,
+              },
+            },
           },
         },
       },
@@ -109,10 +112,13 @@ export class DocumentsService {
     const result = await this.prisma.document.findUnique({
       where: { id, userId },
       include: {
-        user: {
+        employee: {
           include: {
-            profile: true,
-            role: true,
+            user: {
+              include: {
+                profile: true,
+              },
+            },
           },
         },
       },
@@ -138,10 +144,13 @@ export class DocumentsService {
       where: { id, userId },
       data: updateDocumentInput,
       include: {
-        user: {
+        employee: {
           include: {
-            profile: true,
-            role: true,
+            user: {
+              include: {
+                profile: true,
+              },
+            },
           },
         },
       },
@@ -153,10 +162,13 @@ export class DocumentsService {
     return await this.prisma.document.delete({
       where: { id, userId },
       include: {
-        user: {
+        employee: {
           include: {
-            profile: true,
-            role: true,
+            user: {
+              include: {
+                profile: true,
+              },
+            },
           },
         },
       },

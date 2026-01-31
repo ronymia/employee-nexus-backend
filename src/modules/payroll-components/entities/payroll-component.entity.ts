@@ -20,6 +20,9 @@ export class PayrollComponent {
   @Field({ nullable: true })
   description?: string;
 
+  @Field()
+  status: string;
+
   @Field(() => ComponentType)
   componentType: ComponentType;
 

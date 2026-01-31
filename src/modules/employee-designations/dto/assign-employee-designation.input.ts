@@ -29,10 +29,6 @@ export class AssignEmployeeDesignationInput {
   @Type(() => Date)
   endDate?: Date;
 
-  @Field(() => Int, { description: 'Salary for this designation' })
-  @IsInt()
-  salary: number;
-
   @Field(() => Boolean, {
     defaultValue: true,
     description: 'Whether this is the active designation',
@@ -46,3 +42,6 @@ export class AssignEmployeeDesignationInput {
   @IsOptional()
   remarks?: string;
 }
+
+@InputType()
+export class UpdateEmployeeDesignationInput extends AssignEmployeeDesignationInput {}

@@ -20,10 +20,13 @@ export class JobHistoriesService {
         ...createJobHistoryInput,
       },
       include: {
-        user: {
+        employee: {
           include: {
-            profile: true,
-            role: true,
+            user: {
+              include: {
+                profile: true,
+              },
+            },
           },
         },
       },
@@ -36,10 +39,13 @@ export class JobHistoriesService {
         userId: userId,
       },
       include: {
-        user: {
+        employee: {
           include: {
-            profile: true,
-            role: true,
+            user: {
+              include: {
+                profile: true,
+              },
+            },
           },
         },
       },
@@ -53,10 +59,13 @@ export class JobHistoriesService {
     const jobHistory = await this.prisma.jobHistory.findUnique({
       where: { id, userId },
       include: {
-        user: {
+        employee: {
           include: {
-            profile: true,
-            role: true,
+            user: {
+              include: {
+                profile: true,
+              },
+            },
           },
         },
       },
@@ -84,10 +93,13 @@ export class JobHistoriesService {
       where: { id, userId },
       data: updateJobHistoryInput,
       include: {
-        user: {
+        employee: {
           include: {
-            profile: true,
-            role: true,
+            user: {
+              include: {
+                profile: true,
+              },
+            },
           },
         },
       },
@@ -100,10 +112,13 @@ export class JobHistoriesService {
     return await this.prisma.jobHistory.delete({
       where: { id, userId },
       include: {
-        user: {
+        employee: {
           include: {
-            profile: true,
-            role: true,
+            user: {
+              include: {
+                profile: true,
+              },
+            },
           },
         },
       },

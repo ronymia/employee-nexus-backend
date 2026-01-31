@@ -39,9 +39,9 @@ export class SocialLinksResolver {
   @UseGuards(GqlAuthGuard)
   async findAll(
     @CurrentUser() user: JwtPayload,
-    @Args('profileId', { type: () => Int, nullable: true }) profileId?: number,
+    @Args('userId', { type: () => Int, nullable: true }) userId?: number,
   ) {
-    const result = await this.socialLinksService.findAll({ profileId });
+    const result = await this.socialLinksService.findAll({ userId });
     return {
       success: true,
       statusCode: HttpStatus.OK,

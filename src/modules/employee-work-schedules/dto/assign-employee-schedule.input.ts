@@ -45,3 +45,6 @@ export class AssignEmployeeScheduleInput {
   @IsOptional()
   notes?: string;
 }
+
+@InputType()
+export class UpdateEmployeeScheduleInput extends AssignEmployeeScheduleInput {}

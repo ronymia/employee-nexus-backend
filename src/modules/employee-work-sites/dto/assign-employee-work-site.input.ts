@@ -34,3 +34,6 @@ export class AssignEmployeeWorkSiteInput {
   @IsOptional()
   isActive?: boolean;
 }
+
+@InputType()
+export class UpdateEmployeeWorkSiteInput extends AssignEmployeeWorkSiteInput {}

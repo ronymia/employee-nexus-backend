@@ -1,4 +1,4 @@
-import { InputType, Field, Int, Float } from '@nestjs/graphql';
+import { InputType, Field, Float } from '@nestjs/graphql';
 import {
   IsString,
   IsEnum,
@@ -42,25 +42,10 @@ export class CreatePayrollComponentInput {
   @Field({ defaultValue: true })
   @IsBoolean()
   @IsOptional()
-  isActive?: boolean;
-
-  @Field({ defaultValue: true })
-  @IsBoolean()
-  @IsOptional()
   isTaxable?: boolean;
 
   @Field({ defaultValue: false })
   @IsBoolean()
   @IsOptional()
   isStatutory?: boolean;
-
-  @Field(() => Int, { nullable: true })
-  @IsNumber()
-  @IsOptional()
-  displayOrder?: number;
-
-  @Field(() => Int, { nullable: true })
-  @IsNumber()
-  @IsOptional()
-  businessId?: number;
 }

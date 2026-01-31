@@ -12,6 +12,10 @@ import { userSearchableFields } from './users.constant';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { PasswordHelpers } from 'src/helpers/passwordHelpers';
 import configuration from 'src/config/configuration';
+import * as dayjs from 'dayjs';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class UsersService {
@@ -170,6 +174,35 @@ export class UsersService {
           },
         },
       });
+    }
+
+    // FILTER BY PROJECT ASSOCIATION
+    if (query?.projectId !== undefined && query?.projectId !== null) {
+      if (query.isProjectAssociated === true) {
+        // Return users associated with this project
+        andCondition.push({
+          employee: {
+            projectMembers: {
+              some: {
+                projectId: query.projectId,
+                isActive: true,
+              },
+            },
+          },
+        });
+      } else if (query.isProjectAssociated === false) {
+        // Return users NOT associated with this project
+        andCondition.push({
+          employee: {
+            projectMembers: {
+              none: {
+                projectId: query.projectId,
+                isActive: true,
+              },
+            },
+          },
+        });
+      }
     }
 
     // FILTER BY WORK SITE
@@ -1381,5 +1414,200 @@ export class UsersService {
     });
 
     return employeeSchedule?.workSchedule || null;
+  }
+
+  async getEmploymentDetails(userId: number) {
+    return this.prisma.employee.findUnique({
+      where: { userId },
+    });
+  }
+
+  // GET EMPLOYEE CALENDAR DATA (Attendance, Leaves, Holidays)
+  async getEmployeeCalendar({
+    user,
+    query,
+  }: {
+    user: JwtPayload;
+    query?: {
+      userId?: number;
+      startDate?: string;
+      endDate?: string;
+      year?: number;
+      month?: number;
+    };
+  }) {
+    const businessId = user?.businessId;
+    if (!businessId) {
+      throw new HttpException('Business not found', HttpStatus.NOT_FOUND);
+    }
+
+    // Determine the target user ID (either from query or current user)
+    const targetUserId = query?.userId || user.userId;
+
+    // Verify the target user belongs to the business and fetch employee & business info
+    const targetUser = await this.prisma.user.findFirst({
+      where: {
+        id: targetUserId,
+        businessId,
+      },
+      select: {
+        id: true,
+        employee: {
+          select: {
+            joiningDate: true,
+          },
+        },
+        business: {
+          select: {
+            registrationDate: true,
+          },
+        },
+      },
+    });
+
+    if (!targetUser) {
+      throw new HttpException(
+        'User not found or does not belong to your business',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    // Calculate date range
+    let startDate: Date;
+    let endDate: Date;
+
+    if (query?.startDate && query?.endDate) {
+      // Parse DD-MM-YYYY format
+      startDate = dayjs(query.startDate, 'DD-MM-YYYY').toDate();
+      endDate = dayjs(query.endDate, 'DD-MM-YYYY').toDate();
+    } else if (query?.year && query?.month) {
+      // Get dates for specific month
+      startDate = dayjs(`01-${query.month}-${query.year}`, 'DD-MM-YYYY')
+        .startOf('month')
+        .toDate();
+      endDate = dayjs(`01-${query.month}-${query.year}`, 'DD-MM-YYYY')
+        .endOf('month')
+        .toDate();
+    } else if (query?.year) {
+      // Get dates for entire year
+      startDate = dayjs(`01-01-${query.year}`, 'DD-MM-YYYY')
+        .startOf('year')
+        .toDate();
+      endDate = dayjs(`31-12-${query.year}`, 'DD-MM-YYYY')
+        .endOf('year')
+        .toDate();
+    } else {
+      // Default to current year
+      startDate = dayjs().startOf('year').toDate();
+      endDate = dayjs().endOf('year').toDate();
+    }
+
+    // Fetch attendances, leaves, and holidays in parallel with selected fields only
+    const [attendances, leaves, holidays] = await Promise.all([
+      // Fetch attendances
+      this.prisma.attendance.findMany({
+        where: {
+          userId: targetUserId,
+          date: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+        select: {
+          date: true,
+          status: true,
+          totalMinutes: true,
+          breakMinutes: true,
+          overtimeMinutes: true,
+        },
+        orderBy: {
+          date: 'asc',
+        },
+      }),
+
+      // Fetch leaves
+      this.prisma.leave.findMany({
+        where: {
+          userId: targetUserId,
+          OR: [
+            {
+              startDate: {
+                gte: startDate,
+                lte: endDate,
+              },
+            },
+            {
+              endDate: {
+                gte: startDate,
+                lte: endDate,
+              },
+            },
+            {
+              AND: [
+                { startDate: { lte: startDate } },
+                { endDate: { gte: endDate } },
+              ],
+            },
+          ],
+        },
+        select: {
+          startDate: true,
+          endDate: true,
+          status: true,
+          leaveDuration: true,
+          totalMinutes: true,
+        },
+        orderBy: {
+          startDate: 'asc',
+        },
+      }),
+
+      // Fetch holidays
+      this.prisma.holiday.findMany({
+        where: {
+          businessId,
+          OR: [
+            {
+              startDate: {
+                gte: startDate,
+                lte: endDate,
+              },
+            },
+            {
+              endDate: {
+                gte: startDate,
+                lte: endDate,
+              },
+            },
+            {
+              AND: [
+                { startDate: { lte: startDate } },
+                { endDate: { gte: endDate } },
+              ],
+            },
+          ],
+        },
+        select: {
+          startDate: true,
+          endDate: true,
+          name: true,
+          description: true,
+          isPaid: true,
+          holidayType: true,
+          isRecurring: true,
+        },
+        orderBy: {
+          startDate: 'asc',
+        },
+      }),
+    ]);
+
+    return {
+      joiningDate: targetUser.employee?.joiningDate || null,
+      registrationDate: targetUser.business?.registrationDate || null,
+      attendances,
+      leaves,
+      holidays,
+    };
   }
 }

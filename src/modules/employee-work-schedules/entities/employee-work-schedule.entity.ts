@@ -6,7 +6,10 @@ import {
   IsBoolean,
   IsString,
 } from 'class-validator';
-import { BaseResponse } from 'src/common/dto/base-response.type';
+import {
+  BaseQueryResponse,
+  BaseResponse,
+} from 'src/common/dto/base-response.type';
 import { WorkSchedule } from 'src/modules/work-schedules/entities/work-schedule.entity';
 import { Employee } from 'src/modules/users/entities/employee.entity';
 import { User } from 'src/modules/users/entities/user.entity';
@@ -65,5 +68,10 @@ export class EmployeeWorkSchedule {
 
 @ObjectType()
 export class EmployeeWorkScheduleResponse extends BaseResponse(
+  EmployeeWorkSchedule,
+) {}
+
+@ObjectType()
+export class EmployeeWorkSchedulesArrayResponse extends BaseQueryResponse(
   EmployeeWorkSchedule,
 ) {}

@@ -42,7 +42,7 @@ export class AppController {
   // SETUP
   @Get('/setup')
   async setup() {
-    await this.appService.setup();
-    return 'Setup complete';
+    const res = await this.appService.setup();
+    return res;
   }
 }

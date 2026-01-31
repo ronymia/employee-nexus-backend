@@ -29,16 +29,18 @@ export class NotesService {
         isPrivate: noteData.isPrivate ?? true,
       },
       include: {
-        user: {
+        employee: {
           include: {
-            profile: true,
-            role: true,
+            user: {
+              include: {
+                profile: true,
+              },
+            },
           },
         },
         creator: {
           include: {
             profile: true,
-            role: true,
           },
         },
       },
@@ -78,16 +80,18 @@ export class NotesService {
             userId,
           },
           include: {
-            user: {
+            employee: {
               include: {
-                profile: true,
-                role: true,
+                user: {
+                  include: {
+                    profile: true,
+                  },
+                },
               },
             },
             creator: {
               include: {
                 profile: true,
-                role: true,
               },
             },
           },
@@ -103,16 +107,18 @@ export class NotesService {
             [sortBy]: sortOrder,
           },
           include: {
-            user: {
+            employee: {
               include: {
-                profile: true,
-                role: true,
+                user: {
+                  include: {
+                    profile: true,
+                  },
+                },
               },
             },
             creator: {
               include: {
                 profile: true,
-                role: true,
               },
             },
           },
@@ -141,16 +147,18 @@ export class NotesService {
     const result = await this.prisma.note.findUnique({
       where: { id, userId },
       include: {
-        user: {
+        employee: {
           include: {
-            profile: true,
-            role: true,
+            user: {
+              include: {
+                profile: true,
+              },
+            },
           },
         },
         creator: {
           include: {
             profile: true,
-            role: true,
           },
         },
       },
@@ -177,16 +185,18 @@ export class NotesService {
       where: { id, userId },
       data: updateData,
       include: {
-        user: {
+        employee: {
           include: {
-            profile: true,
-            role: true,
+            user: {
+              include: {
+                profile: true,
+              },
+            },
           },
         },
         creator: {
           include: {
             profile: true,
-            role: true,
           },
         },
       },
@@ -198,16 +208,18 @@ export class NotesService {
     return await this.prisma.note.delete({
       where: { id, userId },
       include: {
-        user: {
+        employee: {
           include: {
-            profile: true,
-            role: true,
+            user: {
+              include: {
+                profile: true,
+              },
+            },
           },
         },
         creator: {
           include: {
             profile: true,
-            role: true,
           },
         },
       },

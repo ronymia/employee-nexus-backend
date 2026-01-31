@@ -1,10 +1,14 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { EmployeeWorkSchedulesService } from './employee-work-schedules.service';
 import {
   EmployeeWorkSchedule,
   EmployeeWorkScheduleResponse,
+  EmployeeWorkSchedulesArrayResponse,
 } from './entities/employee-work-schedule.entity';
-import { AssignEmployeeScheduleInput } from './dto/assign-employee-schedule.input';
+import {
+  AssignEmployeeScheduleInput,
+  UpdateEmployeeScheduleInput,
+} from './dto/assign-employee-schedule.input';
 import { GetEmployeeSchedulesInput } from './dto/get-employee-schedules.input';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
@@ -62,6 +66,101 @@ export class EmployeeWorkSchedulesResolver {
       success: true,
       statusCode: HttpStatus.OK,
       message: 'Employee schedules retrieved successfully',
+      data: result,
+    };
+  }
+
+  // GET WORK SCHEDULE HISTORY FOR USER
+  @Query(() => EmployeeWorkSchedulesArrayResponse, {
+    name: 'workScheduleHistory',
+    description: 'Get complete work schedule history for an employee',
+  })
+  async getWorkScheduleHistory(
+    @CurrentUser() user: JwtPayload,
+    @Args('userId', { type: () => Int }) userId: number,
+  ) {
+    const result =
+      await this.employeeWorkSchedulesService.getWorkScheduleHistory({
+        user,
+        userId,
+      });
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Work schedule history retrieved successfully',
+      data: result,
+    };
+  }
+
+  // GET ACTIVE WORK SCHEDULE FOR USER
+  @Query(() => EmployeeWorkScheduleResponse, {
+    name: 'getActiveWorkSchedule',
+    description: 'Get active work schedule for an employee',
+  })
+  async getActiveWorkSchedule(
+    @CurrentUser() user: JwtPayload,
+    @Args('userId', { type: () => Int }) userId: number,
+  ) {
+    const result =
+      await this.employeeWorkSchedulesService.getActiveWorkSchedule({
+        user,
+        userId,
+      });
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Active work schedule retrieved successfully',
+      data: result,
+    };
+  }
+
+  // GET WORK SCHEDULE BY COMPOSITE ID
+  @Query(() => EmployeeWorkScheduleResponse, {
+    name: 'getWorkScheduleById',
+    description: 'Get specific work schedule assignment by composite ID',
+  })
+  async getWorkScheduleById(
+    @CurrentUser() user: JwtPayload,
+    @Args('userId', { type: () => Int }) userId: number,
+    @Args('workScheduleId', { type: () => Int }) workScheduleId: number,
+  ) {
+    const result = await this.employeeWorkSchedulesService.getByCompositeId({
+      user,
+      userId,
+      workScheduleId,
+    });
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Work schedule assignment retrieved successfully',
+      data: result,
+    };
+  }
+
+  // UPDATE EMPLOYEE WORK SCHEDULE
+  @Mutation(() => EmployeeWorkScheduleResponse, {
+    description: 'Update an employee work schedule assignment',
+  })
+  async updateEmployeeSchedule(
+    @CurrentUser() user: JwtPayload,
+    @Args('updateEmployeeScheduleInput')
+    updateEmployeeScheduleInput: UpdateEmployeeScheduleInput,
+  ) {
+    const result =
+      await this.employeeWorkSchedulesService.updateEmployeeSchedule({
+        user,
+        userId: updateEmployeeScheduleInput.userId,
+        workScheduleId: updateEmployeeScheduleInput.workScheduleId,
+        updateData: updateEmployeeScheduleInput,
+      });
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Employee work schedule updated successfully',
       data: result,
     };
   }

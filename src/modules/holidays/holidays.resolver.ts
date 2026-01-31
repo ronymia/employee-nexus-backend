@@ -14,11 +14,27 @@ import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { QueryHolidayInput } from './dto/query-holiday.input';
+import { HolidayOverviewResponse } from './entities/holiday-overview.entity';
 
 @Resolver(() => Holiday)
 @UseGuards(GqlAuthGuard, PermissionsGuard)
 export class HolidaysResolver {
   constructor(private readonly holidaysService: HolidaysService) {}
+
+  // HOLIDAY OVERVIEW
+  @Query(() => HolidayOverviewResponse, {
+    name: 'holidayOverview',
+  })
+  @RequirePermissions('Holiday:read')
+  async holidayOverview(@CurrentUser() user: JwtPayload) {
+    const result = await this.holidaysService.getHolidayOverview({ user });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `Holiday overview retrieved successfully`,
+      data: result,
+    };
+  }
 
   // CREATE HOLIDAY
   @Mutation(() => HolidayResponse, { name: 'createHoliday' })

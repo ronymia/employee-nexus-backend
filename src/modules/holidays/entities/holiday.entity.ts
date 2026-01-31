@@ -49,12 +49,6 @@ export class Holiday {
   })
   business: Business;
 
-  @Field(() => Int, { description: 'ID of the creator' })
-  createdBy: number;
-
-  @Field(() => User, { description: 'ID of the updater' })
-  creator: User;
-
   @Field(() => Date, { description: 'Date when the holiday was created' })
   createdAt: Date;
 

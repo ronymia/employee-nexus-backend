@@ -159,4 +159,174 @@ export class EmployeeWorkSitesService {
       },
     });
   }
+
+  // GET WORK SITE HISTORY FOR USER
+  async getWorkSiteHistory({
+    user,
+    userId,
+  }: {
+    user: JwtPayload;
+    userId: number;
+  }) {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    // Verify user belongs to business
+    const targetUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!targetUser || targetUser.businessId !== businessId) {
+      throw new NotFoundException(
+        `User with ID ${userId} not found in your business`,
+      );
+    }
+
+    return await this.prisma.employeeWorkSite.findMany({
+      where: { userId },
+      orderBy: {
+        startDate: 'desc',
+      },
+      include: {
+        employee: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+        workSite: true,
+      },
+    });
+  }
+
+  // GET ACTIVE WORK SITES FOR USER
+  async getActiveWorkSites({
+    user,
+    userId,
+  }: {
+    user: JwtPayload;
+    userId: number;
+  }) {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    const targetUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!targetUser || targetUser.businessId !== businessId) {
+      throw new NotFoundException(
+        `User with ID ${userId} not found in your business`,
+      );
+    }
+
+    return await this.prisma.employeeWorkSite.findMany({
+      where: {
+        userId,
+        isActive: true,
+      },
+      include: {
+        employee: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+        workSite: true,
+      },
+    });
+  }
+
+  // GET BY COMPOSITE ID
+  async getByCompositeId({
+    user,
+    userId,
+    workSiteId,
+  }: {
+    user: JwtPayload;
+    userId: number;
+    workSiteId: number;
+  }) {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    const employeeWorkSite = await this.prisma.employeeWorkSite.findUnique({
+      where: {
+        userId_workSiteId: {
+          userId,
+          workSiteId,
+        },
+      },
+      include: {
+        employee: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+        workSite: true,
+      },
+    });
+
+    if (!employeeWorkSite) {
+      throw new NotFoundException(`Employee work site assignment not found`);
+    }
+
+    if (employeeWorkSite.employee.user.businessId !== businessId) {
+      throw new NotFoundException(
+        `Employee work site assignment not found in your business`,
+      );
+    }
+
+    return employeeWorkSite;
+  }
+
+  // UPDATE EMPLOYEE WORK SITE
+  async updateEmployeeWorkSite({
+    user,
+    userId,
+    workSiteId,
+    updateData,
+  }: {
+    user: JwtPayload;
+    userId: number;
+    workSiteId: number;
+    updateData: Partial<AssignEmployeeWorkSiteInput>;
+  }) {
+    const businessId = user.businessId;
+    if (!businessId) throw new Error('Business ID not found in token');
+
+    await this.getByCompositeId({ user, userId, workSiteId });
+
+    return await this.prisma.employeeWorkSite.update({
+      where: {
+        userId_workSiteId: {
+          userId,
+          workSiteId,
+        },
+      },
+      data: updateData,
+      include: {
+        employee: {
+          include: {
+            user: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+        workSite: true,
+      },
+    });
+  }
 }

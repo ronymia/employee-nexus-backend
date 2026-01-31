@@ -23,6 +23,8 @@ import { JwtPayload } from '../auth/jwt.strategy';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { QueryLeaveInput } from './dto/query-leave.input';
 import { RequestLeaveInput } from './dto/request-leave.input';
+import { ApproveLeaveInput, RejectLeaveInput } from './dto/approve-leave.input';
+import { LeaveOverviewResponse } from './entities/leave-overview.entity';
 
 @ObjectType()
 class LeaveBalanceData {
@@ -64,6 +66,21 @@ class LeaveBalanceResponse {
 @UseGuards(GqlAuthGuard, PermissionsGuard)
 export class LeavesResolver {
   constructor(private readonly leavesService: LeavesService) {}
+
+  // LEAVE OVERVIEW
+  @Query(() => LeaveOverviewResponse, {
+    name: 'leaveOverview',
+  })
+  @RequirePermissions('Leave:read')
+  async leaveOverview() {
+    const result = await this.leavesService.getLeaveOverview();
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `Leave overview retrieved successfully`,
+      data: result,
+    };
+  }
 
   // CREATE LEAVE
   @Mutation(() => LeaveResponse, { name: 'leaveRequest' })
@@ -189,8 +206,14 @@ export class LeavesResolver {
   // APPROVE LEAVE
   @Mutation(() => LeaveResponse, { name: 'approveLeave' })
   @RequirePermissions('Leave:update')
-  async approveLeave(@Args('leaveId', { type: () => Int }) leaveId: number) {
-    const result = await this.leavesService.approveLeave({ leaveId });
+  async approveLeave(
+    @CurrentUser() user: JwtPayload,
+    @Args('approveLeaveInput') approveLeaveInput: ApproveLeaveInput,
+  ) {
+    const result = await this.leavesService.approveLeave({
+      user,
+      approveLeaveInput,
+    });
     return {
       success: true,
       statusCode: HttpStatus.OK,
@@ -202,8 +225,14 @@ export class LeavesResolver {
   // REJECT LEAVE
   @Mutation(() => LeaveResponse, { name: 'rejectLeave' })
   @RequirePermissions('Leave:update')
-  async rejectLeave(@Args('leaveId', { type: () => Int }) leaveId: number) {
-    const result = await this.leavesService.rejectLeave({ leaveId });
+  async rejectLeave(
+    @CurrentUser() user: JwtPayload,
+    @Args('rejectLeaveInput') rejectLeaveInput: RejectLeaveInput,
+  ) {
+    const result = await this.leavesService.rejectLeave({
+      user,
+      rejectLeaveInput,
+    });
     return {
       success: true,
       statusCode: HttpStatus.OK,

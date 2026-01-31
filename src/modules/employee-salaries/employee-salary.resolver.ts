@@ -11,7 +11,6 @@ import { UpdateEmployeeSalaryInput } from './dto/update-employee-salary.input';
 import { QueryEmployeeSalaryInput } from './dto/query-employee-salary.input';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
-import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
 
@@ -22,7 +21,7 @@ export class EmployeeSalariesResolver {
 
   // CREATE SALARY
   @Mutation(() => EmployeeSalaryResponse, { name: 'createSalary' })
-  @RequirePermissions('Salary:create')
+  // @RequirePermissions('Salary:create')
   async createSalary(
     @Args('createEmployeeSalaryInput')
     createEmployeeSalaryInput: CreateEmployeeSalaryInput,
@@ -42,7 +41,7 @@ export class EmployeeSalariesResolver {
 
   // FIND ALL SALARIES
   @Query(() => EmployeeSalariesQueryResponse, { name: 'salaries' })
-  @RequirePermissions('Salary:read')
+  // @RequirePermissions('Salary:read')
   async findAll(
     @CurrentUser() user: JwtPayload,
     @Args('query', { nullable: true }) query?: QueryEmployeeSalaryInput,
@@ -59,7 +58,7 @@ export class EmployeeSalariesResolver {
 
   // FIND ONE SALARY
   @Query(() => EmployeeSalaryResponse, { name: 'salaryById' })
-  @RequirePermissions('Salary:read')
+  // @RequirePermissions('Salary:read')
   async findOne(
     @Args('id', { type: () => Int }) id: number,
     @CurrentUser() user: JwtPayload,
@@ -75,7 +74,7 @@ export class EmployeeSalariesResolver {
 
   // UPDATE SALARY
   @Mutation(() => EmployeeSalaryResponse, { name: 'updateSalary' })
-  @RequirePermissions('Salary:update')
+  // @RequirePermissions('Salary:update')
   async updateSalary(
     @Args('updateEmployeeSalaryInput')
     updateEmployeeSalaryInput: UpdateEmployeeSalaryInput,
@@ -95,7 +94,7 @@ export class EmployeeSalariesResolver {
 
   // DELETE SALARY
   @Mutation(() => EmployeeSalaryResponse, { name: 'deleteSalary' })
-  @RequirePermissions('Salary:delete')
+  // @RequirePermissions('Salary:delete')
   async removeSalary(
     @Args('id', { type: () => Int }) id: number,
     @CurrentUser() user: JwtPayload,
@@ -111,7 +110,7 @@ export class EmployeeSalariesResolver {
 
   // GET ACTIVE SALARY FOR USER
   @Query(() => EmployeeSalaryResponse, { name: 'activeSalaryByUserId' })
-  @RequirePermissions('Salary:read')
+  // @RequirePermissions('Salary:read')
   async getActiveSalary(
     @Args('userId', { type: () => Int }) userId: number,
     @CurrentUser() user: JwtPayload,
@@ -130,7 +129,7 @@ export class EmployeeSalariesResolver {
 
   // GET SALARY HISTORY FOR USER
   @Query(() => EmployeeSalariesQueryResponse, { name: 'salaryHistory' })
-  @RequirePermissions('Salary:read')
+  // @RequirePermissions('Salary:read')
   async getSalaryHistory(
     @Args('userId', { type: () => Int }) userId: number,
     @CurrentUser() user: JwtPayload,

@@ -23,11 +23,7 @@ import { SubscriptionPlansModule } from './modules/subscription-plans/subscripti
 import { SubscriptionFeaturesModule } from './modules/subscription-features/subscription-features.module';
 import { DesignationsModule } from './modules/designations/designations.module';
 import { FeaturesModule } from './modules/features/features.module';
-import { JobTypesModule } from './modules/job-types/job-types.module';
 import { BusinessSchedulesModule } from './modules/business-schedules/business-schedules.module';
-import { JobPlatformsModule } from './modules/job-platforms/job-platforms.module';
-import { RecruitmentProcessesModule } from './modules/recruitment-processes/recruitment-processes.module';
-import { OnboardingProcessesModule } from './modules/onboarding-processes/onboarding-processes.module';
 import { WorkSitesModule } from './modules/work-sites/work-sites.module';
 import { EmploymentStatusModule } from './modules/employment-status/employment-status.module';
 import { LeaveTypesModule } from './modules/leave-types/leave-types.module';
@@ -40,6 +36,7 @@ import { AssetTypesModule } from './modules/asset-types/asset-types.module';
 import { AssetsModule } from './modules/assets/assets.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { JobHistoriesModule } from './modules/job-histories/job-histories.module';
+import { EducationHistoriesModule } from './modules/education-histories/education-histories.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { NotesModule } from './modules/notes/notes.module';
 import { SocialLinksModule } from './modules/social-links/social-links.module';
@@ -61,6 +58,9 @@ import { EmployeeWorkSchedulesModule } from './modules/employee-work-schedules/e
 import { EmployeeEmploymentStatusesModule } from './modules/employee-employment-statuses/employee-employment-statuses.module';
 import { BusinessSubscriptionsModule } from './modules/business-subscriptions/business-subscriptions.module';
 import { EmployeeSalariesModule } from './modules/employee-salaries/employee-salary.module';
+import { EmployeePayrollComponentsModule } from './modules/employee-payroll-components/employee-payroll-components.module';
+import { EmployeePayslipAdjustmentsModule } from './modules/employee-payslip-adjustments/employee-payslip-adjustments.module';
+import { SeederModule } from './modules/seeder/seeder.module';
 
 @Module({
   imports: [
@@ -91,11 +91,7 @@ import { EmployeeSalariesModule } from './modules/employee-salaries/employee-sal
     BusinessesModule,
     FeaturesModule,
     DesignationsModule,
-    JobTypesModule,
     BusinessSchedulesModule,
-    JobPlatformsModule,
-    RecruitmentProcessesModule,
-    OnboardingProcessesModule,
     WorkSitesModule,
     EmploymentStatusModule,
     LeaveTypesModule,
@@ -108,6 +104,7 @@ import { EmployeeSalariesModule } from './modules/employee-salaries/employee-sal
     AssetsModule,
     ProjectsModule,
     JobHistoriesModule,
+    EducationHistoriesModule,
     DocumentsModule,
     NotesModule,
     SocialLinksModule,
@@ -128,6 +125,9 @@ import { EmployeeSalariesModule } from './modules/employee-salaries/employee-sal
     EmployeeEmploymentStatusesModule,
     BusinessSubscriptionsModule,
     EmployeeSalariesModule,
+    EmployeePayrollComponentsModule,
+    EmployeePayslipAdjustmentsModule,
+    SeederModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

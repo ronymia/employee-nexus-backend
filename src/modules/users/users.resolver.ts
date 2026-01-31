@@ -29,9 +29,11 @@ import { Designation } from '../designations/entities/designation.entity';
 import { EmploymentStatus } from '../employment-status/entities/employment-status.entity';
 import { WorkSite } from '../work-sites/entities/work-site.entity';
 import { WorkSchedule } from '../work-schedules/entities/work-schedule.entity';
-import { Employee } from './entities/employee.entity';
+import { Employee, EmployeeResponse } from './entities/employee.entity';
 import { EmployeeSalariesService } from '../employee-salaries/employee-salary.service';
 import { EmployeeSalary } from '../employee-salaries/entities/employee-salary.entity';
+import { EmployeeCalendarResponse } from './entities/employee-calendar.entity';
+import { QueryEmployeeCalendarInput } from './dto/query-employee-calendar.input';
 
 @Resolver(() => User)
 @UseGuards(GqlAuthGuard, PermissionsGuard)
@@ -206,6 +208,37 @@ export class UsersResolver {
     };
   }
 
+  // @Mutation(() => UserResponse, { name: 'updateEmploymentDetails' })
+  // @RequirePermissions('User:read')
+  // async updateEmploymentDetails(
+  //   @Args('updateEmploymentDetailsInput')
+  //   updateEmploymentDetailsInput: UpdateEmploymentDetailsInput,
+  //   @CurrentUser() user: JwtPayload,
+  // ) {
+  //   const result = await this.usersService.findOne(user.userId);
+  //   return {
+  //     success: true,
+  //     statusCode: HttpStatus.OK,
+  //     message: 'Employment details retrieved successfully',
+  //     data: result,
+  //   };
+  // }
+
+  @Query(() => EmployeeResponse, { name: 'getEmploymentDetails' })
+  @RequirePermissions('User:read')
+  async getEmploymentDetails(
+    @Args('id', { type: () => Int }) id: number,
+    // @CurrentUser() user: JwtPayload,
+  ) {
+    const result = await this.usersService.getEmploymentDetails(id);
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Employment details retrieved successfully',
+      data: result,
+    };
+  }
+
   @Query(() => UserStatisticsResponse, { name: 'userStatistics' })
   @RequirePermissions('User:read')
   async userStatistics(@CurrentUser() user: JwtPayload) {
@@ -217,6 +250,21 @@ export class UsersResolver {
       success: true,
       statusCode: HttpStatus.OK,
       message: 'User statistics retrieved successfully',
+      data: result,
+    };
+  }
+
+  @Query(() => EmployeeCalendarResponse, { name: 'employeeCalendar' })
+  @RequirePermissions('User:read')
+  async employeeCalendar(
+    @CurrentUser() user: JwtPayload,
+    @Args('query', { nullable: true }) query?: QueryEmployeeCalendarInput,
+  ) {
+    const result = await this.usersService.getEmployeeCalendar({ user, query });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Employee calendar retrieved successfully',
       data: result,
     };
   }

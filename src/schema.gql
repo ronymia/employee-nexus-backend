@@ -9,8 +9,41 @@ input AddPayslipAdjustmentInput {
   type: String!
 }
 
+"""
+Status of payslip adjustment - PENDING, APPROVED, REJECTED, APPLIED, or CANCELLED
+"""
+enum AdjustmentStatus {
+  APPLIED
+  APPROVED
+  CANCELLED
+  PENDING
+  REJECTED
+}
+
+input ApproveAttendanceInput {
+  """Attendance ID"""
+  attendanceId: Int!
+
+  """Remarks"""
+  remarks: String
+}
+
+input ApproveLeaveInput {
+  """Leave ID"""
+  leaveId: Int!
+
+  """Remarks"""
+  remarks: String
+}
+
 input ApprovePayrollCycleInput {
   id: Int!
+}
+
+input ApproveRejectPayslipAdjustmentInput {
+  id: Int!
+  notes: String
+  status: AdjustmentStatus!
 }
 
 type Asset {
@@ -174,14 +207,22 @@ input AssignEmployeeDesignationInput {
   """Additional remarks"""
   remarks: String
 
-  """Salary for this designation"""
-  salary: Int!
-
   """Start date of designation"""
   startDate: DateTime!
 
   """User ID of the employee"""
   userId: Int!
+}
+
+input AssignEmployeePayrollComponentInput {
+  effectiveFrom: DateTime!
+  effectiveTo: DateTime
+  notes: String
+  payrollComponentId: Int!
+  userId: Int!
+
+  """The value of the payroll component for the employee"""
+  value: Float!
 }
 
 input AssignEmployeeScheduleInput {
@@ -245,8 +286,13 @@ input AssignEmployeeWorkSiteInput {
 }
 
 input AssignProjectMemberInput {
+  endDate: DateTime
+  isActive: Boolean! = true
+  notes: String
   projectId: Int!
+  remarks: String
   role: String
+  startDate: DateTime!
   userId: Int!
 }
 
@@ -269,6 +315,18 @@ type Attendance {
   """Punch records for this attendance"""
   punchRecords: [AttendancePunch!]
 
+  """Remarks for this attendance"""
+  remarks: String
+
+  """Reviewed timestamp"""
+  reviewedAt: DateTime
+
+  """Reviewer ID who reviewed this attendance"""
+  reviewedBy: Int
+
+  """User who reviewed this attendance"""
+  reviewer: User
+
   """Total work schedule minutes for the day"""
   scheduleMinutes: Int!
 
@@ -277,6 +335,9 @@ type Attendance {
 
   """Total working minutes for the day"""
   totalMinutes: Int!
+
+  """Attendance type such as regular, late, partial"""
+  type: String!
 
   """Last update timestamp"""
   updatedAt: DateTime!
@@ -293,6 +354,33 @@ type AttendanceAnalytics {
   thisWeek: AttendanceThisWeek!
   today: AttendanceToday!
   trend: [AttendanceTrend!]!
+}
+
+type AttendanceDateInfo {
+  """Break minutes"""
+  breakMinutes: Int!
+
+  """Attendance date"""
+  date: DateTime!
+
+  """Overtime minutes"""
+  overtimeMinutes: Int!
+
+  """Attendance status (present, absent, late, half_day, on_leave)"""
+  status: String!
+
+  """Total minutes worked"""
+  totalMinutes: Int!
+}
+
+type AttendanceOverview {
+  absent: Int!
+  approved: Int!
+  late: Int!
+  partial: Int!
+  pending: Int!
+  rejected: Int!
+  total: Int!
 }
 
 type AttendancePunch {
@@ -436,6 +524,14 @@ type AttendanceSummary {
   recentAttendance: [RecentAttendanceItem!]!
   thisMonth: AttendanceThisMonths!
   today: AttendanceTodays!
+}
+
+type AttendanceSummaryAttendanceOverview {
+  data: AttendanceOverview!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type AttendanceThisMonth {
@@ -859,6 +955,41 @@ input CreateDocumentInput {
   userId: Int!
 }
 
+input CreateEducationHistoryInput {
+  """City where institution is located"""
+  city: String!
+
+  """Country where institution is located"""
+  country: String!
+
+  """Degree or qualification"""
+  degree: String!
+
+  """Additional details or achievements"""
+  description: String!
+
+  """End/graduation date (MM-YYYY or YYYY)"""
+  endDate: String
+
+  """Field of study or major"""
+  fieldOfStudy: String!
+
+  """Grade, GPA, or percentage"""
+  grade: String
+
+  """Institution or university name"""
+  institution: String!
+
+  """Whether currently studying"""
+  isCurrentlyStudying: Boolean! = false
+
+  """Start date (MM-YYYY or YYYY)"""
+  startDate: String!
+
+  """ID of the employee"""
+  userId: Int!
+}
+
 input CreateEmergencyContactInput {
   name: String!
   phone: String!
@@ -982,28 +1113,12 @@ input CreateJobHistoryInput {
   userId: Int!
 }
 
-input CreateJobPlatformInput {
-  """Description of the job platform"""
-  description: String!
-
-  """Name of the job platform"""
-  name: String!
-}
-
-input CreateJobTypeInput {
-  """Description of the job type"""
-  description: String!
-
-  """Name of the job type"""
-  name: String!
-}
-
 input CreateLeaveInput {
   """Supporting documents (JSON array or URLs)"""
   attachments: String
 
   """Leave end date (required for MULTI_DAY)"""
-  endDate: String
+  endDate: DateTime
 
   """Leave duration type (SINGLE_DAY, MULTI_DAY, HALF_DAY)"""
   leaveDuration: LeaveDuration!
@@ -1018,10 +1133,7 @@ input CreateLeaveInput {
   notes: String
 
   """Leave start date"""
-  startDate: String!
-
-  """Total leave hours deducted from balance"""
-  totalHours: Float!
+  startDate: DateTime!
 
   """User ID"""
   userId: Int!
@@ -1091,26 +1203,12 @@ input CreateNotificationTemplateInput {
   type: NotificationType!
 }
 
-input CreateOnboardingProcessInput {
-  """Description of the onboarding process"""
-  description: String!
-
-  """Whether the onboarding process is required"""
-  isRequired: Boolean!
-
-  """Name of the onboarding process"""
-  name: String!
-}
-
 input CreatePayrollComponentInput {
-  businessId: Int
   calculationType: CalculationType!
   code: String!
   componentType: ComponentType!
   defaultValue: Float
   description: String
-  displayOrder: Int
-  isActive: Boolean! = true
   isStatutory: Boolean! = false
   isTaxable: Boolean! = true
   name: String!
@@ -1144,6 +1242,14 @@ input CreatePayrollItemInput {
   workingDays: Int!
 }
 
+input CreatePayslipAdjustmentInput {
+  notes: String
+  payrollComponentId: Int
+  remarks: String!
+  userId: Int!
+  value: Float!
+}
+
 input CreateProfileInput {
   address: String!
   city: String!
@@ -1163,17 +1269,6 @@ input CreateProjectInput {
   name: String!
   startDate: DateTime!
   status: String!
-}
-
-input CreateRecruitmentProcessInput {
-  """Description of the recruitment process"""
-  description: String!
-
-  """Whether the recruitment process is required"""
-  isRequired: Boolean!
-
-  """Name of the recruitment process"""
-  name: String!
 }
 
 input CreateSocialLinkInput {
@@ -1419,6 +1514,9 @@ type Document {
   """Description of the document"""
   description: String
 
+  """Employee who owns this document"""
+  employee: Employee
+
   """Unique identifier for the document"""
   id: ID!
 
@@ -1428,10 +1526,7 @@ type Document {
   """Date when the document was last updated"""
   updatedAt: DateTime!
 
-  """User who owns this document"""
-  user: User
-
-  """ID of the user who owns the document"""
+  """ID of the employee who owns the document"""
   userId: Int!
 }
 
@@ -1445,6 +1540,67 @@ type DocumentResponse {
 
 type DocumentsQueryResponse {
   data: [Document!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EducationHistoriesQueryResponse {
+  data: [EducationHistory!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EducationHistory {
+  """City where institution is located"""
+  city: String
+
+  """Country where institution is located"""
+  country: String!
+
+  """Date when the record was created"""
+  createdAt: DateTime!
+
+  """Degree or qualification"""
+  degree: String!
+
+  """Additional details or achievements"""
+  description: String
+
+  """Employee who owns this education history"""
+  employee: Employee
+
+  """End/graduation date (MM-YYYY or YYYY)"""
+  endDate: DateTime
+
+  """Field of study or major"""
+  fieldOfStudy: String!
+
+  """Grade, GPA, or percentage"""
+  grade: String
+  id: ID!
+
+  """Institution or university name"""
+  institution: String!
+
+  """Whether currently studying"""
+  isCurrentlyStudying: Boolean!
+
+  """Start date (MM-YYYY or YYYY)"""
+  startDate: DateTime!
+
+  """Date when the record was last updated"""
+  updatedAt: DateTime!
+
+  """ID of the employee"""
+  userId: Int!
+}
+
+type EducationHistoryResponse {
+  data: EducationHistory!
   message: String!
   meta: PaginationMeta
   statusCode: Float!
@@ -1498,6 +1654,31 @@ type Employee {
 
   """Active work sites of the user"""
   workSites: [WorkSite!]
+}
+
+type EmployeeCalendarData {
+  """List of attendance dates"""
+  attendances: [AttendanceDateInfo!]!
+
+  """List of holidays"""
+  holidays: [HolidayDateInfo!]!
+
+  """Employee joining date"""
+  joiningDate: DateTime
+
+  """List of leave dates"""
+  leaves: [LeaveDateInfo!]!
+
+  """Business registration date"""
+  registrationDate: DateTime
+}
+
+type EmployeeCalendarResponse {
+  data: EmployeeCalendarData!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Int!
+  success: Boolean!
 }
 
 type EmployeeDashboard {
@@ -1563,6 +1744,14 @@ type EmployeeDepartmentResponse {
   success: Boolean!
 }
 
+type EmployeeDepartmentsArrayResponse {
+  data: [EmployeeDepartment!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type EmployeeDesignation {
   """Created timestamp"""
   createdAt: DateTime!
@@ -1581,9 +1770,6 @@ type EmployeeDesignation {
   isActive: Boolean!
   remarks: String
 
-  """Salary of employee"""
-  salary: Int!
-
   """Start Date"""
   startDate: DateTime!
 
@@ -1596,6 +1782,14 @@ type EmployeeDesignation {
 
 type EmployeeDesignationResponse {
   data: EmployeeDesignation!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EmployeeDesignationsArrayResponse {
+  data: [EmployeeDesignation!]!
   message: String!
   meta: PaginationMeta
   statusCode: Float!
@@ -1639,6 +1833,54 @@ type EmployeeEmploymentStatus {
 
 type EmployeeEmploymentStatusResponse {
   data: EmployeeEmploymentStatus!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EmployeeEmploymentStatusesArrayResponse {
+  data: [EmployeeEmploymentStatus!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EmployeePayrollComponent {
+  assignedBy: Int
+  assignedByUser: User
+  createdAt: DateTime!
+  effectiveFrom: DateTime!
+  effectiveTo: DateTime
+  employee: User
+  id: Int!
+  notes: String
+  payrollComponent: PayrollComponent
+  payrollComponentId: Int!
+  updatedAt: DateTime!
+  userId: Int!
+  value: Float
+}
+
+type EmployeePayrollComponentResponse {
+  data: EmployeePayrollComponent!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EmployeePayrollComponentsQueryResponse {
+  data: [EmployeePayrollComponent!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type EmployeeResponse {
+  data: Employee!
   message: String!
   meta: PaginationMeta
   statusCode: Float!
@@ -1745,6 +1987,14 @@ type EmployeeWorkScheduleResponse {
   success: Boolean!
 }
 
+type EmployeeWorkSchedulesArrayResponse {
+  data: [EmployeeWorkSchedule!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
 type EmployeeWorkSite {
   """Created timestamp"""
   createdAt: DateTime!
@@ -1775,16 +2025,18 @@ type EmployeeWorkSite {
 }
 
 type EmployeeWorkSiteResponse {
-  """Employee Work Site data"""
-  data: [EmployeeWorkSite!]!
-
-  """Response message"""
+  data: EmployeeWorkSite!
   message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
 
-  """Response status code"""
-  statusCode: Int!
-
-  """Base response data"""
+type EmployeeWorkSitesArrayResponse {
+  data: [EmployeeWorkSite!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
   success: Boolean!
 }
 
@@ -1946,12 +2198,6 @@ type Holiday {
   """Date when the holiday was created"""
   createdAt: DateTime!
 
-  """ID of the creator"""
-  createdBy: Int!
-
-  """ID of the updater"""
-  creator: User!
-
   """Description of the holiday"""
   description: String
 
@@ -1978,6 +2224,48 @@ type Holiday {
 
   """Date when the holiday was last updated"""
   updatedAt: DateTime!
+}
+
+type HolidayDateInfo {
+  """Holiday description"""
+  description: String
+
+  """Holiday end date"""
+  endDate: DateTime!
+
+  """Holiday type (PUBLIC, RELIGIOUS, COMPANY_SPECIFIC, REGIONAL)"""
+  holidayType: String!
+
+  """Is paid holiday"""
+  isPaid: Boolean!
+
+  """Is recurring holiday"""
+  isRecurring: Boolean!
+
+  """Holiday name"""
+  name: String!
+
+  """Holiday start date"""
+  startDate: DateTime!
+}
+
+type HolidayOverview {
+  companySpecific: Int!
+  paid: Int!
+  public: Int!
+  recurring: Int!
+  regional: Int!
+  religious: Int!
+  total: Int!
+  unpaid: Int!
+}
+
+type HolidayOverviewResponse {
+  data: HolidayOverview!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type HolidayResponse {
@@ -2028,6 +2316,9 @@ type JobHistory {
   """Date when the record was created"""
   createdAt: DateTime!
 
+  """Employee who owns this job history"""
+  employee: Employee
+
   """Employment type"""
   employmentType: String!
 
@@ -2047,99 +2338,12 @@ type JobHistory {
   """Date when the record was last updated"""
   updatedAt: DateTime!
 
-  """User who owns this job history"""
-  user: User
-
-  """ID of the user"""
+  """ID of the employee"""
   userId: Int!
 }
 
 type JobHistoryResponse {
   data: JobHistory!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
-type JobPlatform {
-  """ID of the business"""
-  businessId: Int!
-
-  """Date when the job platform was created"""
-  createdAt: DateTime!
-
-  """ID of the creator"""
-  createdBy: Int!
-
-  """Description of the job platform"""
-  description: String!
-
-  """Unique identifier for the job platform"""
-  id: ID!
-
-  """Name of the job platform"""
-  name: String!
-
-  """Status of the job platform"""
-  status: Status!
-
-  """Date when the job platform was last updated"""
-  updatedAt: DateTime!
-}
-
-type JobPlatformResponse {
-  data: JobPlatform!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
-type JobPlatformsQueryResponse {
-  data: [JobPlatform!]!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
-type JobType {
-  """ID of the business"""
-  businessId: Int!
-
-  """Date when the job type was created"""
-  createdAt: DateTime!
-
-  """ID of the creator"""
-  createdBy: Int!
-
-  """Description of the job type"""
-  description: String!
-
-  """Unique identifier for the job type"""
-  id: ID!
-
-  """Name of the job type"""
-  name: String!
-
-  """Status of the job type"""
-  status: Status!
-
-  """Date when the job type was last updated"""
-  updatedAt: DateTime!
-}
-
-type JobTypeResponse {
-  data: JobType!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
-type JobTypesQueryResponse {
-  data: [JobType!]!
   message: String!
   meta: PaginationMeta
   statusCode: Float!
@@ -2182,7 +2386,7 @@ type Leave {
   notes: String
 
   """Reason for rejection if rejected"""
-  rejectionReason: String
+  remarks: String
 
   """When leave was approved/rejected"""
   reviewedAt: DateTime
@@ -2200,7 +2404,7 @@ type Leave {
   status: String!
 
   """Total leave hours deducted from balance"""
-  totalHours: Float!
+  totalMinutes: Float!
 
   """Date when the leave was last updated"""
   updatedAt: DateTime!
@@ -2233,6 +2437,23 @@ type LeaveByType {
   leaveType: String!
 }
 
+type LeaveDateInfo {
+  """Leave end date"""
+  endDate: DateTime
+
+  """Leave duration (SINGLE_DAY, MULTI_DAY, HALF_DAY)"""
+  leaveDuration: String!
+
+  """Leave start date"""
+  startDate: DateTime!
+
+  """Leave status (pending, approved, rejected, cancelled)"""
+  status: String!
+
+  """Total minutes for this leave"""
+  totalMinutes: Float!
+}
+
 """Duration type of the leave"""
 enum LeaveDuration {
   HALF_DAY
@@ -2246,6 +2467,25 @@ type LeaveHistoryItem {
   reason: String
   startDate: DateTime!
   status: String!
+}
+
+type LeaveOverview {
+  approved: Int!
+  cancelled: Int!
+  halfDay: Int!
+  multiDay: Int!
+  pending: Int!
+  rejected: Int!
+  singleDay: Int!
+  total: Int!
+}
+
+type LeaveOverviewResponse {
+  data: LeaveOverview!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type LeaveResponse {
@@ -2405,9 +2645,11 @@ type MonthAmount {
 
 type Mutation {
   addPayslipAdjustment(addPayslipAdjustmentInput: AddPayslipAdjustmentInput!): PayrollItemResponse!
-  approveLeave(leaveId: Int!): LeaveResponse!
+  approveAttendance(approveAttendanceInput: ApproveAttendanceInput!): AttendanceResponse!
+  approveLeave(approveLeaveInput: ApproveLeaveInput!): LeaveResponse!
   approvePayrollCycle(approvePayrollCycleInput: ApprovePayrollCycleInput!): PayrollCycleResponse!
   approvePayrollItem(id: Int!): PayrollItemResponse!
+  approveRejectPayslipAdjustment(approveRejectPayslipAdjustmentInput: ApproveRejectPayslipAdjustmentInput!): PayslipAdjustmentResponse!
   assignAsset(assignAssetInput: AssignAssetInput!): AssetAssignmentResponse!
 
   """Assign a department to an employee"""
@@ -2415,6 +2657,7 @@ type Mutation {
 
   """Assign a designation to an employee"""
   assignEmployeeDesignation(assignEmployeeDesignationInput: AssignEmployeeDesignationInput!): EmployeeDesignationResponse!
+  assignEmployeePayrollComponent(assignEmployeePayrollComponentInput: AssignEmployeePayrollComponentInput!): EmployeePayrollComponentResponse!
 
   """Assign a work schedule to an employee"""
   assignEmployeeSchedule(assignEmployeeScheduleInput: AssignEmployeeScheduleInput!): EmployeeWorkScheduleResponse!
@@ -2435,23 +2678,21 @@ type Mutation {
   createDepartment(createDepartmentInput: CreateDepartmentInput!): DepartmentResponse!
   createDesignation(createDesignationInput: CreateDesignationInput!): DesignationResponse!
   createDocument(createDocumentInput: CreateDocumentInput!): DocumentResponse!
+  createEducationHistory(createEducationHistoryInput: CreateEducationHistoryInput!): EducationHistoryResponse!
   createEmployee(createEmployeeInput: CreateEmployeeInput!): UserResponse!
   createEmploymentStatus(createEmploymentStatusInput: CreateEmploymentStatusInput!): EmploymentStatusResponse!
   createHoliday(createHolidayInput: CreateHolidayInput!): HolidayResponse!
   createJobHistory(createJobHistoryInput: CreateJobHistoryInput!): JobHistoryResponse!
-  createJobPlatform(createJobPlatformInput: CreateJobPlatformInput!): JobPlatformResponse!
-  createJobType(createJobTypeInput: CreateJobTypeInput!): JobTypeResponse!
   createLeave(createLeaveInput: CreateLeaveInput!): LeaveResponse!
   createLeaveType(createLeaveTypeInput: CreateLeaveTypeInput!): LeaveTypeResponse!
   createNote(createNoteInput: CreateNoteInput!): NoteResponse!
   createNotification(createNotificationInput: CreateNotificationInput!): NotificationResponse!
   createNotificationTemplate(createNotificationTemplateInput: CreateNotificationTemplateInput!): NotificationTemplateResponse!
-  createOnboardingProcess(createOnboardingProcessInput: CreateOnboardingProcessInput!): OnboardingProcessResponse!
   createPayrollComponent(createPayrollComponentInput: CreatePayrollComponentInput!): PayrollComponentResponse!
   createPayrollCycle(createPayrollCycleInput: CreatePayrollCycleInput!): PayrollCycleResponse!
   createPayrollItem(createPayrollItemInput: CreatePayrollItemInput!): PayrollItemResponse!
+  createPayslipAdjustment(createPayslipAdjustmentInput: CreatePayslipAdjustmentInput!): PayslipAdjustmentResponse!
   createProject(createProjectInput: CreateProjectInput!): ProjectResponse!
-  createRecruitmentProcess(createRecruitmentProcessInput: CreateRecruitmentProcessInput!): RecruitmentProcessResponse!
   createSalary(createEmployeeSalaryInput: CreateEmployeeSalaryInput!): EmployeeSalaryResponse!
   createSocialLink(createSocialLinkInput: CreateSocialLinkInput!): SocialLinkResponse!
   createSubscriptionPlan(createSubscriptionPlanInput: CreateSubscriptionPlanInput!): SubscriptionPlanResponse!
@@ -2463,21 +2704,18 @@ type Mutation {
   deleteDepartment(id: Int!): DepartmentResponse!
   deleteDesignation(id: Int!): DesignationResponse!
   deleteDocument(id: Int!, userId: Int!): DocumentResponse!
+  deleteEducationHistory(id: Int!, userId: Int!): EducationHistoryResponse!
   deleteEmployee(id: Int!): UserResponse!
   deleteEmploymentStatus(id: Int!): EmploymentStatusResponse!
   deleteHoliday(id: Int!): HolidayResponse!
   deleteJobHistory(id: Int!, userId: Int!): JobHistoryResponse!
-  deleteJobPlatform(id: Int!): JobPlatformResponse!
-  deleteJobType(id: Int!): JobTypeResponse!
   deleteLeave(id: Int!): LeaveResponse!
   deleteLeaveType(id: Int!): LeaveTypeResponse!
   deleteNote(id: Int!, userId: Int!): NoteResponse!
   deleteNotification(id: Int!): NotificationResponse!
-  deleteOnboardingProcess(id: Int!): OnboardingProcessResponse!
   deletePayrollComponent(id: Int!): PayrollComponentResponse!
   deletePayrollItem(id: Int!): PayrollItemResponse!
   deleteProject(id: Int!): ProjectResponse!
-  deleteRecruitmentProcess(id: Int!): RecruitmentProcessResponse!
   deleteSalary(id: Int!): EmployeeSalaryResponse!
   deleteSocialLink(userId: Int!): SocialLinkResponse!
   deleteSubscriptionPlan(id: Int!): SubscriptionPlanResponse!
@@ -2494,7 +2732,8 @@ type Mutation {
   processPayrollCycle(processPayrollCycleInput: ProcessPayrollCycleInput!): PayrollCycleResponse!
   punchIn(punchInInput: PunchInInput!): AttendancePunchResponse!
   punchOut(punchOutInput: PunchOutInput!): AttendancePunchResponse!
-  rejectLeave(leaveId: Int!): LeaveResponse!
+  rejectAttendance(rejectAttendanceInput: RejectAttendanceInput!): AttendanceResponse!
+  rejectLeave(rejectLeaveInput: RejectLeaveInput!): LeaveResponse!
   removeAsset(id: Int!): AssetResponse!
   removeAssetType(id: Int!): AssetTypeResponse!
   renewBusinessSubscription(renewBusinessSubscriptionInput: RenewBusinessSubscriptionInput!): BusinessSubscriptionResponse!
@@ -2511,25 +2750,39 @@ type Mutation {
   updateDepartment(updateDepartmentInput: UpdateDepartmentInput!): DepartmentResponse!
   updateDesignation(updateDesignationInput: UpdateDesignationInput!): DesignationResponse!
   updateDocument(updateDocumentInput: UpdateDocumentInput!): DocumentResponse!
+  updateEducationHistory(updateEducationHistoryInput: UpdateEducationHistoryInput!): EducationHistoryResponse!
   updateEmergencyContact(updateEmergencyContactInput: UpdateEmergencyContactInput!): EmergencyContactResponse!
   updateEmployee(updateEmployeeInput: UpdateEmployeeInput!): UserResponse!
+
+  """Update an employee department assignment"""
+  updateEmployeeDepartment(updateEmployeeDepartmentInput: UpdateEmployeeDepartmentInput!): EmployeeDepartmentResponse!
+
+  """Update an employee designation assignment"""
+  updateEmployeeDesignation(updateEmployeeDesignationInput: UpdateEmployeeDesignationInput!): EmployeeDesignationResponse!
+  updateEmployeePayrollComponent(updateEmployeePayrollComponentInput: UpdateEmployeePayrollComponentInput!): EmployeePayrollComponentResponse!
+
+  """Update an employee work schedule assignment"""
+  updateEmployeeSchedule(updateEmployeeScheduleInput: UpdateEmployeeScheduleInput!): EmployeeWorkScheduleResponse!
+
+  """Update an employee employment status assignment"""
+  updateEmployeeStatus(updateEmployeeStatusInput: UpdateEmployeeStatusInput!): EmployeeEmploymentStatusResponse!
+
+  """Update an employee work site assignment"""
+  updateEmployeeWorkSite(updateEmployeeWorkSiteInput: UpdateEmployeeWorkSiteInput!): EmployeeWorkSiteResponse!
   updateEmploymentDetails(updateEmploymentDetailsInput: UpdateEmploymentDetailsInput!): EmploymentDetailsResponse!
   updateEmploymentStatus(updateEmploymentStatusInput: UpdateEmploymentStatusInput!): EmploymentStatusResponse!
   updateHoliday(updateHolidayInput: UpdateHolidayInput!): HolidayResponse!
   updateJobHistory(updateJobHistoryInput: UpdateJobHistoryInput!): JobHistoryResponse!
-  updateJobPlatform(updateJobPlatformInput: UpdateJobPlatformInput!): JobPlatformResponse!
-  updateJobType(updateJobTypeInput: UpdateJobTypeInput!): JobTypeResponse!
   updateLeave(updateLeaveInput: UpdateLeaveInput!): LeaveResponse!
   updateLeaveSetting(updateLeaveSettingInput: UpdateLeaveSettingInput!): LeaveSettingResponse!
   updateLeaveType(updateLeaveTypeInput: UpdateLeaveTypeInput!): LeaveTypeResponse!
   updateNote(updateNoteInput: UpdateNoteInput!): NoteResponse!
   updateNotificationTemplate(updateNotificationTemplateInput: UpdateNotificationTemplateInput!): NotificationTemplateResponse!
-  updateOnboardingProcess(updateOnboardingProcessInput: UpdateOnboardingProcessInput!): OnboardingProcessResponse!
   updatePayrollComponent(updatePayrollComponentInput: UpdatePayrollComponentInput!): PayrollComponentResponse!
   updatePayrollItem(updatePayrollItemInput: UpdatePayrollItemInput!): PayrollItemResponse!
+  updatePayslipAdjustment(updatePayslipAdjustmentInput: UpdatePayslipAdjustmentInput!): PayslipAdjustmentResponse!
   updateProfile(updateProfileInput: UpdateProfileInput!): ProfileResponse!
   updateProject(updateProjectInput: UpdateProjectInput!): ProjectResponse!
-  updateRecruitmentProcess(updateRecruitmentProcessInput: UpdateRecruitmentProcessInput!): RecruitmentProcessResponse!
   updateSalary(updateEmployeeSalaryInput: UpdateEmployeeSalaryInput!): EmployeeSalaryResponse!
   updateSocialLink(updateSocialLinkInput: UpdateSocialLinkInput!): SocialLinkResponse!
   updateSubscriptionPlan(id: Int!, updateSubscriptionPlanInput: UpdateSubscriptionPlanInput!): SubscriptionPlanResponse!
@@ -2553,6 +2806,9 @@ type Note {
   """User who created this note"""
   creator: User
 
+  """Employee this note is about"""
+  employee: Employee
+
   """Unique identifier for the note"""
   id: ID!
 
@@ -2565,10 +2821,7 @@ type Note {
   """Date when the note was last updated"""
   updatedAt: DateTime!
 
-  """User this note is about"""
-  user: User
-
-  """ID of the user this note is about"""
+  """ID of the employee this note is about"""
   userId: Int!
 }
 
@@ -2693,51 +2946,6 @@ type NotificationsQueryResponse {
   success: Boolean!
 }
 
-type OnboardingProcess {
-  """ID of the business"""
-  businessId: Int!
-
-  """Date when the onboarding process was created"""
-  createdAt: DateTime!
-
-  """ID of the creator"""
-  createdBy: Int!
-
-  """Description of the onboarding process"""
-  description: String!
-
-  """Unique identifier for the onboarding process"""
-  id: ID!
-
-  """Whether the onboarding process is required"""
-  isRequired: Boolean!
-
-  """Name of the onboarding process"""
-  name: String!
-
-  """Status of the onboarding process"""
-  status: Status!
-
-  """Date when the onboarding process was last updated"""
-  updatedAt: DateTime!
-}
-
-type OnboardingProcessResponse {
-  data: OnboardingProcess!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
-type OnboardingProcessesQueryResponse {
-  data: [OnboardingProcess!]!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
-
 type OwnerDashboard {
   attendanceAnalytics: AttendanceAnalytics!
   businessOverview: BusinessOverview!
@@ -2776,7 +2984,31 @@ type PayrollComponent {
   isStatutory: Boolean!
   isTaxable: Boolean!
   name: String!
+  status: String!
   updatedAt: DateTime!
+}
+
+type PayrollComponentOverview {
+  active: Int!
+  deduction: Int!
+  disabled: Int!
+  draft: Int!
+  earning: Int!
+  fixedAmount: Int!
+  nonStatutory: Int!
+  nonTaxable: Int!
+  percentageOfBasic: Int!
+  statutory: Int!
+  taxable: Int!
+  total: Int!
+}
+
+type PayrollComponentOverviewResponse {
+  data: PayrollComponentOverview!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type PayrollComponentResponse {
@@ -2785,6 +3017,15 @@ type PayrollComponentResponse {
   meta: PaginationMeta
   statusCode: Float!
   success: Boolean!
+}
+
+"""Status of the payroll component"""
+enum PayrollComponentStatus {
+  ACTIVE
+  ARCHIVED
+  DISABLED
+  DRAFT
+  PUBLISHED
 }
 
 type PayrollComponentsQueryResponse {
@@ -2867,10 +3108,8 @@ enum PayrollFrequency {
 
 type PayrollItem {
   absentDays: Float!
-  adjustments: [PayslipAdjustment!]
   bankAccount: String
   basicSalary: Float!
-  components: [PayrollItemComponent!]
   createdAt: DateTime!
   grossPay: Float!
   id: Int!
@@ -2893,26 +3132,11 @@ type PayrollItem {
   workingDays: Int!
 }
 
-type PayrollItemComponent {
-  amount: Float!
-  calculationBase: Float
-
-  """Payroll Component"""
-  component: PayrollComponent!
-  componentId: Int!
-  id: Int!
-  notes: String
-
-  """Payroll Item"""
-  payrollItem: PayrollItem!
-  payrollItemId: Int!
-}
-
 input PayrollItemComponentInput {
   amount: Float!
   calculationBase: Float
-  componentId: Int!
   notes: String
+  payrollComponentId: Int!
 }
 
 type PayrollItemResponse {
@@ -2966,17 +3190,24 @@ type PayrollYearToDate {
 }
 
 type PayslipAdjustment {
-  amount: Float!
-  createdBy: Int!
-  description: String!
+  appliedMonth: DateTime
+  createdAt: DateTime!
   id: Int!
-  isRecurring: Boolean!
   notes: String
-
-  """Payroll Item"""
-  payrollItem: PayrollItem!
-  payrollItemId: Int!
-  type: String!
+  payrollComponent: PayrollComponent
+  payrollComponentId: Int
+  payrollItemId: Int
+  remarks: String!
+  requestedBy: Int!
+  requestedByUser: User
+  reviewedAt: DateTime
+  reviewedBy: Int
+  reviewedByUser: User
+  status: AdjustmentStatus!
+  updatedAt: DateTime!
+  user: User
+  userId: Int!
+  value: Float!
 }
 
 input PayslipAdjustmentInput {
@@ -2985,6 +3216,22 @@ input PayslipAdjustmentInput {
   isRecurring: Boolean! = false
   notes: String
   type: String!
+}
+
+type PayslipAdjustmentResponse {
+  data: PayslipAdjustment!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
+}
+
+type PayslipAdjustmentsQueryResponse {
+  data: [PayslipAdjustment!]!
+  message: String!
+  meta: PaginationMeta
+  statusCode: Float!
+  success: Boolean!
 }
 
 type Permission {
@@ -3054,12 +3301,17 @@ type Project {
 
 type ProjectMember {
   createdAt: DateTime!
+  employee: Employee!
+  endDate: DateTime
   id: Int!
+  isActive: Boolean!
+  notes: String
   project: Project!
   projectId: Int!
+  remarks: String
   role: String
+  startDate: DateTime!
   updatedAt: DateTime!
-  user: User!
   userId: Int!
 }
 
@@ -3133,15 +3385,18 @@ input PunchOutInput {
 type Query {
   FeatureById(id: Int!): FeatureResponse!
   activeBusinessSubscription(businessId: Int): BusinessSubscriptionResponse!
+  activeEmployeePayrollComponents(query: QueryEmployeePayrollComponentInput): EmployeePayrollComponentsQueryResponse!
   activePayrollComponents(businessId: Int!): PayrollComponentsQueryResponse!
   activeSalaryByUserId(userId: Int!): EmployeeSalaryResponse!
   allFeatures: FeatureQueryResponse!
+  approvedPayslipAdjustments(query: QueryPayslipAdjustmentInput): PayslipAdjustmentsQueryResponse!
   asset(id: Int!): AssetResponse!
   assetType(id: Int!): AssetTypeResponse!
   assetTypes(query: QueryAssetTypeInput): AssetTypesQueryResponse!
   assets(query: QueryAssetInput): AssetsQueryResponse!
   assetsByUserId(userId: Int!): AssetsQueryResponse!
   attendanceById(id: Int!): AttendanceResponse!
+  attendanceOverview: AttendanceSummaryAttendanceOverview!
   attendanceSettingsByBusiness: AttendanceSettingResponse!
   attendances(query: QueryAttendanceInput): AttendanceQueryResponse!
   businessById(id: Int!): BusinessResponse!
@@ -3152,17 +3407,53 @@ type Query {
   businessSubscriptions(query: QueryBusinessSubscriptionInput): BusinessSubscriptionsQueryResponse!
   businesses(query: QueryBusinessInput): BusinessQueryResponse!
   departmentById(id: Int!): DepartmentResponse!
+
+  """Get complete department history for an employee"""
+  departmentHistory(userId: Int!): EmployeeDepartmentsArrayResponse!
   departments(query: QueryDepartmentInput): DepartmentsQueryResponse!
   designationById(id: Int!): DesignationResponse!
+
+  """Get complete designation history for an employee"""
+  designationHistory(userId: Int!): EmployeeDesignationsArrayResponse!
   designations(query: QueryDesignationInput): DesignationsQueryResponse!
   document(id: Int!, userId: Int!): DocumentResponse!
   documentsByUserId(query: QueryDocumentInput, userId: Int!): DocumentsQueryResponse!
+  educationHistory(id: Int!, userId: Int!): EducationHistoryResponse!
+  educationHistoryByUserId(userId: Int!): EducationHistoriesQueryResponse!
   employeeById(id: Int!): UserResponse!
+  employeeCalendar(query: QueryEmployeeCalendarInput): EmployeeCalendarResponse!
   employeeDashboard: EmployeeDashboardResponse!
+  employeePayrollComponent(id: Int!): EmployeePayrollComponentResponse!
+  employeePayrollComponentHistory(query: QueryEmployeePayrollComponentInput): EmployeePayrollComponentsQueryResponse!
+  employeePayrollComponents(query: QueryEmployeePayrollComponentInput): EmployeePayrollComponentsQueryResponse!
   employees(query: QueryUserInput): UsersQueryResponse!
   employmentStatusById(id: Int!): EmploymentStatusResponse!
+
+  """Get complete employment status history for an employee"""
+  employmentStatusHistory(userId: Int!): EmployeeEmploymentStatusesArrayResponse!
   employmentStatuses(query: QueryEmploymentStatusInput): EmploymentStatusesQueryResponse!
   generateEmployeeId: String!
+
+  """Get active department for an employee"""
+  getActiveDepartment(userId: Int!): EmployeeDepartmentResponse!
+
+  """Get active designation for an employee"""
+  getActiveDesignation(userId: Int!): EmployeeDesignationResponse!
+
+  """Get active employment status for an employee"""
+  getActiveEmploymentStatus(userId: Int!): EmployeeEmploymentStatusResponse!
+
+  """Get active work schedule for an employee"""
+  getActiveWorkSchedule(userId: Int!): EmployeeWorkScheduleResponse!
+
+  """Get active work sites for an employee"""
+  getActiveWorkSites(userId: Int!): EmployeeWorkSitesArrayResponse!
+
+  """Get specific department assignment by composite ID"""
+  getDepartmentById(departmentId: Int!, userId: Int!): EmployeeDepartmentResponse!
+
+  """Get specific designation assignment by composite ID"""
+  getDesignationById(designationId: Int!, userId: Int!): EmployeeDesignationResponse!
 
   """Get employee departments with optional filters"""
   getEmployeeDepartments(getEmployeeDepartmentsInput: GetEmployeeDepartmentsInput): EmployeeDepartmentResponse!
@@ -3178,18 +3469,26 @@ type Query {
 
   """Get employee work sites with optional filters"""
   getEmployeeWorkSites(queryEmployeeWorkSitesInput: QueryEmployeeWorkSitesInput): EmployeeWorkSiteResponse!
+  getEmploymentDetails(id: Int!): EmployeeResponse!
+
+  """Get specific employment status assignment by composite ID"""
+  getEmploymentStatusById(employmentStatusId: Int!, userId: Int!): EmployeeEmploymentStatusResponse!
   getMyProfile: UserResponse!
   getUserWorkSchedule(userId: Int!): WorkScheduleResponse!
+
+  """Get specific work schedule assignment by composite ID"""
+  getWorkScheduleById(userId: Int!, workScheduleId: Int!): EmployeeWorkScheduleResponse!
+
+  """Get specific work site assignment by composite ID"""
+  getWorkSiteById(userId: Int!, workSiteId: Int!): EmployeeWorkSiteResponse!
   holidayById(id: Int!): HolidayResponse!
+  holidayOverview: HolidayOverviewResponse!
   holidays(query: QueryHolidayInput): HolidaysQueryResponse!
   jobHistory(id: Int!, userId: Int!): JobHistoryResponse!
   jobHistoryByUserId(userId: Int!): JobHistoriesQueryResponse!
-  jobPlatformById(id: Int!): JobPlatformResponse!
-  jobPlatforms(query: QueryJobPlatformInput): JobPlatformsQueryResponse!
-  jobTypeById(id: Int!): JobTypeResponse!
-  jobTypes(query: QueryJobTypeInput): JobTypesQueryResponse!
   leaveBalance(leaveTypeId: Int!, userId: Int!, year: Int!): LeaveBalanceResponse!
   leaveById(id: Int!): LeaveResponse!
+  leaveOverview: LeaveOverviewResponse!
   leaveSettingByBusinessId: LeaveSettingResponse!
   leaveTypeById(id: Int!): LeaveTypeResponse!
   leaveTypes(query: QueryLeaveTypeInput): LeaveTypesQueryResponse!
@@ -3199,29 +3498,29 @@ type Query {
   notificationById(id: Int!): NotificationResponse!
   notificationTemplates: NotificationTemplatesQueryResponse!
   notifications(query: QueryNotificationInput): NotificationsQueryResponse!
-  onboardingProcessById(id: Int!): OnboardingProcessResponse!
-  onboardingProcesses(query: QueryOnboardingProcessInput): OnboardingProcessesQueryResponse!
   ownerDashboard: OwnerDashboardResponse!
   payrollComponentByCode(businessId: Int!, code: String!): PayrollComponentResponse!
   payrollComponentById(id: Int!): PayrollComponentResponse!
+  payrollComponentOverview: PayrollComponentOverviewResponse!
   payrollComponents(query: QueryPayrollComponentInput): PayrollComponentsQueryResponse!
   payrollCycleById(id: Int!): PayrollCycleResponse!
   payrollCycles(query: QueryPayrollCycleInput): PayrollCyclesQueryResponse!
   payrollItemById(id: Int!): PayrollItemResponse!
   payrollItemByUserId(payrollCycleId: Int!, userId: Int!): PayrollItemsQueryResponse!
   payrollItems(query: QueryPayrollItemInput!): PayrollItemsQueryResponse!
+  payslipAdjustment(id: Int!): PayslipAdjustmentResponse!
+  payslipAdjustments(query: QueryPayslipAdjustmentInput): PayslipAdjustmentsQueryResponse!
+  pendingPayslipAdjustments(query: QueryPayslipAdjustmentInput): PayslipAdjustmentsQueryResponse!
   permissionById(id: Int!): Permission!
   permissions: [Permission!]!
   projectById(id: Int!): ProjectResponse!
   projects(businessId: Int): ProjectsQueryResponse!
-  recruitmentProcessById(id: Int!): RecruitmentProcessResponse!
-  recruitmentProcesses(query: QueryRecruitmentProcessInput): RecruitmentProcessesQueryResponse!
   roles: RoleResponse!
   salaries(query: QueryEmployeeSalaryInput): EmployeeSalariesQueryResponse!
   salaryById(id: Int!): EmployeeSalaryResponse!
   salaryHistory(userId: Int!): EmployeeSalariesQueryResponse!
   socialLink(userId: Int!): SocialLinkResponse!
-  socialLinksByProfileId(profileId: Int): SocialLinkResponse!
+  socialLinksByProfileId(userId: Int): SocialLinkResponse!
   subscriptionPlanById(id: Int!): SubscriptionPlanResponse!
   subscriptionPlans(query: QuerySubscriptionPlanInput): SubscriptionPlanQueryResponse!
   unreadNotificationCount: Int!
@@ -3231,8 +3530,14 @@ type Query {
   userStatistics: UserStatisticsResponse!
   users(query: QueryUserInput): UsersQueryResponse!
   workScheduleById(id: Int!): WorkScheduleResponse!
+
+  """Get complete work schedule history for an employee"""
+  workScheduleHistory(userId: Int!): EmployeeWorkSchedulesArrayResponse!
   workSchedules(query: QueryWorkScheduleInput): WorkSchedulesQueryResponse!
   workSiteById(id: Int!): WorkSiteResponse!
+
+  """Get complete work site history for an employee"""
+  workSiteHistory(userId: Int!): EmployeeWorkSitesArrayResponse!
   workSites(query: QueryWorkSiteInput): WorkSitesQueryResponse!
 }
 
@@ -3297,6 +3602,28 @@ input QueryDocumentInput {
   title: String
 }
 
+input QueryEmployeeCalendarInput {
+  """End date (YYYY-MM-DD)"""
+  endDate: String
+
+  """Month filter (1-12)"""
+  month: Int
+
+  """Start date (YYYY-MM-DD)"""
+  startDate: String
+
+  """Employee user ID"""
+  userId: Int
+
+  """Year filter (e.g., 2026)"""
+  year: Int
+}
+
+input QueryEmployeePayrollComponentInput {
+  payrollComponentId: Int
+  userId: Int
+}
+
 input QueryEmployeeSalaryInput {
   """Filter by active status"""
   isActive: Boolean
@@ -3341,20 +3668,6 @@ input QueryHolidayInput {
   startDate: String
 }
 
-input QueryJobPlatformInput {
-  name: String
-  pagination: BasePaginationInput
-  searchTerm: String
-  status: Status
-}
-
-input QueryJobTypeInput {
-  name: String
-  pagination: BasePaginationInput
-  searchTerm: String
-  status: Status
-}
-
 input QueryLeaveInput {
   """Filter leaves ending before this date"""
   endDate: String
@@ -3396,17 +3709,13 @@ input QueryNotificationInput {
   userId: Int
 }
 
-input QueryOnboardingProcessInput {
-  isRequired: Boolean
-  name: String
-  pagination: BasePaginationInput
-  searchTerm: String
-  status: Status
-}
-
 input QueryPayrollComponentInput {
-  businessId: Int
+  calculationType: CalculationType
   componentType: ComponentType
+  isStatutory: Boolean
+  isTaxable: Boolean
+  searchTerm: String
+  status: PayrollComponentStatus
 }
 
 input QueryPayrollCycleInput {
@@ -3421,12 +3730,10 @@ input QueryPayrollItemInput {
   userId: Int
 }
 
-input QueryRecruitmentProcessInput {
-  isRequired: Boolean
-  name: String
-  pagination: BasePaginationInput
-  searchTerm: String
-  status: Status
+input QueryPayslipAdjustmentInput {
+  payrollComponentId: Int
+  status: AdjustmentStatus
+  userId: Int
 }
 
 input QuerySubscriptionPlanInput {
@@ -3441,7 +3748,9 @@ input QueryUserInput {
   departmentId: Float
   designationId: Float
   employmentStatusId: Float
+  isProjectAssociated: Boolean
   pagination: BasePaginationInput
+  projectId: Float
   role: String
   searchTerm: String
   status: String
@@ -3509,49 +3818,20 @@ type RecentTask {
   title: String!
 }
 
-type RecruitmentProcess {
-  """ID of the business"""
-  businessId: Int!
+input RejectAttendanceInput {
+  """Attendance ID"""
+  attendanceId: Int!
 
-  """Date when the recruitment process was created"""
-  createdAt: DateTime!
-
-  """ID of the creator"""
-  createdBy: Int!
-
-  """Description of the recruitment process"""
-  description: String!
-
-  """Unique identifier for the recruitment process"""
-  id: ID!
-
-  """Whether the recruitment process is required"""
-  isRequired: Boolean!
-
-  """Name of the recruitment process"""
-  name: String!
-
-  """Status of the recruitment process"""
-  status: Status!
-
-  """Date when the recruitment process was last updated"""
-  updatedAt: DateTime!
+  """Remarks"""
+  remarks: String!
 }
 
-type RecruitmentProcessResponse {
-  data: RecruitmentProcess!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
-}
+input RejectLeaveInput {
+  """Leave ID"""
+  leaveId: Int!
 
-type RecruitmentProcessesQueryResponse {
-  data: [RecruitmentProcess!]!
-  message: String!
-  meta: PaginationMeta
-  statusCode: Float!
-  success: Boolean!
+  """Remarks"""
+  remarks: String!
 }
 
 input RenewBusinessSubscriptionInput {
@@ -3586,9 +3866,6 @@ input RequestLeaveInput {
 
   """Leave start date"""
   startDate: String!
-
-  """Total leave hours deducted from balance"""
-  totalHours: Float!
 
   """User ID"""
   userId: Int!
@@ -3670,14 +3947,14 @@ type SocialLink {
   """Profile associated with these social links"""
   profile: Profile
 
-  """Profile ID (primary key)"""
-  profileId: ID!
-
   """Twitter profile URL"""
   twitter: String
 
   """Date when the social links were last updated"""
   updatedAt: DateTime!
+
+  """Profile ID (primary key)"""
+  userId: ID!
 }
 
 type SocialLinkResponse {
@@ -3688,7 +3965,6 @@ type SocialLinkResponse {
   success: Boolean!
 }
 
-"""Status of the Job Type"""
 enum Status {
   ACTIVE
   DEACTIVATED
@@ -3766,7 +4042,10 @@ type TimeSlot {
 }
 
 input UnassignProjectMemberInput {
+  endDate: String
   projectId: Int!
+  remarks: String
+  role: String!
   userId: Int!
 }
 
@@ -3809,17 +4088,52 @@ input UpdateAttendanceInput {
   """Total break minutes for the day"""
   breakMinutes: Int
 
-  """Date of attendance"""
-  date: DateTime!
-
   """Attendance ID"""
   id: ID!
 
   """Punch records for this attendance"""
-  punchRecords: [CreateAttendancePunchInput!]!
+  punchRecords: [UpdateAttendancePunchInput!]!
 
   """User ID"""
   userId: Int!
+}
+
+input UpdateAttendancePunchInput {
+  """Attendance ID"""
+  attendanceId: Int!
+
+  """Break minutes for this session"""
+  breakMinutes: Float
+
+  """Attendance record ID"""
+  id: Int!
+
+  """Notes for this punch session"""
+  notes: String
+
+  """Project ID if working on a project"""
+  projectId: Int!
+
+  """Clock in timestamp"""
+  punchIn: DateTime!
+
+  """Device used for punch in"""
+  punchInDevice: String!
+  punchInIp: String
+  punchInLat: Float
+  punchInLng: Float
+
+  """Clock out timestamp"""
+  punchOut: DateTime!
+
+  """Device used for punch out"""
+  punchOutDevice: String!
+  punchOutIp: String
+  punchOutLat: Float
+  punchOutLng: Float
+
+  """Work site ID"""
+  workSiteId: Int!
 }
 
 input UpdateAttendanceSettingInput {
@@ -3947,6 +4261,42 @@ input UpdateDocumentInput {
   userId: Int
 }
 
+input UpdateEducationHistoryInput {
+  """City where institution is located"""
+  city: String
+
+  """Country where institution is located"""
+  country: String
+
+  """Degree or qualification"""
+  degree: String
+
+  """Additional details or achievements"""
+  description: String
+
+  """End/graduation date (MM-YYYY or YYYY)"""
+  endDate: String
+
+  """Field of study or major"""
+  fieldOfStudy: String
+
+  """Grade, GPA, or percentage"""
+  grade: String
+  id: Int!
+
+  """Institution or university name"""
+  institution: String
+
+  """Whether currently studying"""
+  isCurrentlyStudying: Boolean = false
+
+  """Start date (MM-YYYY or YYYY)"""
+  startDate: String
+
+  """ID of the employee"""
+  userId: Int
+}
+
 input UpdateEmergencyContactInput {
   """Emergency contact name"""
   name: String!
@@ -3958,6 +4308,52 @@ input UpdateEmergencyContactInput {
   relation: String!
 
   """ID of the user to update"""
+  userId: Int!
+}
+
+input UpdateEmployeeDepartmentInput {
+  """Department ID to assign"""
+  departmentId: Int!
+
+  """End date of department assignment"""
+  endDate: DateTime
+
+  """Whether this assignment is active"""
+  isActive: Boolean
+
+  """Whether this is the primary department"""
+  isPrimary: Boolean
+
+  """Additional remarks"""
+  remarks: String
+
+  """Role in department"""
+  roleInDept: String
+
+  """Start date of department assignment"""
+  startDate: DateTime
+
+  """User ID of the employee"""
+  userId: Int!
+}
+
+input UpdateEmployeeDesignationInput {
+  """Designation ID to assign"""
+  designationId: Int!
+
+  """End date of designation"""
+  endDate: DateTime
+
+  """Whether this is the active designation"""
+  isActive: Boolean! = true
+
+  """Additional remarks"""
+  remarks: String
+
+  """Start date of designation"""
+  startDate: DateTime!
+
+  """User ID of the employee"""
   userId: Int!
 }
 
@@ -3993,6 +4389,18 @@ input UpdateEmployeeInput {
   workSiteIds: [Int!]
 }
 
+input UpdateEmployeePayrollComponentInput {
+  effectiveFrom: DateTime!
+  effectiveTo: DateTime
+  id: Int!
+  notes: String
+  payrollComponentId: Int!
+  userId: Int!
+
+  """The value of the payroll component for the employee"""
+  value: Float!
+}
+
 input UpdateEmployeeSalaryInput {
   """End date of the salary (YYYY-MM-DD)"""
   endDate: String
@@ -4017,6 +4425,66 @@ input UpdateEmployeeSalaryInput {
 
   """Start date of the salary (YYYY-MM-DD)"""
   startDate: String
+}
+
+input UpdateEmployeeScheduleInput {
+  """End date of schedule assignment"""
+  endDate: DateTime
+
+  """Whether this assignment is active"""
+  isActive: Boolean! = true
+
+  """Additional notes"""
+  notes: String
+
+  """Start date of schedule assignment"""
+  startDate: DateTime!
+
+  """User ID of the employee"""
+  userId: Int!
+
+  """Work Schedule ID to assign"""
+  workScheduleId: Int!
+}
+
+input UpdateEmployeeStatusInput {
+  """Employment Status ID to assign"""
+  employmentStatusId: Int!
+
+  """End date of employment status"""
+  endDate: DateTime
+
+  """Whether this status is active"""
+  isActive: Boolean! = true
+
+  """Reason for status change"""
+  reason: String
+
+  """Additional remarks"""
+  remarks: String
+
+  """Start date of employment status"""
+  startDate: DateTime!
+
+  """User ID of the employee"""
+  userId: Int!
+}
+
+input UpdateEmployeeWorkSiteInput {
+  """End date of work site assignment"""
+  endDate: DateTime
+
+  """Whether this assignment is active"""
+  isActive: Boolean! = true
+
+  """Start date of work site assignment"""
+  startDate: DateTime!
+
+  """User ID of the employee"""
+  userId: Int!
+
+  """Work Site ID to assign"""
+  workSiteId: Int!
 }
 
 input UpdateEmploymentDetailsInput {
@@ -4126,30 +4594,12 @@ input UpdateJobHistoryInput {
   userId: Int
 }
 
-input UpdateJobPlatformInput {
-  """Description of the job platform"""
-  description: String
-  id: Int!
-
-  """Name of the job platform"""
-  name: String
-}
-
-input UpdateJobTypeInput {
-  """Description of the job type"""
-  description: String
-  id: Int!
-
-  """Name of the job type"""
-  name: String
-}
-
 input UpdateLeaveInput {
   """Supporting documents (JSON array or URLs)"""
   attachments: String
 
   """Leave end date (required for MULTI_DAY)"""
-  endDate: String
+  endDate: DateTime
   id: Int!
 
   """Leave duration type (SINGLE_DAY, MULTI_DAY, HALF_DAY)"""
@@ -4165,10 +4615,7 @@ input UpdateLeaveInput {
   notes: String
 
   """Leave start date"""
-  startDate: String
-
-  """Total leave hours deducted from balance"""
-  totalHours: Float
+  startDate: DateTime
 
   """User ID"""
   userId: Int
@@ -4233,28 +4680,13 @@ input UpdateNotificationTemplateInput {
   type: NotificationType!
 }
 
-input UpdateOnboardingProcessInput {
-  """Description of the onboarding process"""
-  description: String
-  id: Int!
-
-  """Whether the onboarding process is required"""
-  isRequired: Boolean
-
-  """Name of the onboarding process"""
-  name: String
-}
-
 input UpdatePayrollComponentInput {
-  businessId: Int
   calculationType: CalculationType
   code: String
   componentType: ComponentType
   defaultValue: Float
   description: String
-  displayOrder: Int
   id: Int!
-  isActive: Boolean = true
   isStatutory: Boolean = false
   isTaxable: Boolean = true
   name: String
@@ -4274,6 +4706,15 @@ input UpdatePayrollItemInput {
   presentDays: Float
   transactionRef: String
   workingDays: Int
+}
+
+input UpdatePayslipAdjustmentInput {
+  id: Int!
+  notes: String
+  payrollComponentId: Int
+  remarks: String!
+  userId: Int!
+  value: Float!
 }
 
 input UpdateProfileInput {
@@ -4299,18 +4740,6 @@ input UpdateProjectInput {
   name: String
   startDate: DateTime
   status: String
-}
-
-input UpdateRecruitmentProcessInput {
-  """Description of the recruitment process"""
-  description: String
-  id: Int!
-
-  """Whether the recruitment process is required"""
-  isRequired: Boolean
-
-  """Name of the recruitment process"""
-  name: String
 }
 
 input UpdateSocialLinkInput {

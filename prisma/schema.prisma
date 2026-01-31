@@ -53,34 +53,34 @@ enum CommonStatus {
 }
 
 model User {
-  id                    Int                @id @default(autoincrement())
-  email                 String             @unique
-  password              String
-  status                String
-  profile               Profile?           @relation(name: "userProfile")
-  employee              Employee?          @relation(name: "userEmployee")
-  roleId                Int                @map("role_id")
-  role                  Role               @relation(fields: [roleId], references: [id], onDelete: Restrict)
-  businessId            Int?               @map("business_id")
-  business              Business?          @relation(name: "userBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-  ownedBusiness         Business?          @relation(name: "ownedBusiness")
-  userPermissions       UserPermission[]
-  managedDepartments    Department[]       @relation(name: "managedDepartments")
-  assetAssignments      AssetAssignment[]  @relation(name: "assetAssignmentsAssignedToUser")
-  assetAssignmentsBy    AssetAssignment[]  @relation(name: "assetAssignmentsAssignedByUser")
-  projectCreated        Project[]          @relation(name: "projectCreated")
-  projects              ProjectMember[]    @relation(name: "projectMembersInUser")
-  educationHistory      EducationHistory[] @relation(name: "userEducationHistory")
-  jobHistory            JobHistory[]       @relation(name: "userJobHistory")
-  scheduleAssignmentsBy EmployeeSchedule[] @relation(name: "scheduleAssignmentsByUser")
-  documents             Document[]         @relation(name: "userDocuments")
-  notes                 Note[]             @relation(name: "userNotes")
-  notesCreated          Note[]             @relation(name: "noteCreatedBy")
-  attendances           Attendance[]       @relation(name: "userAttendance")
-  leaves                Leave[]            @relation(name: "userLeaves")
-  reviewedLeaves        Leave[]            @relation(name: "leaveReviewedBy")
-  payrollItems          PayrollItem[]      @relation(name: "userPayrollItems")
-  notifications         Notification[]     @relation(name: "userNotifications")
+  id                                  Int                        @id @default(autoincrement())
+  email                               String                     @unique
+  password                            String
+  status                              String
+  profile                             Profile?                   @relation(name: "userProfile")
+  employee                            Employee?                  @relation(name: "userEmployee")
+  roleId                              Int                        @map("role_id")
+  role                                Role                       @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  businessId                          Int?                       @map("business_id")
+  business                            Business?                  @relation(name: "userBusiness", fields: [businessId], references: [id], onDelete: Cascade)
+  ownedBusiness                       Business?                  @relation(name: "ownedBusiness")
+  userPermissions                     UserPermission[]
+  managedDepartments                  Department[]               @relation(name: "managedDepartments")
+  assetAssignments                    AssetAssignment[]          @relation(name: "assetAssignmentsAssignedToUser")
+  assetAssignmentsBy                  AssetAssignment[]          @relation(name: "assetAssignmentsAssignedByUser")
+  projectCreated                      Project[]                  @relation(name: "projectCreated")
+  scheduleAssignmentsBy               EmployeeSchedule[]         @relation(name: "scheduleAssignmentsByUser")
+  notesCreated                        Note[]                     @relation(name: "noteCreatedBy")
+  attendances                         Attendance[]               @relation(name: "userAttendance")
+  reviewedAttendances                 Attendance[]               @relation(name: "attendanceReviewedBy")
+  leaves                              Leave[]                    @relation(name: "userLeaves")
+  reviewedLeaves                      Leave[]                    @relation(name: "leaveReviewedBy")
+  payrollItems                        PayrollItem[]              @relation(name: "userPayrollItems")
+  notifications                       Notification[]             @relation(name: "userNotifications")
+  employeePayrollComponentAssignments EmployeePayrollComponent[] @relation(name: "employeePayrollComponentAssignments")
+
+  payslipAdjustmentRequests  PayslipAdjustment[] @relation(name: "payslipAdjustmentRequester")
+  payslipAdjustmentApprovals PayslipAdjustment[] @relation(name: "payslipAdjustmentReviewer")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -137,10 +137,6 @@ model Business {
   paymentSettings       PaymentSettings?       @relation(name: "paymentSettings")
   employmentStatuses    EmploymentStatus[]     @relation(name: "employmentStatusesInBusiness")
   designations          Designation[]          @relation(name: "designationsInBusiness")
-  jobTypes              JobType[]              @relation(name: "jobTypesInBusiness")
-  jobPlatforms          JobPlatform[]          @relation(name: "jobPlatformsInBusiness")
-  recruitmentProcesses  RecruitmentProcess[]   @relation(name: "recruitmentProcessesInBusiness")
-  onboardingProcesses   OnboardingProcess[]    @relation(name: "onboardingProcessesInBusiness")
   workSites             WorkSite[]             @relation(name: "workSitesInBusiness")
   departments           Department[]           @relation(name: "departmentsInBusiness")
   workSchedules         WorkSchedule[]         @relation(name: "workSchedulesInBusiness")
@@ -400,72 +396,6 @@ model EmployeeDesignation {
   @@index([userId, isActive])
   @@index([startDate, endDate])
   @@map("employee_designations")
-}
-
-model JobType {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String   @db.Text
-  status      String
-  businessId  Int      @map("business_id")
-  business    Business @relation(name: "jobTypesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@unique([name, businessId])
-  @@index([businessId])
-  @@map("job_types")
-}
-
-model JobPlatform {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique
-  description String    @db.Text
-  status      String
-  businessId  Int?      @map("business_id")
-  business    Business? @relation(name: "jobPlatformsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@unique([name, businessId])
-  @@index([businessId])
-  @@map("job_platforms")
-}
-
-model RecruitmentProcess {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String   @db.Text
-  status      String
-  isRequired  Boolean  @map("is_required")
-  businessId  Int      @map("business_id")
-  business    Business @relation(name: "recruitmentProcessesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@unique([name, businessId])
-  @@index([businessId])
-  @@map("recruitment_processes")
-}
-
-model OnboardingProcess {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String   @db.Text
-  status      String
-  isRequired  Boolean  @map("is_required")
-  businessId  Int      @map("business_id")
-  business    Business @relation(name: "onboardingProcessesInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@unique([name, businessId])
-  @@index([businessId])
-  @@map("onboarding_processes")
 }
 
 model WorkSite {
@@ -805,37 +735,53 @@ model Project {
 }
 
 model ProjectMember {
-  id        Int     @id @default(autoincrement())
-  projectId Int     @map("project_id")
-  project   Project @relation(name: "projectMembersInProject", fields: [projectId], references: [id], onDelete: Cascade)
-  userId    Int     @map("user_id")
-  user      User    @relation(name: "projectMembersInUser", fields: [userId], references: [id], onDelete: Cascade)
+  id        Int       @id @default(autoincrement())
+  projectId Int       @map("project_id")
+  project   Project   @relation(name: "projectMembersInProject", fields: [projectId], references: [id], onDelete: Cascade)
+  userId    Int       @map("user_id")
+  employee  Employee  @relation(name: "projectMembersInEmployee", fields: [userId], references: [userId], onDelete: Cascade)
   role      String?
+  startDate DateTime  @map("start_date") @db.Date
+  endDate   DateTime? @map("end_date") @db.Date
+  isActive  Boolean   @default(true) @map("is_active")
+  remarks   String?   @map("remarks") @db.Text
+  notes     String?   @map("notes") @db.Text
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([projectId, userId])
+  @@unique([projectId, userId, role])
   @@index([projectId])
   @@index([userId])
+  @@index([role])
+  @@index([userId, isActive])
+  @@index([startDate, endDate])
   @@map("project_members")
 }
 
 model Employee {
-  userId             Int                   @id @map("user_id")
-  user               User                  @relation(name: "userEmployee", fields: [userId], references: [id], onDelete: Cascade)
-  employeeId         String                @unique @map("employee_id")
-  nidNumber          String                @unique @map("nid_number")
-  joiningDate        DateTime              @map("joining_date") @db.Date
-  employmentStatuses EmployeeStatus[]      @relation(name: "employeeEmploymentStatus")
-  designations       EmployeeDesignation[] @relation(name: "employeeDesignation")
-  salaries           EmployeeSalary[]      @relation(name: "employeeSalaries")
-  workSites          EmployeeWorkSite[]    @relation(name: "employeeWorkSites")
-  workSchedules      EmployeeSchedule[]    @relation(name: "employeeSchedules")
-  departments        EmployeeDepartment[]  @relation(name: "employeeDepartment")
+  userId                     Int                        @id @map("user_id")
+  user                       User                       @relation(name: "userEmployee", fields: [userId], references: [id], onDelete: Cascade)
+  employeeId                 String                     @unique @map("employee_id")
+  nidNumber                  String                     @unique @map("nid_number")
+  joiningDate                DateTime                   @map("joining_date") @db.Date
+  employmentStatuses         EmployeeStatus[]           @relation(name: "employeeEmploymentStatus")
+  designations               EmployeeDesignation[]      @relation(name: "employeeDesignation")
+  salaries                   EmployeeSalary[]           @relation(name: "employeeSalaries")
+  workSites                  EmployeeWorkSite[]         @relation(name: "employeeWorkSites")
+  workSchedules              EmployeeSchedule[]         @relation(name: "employeeSchedules")
+  departments                EmployeeDepartment[]       @relation(name: "employeeDepartment")
+  educationHistory           EducationHistory[]         @relation(name: "employeeEducationHistory")
+  jobHistory                 JobHistory[]               @relation(name: "employeeJobHistory")
+  documents                  Document[]                 @relation(name: "employeeDocuments")
+  notes                      Note[]                     @relation(name: "employeeNotes")
+  projectMembers             ProjectMember[]            @relation(name: "projectMembersInEmployee")
+  employeePayrollComponents  EmployeePayrollComponent[] @relation(name: "employeePayrollComponents")
+  employeePayslipAdjustments PayslipAdjustment[]        @relation(name: "employeePayslipAdjustments")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  attendances Attendance[]
 
   @@index([joiningDate])
   @@map("employees")
@@ -879,7 +825,7 @@ model EmergencyContact {
 model EducationHistory {
   id                  Int       @id @default(autoincrement())
   userId              Int       @map("user_id")
-  user                User      @relation(name: "userEducationHistory", fields: [userId], references: [id], onDelete: Cascade)
+  employee            Employee  @relation(name: "employeeEducationHistory", fields: [userId], references: [userId], onDelete: Cascade)
   degree              String
   fieldOfStudy        String    @map("field_of_study")
   institution         String
@@ -901,7 +847,7 @@ model EducationHistory {
 model JobHistory {
   id               Int       @id @default(autoincrement())
   userId           Int       @map("user_id")
-  user             User      @relation(name: "userJobHistory", fields: [userId], references: [id], onDelete: Cascade)
+  employee         Employee  @relation(name: "employeeJobHistory", fields: [userId], references: [userId], onDelete: Cascade)
   jobTitle         String    @map("job_title") // e.g., "Software Engineer", "Project Manager"
   companyName      String    @map("company_name") // Name of the company/organization
   employmentType   String    @map("employment_type") // e.g., "Full-time", "Part-time", "Contract", "Freelance"
@@ -920,12 +866,12 @@ model JobHistory {
 }
 
 model Document {
-  id          Int     @id @default(autoincrement())
-  userId      Int     @map("user_id")
-  user        User    @relation(name: "userDocuments", fields: [userId], references: [id], onDelete: Cascade)
-  title       String  @map("title")
-  description String? @map("description") @db.Text
-  attachment  String  @map("attachment")
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  employee    Employee @relation(name: "employeeDocuments", fields: [userId], references: [userId], onDelete: Cascade)
+  title       String   @map("title")
+  description String?  @map("description") @db.Text
+  attachment  String   @map("attachment")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -935,15 +881,15 @@ model Document {
 }
 
 model Note {
-  id        Int     @id @default(autoincrement())
-  userId    Int     @map("user_id")
-  user      User    @relation(name: "userNotes", fields: [userId], references: [id], onDelete: Cascade)
-  createdBy Int?    @map("created_by")
-  creator   User?   @relation(name: "noteCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
-  title     String  @map("title")
-  content   String  @map("content") @db.Text
-  category  String? @map("category") // e.g., "Performance", "Incident", "General", "Feedback"
-  isPrivate Boolean @default(true) @map("is_private")
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  employee  Employee @relation(name: "employeeNotes", fields: [userId], references: [userId], onDelete: Cascade)
+  createdBy Int?     @map("created_by")
+  creator   User?    @relation(name: "noteCreatedBy", fields: [createdBy], references: [id], onDelete: SetNull)
+  title     String   @map("title")
+  content   String   @map("content") @db.Text
+  category  String?  @map("category") // e.g., "Performance", "Incident", "General", "Feedback"
+  isPrivate Boolean  @default(true) @map("is_private")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -976,11 +922,18 @@ model Attendance {
   totalMinutes    Int               @default(0) @map("total_minutes") // Calculated total working hours for the day
   breakMinutes    Int               @default(0) @map("break_minutes") // Calculated total break hours for the day
   overtimeMinutes Int               @default(0) @map("overtime_minutes") // Calculated overtime minutes beyond regular schedule
-  status          String            @default("pending") @map("status") // present, absent, late, half_day, on_leave
+  status          String            @default("pending") @map("status") // pending, present, absent, on_leave
+  type            String            @default("regular") @map("type") // partial, late, regular
+  reviewedAt      DateTime?         @map("reviewed_at") // When attendance was approved/rejected
+  reviewedBy      Int?              @map("reviewed_by") // Manager/admin who reviewed
+  reviewer        User?             @relation(name: "attendanceReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  remarks         String?           @map("remarks") // remarks for status action
   punchRecords    AttendancePunch[] @relation(name: "attendancePunchRecords")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  employee       Employee? @relation(fields: [employeeUserId], references: [userId])
+  employeeUserId Int?
 
   @@unique([userId, date])
   @@index([userId])
@@ -1028,23 +981,23 @@ model AttendancePunch {
 }
 
 model Leave {
-  id              Int       @id @default(autoincrement())
-  userId          Int       @map("user_id")
-  user            User      @relation(name: "userLeaves", fields: [userId], references: [id], onDelete: Cascade)
-  leaveTypeId     Int       @map("leave_type_id")
-  leaveType       LeaveType @relation(name: "leaveTypeInLeave", fields: [leaveTypeId], references: [id], onDelete: Restrict)
-  leaveYear       Int       @map("leave_year")
-  leaveDuration   String    @map("leave_duration") // SINGLE_DAY, MULTI_DAY, HALF_DAY
-  startDate       DateTime  @map("start_date") @db.Date
-  endDate         DateTime? @map("end_date") @db.Date
-  totalMinutes    Float     @map("total_minutes") // Total leave minutes deducted from balance
-  status          String    @default("pending") @map("status") // pending, approved, rejected, cancelled
-  reviewedAt      DateTime? @map("reviewed_at") // When leave was approved/rejected
-  reviewedBy      Int?      @map("reviewed_by") // Manager/admin who reviewed
-  reviewer        User?     @relation(name: "leaveReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
-  rejectionReason String?   @map("rejection_reason") // Reason for rejection if rejected
-  attachments     String?   @map("attachments") // Supporting documents (JSON array or comma-separated URLs)
-  notes           String?   @map("notes") @db.Text // Additional notes or comments
+  id            Int       @id @default(autoincrement())
+  userId        Int       @map("user_id")
+  user          User      @relation(name: "userLeaves", fields: [userId], references: [id], onDelete: Cascade)
+  leaveTypeId   Int       @map("leave_type_id")
+  leaveType     LeaveType @relation(name: "leaveTypeInLeave", fields: [leaveTypeId], references: [id], onDelete: Restrict)
+  leaveYear     Int       @map("leave_year")
+  leaveDuration String    @map("leave_duration") // SINGLE_DAY, MULTI_DAY, HALF_DAY
+  startDate     DateTime  @map("start_date") @db.Date
+  endDate       DateTime? @map("end_date") @db.Date
+  totalMinutes  Float     @map("total_minutes") // Total leave minutes deducted from balance
+  status        String    @default("pending") @map("status") // pending, approved, rejected, cancelled
+  reviewedAt    DateTime? @map("reviewed_at") // When leave was approved/rejected
+  reviewedBy    Int?      @map("reviewed_by") // Manager/admin who reviewed
+  reviewer      User?     @relation(name: "leaveReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  remarks       String?   @map("remarks") // remarks for status action
+  attachments   String?   @map("attachments") // Supporting documents (JSON array or comma-separated URLs)
+  notes         String?   @map("notes") @db.Text // Additional notes or comments
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1097,7 +1050,8 @@ model PayrollComponent {
   businessId      Int                    @map("business_id")
   business        Business               @relation(name: "payrollComponentsInBusiness", fields: [businessId], references: [id], onDelete: Cascade)
 
-  payrollItemComponents PayrollItemComponent[] @relation(name: "componentInPayrollItem")
+  employeePayrollComponents EmployeePayrollComponent[] @relation(name: "employeePayrollComponents")
+  payslipAdjustments        PayslipAdjustment[]        @relation(name: "payslipAdjustmentComponent")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1143,29 +1097,27 @@ model PayrollCycle {
 }
 
 model PayrollItem {
-  id              Int          @id @default(autoincrement())
-  payrollCycleId  Int          @map("payroll_cycle_id")
-  payrollCycle    PayrollCycle @relation(name: "payrollItemsInCycle", fields: [payrollCycleId], references: [id], onDelete: Cascade)
-  userId          Int          @map("user_id")
-  user            User         @relation(name: "userPayrollItems", fields: [userId], references: [id], onDelete: Cascade)
-  basicSalary     Float        @map("basic_salary")
-  grossPay        Float        @map("gross_pay")
-  totalDeductions Float        @map("total_deductions")
-  netPay          Float        @map("net_pay")
-  workingDays     Int          @map("working_days")
-  presentDays     Int          @map("present_days")
-  absentDays      Int          @map("absent_days")
-  leaveDays       Int          @map("leave_days")
-  overtimeMinutes Int?         @map("overtime_minutes")
-  status          String
-  paymentMethod   String       @map("payment_method")
-  bankAccount     String?      @map("bank_account")
-  transactionRef  String?      @map("transaction_ref")
-  paidAt          DateTime?    @map("paid_at")
-  notes           String?      @db.Text
-
-  components  PayrollItemComponent[] @relation(name: "payrollItemComponents")
-  adjustments PayslipAdjustment[]    @relation(name: "payslipAdjustments")
+  id                 Int                 @id @default(autoincrement())
+  payrollCycleId     Int                 @map("payroll_cycle_id")
+  payrollCycle       PayrollCycle        @relation(name: "payrollItemsInCycle", fields: [payrollCycleId], references: [id], onDelete: Cascade)
+  userId             Int                 @map("user_id")
+  user               User                @relation(name: "userPayrollItems", fields: [userId], references: [id], onDelete: Cascade)
+  basicSalary        Float               @map("basic_salary")
+  grossPay           Float               @map("gross_pay")
+  totalDeductions    Float               @map("total_deductions")
+  netPay             Float               @map("net_pay")
+  workingDays        Int                 @map("working_days")
+  presentDays        Int                 @map("present_days")
+  absentDays         Int                 @map("absent_days")
+  leaveDays          Int                 @map("leave_days")
+  overtimeMinutes    Int?                @map("overtime_minutes")
+  status             String
+  paymentMethod      String              @map("payment_method")
+  bankAccount        String?             @map("bank_account")
+  transactionRef     String?             @map("transaction_ref")
+  paidAt             DateTime?           @map("paid_at")
+  notes              String?             @db.Text
+  payslipAdjustments PayslipAdjustment[] @relation(name: "payslipAdjustments")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1177,41 +1129,77 @@ model PayrollItem {
   @@map("payroll_items")
 }
 
-model PayrollItemComponent {
-  id              Int              @id @default(autoincrement())
-  payrollItemId   Int              @map("payroll_item_id")
-  payrollItem     PayrollItem      @relation(name: "payrollItemComponents", fields: [payrollItemId], references: [id], onDelete: Cascade)
-  componentId     Int              @map("component_id")
-  component       PayrollComponent @relation(name: "componentInPayrollItem", fields: [componentId], references: [id], onDelete: Restrict)
-  amount          Float
-  calculationBase Float?           @map("calculation_base") // calculation type eg : percentage base , fixed amount base
-  notes           String?          @db.Text
+model EmployeePayrollComponent {
+  id                 Int              @id @default(autoincrement())
+  userId             Int              @map("user_id")
+  employee           Employee         @relation(name: "employeePayrollComponents", fields: [userId], references: [userId], onDelete: Cascade)
+  payrollComponentId Int              @map("payroll_component_id")
+  payrollComponent   PayrollComponent @relation(name: "employeePayrollComponents", fields: [payrollComponentId], references: [id], onDelete: Cascade)
+  value              Float? // Custom value for this employee (if null, uses component's defaultValue)
+  effectiveFrom      DateTime         @map("effective_from") @db.Date // When this component becomes effective
+  effectiveTo        DateTime?        @map("effective_to") @db.Date // When this component ends (null = ongoing)
+  assignedBy         Int?             @map("assigned_by") // User who assigned this component
+  assignedByUser     User?            @relation(name: "employeePayrollComponentAssignments", fields: [assignedBy], references: [id], onDelete: SetNull)
+  notes              String?          @db.Text
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([payrollItemId, componentId])
-  @@index([payrollItemId])
-  @@index([componentId])
-  @@map("payroll_item_components")
+  @@unique([userId, payrollComponentId])
+  @@index([userId])
+  @@index([payrollComponentId])
+  @@index([effectiveFrom, effectiveTo])
+  @@map("employee_payroll_components")
 }
 
 model PayslipAdjustment {
-  id            Int         @id @default(autoincrement())
-  payrollItemId Int         @map("payroll_item_id")
-  payrollItem   PayrollItem @relation(name: "payslipAdjustments", fields: [payrollItemId], references: [id], onDelete: Cascade)
-  type          String
-  description   String      @db.Text
-  amount        Float
-  isRecurring   Boolean     @default(false) @map("is_recurring")
-  notes         String?     @db.Text
+  id Int @id @default(autoincrement())
+
+  // Link to employee and payroll cycle
+  userId   Int      @map("user_id")
+  employee Employee @relation(name: "employeePayslipAdjustments", fields: [userId], references: [userId], onDelete: Cascade)
+
+  payrollItemId Int?         @map("payroll_item_id")
+  payrollItem   PayrollItem? @relation(name: "payslipAdjustments", fields: [payrollItemId], references: [id], onDelete: Cascade)
+
+  // Reference to component (optional - for categorization)
+  payrollComponentId Int?              @map("payroll_component_id")
+  payrollComponent   PayrollComponent? @relation(name: "payslipAdjustmentComponent", fields: [payrollComponentId], references: [id], onDelete: SetNull)
+
+  // Adjustment details
+  remarks      String    @db.Text
+  value        Float
+  appliedMonth DateTime? @map("applied_month") @db.Date // Specific month for one-time adjustments
+
+  // Approval workflow
+  status          AdjustmentStatus @default(APPROVED)
+  requestedBy     Int              @map("requested_by")
+  requestedByUser User             @relation(name: "payslipAdjustmentRequester", fields: [requestedBy], references: [id], onDelete: Restrict)
+
+  reviewedBy Int?      @map("reviewed_by")
+  reviewer   User?     @relation(name: "payslipAdjustmentReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  reviewedAt DateTime? @map("reviewed_at")
+
+  // Metadata
+  notes String? @db.Text
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@index([userId])
   @@index([payrollItemId])
-  @@index([type])
+  @@index([status])
+  @@index([appliedMonth])
+  @@index([userId, appliedMonth])
   @@map("payslip_adjustments")
+}
+
+enum AdjustmentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  APPLIED
+  CANCELLED
 }
 
 // ============ NOTIFICATION MANAGEMENT ============

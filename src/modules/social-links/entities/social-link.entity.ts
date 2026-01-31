@@ -8,7 +8,7 @@ import { Profile } from 'src/modules/profiles/entities/profile.entity';
 @ObjectType()
 export class SocialLink {
   @Field(() => ID, { description: 'Profile ID (primary key)' })
-  profileId: number;
+  userId: number;
 
   @Field(() => Profile, {
     nullable: true,
