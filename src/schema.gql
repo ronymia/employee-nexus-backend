@@ -1243,8 +1243,9 @@ input CreatePayrollItemInput {
 }
 
 input CreatePayslipAdjustmentInput {
+  appliedMonth: DateTime!
   notes: String
-  payrollComponentId: Int
+  payrollComponentId: Int!
   remarks: String!
   userId: Int!
   value: Float!
@@ -4709,9 +4710,10 @@ input UpdatePayrollItemInput {
 }
 
 input UpdatePayslipAdjustmentInput {
+  appliedMonth: DateTime!
   id: Int!
   notes: String
-  payrollComponentId: Int
+  payrollComponentId: Int!
   remarks: String!
   userId: Int!
   value: Float!

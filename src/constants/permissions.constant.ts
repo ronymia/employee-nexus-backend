@@ -33,6 +33,7 @@ export enum PermissionResource {
   LEAVE = 'Leave',
   HOLIDAY = 'Holiday',
   PAYROLL_COMPONENT = 'Payroll Component',
+  PAYROLL_ADJUSTMENT = 'Payroll Adjustment',
   PAYROLL = 'Payroll',
   PAYROLL_CYCLE = 'Payroll Cycle',
   PAYROLL_ITEM = 'Payroll Item',

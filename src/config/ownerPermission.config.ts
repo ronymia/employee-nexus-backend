@@ -187,6 +187,15 @@ export const ownerPermissions = [
     ],
   },
   {
+    resource: PermissionResource.PAYROLL_ADJUSTMENT,
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
+  },
+  {
     resource: PermissionResource.PAYROLL,
     action: [
       PermissionAction.CREATE,

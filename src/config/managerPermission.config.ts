@@ -139,6 +139,10 @@ export const managerPermissions = [
     action: [PermissionAction.READ],
   },
   {
+    resource: PermissionResource.PAYROLL_ADJUSTMENT,
+    action: [PermissionAction.READ],
+  },
+  {
     resource: PermissionResource.PAYROLL,
     action: [PermissionAction.READ],
   },
