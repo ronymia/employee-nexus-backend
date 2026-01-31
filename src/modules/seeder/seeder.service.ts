@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { seedBusinessWithUsers } from 'src/Database/seed-business-with-users';
-import configuration from 'src/config/configuration';
+// import configuration from 'src/config/configuration';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
@@ -11,12 +11,12 @@ export class SeederService {
   async seedDemoBusiness() {
     try {
       // Only allow in development mode for security
-      if (configuration().node_env === 'production') {
-        throw new HttpException(
-          'Seeding is not allowed in production',
-          HttpStatus.FORBIDDEN,
-        );
-      }
+      // if (configuration().node_env === 'production') {
+      //   throw new HttpException(
+      //     'Seeding is not allowed in production',
+      //     HttpStatus.FORBIDDEN,
+      //   );
+      // }
 
       const result = await seedBusinessWithUsers();
 
