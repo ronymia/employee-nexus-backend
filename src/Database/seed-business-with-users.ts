@@ -219,6 +219,10 @@ export const seedBusinessWithUsers = async () => {
           ],
         };
       },
+      {
+        maxWait: 1000 * 60 * 5, // 5 minutes max wait time
+        timeout: 1000 * 60 * 5, // 5 minutes timeout
+      },
     );
 
     console.log('\n📊 Seeding Summary:');
