@@ -1,4 +1,4 @@
-import { Controller, Post, HttpCode, HttpStatus, Get } from '@nestjs/common';
+import { Controller, HttpCode, HttpStatus, Get } from '@nestjs/common';
 import { SeederService } from './seeder.service';
 
 @Controller('seeder')
@@ -11,9 +11,14 @@ export class SeederController {
     return await this.seederService.seedDemoBusiness();
   }
 
-  @Post('run-migrations')
+  @Get('run-migrations')
   @HttpCode(HttpStatus.OK)
   async runMigrations() {
     return await this.seederService.runMigrations();
+  }
+  @Get('reset-database')
+  @HttpCode(HttpStatus.OK)
+  async resetDatabase() {
+    return await this.seederService.resetDatabase();
   }
 }

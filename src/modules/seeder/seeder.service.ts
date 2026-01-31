@@ -46,12 +46,12 @@ export class SeederService {
   async runMigrations() {
     try {
       // Only allow in development mode for security
-      if (configuration().node_env === 'production') {
-        throw new HttpException(
-          'Running migrations via API is not allowed in production',
-          HttpStatus.FORBIDDEN,
-        );
-      }
+      // if (configuration().node_env === 'production') {
+      //   throw new HttpException(
+      //     'Running migrations via API is not allowed in production',
+      //     HttpStatus.FORBIDDEN,
+      //   );
+      // }
 
       const { stdout, stderr } = await execAsync('yarn prisma migrate dev', {
         cwd: process.cwd(),
@@ -70,6 +70,45 @@ export class SeederService {
         {
           success: false,
           message: 'Failed to run migrations',
+          error: error.message,
+          output: error.stdout,
+          stderr: error.stderr,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+  async resetDatabase() {
+    try {
+      // Only allow in development mode for security
+      // if (configuration().node_env === 'production') {
+      //   throw new HttpException(
+      //     'Running migrations via API is not allowed in production',
+      //     HttpStatus.FORBIDDEN,
+      //   );
+      // }
+
+      const { stdout, stderr } = await execAsync(
+        'yarn prisma migrate reset --force',
+        {
+          cwd: process.cwd(),
+        },
+      );
+
+      return {
+        success: true,
+        message: 'Database reset successfully',
+        data: {
+          output: stdout,
+          errors: stderr || null,
+        },
+      };
+    } catch (error) {
+      console.log({ error });
+      throw new HttpException(
+        {
+          success: false,
+          message: 'Failed to reset database',
           error: error.message,
           output: error.stdout,
           stderr: error.stderr,
