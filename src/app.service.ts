@@ -42,7 +42,7 @@ export class AppService {
     await this.prisma.$transaction(
       async (prismaTransaction: Prisma.TransactionClient) => {
         // 1. Ensure SUPER_ADMIN role exists
-        await this.prisma.role.createMany({
+        await prismaTransaction.role.createMany({
           data: [
             {
               name: ROLE.SUPER_ADMIN,
@@ -68,8 +68,8 @@ export class AppService {
           skipDuplicates: true,
         });
 
-        // 1. Ensure SUPER_ADMIN role exists
-        const role = await this.prisma.role.findFirst({
+        // 2. Ensure SUPER_ADMIN role exists
+        const role = await prismaTransaction.role.findFirst({
           where: {
             name: ROLE.SUPER_ADMIN,
             businessId: null,
@@ -79,12 +79,12 @@ export class AppService {
         if (!role) {
           throw new NotImplementedException('No Super Admin Role Found');
         }
-        // 2. Check if a super admin user already exists
-        const isSuperAdminExist = await this.prisma.user.findFirst({
+        // 3. Check if a super admin user already exists
+        const isSuperAdminExist = await prismaTransaction.user.findFirst({
           where: { roleId: role?.id },
         });
 
-        // 3. Create Super Admin
+        // 4. Create Super Admin
         if (!isSuperAdminExist) {
           const password = await PasswordHelpers.passwordHash(
             configuration().default_password.super_admin as string,
@@ -101,10 +101,13 @@ export class AppService {
           });
         }
 
-        // MODULE REFRESH
-        await this.moduleRefresh();
+        // 5. Create/refresh features (modules)
+        await prismaTransaction.feature.createMany({
+          data: features.map((module) => ({ name: module })),
+          skipDuplicates: true,
+        });
 
-        // CREATE SUBSCRIPTION PLAN
+        // 6. Create subscription plans
         await Promise.all(
           subscriptionPlans.map(
             async (plan) =>
@@ -116,7 +119,7 @@ export class AppService {
           ),
         );
 
-        // RELATION PLAN WITH FEATURE
+        // 7. Relation plan with feature
         const subscriptionPlan =
           await prismaTransaction.subscriptionPlan.findMany({
             select: {
@@ -130,134 +133,9 @@ export class AppService {
           })),
           skipDuplicates: true,
         });
-
-        // Seed notification templates
-        // await seedNotificationTemplates();
       },
     );
   }
-
-  // ROLE REFRESH
-  // async roleRefresh() {
-  //   type PermissionInput = { resource: string; action: string };
-  //   type RolePermissionMap = Record<string, PermissionInput[]>;
-
-  //   // 1. Define role-permission mapping
-  //   const rolePermissionMap: RolePermissionMap = {
-  //     super_admin: superAdminPermissions.flatMap((p) =>
-  //       p.action.map((a) => ({ resource: p.resource, action: a })),
-  //     ),
-  //     owner: ownerPermissions.flatMap((p) =>
-  //       p.action.map((a) => ({ resource: p.resource, action: a })),
-  //     ),
-  //     admin: adminPermissions.flatMap((p) =>
-  //       p.action.map((a) => ({ resource: p.resource, action: a })),
-  //     ),
-  //     manager: managerPermissions.flatMap((p) =>
-  //       p.action.map((a) => ({ resource: p.resource, action: a })),
-  //     ),
-  //     employee: employeePermissions.flatMap((p) =>
-  //       p.action.map((a) => ({ resource: p.resource, action: a })),
-  //     ),
-  //   };
-
-  //   // 2. Flatten & deduplicate permissions
-  //   const allPermissions = Object.values(rolePermissionMap).flat();
-  //   const uniquePermissions = Array.from(
-  //     new Map(
-  //       allPermissions.map((p) => [`${p.resource}_${p.action}`, p]),
-  //     ).values(),
-  //   );
-
-  //   const roleRefresh = await this.prisma.$transaction(
-  //     async (tx) => {
-  //       // 3. Upsert all permissions
-  //       await Promise.all(
-  //         uniquePermissions.map((p) =>
-  //           tx.permission.upsert({
-  //             where: {
-  //               resource_action: {
-  //                 resource: p.resource,
-  //                 action: p.action,
-  //               },
-  //             },
-  //             create: p,
-  //             update: {},
-  //           }),
-  //         ),
-  //       );
-
-  //       // 4. Fetch all roles (including super_admin)
-  //       const roles = await tx.role.findMany();
-
-  //       const allDbPermissions = await tx.permission.findMany();
-
-  //       for (const role of roles) {
-  //         const expectedPerms = rolePermissionMap[role.name];
-  //         if (!expectedPerms) continue;
-
-  //         const existingRolePerms = await tx.rolePermission.findMany({
-  //           where: { roleId: role.id },
-  //           include: { permission: true },
-  //         });
-
-  //         const expectedPermKeys = new Set(
-  //           expectedPerms.map((p) => `${p.resource}_${p.action}`),
-  //         );
-
-  //         const existingPermKeys = new Set(
-  //           existingRolePerms.map(
-  //             (rp) => `${rp.permission.resource}_${rp.permission.action}`,
-  //           ),
-  //         );
-
-  //         // Add missing RolePermissions
-  //         for (const perm of expectedPerms) {
-  //           const dbPerm = allDbPermissions.find(
-  //             (p) => p.resource === perm.resource && p.action === perm.action,
-  //           );
-  //           if (!dbPerm) continue;
-
-  //           const key = `${perm.resource}_${perm.action}`;
-  //           if (!existingPermKeys.has(key)) {
-  //             await tx.rolePermission.create({
-  //               data: {
-  //                 roleId: role.id,
-  //                 permissionId: dbPerm.id,
-  //               },
-  //             });
-  //           }
-  //         }
-
-  //         // Remove outdated RolePermissions
-  //         for (const rp of existingRolePerms) {
-  //           const key = `${rp.permission.resource}_${rp.permission.action}`;
-  //           if (!expectedPermKeys.has(key)) {
-  //             await tx.rolePermission.delete({
-  //               where: {
-  //                 roleId_permissionId: {
-  //                   roleId: role.id,
-  //                   permissionId: rp.permissionId,
-  //                 },
-  //               },
-  //             });
-  //           }
-  //         }
-  //       }
-
-  //       return {
-  //         message: 'Role permissions refreshed successfully',
-  //         updatedRoles: roles.map((r) => r.name),
-  //       };
-  //     },
-  //     {
-  //       maxWait: 5000,
-  //       timeout: 60000,
-  //     },
-  //   );
-
-  //   return roleRefresh;
-  // }
 
   async rolePermissionsRefresh() {
     // GET ALL ROLES FROM DATABASE
@@ -383,27 +261,12 @@ export class AppService {
   async setup() {
     // CREATE DEFAULT DATA
 
-    const setup = await this.prisma.$transaction(
-      async (prismaClient: Prisma.TransactionClient) => {
-        // GET SUPER ADMIN
-        const superAdmin = await prismaClient.role.findFirst({
-          where: {
-            name: ROLE.SUPER_ADMIN,
-            businessId: null as any,
-          },
-        });
-        if (!superAdmin) {
-          throw new NotImplementedException('No Super Admin Role Found');
-        }
+    await this.seedSuperAdmin();
 
-        return `Setup Complete`;
-      },
-      {
-        maxWait: 1000 * 60 * 5, // 5 minutes
-        timeout: 1000 * 6 * 100, // 10 minutes
-      },
-    );
-
-    return setup;
+    // CREATE DEFAULT ROLE PERMISSIONS
+    await this.rolePermissionsRefresh();
+    return {
+      message: 'Setup Completed',
+    };
   }
 }

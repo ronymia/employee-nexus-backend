@@ -95,6 +95,9 @@ export class ProjectsService {
           },
         },
         projectMembers: {
+          where: {
+            isActive: true,
+          },
           include: {
             employee: {
               include: {
@@ -285,7 +288,7 @@ export class ProjectsService {
         projectId_userId_role: {
           projectId,
           userId,
-          role: unassignProjectMemberInput.role as string,
+          role: unassignProjectMemberInput.role,
         },
       },
     });
@@ -330,6 +333,7 @@ export class ProjectsService {
     const projectMembers = await this.prisma.projectMember.findMany({
       where: {
         userId,
+        isActive: true,
       },
       include: {
         project: {

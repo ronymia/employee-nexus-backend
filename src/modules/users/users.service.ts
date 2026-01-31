@@ -176,6 +176,35 @@ export class UsersService {
       });
     }
 
+    // FILTER BY PROJECT ASSOCIATION
+    if (query?.projectId !== undefined && query?.projectId !== null) {
+      if (query.isProjectAssociated === true) {
+        // Return users associated with this project
+        andCondition.push({
+          employee: {
+            projectMembers: {
+              some: {
+                projectId: query.projectId,
+                isActive: true,
+              },
+            },
+          },
+        });
+      } else if (query.isProjectAssociated === false) {
+        // Return users NOT associated with this project
+        andCondition.push({
+          employee: {
+            projectMembers: {
+              none: {
+                projectId: query.projectId,
+                isActive: true,
+              },
+            },
+          },
+        });
+      }
+    }
+
     // FILTER BY WORK SITE
     // if (query?.workSiteId) {
     //   andCondition.push({

@@ -11,7 +11,6 @@ import { UpdateEmployeeSalaryInput } from './dto/update-employee-salary.input';
 import { QueryEmployeeSalaryInput } from './dto/query-employee-salary.input';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
-import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
 

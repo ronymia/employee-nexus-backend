@@ -35,6 +35,15 @@ export class QueryUserInput {
   @IsOptional()
   designationId?: number | null;
 
+  @Field(() => Number, { nullable: true })
+  @IsInt()
+  @IsOptional()
+  projectId?: number | null;
+
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  isProjectAssociated?: boolean | null;
+
   // @Field(() => Number, { nullable: true })
   // @IsInt()
   // @IsOptional()

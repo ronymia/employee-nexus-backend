@@ -10,7 +10,7 @@ export class UnassignProjectMemberInput {
   userId: number;
 
   @Field(() => String)
-  role?: string;
+  role: string;
 
   @Field({ nullable: true })
   @IsDateString()

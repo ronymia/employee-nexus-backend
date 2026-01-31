@@ -3965,7 +3965,9 @@ input QueryUserInput {
   departmentId: Float
   designationId: Float
   employmentStatusId: Float
+  isProjectAssociated: Boolean
   pagination: BasePaginationInput
+  projectId: Float
   role: String
   searchTerm: String
   status: String
