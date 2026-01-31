@@ -128,7 +128,7 @@ export class PayrollItemsResolver {
   }
 
   @Mutation(() => PayrollItemResponse, { name: 'markPayrollItemAsPaid' })
-  // @RequirePermissions('PayrollItem:update')
+  // @RequirePermissions('Payroll Item:update')
   async markPayrollItemAsPaid(
     @Args('id', { type: () => Int }) id: number,
     @Args('paymentMethod') paymentMethod: string,

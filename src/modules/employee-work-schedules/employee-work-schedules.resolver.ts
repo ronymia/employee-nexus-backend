@@ -12,11 +12,13 @@ import {
 import { GetEmployeeSchedulesInput } from './dto/get-employee-schedules.input';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
+import { PermissionsGuard } from '../permissions/guards/permission.guard';
+import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
 
 @Resolver(() => EmployeeWorkSchedule)
-@UseGuards(GqlAuthGuard)
+@UseGuards(GqlAuthGuard, PermissionsGuard)
 export class EmployeeWorkSchedulesResolver {
   constructor(
     private readonly employeeWorkSchedulesService: EmployeeWorkSchedulesService,
@@ -26,6 +28,7 @@ export class EmployeeWorkSchedulesResolver {
   @Mutation(() => EmployeeWorkScheduleResponse, {
     description: 'Assign a work schedule to an employee',
   })
+  @RequirePermissions('Work Schedule:create')
   async assignEmployeeSchedule(
     @CurrentUser() user: JwtPayload,
     @Args('assignEmployeeScheduleInput')
@@ -50,6 +53,7 @@ export class EmployeeWorkSchedulesResolver {
     name: 'getEmployeeSchedules',
     description: 'Get employee work schedules with optional filters',
   })
+  @RequirePermissions('Work Schedule:read')
   async getEmployeeSchedules(
     @CurrentUser() user: JwtPayload,
     @Args('getEmployeeSchedulesInput', { nullable: true })
@@ -75,6 +79,7 @@ export class EmployeeWorkSchedulesResolver {
     name: 'workScheduleHistory',
     description: 'Get complete work schedule history for an employee',
   })
+  @RequirePermissions('Work Schedule:read')
   async getWorkScheduleHistory(
     @CurrentUser() user: JwtPayload,
     @Args('userId', { type: () => Int }) userId: number,
@@ -98,6 +103,7 @@ export class EmployeeWorkSchedulesResolver {
     name: 'getActiveWorkSchedule',
     description: 'Get active work schedule for an employee',
   })
+  @RequirePermissions('Work Schedule:read')
   async getActiveWorkSchedule(
     @CurrentUser() user: JwtPayload,
     @Args('userId', { type: () => Int }) userId: number,
@@ -121,6 +127,7 @@ export class EmployeeWorkSchedulesResolver {
     name: 'getWorkScheduleById',
     description: 'Get specific work schedule assignment by composite ID',
   })
+  @RequirePermissions('Work Schedule:read')
   async getWorkScheduleById(
     @CurrentUser() user: JwtPayload,
     @Args('userId', { type: () => Int }) userId: number,
@@ -144,6 +151,7 @@ export class EmployeeWorkSchedulesResolver {
   @Mutation(() => EmployeeWorkScheduleResponse, {
     description: 'Update an employee work schedule assignment',
   })
+  @RequirePermissions('Work Schedule:update')
   async updateEmployeeSchedule(
     @CurrentUser() user: JwtPayload,
     @Args('updateEmployeeScheduleInput')

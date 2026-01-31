@@ -6,6 +6,8 @@ import { UpdateProfileInput } from './dto/update-profile.input';
 import { UpdateEmploymentDetailsInput } from './dto/update-employment-details.input';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
+import { PermissionsGuard } from '../permissions/guards/permission.guard';
+import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import {
   EmergencyContactResponse,
   EmploymentDetailsResponse,
@@ -17,7 +19,8 @@ export class ProfilesResolver {
 
   // UPDATE PROFILE
   @Mutation(() => ProfileResponse, { name: 'updateProfile' })
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, PermissionsGuard)
+  @RequirePermissions('Profile:update')
   async updateProfile(
     @Args('updateProfileInput') updateProfileInput: UpdateProfileInput,
   ) {
@@ -37,7 +40,8 @@ export class ProfilesResolver {
   @Mutation(() => EmergencyContactResponse, {
     name: 'updateEmergencyContact',
   })
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, PermissionsGuard)
+  @RequirePermissions('Emergency Contact:update')
   async updateEmergencyContact(
     @Args('updateEmergencyContactInput')
     updateEmergencyContactInput: UpdateEmergencyContactInput,
@@ -58,7 +62,8 @@ export class ProfilesResolver {
   @Mutation(() => EmploymentDetailsResponse, {
     name: 'updateEmploymentDetails',
   })
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, PermissionsGuard)
+  @RequirePermissions('Employment Details:update')
   async updateEmploymentDetails(
     @Args('updateEmploymentDetailsInput')
     updateEmploymentDetailsInput: UpdateEmploymentDetailsInput,

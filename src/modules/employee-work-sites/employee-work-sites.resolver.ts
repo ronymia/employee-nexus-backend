@@ -12,11 +12,13 @@ import {
 import { QueryEmployeeWorkSitesInput } from './dto/query-employee-work-sites.input';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
+import { PermissionsGuard } from '../permissions/guards/permission.guard';
+import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
 
 @Resolver(() => EmployeeWorkSite)
-@UseGuards(GqlAuthGuard)
+@UseGuards(GqlAuthGuard, PermissionsGuard)
 export class EmployeeWorkSitesResolver {
   constructor(
     private readonly employeeWorkSitesService: EmployeeWorkSitesService,
@@ -26,6 +28,7 @@ export class EmployeeWorkSitesResolver {
   @Mutation(() => EmployeeWorkSiteResponse, {
     description: 'Assign a work site to an employee',
   })
+  @RequirePermissions('Work Site:create')
   async assignEmployeeWorkSite(
     @CurrentUser() user: JwtPayload,
     @Args('assignEmployeeWorkSiteInput')

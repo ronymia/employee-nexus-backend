@@ -45,7 +45,7 @@ export class NotificationsResolver {
   }
 
   @Query(() => NotificationsQueryResponse, { name: 'notifications' })
-  // @RequirePermissions('Notification:read')
+  @RequirePermissions('Notification:read')
   async notifications(
     @CurrentUser() user: JwtPayload,
     @Args('query', { nullable: true }) query?: QueryNotificationInput,

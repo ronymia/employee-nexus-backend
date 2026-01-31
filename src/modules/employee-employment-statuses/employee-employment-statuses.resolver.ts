@@ -12,11 +12,13 @@ import {
 import { GetEmployeeStatusesInput } from './dto/get-employee-statuses.input';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
+import { PermissionsGuard } from '../permissions/guards/permission.guard';
+import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
 
 @Resolver(() => EmployeeEmploymentStatus)
-@UseGuards(GqlAuthGuard)
+@UseGuards(GqlAuthGuard, PermissionsGuard)
 export class EmployeeEmploymentStatusesResolver {
   constructor(
     private readonly employeeEmploymentStatusesService: EmployeeEmploymentStatusesService,
@@ -26,6 +28,7 @@ export class EmployeeEmploymentStatusesResolver {
   @Mutation(() => EmployeeEmploymentStatusResponse, {
     description: 'Assign an employment status to an employee',
   })
+  @RequirePermissions('Employment Status:create')
   async assignEmployeeStatus(
     @CurrentUser() user: JwtPayload,
     @Args('assignEmployeeStatusInput')

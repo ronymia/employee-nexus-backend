@@ -22,7 +22,7 @@ export class DocumentsResolver {
   // CREATE DOCUMENT
   @Mutation(() => DocumentResponse, { name: 'createDocument' })
   // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Document:create')
+  @RequirePermissions('Document:create')
   @UseGuards(GqlAuthGuard)
   async createDocument(
     @Args('createDocumentInput') createDocumentInput: CreateDocumentInput,
@@ -43,7 +43,7 @@ export class DocumentsResolver {
   // FIND ALL DOCUMENTS
   @Query(() => DocumentsQueryResponse, { name: 'documentsByUserId' })
   // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Document:read')
+  @RequirePermissions('Document:read')
   @UseGuards(GqlAuthGuard)
   async findAll(
     @CurrentUser() user: JwtPayload,
@@ -63,7 +63,7 @@ export class DocumentsResolver {
   // FIND ONE DOCUMENT
   @Query(() => DocumentResponse, { name: 'document' })
   // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Document:read')
+  @RequirePermissions('Document:read')
   @UseGuards(GqlAuthGuard)
   async findOne(
     @Args('id', { type: () => Int }) id: number,
@@ -82,7 +82,7 @@ export class DocumentsResolver {
   // UPDATE DOCUMENT
   @Mutation(() => DocumentResponse, { name: 'updateDocument' })
   // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Document:update')
+  @RequirePermissions('Document:update')
   @UseGuards(GqlAuthGuard)
   async updateDocument(
     @Args('updateDocumentInput') updateDocumentInput: UpdateDocumentInput,
@@ -102,7 +102,7 @@ export class DocumentsResolver {
   // REMOVE DOCUMENT
   @Mutation(() => DocumentResponse, { name: 'deleteDocument' })
   // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Document:delete')
+  @RequirePermissions('Document:delete')
   @UseGuards(GqlAuthGuard)
   async removeDocument(
     @Args('id', { type: () => Int }) id: number,

@@ -35,7 +35,7 @@ export class SocialLinksResolver {
   // FIND ALL SOCIAL LINKS
   @Query(() => SocialLinkResponse, { name: 'socialLinksByProfileId' })
   // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Social Link:read')
+  @RequirePermissions('Social Link:read')
   @UseGuards(GqlAuthGuard)
   async findAll(
     @CurrentUser() user: JwtPayload,
@@ -53,7 +53,7 @@ export class SocialLinksResolver {
   // FIND ONE SOCIAL LINK BY PROFILE ID
   @Query(() => SocialLinkResponse, { name: 'socialLink' })
   // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Social Link:read')
+  @RequirePermissions('Social Link:read')
   @UseGuards(GqlAuthGuard)
   async findOne(@Args('userId', { type: () => Int }) userId: number) {
     const result = await this.socialLinksService.findOne({ userId });
@@ -69,7 +69,7 @@ export class SocialLinksResolver {
   // UPDATE SOCIAL LINK
   @Mutation(() => SocialLinkResponse, { name: 'updateSocialLink' })
   // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Social Link:update')
+  @RequirePermissions('Social Link:update')
   @UseGuards(GqlAuthGuard)
   async updateSocialLink(
     @Args('updateSocialLinkInput') updateSocialLinkInput: UpdateSocialLinkInput,
@@ -88,7 +88,7 @@ export class SocialLinksResolver {
   // REMOVE SOCIAL LINK
   @Mutation(() => SocialLinkResponse, { name: 'deleteSocialLink' })
   // @UseGuards(PermissionsGuard)
-  // @RequirePermissions('Social Link:delete')
+  @RequirePermissions('Social Link:delete')
   @UseGuards(GqlAuthGuard)
   async removeSocialLink(@Args('userId', { type: () => Int }) userId: number) {
     const result = await this.socialLinksService.remove({ userId });

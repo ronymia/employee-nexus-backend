@@ -9,6 +9,8 @@ import { CreateEducationHistoryInput } from './dto/create-education-history.inpu
 import { UpdateEducationHistoryInput } from './dto/update-education-history.input';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
+import { PermissionsGuard } from '../permissions/guards/permission.guard';
+import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
@@ -22,7 +24,8 @@ export class EducationHistoriesResolver {
   @Mutation(() => EducationHistoryResponse, {
     name: 'createEducationHistory',
   })
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, PermissionsGuard)
+  @RequirePermissions('Education History:create')
   async createEducationHistory(
     @Args('createEducationHistoryInput')
     createEducationHistoryInput: CreateEducationHistoryInput,
@@ -43,7 +46,8 @@ export class EducationHistoriesResolver {
   @Query(() => EducationHistoriesQueryResponse, {
     name: 'educationHistoryByUserId',
   })
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, PermissionsGuard)
+  @RequirePermissions('Education History:read')
   async findAll(
     @CurrentUser() user: JwtPayload,
     @Args('userId', { type: () => Int }) userId: number,
@@ -59,7 +63,8 @@ export class EducationHistoriesResolver {
 
   // FIND ONE EDUCATION HISTORY
   @Query(() => EducationHistoryResponse, { name: 'educationHistory' })
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, PermissionsGuard)
+  @RequirePermissions('Education History:read')
   async findOne(
     @Args('id', { type: () => Int }) id: number,
     @Args('userId', { type: () => Int }) userId: number,
@@ -78,7 +83,8 @@ export class EducationHistoriesResolver {
   @Mutation(() => EducationHistoryResponse, {
     name: 'updateEducationHistory',
   })
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, PermissionsGuard)
+  @RequirePermissions('Education History:update')
   async updateEducationHistory(
     @Args('updateEducationHistoryInput')
     updateEducationHistoryInput: UpdateEducationHistoryInput,
@@ -99,7 +105,8 @@ export class EducationHistoriesResolver {
   @Mutation(() => EducationHistoryResponse, {
     name: 'deleteEducationHistory',
   })
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, PermissionsGuard)
+  @RequirePermissions('Education History:delete')
   async removeEducationHistory(
     @Args('id', { type: () => Int }) id: number,
     @Args('userId', { type: () => Int }) userId: number,

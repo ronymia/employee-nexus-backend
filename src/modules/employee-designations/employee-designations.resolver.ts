@@ -12,11 +12,13 @@ import {
 import { GetEmployeeDesignationsInput } from './dto/get-employee-designations.input';
 import { HttpStatus, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
+import { PermissionsGuard } from '../permissions/guards/permission.guard';
+import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/jwt.strategy';
 
 @Resolver(() => EmployeeDesignation)
-@UseGuards(GqlAuthGuard)
+@UseGuards(GqlAuthGuard, PermissionsGuard)
 export class EmployeeDesignationsResolver {
   constructor(
     private readonly employeeDesignationsService: EmployeeDesignationsService,
@@ -26,6 +28,7 @@ export class EmployeeDesignationsResolver {
   @Mutation(() => EmployeeDesignationResponse, {
     description: 'Assign a designation to an employee',
   })
+  @RequirePermissions('Designation:create')
   async assignEmployeeDesignation(
     @CurrentUser() user: JwtPayload,
     @Args('assignEmployeeDesignationInput')
