@@ -9,9 +9,13 @@ import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { leaveSearchableFields } from './leave.constant';
 import { NotificationsService } from '../notifications/notifications.service';
 import { RequestLeaveInput } from './dto/request-leave.input';
-import { NotificationChannel, NotificationType } from '../notifications/enums';
 import { calculateLeaveDurationInMinutes } from 'src/utils/time.utils';
 import { ApproveLeaveInput, RejectLeaveInput } from './dto/approve-leave.input';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class LeavesService {
@@ -74,6 +78,9 @@ export class LeavesService {
     user: JwtPayload;
     createLeaveInput: RequestLeaveInput;
   }) {
+    if (!user.businessId) {
+      throw new NotFoundException('Business not found for the user');
+    }
     const leaveType = await this.prisma.leaveType.findUnique({
       where: {
         id: createLeaveInput.leaveTypeId,
@@ -283,7 +290,7 @@ export class LeavesService {
     if (startDate) {
       andCondition.push({
         startDate: {
-          gte: new Date(startDate),
+          gte: dayjs.utc(startDate).toISOString(),
         },
       });
     }
@@ -291,7 +298,7 @@ export class LeavesService {
     if (endDate) {
       andCondition.push({
         startDate: {
-          lte: new Date(endDate),
+          lte: dayjs.utc(endDate).toISOString(),
         },
       });
     }
@@ -430,7 +437,7 @@ export class LeavesService {
       data: {
         status,
         reviewedBy: reviewerId,
-        reviewedAt: new Date(),
+        reviewedAt: dayjs.utc().toISOString(),
         remarks: reviewerNotes || null,
       },
       include: {
@@ -524,9 +531,9 @@ export class LeavesService {
     }
 
     // Get active employment status if needed
-    const activeEmploymentStatus =
-      existingUser?.employee?.employmentStatuses?.find((es) => es.isActive);
-    const employmentStatusId = activeEmploymentStatus?.employmentStatusId;
+    // const activeEmploymentStatus =
+    //   existingUser?.employee?.employmentStatuses?.find((es) => es.isActive);
+    // const employmentStatusId = activeEmploymentStatus?.employmentStatusId;
     // Get leave type with employment status validation
     const leaveType = await this.prisma.leaveType.findFirst({
       where: {
@@ -591,7 +598,7 @@ export class LeavesService {
       where: { id: Number(approveLeaveInput.leaveId) },
       data: {
         status: 'approved',
-        reviewedAt: new Date().toISOString(),
+        reviewedAt: dayjs.utc().toISOString(),
         reviewedBy: user.userId,
         remarks: approveLeaveInput.remarks,
       },
@@ -617,7 +624,7 @@ export class LeavesService {
       where: { id: Number(rejectLeaveInput.leaveId) },
       data: {
         status: 'rejected',
-        reviewedAt: new Date().toISOString(),
+        reviewedAt: dayjs.utc().toISOString(),
         reviewedBy: user.userId,
         remarks: rejectLeaveInput.remarks,
       },

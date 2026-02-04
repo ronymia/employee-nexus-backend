@@ -10,6 +10,11 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { Prisma } from 'generated/prisma';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class EmployeePayrollComponentsService {
@@ -214,7 +219,7 @@ export class EmployeePayrollComponentsService {
   }) {
     const businessId = user.businessId;
     const { ...filters } = query ?? {};
-    const today = new Date();
+    const today = dayjs.utc().toDate();
     today.setHours(0, 0, 0, 0);
 
     // FILTER
@@ -288,7 +293,7 @@ export class EmployeePayrollComponentsService {
   }) {
     const businessId = user.businessId;
     const { ...filters } = query ?? {};
-    const today = new Date();
+    const today = dayjs.utc().toDate();
     today.setHours(0, 0, 0, 0);
 
     // FILTER

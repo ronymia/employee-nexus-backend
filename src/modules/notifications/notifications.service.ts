@@ -11,6 +11,11 @@ import {
   QueryNotificationInput,
 } from './dto';
 import { JwtPayload } from '../auth/jwt.strategy';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class NotificationsService {
@@ -97,7 +102,7 @@ export class NotificationsService {
     return await this.prisma.notification.update({
       where: { id },
       data: {
-        readAt: new Date(),
+        readAt: dayjs.utc().toISOString(),
       },
     });
   }
@@ -111,7 +116,7 @@ export class NotificationsService {
         },
       },
       data: {
-        readAt: new Date(),
+        readAt: dayjs.utc().toISOString(),
       },
     });
   }

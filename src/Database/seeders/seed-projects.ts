@@ -1,4 +1,9 @@
 import { Prisma } from 'generated/prisma';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 /**
  * Seeds 5 demo projects for the business
@@ -18,8 +23,8 @@ export const seedProjects = async (
         description:
           'Complete redesign of the company e-commerce platform with modern UI/UX, improved performance, and mobile responsiveness.',
         status: 'ACTIVE',
-        startDate: new Date('2024-01-15'),
-        endDate: new Date('2024-06-30'),
+        startDate: dayjs.utc('2024-01-15').toISOString(),
+        endDate: dayjs.utc('2024-06-30').toISOString(),
         businessId,
         createdBy: creatorId,
       },
@@ -32,8 +37,8 @@ export const seedProjects = async (
         description:
           'Native iOS and Android mobile application for customer engagement, featuring push notifications, in-app purchases, and real-time tracking.',
         status: 'ACTIVE',
-        startDate: new Date('2024-02-01'),
-        endDate: new Date('2024-08-31'),
+        startDate: dayjs.utc('2024-02-01').toISOString(),
+        endDate: dayjs.utc('2024-08-31').toISOString(),
         businessId,
         createdBy: creatorId,
       },
@@ -46,8 +51,8 @@ export const seedProjects = async (
         description:
           'Custom CRM system for managing customer relationships, sales pipeline, and support tickets with advanced analytics and reporting.',
         status: 'ACTIVE',
-        startDate: new Date('2024-03-01'),
-        endDate: new Date('2024-12-31'),
+        startDate: dayjs.utc('2024-03-01').toISOString(),
+        endDate: dayjs.utc('2024-12-31').toISOString(),
         businessId,
         createdBy: creatorId,
       },
@@ -60,8 +65,8 @@ export const seedProjects = async (
         description:
           'Migration of legacy infrastructure to cloud-based Kubernetes cluster with CI/CD pipelines, monitoring, and automated scaling.',
         status: 'ACTIVE',
-        startDate: new Date('2024-04-01'),
-        endDate: new Date('2024-09-30'),
+        startDate: dayjs.utc('2024-04-01').toISOString(),
+        endDate: dayjs.utc('2024-09-30').toISOString(),
         businessId,
         createdBy: creatorId,
       },
@@ -74,8 +79,8 @@ export const seedProjects = async (
         description:
           'Integration of machine learning models for predictive analytics, customer behavior analysis, and automated reporting dashboard.',
         status: 'PLANNING',
-        startDate: new Date('2024-05-01'),
-        endDate: new Date('2024-11-30'),
+        startDate: dayjs.utc('2024-05-01').toISOString(),
+        endDate: dayjs.utc('2024-11-30').toISOString(),
         businessId,
         createdBy: creatorId,
       },

@@ -6,6 +6,11 @@ import { JwtPayload } from '../auth/jwt.strategy';
 import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { QueryEmployeeSalaryInput } from './dto/query-employee-salary.input';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class EmployeeSalariesService {
@@ -59,7 +64,9 @@ export class EmployeeSalariesService {
           },
           data: {
             isActive: false,
-            endDate: new Date(createEmployeeSalaryInput.startDate),
+            endDate: dayjs
+              .utc(createEmployeeSalaryInput.startDate)
+              .toISOString(),
           },
         });
       }
@@ -70,9 +77,11 @@ export class EmployeeSalariesService {
           userId: createEmployeeSalaryInput.userId,
           salaryAmount: createEmployeeSalaryInput.salaryAmount,
           salaryType: createEmployeeSalaryInput.salaryType,
-          startDate: new Date(createEmployeeSalaryInput.startDate),
+          startDate: dayjs
+            .utc(createEmployeeSalaryInput.startDate)
+            .toISOString(),
           endDate: createEmployeeSalaryInput.endDate
-            ? new Date(createEmployeeSalaryInput.endDate)
+            ? dayjs.utc(createEmployeeSalaryInput.endDate).toISOString()
             : null,
           reason: createEmployeeSalaryInput.reason,
           remarks: createEmployeeSalaryInput.remarks,
@@ -249,10 +258,14 @@ export class EmployeeSalariesService {
       updateData.salaryType = updateEmployeeSalaryInput.salaryType as any;
     }
     if (updateEmployeeSalaryInput.startDate !== undefined) {
-      updateData.startDate = new Date(updateEmployeeSalaryInput.startDate);
+      updateData.startDate = dayjs
+        .utc(updateEmployeeSalaryInput.startDate)
+        .toISOString();
     }
     if (updateEmployeeSalaryInput.endDate !== undefined) {
-      updateData.endDate = new Date(updateEmployeeSalaryInput.endDate);
+      updateData.endDate = dayjs
+        .utc(updateEmployeeSalaryInput.endDate)
+        .toISOString();
     }
     if (updateEmployeeSalaryInput.isActive !== undefined) {
       updateData.isActive = updateEmployeeSalaryInput.isActive;

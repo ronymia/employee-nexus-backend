@@ -12,6 +12,7 @@ import { minutesToHoursAndMinutes } from 'src/utils/time.utils';
 import * as isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import * as isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+import * as utc from 'dayjs/plugin/utc';
 import {
   ApproveAttendanceInput,
   RejectAttendanceInput,
@@ -20,6 +21,7 @@ import {
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
 @Injectable()
 export class AttendancesService {
@@ -337,10 +339,10 @@ export class AttendancesService {
     if (startDate || endDate) {
       const dateFilter: { gte?: Date; lte?: Date } = {};
       if (startDate) {
-        dateFilter.gte = dayjs(startDate).toDate();
+        dateFilter.gte = dayjs.utc(startDate).toDate();
       }
       if (endDate) {
-        dateFilter.lte = dayjs(endDate).toDate();
+        dateFilter.lte = dayjs.utc(endDate).toDate();
       }
       andCondition.push({ date: dateFilter });
     }
@@ -406,7 +408,9 @@ export class AttendancesService {
         userId: { in: uniqueUserIds },
         isActive: true,
         startDate: {
-          lte: new Date(Math.max(...uniqueDates.map((d) => d.getTime()))),
+          lte: dayjs
+            .utc(Math.max(...uniqueDates.map((d) => d.getTime())))
+            .toDate(),
         },
       },
       orderBy: {
@@ -700,14 +704,14 @@ export class AttendancesService {
       notes?: string;
     };
   }) {
-    const today = dayjs().format('YYYY-MM-DD');
+    const today = dayjs.utc().format('YYYY-MM-DD');
     const userId = user.userId;
 
     // Find or create attendance record for today
     let attendance = await this.prisma.attendance.findFirst({
       where: {
         userId,
-        date: new Date(today),
+        date: dayjs.utc(today).toISOString(),
       },
     });
 
@@ -715,7 +719,7 @@ export class AttendancesService {
       attendance = await this.prisma.attendance.create({
         data: {
           userId,
-          date: new Date(today),
+          date: dayjs.utc(today).toISOString(),
           totalMinutes: 0,
           breakMinutes: 0,
           status: 'pending',
@@ -728,7 +732,7 @@ export class AttendancesService {
       data: {
         attendanceId: attendance.id,
         punchInBy: user.userId,
-        punchIn: new Date(),
+        punchIn: dayjs.utc().toISOString(),
         ...data,
       },
       include: {
@@ -807,7 +811,7 @@ export class AttendancesService {
       throw new Error('Already punched out');
     }
 
-    const punchOut = new Date();
+    const punchOut = dayjs.utc().toDate();
     const workMinutes = this.calculateWorkMinutes(punch.punchIn, punchOut);
 
     // Update punch record
@@ -909,8 +913,8 @@ export class AttendancesService {
       where: {
         userId: targetUserId,
         date: {
-          gte: new Date(startDate),
-          lte: new Date(endDate),
+          gte: dayjs.utc(startDate).toISOString(),
+          lte: dayjs.utc(endDate).toISOString(),
         },
       },
       include: {
@@ -960,7 +964,7 @@ export class AttendancesService {
       data: {
         status: 'approved',
         reviewedBy: user.userId,
-        reviewedAt: new Date().toISOString(),
+        reviewedAt: dayjs.utc().toISOString(),
         remarks: approveAttendanceInput.remarks
           ? approveAttendanceInput.remarks
           : null,
@@ -994,7 +998,7 @@ export class AttendancesService {
         status: 'rejected',
         remarks: rejectAttendanceInput.remarks,
         reviewedBy: user.userId,
-        reviewedAt: new Date().toISOString(),
+        reviewedAt: dayjs.utc().toISOString(),
       },
     });
 

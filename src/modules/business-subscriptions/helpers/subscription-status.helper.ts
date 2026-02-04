@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { BusinessSubscriptionStatus } from 'generated/prisma';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class SubscriptionStatusHelper {
@@ -12,7 +17,7 @@ export class SubscriptionStatusHelper {
     endDate?: Date | null;
     status?: string;
   }): { status: BusinessSubscriptionStatus; isActive: boolean } {
-    const now = new Date();
+    const now = dayjs.utc().toDate();
     now.setHours(0, 0, 0, 0); // Start of day
 
     // If manually cancelled or suspended, keep that status
@@ -28,7 +33,7 @@ export class SubscriptionStatusHelper {
 
     // Check if in trial period
     if (data.trialEndDate) {
-      const trialEnd = new Date(data.trialEndDate);
+      const trialEnd = dayjs.utc(data.trialEndDate).toDate();
       trialEnd.setHours(0, 0, 0, 0);
 
       if (now <= trialEnd) {
@@ -37,7 +42,7 @@ export class SubscriptionStatusHelper {
     }
 
     // Check start date
-    const startDate = new Date(data.startDate);
+    const startDate = dayjs.utc(data.startDate).toDate();
     startDate.setHours(0, 0, 0, 0);
 
     if (now < startDate) {
@@ -46,7 +51,7 @@ export class SubscriptionStatusHelper {
 
     // Check end date
     if (data.endDate) {
-      const endDate = new Date(data.endDate);
+      const endDate = dayjs.utc(data.endDate).toDate();
       endDate.setHours(0, 0, 0, 0);
 
       if (now > endDate) {
@@ -64,7 +69,7 @@ export class SubscriptionStatusHelper {
   static canAccessFeature(
     status: string,
     isActive: boolean,
-    _featureName?: string,
+    // _featureName?: string,
   ): boolean {
     // During trial, all features are accessible
     if (status === BusinessSubscriptionStatus.TRIAL && isActive) {
@@ -85,14 +90,16 @@ export class SubscriptionStatusHelper {
    */
   static getStatusMessage(status: string, endDate?: Date | null): string {
     switch (status) {
-      case BusinessSubscriptionStatus.TRIAL:
+      case BusinessSubscriptionStatus.TRIAL: {
         const daysLeft = endDate
           ? Math.ceil(
-              (new Date(endDate).getTime() - new Date().getTime()) /
+              (dayjs.utc(endDate).toDate().getTime() -
+                dayjs.utc().toDate().getTime()) /
                 (1000 * 60 * 60 * 24),
             )
           : 0;
         return `Trial period (${daysLeft} days remaining)`;
+      }
 
       case BusinessSubscriptionStatus.ACTIVE:
         return 'Active subscription';

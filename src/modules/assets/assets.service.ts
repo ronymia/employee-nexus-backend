@@ -6,6 +6,11 @@ import { AssignAssetInput } from './dto/assign-asset.input';
 import { ReturnAssetInput } from './dto/return-asset.input';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { QueryAssetInput } from './dto/query-asset.input';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class AssetsService {
@@ -319,7 +324,7 @@ export class AssetsService {
     const updatedAssignment = await this.prisma.assetAssignment.update({
       where: { id: latestAssignment.id },
       data: {
-        returnedAt: new Date(),
+        returnedAt: dayjs.utc().toISOString(),
         status: 'returned',
       },
       include: {

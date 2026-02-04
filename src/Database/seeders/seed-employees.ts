@@ -3,6 +3,11 @@
 import { Prisma } from 'generated/prisma';
 import { createUserWithEmployee } from './create-user-employee';
 import { Gender, MaritalStatus } from 'src/modules/users/enums';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 export const seedEmployees = async (
   tx: Prisma.TransactionClient,
@@ -116,8 +121,8 @@ export const seedEmployees = async (
       fullName: 'James Taylor',
       phone: '+1234567895',
       gender: Gender.MALE,
-      dateOfBirth: '1995-01-10',
-      joiningDate: '2023-01-15',
+      dateOfBirth: dayjs.utc('1995-05-10').toISOString(),
+      joiningDate: dayjs.utc('2023-01-15').toISOString(),
       salaryAmount: 45000,
     },
     {
@@ -125,8 +130,8 @@ export const seedEmployees = async (
       fullName: 'Emma Martinez',
       phone: '+1234567896',
       gender: Gender.FEMALE,
-      dateOfBirth: '1994-04-22',
-      joiningDate: '2023-02-20',
+      dateOfBirth: dayjs.utc('1994-04-22').toISOString(),
+      joiningDate: dayjs.utc('2023-02-20').toISOString(),
       salaryAmount: 48000,
     },
     {
@@ -134,8 +139,8 @@ export const seedEmployees = async (
       fullName: 'Robert Anderson',
       phone: '+1234567897',
       gender: Gender.MALE,
-      dateOfBirth: '1996-08-15',
-      joiningDate: '2023-03-10',
+      dateOfBirth: dayjs.utc('1996-08-15').toISOString(),
+      joiningDate: dayjs.utc('2023-03-10').toISOString(),
       salaryAmount: 52000,
     },
     {
@@ -143,8 +148,8 @@ export const seedEmployees = async (
       fullName: 'Olivia Thomas',
       phone: '+1234567898',
       gender: Gender.FEMALE,
-      dateOfBirth: '1993-12-30',
-      joiningDate: '2023-04-05',
+      dateOfBirth: dayjs.utc('1993-12-30').toISOString(),
+      joiningDate: dayjs.utc('2023-04-05').toISOString(),
       salaryAmount: 55000,
     },
     {
@@ -152,8 +157,8 @@ export const seedEmployees = async (
       fullName: 'William Jackson',
       phone: '+1234567899',
       gender: Gender.MALE,
-      dateOfBirth: '1997-06-08',
-      joiningDate: '2023-05-12',
+      dateOfBirth: dayjs.utc('1997-06-08').toISOString(),
+      joiningDate: dayjs.utc('2023-05-12').toISOString(),
       salaryAmount: 47000,
     },
     {
@@ -161,8 +166,8 @@ export const seedEmployees = async (
       fullName: 'Sophia White',
       phone: '+1234567800',
       gender: Gender.FEMALE,
-      dateOfBirth: '1995-02-14',
-      joiningDate: '2023-06-18',
+      dateOfBirth: dayjs.utc('1994-09-14').toISOString(),
+      joiningDate: dayjs.utc('2023-06-18').toISOString(),
       salaryAmount: 50000,
     },
     {
@@ -170,8 +175,8 @@ export const seedEmployees = async (
       fullName: 'Benjamin Harris',
       phone: '+1234567801',
       gender: Gender.MALE,
-      dateOfBirth: '1994-10-20',
-      joiningDate: '2023-07-22',
+      dateOfBirth: dayjs.utc('1994-10-20').toISOString(),
+      joiningDate: dayjs.utc('2023-07-22').toISOString(),
       salaryAmount: 53000,
     },
     {
@@ -179,8 +184,8 @@ export const seedEmployees = async (
       fullName: 'Isabella Martin',
       phone: '+1234567802',
       gender: Gender.FEMALE,
-      dateOfBirth: '1996-03-25',
-      joiningDate: '2023-08-30',
+      dateOfBirth: dayjs.utc('1996-03-25').toISOString(),
+      joiningDate: dayjs.utc('2023-08-30').toISOString(),
       salaryAmount: 49000,
     },
     {
@@ -188,8 +193,8 @@ export const seedEmployees = async (
       fullName: 'Lucas Thompson',
       phone: '+1234567803',
       gender: Gender.MALE,
-      dateOfBirth: '1995-07-18',
-      joiningDate: '2023-09-15',
+      dateOfBirth: dayjs.utc('1995-07-18').toISOString(),
+      joiningDate: dayjs.utc('2023-09-15').toISOString(),
       salaryAmount: 51000,
     },
     {
@@ -197,8 +202,8 @@ export const seedEmployees = async (
       fullName: 'Mia Garcia',
       phone: '+1234567804',
       gender: Gender.FEMALE,
-      dateOfBirth: '1997-11-12',
-      joiningDate: '2023-10-08',
+      dateOfBirth: dayjs.utc('1997-11-12').toISOString(),
+      joiningDate: dayjs.utc('2023-10-08').toISOString(),
       salaryAmount: 46000,
     },
     {
@@ -206,8 +211,8 @@ export const seedEmployees = async (
       fullName: 'Alexander Moore',
       phone: '+1234567805',
       gender: Gender.MALE,
-      dateOfBirth: '1996-05-05',
-      joiningDate: '2023-11-20',
+      dateOfBirth: dayjs.utc('1996-05-05').toISOString(),
+      joiningDate: dayjs.utc('2023-11-20').toISOString(),
       salaryAmount: 54000,
     },
     {
@@ -215,8 +220,8 @@ export const seedEmployees = async (
       fullName: 'Charlotte Lee',
       phone: '+1234567806',
       gender: Gender.FEMALE,
-      dateOfBirth: '1995-09-17',
-      joiningDate: '2023-12-05',
+      dateOfBirth: dayjs.utc('1995-09-17').toISOString(),
+      joiningDate: dayjs.utc('2023-12-05').toISOString(),
       salaryAmount: 48500,
     },
     {
@@ -224,8 +229,8 @@ export const seedEmployees = async (
       fullName: 'Daniel Walker',
       phone: '+1234567807',
       gender: Gender.MALE,
-      dateOfBirth: '1994-03-03',
-      joiningDate: '2024-01-10',
+      dateOfBirth: dayjs.utc('1994-03-03').toISOString(),
+      joiningDate: dayjs.utc('2024-01-10').toISOString(),
       salaryAmount: 56000,
     },
     {
@@ -233,8 +238,8 @@ export const seedEmployees = async (
       fullName: 'Amelia Hall',
       phone: '+1234567808',
       gender: Gender.FEMALE,
-      dateOfBirth: '1997-01-28',
-      joiningDate: '2024-02-14',
+      dateOfBirth: dayjs.utc('1997-01-28').toISOString(),
+      joiningDate: dayjs.utc('2024-02-14').toISOString(),
       salaryAmount: 47500,
     },
     {
@@ -242,8 +247,8 @@ export const seedEmployees = async (
       fullName: 'Matthew Allen',
       phone: '+1234567809',
       gender: Gender.MALE,
-      dateOfBirth: '1996-12-11',
-      joiningDate: '2024-03-20',
+      dateOfBirth: dayjs.utc('1996-12-11').toISOString(),
+      joiningDate: dayjs.utc('2024-03-20').toISOString(),
       salaryAmount: 52500,
     },
     {
@@ -251,8 +256,8 @@ export const seedEmployees = async (
       fullName: 'Ava Young',
       phone: '+1234567810',
       gender: Gender.FEMALE,
-      dateOfBirth: '1995-08-23',
-      joiningDate: '2024-04-08',
+      dateOfBirth: dayjs.utc('1995-08-23').toISOString(),
+      joiningDate: dayjs.utc('2024-04-08').toISOString(),
       salaryAmount: 49500,
     },
     {
@@ -260,8 +265,8 @@ export const seedEmployees = async (
       fullName: 'Ethan King',
       phone: '+1234567811',
       gender: Gender.MALE,
-      dateOfBirth: '1994-06-19',
-      joiningDate: '2024-05-15',
+      dateOfBirth: dayjs.utc('1994-06-19').toISOString(),
+      joiningDate: dayjs.utc('2024-05-15').toISOString(),
       salaryAmount: 55500,
     },
     {
@@ -269,8 +274,8 @@ export const seedEmployees = async (
       fullName: 'Harper Wright',
       phone: '+1234567812',
       gender: Gender.FEMALE,
-      dateOfBirth: '1997-04-08',
-      joiningDate: '2024-06-22',
+      dateOfBirth: dayjs.utc('1997-04-08').toISOString(),
+      joiningDate: dayjs.utc('2024-06-22').toISOString(),
       salaryAmount: 48000,
     },
     {
@@ -278,8 +283,8 @@ export const seedEmployees = async (
       fullName: 'Christopher Lopez',
       phone: '+1234567813',
       gender: Gender.MALE,
-      dateOfBirth: '1995-10-30',
-      joiningDate: '2024-07-30',
+      dateOfBirth: dayjs.utc('1995-10-30').toISOString(),
+      joiningDate: dayjs.utc('2024-07-30').toISOString(),
       salaryAmount: 51500,
     },
     {
@@ -287,8 +292,8 @@ export const seedEmployees = async (
       fullName: 'Evelyn Hill',
       phone: '+1234567814',
       gender: Gender.FEMALE,
-      dateOfBirth: '1996-02-16',
-      joiningDate: '2024-08-12',
+      dateOfBirth: dayjs.utc('1996-02-16').toISOString(),
+      joiningDate: dayjs.utc('2024-08-12').toISOString(),
       salaryAmount: 50500,
     },
   ];
@@ -319,7 +324,7 @@ export const seedEmployees = async (
       employeeData: {
         employeeId: `TH-EMP-${String(i + 1).padStart(3, '0')}`,
         nidNumber: `NID-EMP-${String(i + 1).padStart(3, '0')}`,
-        joiningDate: new Date(emp.joiningDate),
+        joiningDate: dayjs.utc(emp.joiningDate).toISOString(),
       },
       designationId: designationId,
       employmentStatusId: employmentStatusId,
@@ -327,7 +332,7 @@ export const seedEmployees = async (
       workSiteId: params.workSiteId,
       salaryAmount: emp.salaryAmount,
       salaryType: 'MONTHLY',
-      startDate: new Date(emp.joiningDate),
+      startDate: dayjs.utc(emp.joiningDate).toISOString(),
     });
 
     createdEmployees.push(user);

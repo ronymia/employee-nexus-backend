@@ -1,4 +1,9 @@
 import { Prisma } from 'generated/prisma';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 export const seedBusinessSubscription = async (
   tx: Prisma.TransactionClient,
@@ -24,9 +29,9 @@ export const seedBusinessSubscription = async (
   }
 
   // Create business subscription
-  const startDate = new Date('2024-01-01');
-  const endDate = new Date('2025-01-01');
-  const trialEndDate = new Date('2024-01-15');
+  const startDate = dayjs.utc('2024-01-01').toISOString();
+  const endDate = dayjs.utc('2025-01-01').toISOString();
+  const trialEndDate = dayjs.utc('2024-01-15').toISOString();
 
   await tx.businessSubscription.create({
     data: {

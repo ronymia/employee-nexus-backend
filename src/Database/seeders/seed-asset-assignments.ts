@@ -2,6 +2,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Prisma } from '@prisma/client';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 /**
  * Seed asset assignments to employees
@@ -33,97 +38,97 @@ export async function seedAssetAssignments(
     {
       assetCode: 'LAP-001',
       employeeIndex: 0,
-      assignedAt: new Date('2023-01-20'),
+      assignedAt: dayjs.utc('2023-01-20').toISOString(),
     },
     {
       assetCode: 'LAP-002',
       employeeIndex: 1,
-      assignedAt: new Date('2023-02-25'),
+      assignedAt: dayjs.utc('2023-02-25').toISOString(),
     },
     {
       assetCode: 'LAP-003',
       employeeIndex: 2,
-      assignedAt: new Date('2023-03-15'),
+      assignedAt: dayjs.utc('2023-03-15').toISOString(),
     },
     {
       assetCode: 'LAP-004',
       employeeIndex: 3,
-      assignedAt: new Date('2023-04-10'),
+      assignedAt: dayjs.utc('2023-04-10').toISOString(),
     },
     {
       assetCode: 'LAP-005',
       employeeIndex: 4,
-      assignedAt: new Date('2023-05-18'),
+      assignedAt: dayjs.utc('2023-05-18').toISOString(),
     },
 
     // Monitors - assign to first 3 employees
     {
       assetCode: 'MON-001',
       employeeIndex: 0,
-      assignedAt: new Date('2023-01-22'),
+      assignedAt: dayjs.utc('2023-01-22').toISOString(),
     },
     {
       assetCode: 'MON-002',
       employeeIndex: 1,
-      assignedAt: new Date('2023-02-20'),
+      assignedAt: dayjs.utc('2023-02-20').toISOString(),
     },
     {
       assetCode: 'MON-003',
       employeeIndex: 2,
-      assignedAt: new Date('2023-03-25'),
+      assignedAt: dayjs.utc('2023-03-25').toISOString(),
     },
 
     // Mobile Phones - assign to employees 5, 6, 7
     {
       assetCode: 'PHN-001',
       employeeIndex: 5,
-      assignedAt: new Date('2023-02-05'),
+      assignedAt: dayjs.utc('2023-02-05').toISOString(),
     },
     {
       assetCode: 'PHN-002',
       employeeIndex: 6,
-      assignedAt: new Date('2023-02-15'),
+      assignedAt: dayjs.utc('2023-02-15').toISOString(),
     },
     {
       assetCode: 'PHN-003',
       employeeIndex: 7,
-      assignedAt: new Date('2023-03-10'),
+      assignedAt: dayjs.utc('2023-03-10').toISOString(),
     },
 
     // Keyboards - assign to first 2 employees
     {
       assetCode: 'KBD-001',
       employeeIndex: 0,
-      assignedAt: new Date('2023-01-26'),
+      assignedAt: dayjs.utc('2023-01-26').toISOString(),
     },
     {
       assetCode: 'KBD-002',
       employeeIndex: 1,
-      assignedAt: new Date('2023-02-10'),
+      assignedAt: dayjs.utc('2023-02-10').toISOString(),
     },
 
     // Mice - assign to first 2 employees
     {
       assetCode: 'MSE-001',
       employeeIndex: 0,
-      assignedAt: new Date('2023-01-30'),
+      assignedAt: dayjs.utc('2023-01-30').toISOString(),
     },
     {
       assetCode: 'MSE-002',
       employeeIndex: 1,
-      assignedAt: new Date('2023-02-12'),
+      assignedAt: dayjs.utc('2023-02-12').toISOString(),
     },
 
     // Headsets - assign to employees 3, 4
     {
       assetCode: 'HDS-001',
       employeeIndex: 3,
-      assignedAt: new Date('2023-02-18'),
+      assignedAt: dayjs.utc('2023-02-18').toISOString(),
     },
     {
       assetCode: 'HDS-002',
       employeeIndex: 4,
-      assignedAt: new Date('2023-03-20'),
+      assignedAt: dayjs.utc('2023-03-20').toISOString(),
     },
   ];
 

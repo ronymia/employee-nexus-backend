@@ -4,6 +4,11 @@ import {
   MaritalStatus,
   UserAccountStatus,
 } from 'src/modules/users/enums';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 interface CreateUserParams {
   tx: Prisma.TransactionClient;
@@ -14,7 +19,7 @@ interface CreateUserParams {
   profileData: {
     fullName: string;
     phone: string;
-    dateOfBirth: string;
+    dateOfBirth: Date | string;
     gender: Gender;
     address: string;
     city: string;
@@ -25,7 +30,7 @@ interface CreateUserParams {
   employeeData: {
     employeeId: string;
     nidNumber: string;
-    joiningDate: Date;
+    joiningDate: Date | string;
   };
   designationId: number;
   employmentStatusId: number;
@@ -33,7 +38,7 @@ interface CreateUserParams {
   workSiteId: number;
   salaryAmount: number;
   salaryType: 'MONTHLY' | 'HOURLY' | 'DAILY';
-  startDate: Date;
+  startDate: Date | string;
 }
 
 export const createUserWithEmployee = async (params: CreateUserParams) => {
@@ -71,7 +76,7 @@ export const createUserWithEmployee = async (params: CreateUserParams) => {
       userId: user.id,
       fullName: profileData.fullName,
       phone: profileData.phone,
-      dateOfBirth: new Date(profileData.dateOfBirth).toISOString(),
+      dateOfBirth: dayjs.utc(profileData.dateOfBirth).toISOString(),
       gender: profileData.gender,
       address: profileData.address,
       city: profileData.city,

@@ -7,6 +7,11 @@ import {
   MaritalStatus,
   UserAccountStatus,
 } from 'src/modules/users/enums';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 const prisma = new PrismaClient();
 
@@ -57,7 +62,7 @@ export const seedBusinessWithUsers = async () => {
             userId: owner.id,
             fullName: 'Md Rony Mia',
             phone: '+1234567890',
-            dateOfBirth: new Date('1985-05-15').toISOString(),
+            dateOfBirth: dayjs.utc('1985-05-15').toISOString(),
             gender: Gender.MALE,
             address: '123 Business Street',
             city: 'New York',
@@ -77,7 +82,7 @@ export const seedBusinessWithUsers = async () => {
             city: 'New York',
             country: 'USA',
             postcode: '10001',
-            registrationDate: new Date('2024-01-01'),
+            registrationDate: dayjs.utc('2024-01-01').toISOString(),
             status: 'ACTIVE',
             isSelfRegistered: false,
             ownerId: owner.id,
@@ -106,9 +111,9 @@ export const seedBusinessWithUsers = async () => {
         }
 
         // Create business subscription
-        const startDate = new Date('2024-01-01');
-        const endDate = new Date('2025-01-01');
-        const trialEndDate = new Date('2024-01-15'); // 15 days trial
+        const startDate = dayjs.utc('2024-01-01').toISOString();
+        const endDate = dayjs.utc('2025-01-01').toISOString();
+        const trialEndDate = dayjs.utc('2024-01-15').toISOString(); // 15 days trial
 
         await tx.businessSubscription.create({
           data: {
@@ -165,13 +170,13 @@ export const seedBusinessWithUsers = async () => {
 
         // Common passwords
         const adminPassword = await PasswordHelpers.passwordHash(
-          configuration().default_password.admin || 'AdminPass123',
+          configuration().default_password.admin || '12345678@We',
         );
         const managerPassword = await PasswordHelpers.passwordHash(
-          configuration().default_password.manager || 'ManagerPass123',
+          configuration().default_password.manager || '12345678@We',
         );
         const employeePassword = await PasswordHelpers.passwordHash(
-          configuration().default_password.employee || 'EmployeePass123',
+          configuration().default_password.employee || '12345678@We',
         );
 
         // Store created users for department assignment
@@ -217,7 +222,7 @@ export const seedBusinessWithUsers = async () => {
               userId: user.id,
               fullName: admin.fullName,
               phone: admin.phone,
-              dateOfBirth: new Date(admin.dateOfBirth).toISOString(),
+              dateOfBirth: dayjs.utc(admin.dateOfBirth).toISOString(),
               gender: admin.gender,
               address: '456 Admin Avenue',
               city: 'New York',
@@ -232,7 +237,7 @@ export const seedBusinessWithUsers = async () => {
               userId: user.id,
               employeeId: admin.employeeId,
               nidNumber: admin.nidNumber,
-              joiningDate: new Date('2024-02-01'),
+              joiningDate: dayjs.utc('2024-02-01').toISOString(),
             },
           });
 
@@ -241,7 +246,7 @@ export const seedBusinessWithUsers = async () => {
             data: {
               userId: user.id,
               designationId: designation.id,
-              startDate: new Date('2024-02-01'),
+              startDate: dayjs.utc('2024-02-01').toISOString(),
               isActive: true,
             },
           });
@@ -251,7 +256,7 @@ export const seedBusinessWithUsers = async () => {
             data: {
               userId: user.id,
               employmentStatusId: employmentStatus.id,
-              startDate: new Date('2024-02-01'),
+              startDate: dayjs.utc('2024-02-01').toISOString(),
               isActive: true,
             },
           });
@@ -262,7 +267,7 @@ export const seedBusinessWithUsers = async () => {
               userId: user.id,
               salaryAmount: 75000,
               salaryType: 'MONTHLY',
-              startDate: new Date('2024-02-01'),
+              startDate: dayjs.utc('2024-02-01').toISOString(),
               isActive: true,
               reason: 'Initial Salary',
             },
@@ -308,7 +313,7 @@ export const seedBusinessWithUsers = async () => {
               userId: user.id,
               fullName: manager.fullName,
               phone: manager.phone,
-              dateOfBirth: new Date(manager.dateOfBirth).toISOString(),
+              dateOfBirth: dayjs.utc(manager.dateOfBirth).toISOString(),
               gender: manager.gender,
               address: '789 Manager Lane',
               city: 'New York',
@@ -323,7 +328,7 @@ export const seedBusinessWithUsers = async () => {
               userId: user.id,
               employeeId: manager.employeeId,
               nidNumber: manager.nidNumber,
-              joiningDate: new Date('2024-03-01'),
+              joiningDate: dayjs.utc('2024-03-01').toISOString(),
             },
           });
 
@@ -332,7 +337,7 @@ export const seedBusinessWithUsers = async () => {
             data: {
               userId: user.id,
               designationId: designation.id,
-              startDate: new Date('2024-03-01'),
+              startDate: dayjs.utc('2024-03-01').toISOString(),
               isActive: true,
             },
           });
@@ -342,7 +347,7 @@ export const seedBusinessWithUsers = async () => {
             data: {
               userId: user.id,
               employmentStatusId: employmentStatus.id,
-              startDate: new Date('2024-03-01'),
+              startDate: dayjs.utc('2024-03-01').toISOString(),
               isActive: true,
             },
           });
@@ -353,7 +358,7 @@ export const seedBusinessWithUsers = async () => {
               userId: user.id,
               salaryAmount: 65000,
               salaryType: 'MONTHLY',
-              startDate: new Date('2024-03-01'),
+              startDate: dayjs.utc('2024-03-01').toISOString(),
               isActive: true,
               reason: 'Initial Salary',
             },
@@ -454,7 +459,7 @@ export const seedBusinessWithUsers = async () => {
               userId: user.id,
               fullName: emp.fullName,
               phone: emp.phone,
-              dateOfBirth: new Date(emp.dateOfBirth).toISOString(),
+              dateOfBirth: dayjs.utc(emp.dateOfBirth).toISOString(),
               gender: emp.gender,
               address: `${100 + i} Employee Street`,
               city: 'New York',
@@ -470,7 +475,7 @@ export const seedBusinessWithUsers = async () => {
               userId: user.id,
               employeeId: `TH-EMP-${String(i + 1).padStart(3, '0')}`,
               nidNumber: `NID-EMP-${String(i + 1).padStart(3, '0')}`,
-              joiningDate: new Date('2024-04-01'),
+              joiningDate: dayjs.utc('2024-04-01').toISOString(),
             },
           });
 
@@ -479,7 +484,7 @@ export const seedBusinessWithUsers = async () => {
             data: {
               userId: user.id,
               designationId: designation.id,
-              startDate: new Date('2024-04-01'),
+              startDate: dayjs.utc('2024-04-01').toISOString(),
               isActive: true,
             },
           });
@@ -489,7 +494,7 @@ export const seedBusinessWithUsers = async () => {
             data: {
               userId: user.id,
               employmentStatusId: employmentStatus.id,
-              startDate: new Date('2024-04-01'),
+              startDate: dayjs.utc('2024-04-01').toISOString(),
               isActive: true,
             },
           });
@@ -500,7 +505,7 @@ export const seedBusinessWithUsers = async () => {
               userId: user.id,
               salaryAmount: 50000,
               salaryType: 'MONTHLY',
-              startDate: new Date('2024-04-01'),
+              startDate: dayjs.utc('2024-04-01').toISOString(),
               isActive: true,
               reason: 'Initial Salary',
             },
@@ -565,7 +570,7 @@ export const seedBusinessWithUsers = async () => {
           data: {
             userId: createdManagers[0].id,
             departmentId: frontendTeam.id,
-            startDate: new Date('2024-03-01'),
+            startDate: dayjs.utc('2024-03-01').toISOString(),
             isPrimary: true,
             isActive: true,
             roleInDept: 'manager',
@@ -576,7 +581,7 @@ export const seedBusinessWithUsers = async () => {
           data: {
             userId: createdManagers[1].id,
             departmentId: backendTeam.id,
-            startDate: new Date('2024-03-01'),
+            startDate: dayjs.utc('2024-03-01').toISOString(),
             isPrimary: true,
             isActive: true,
             roleInDept: 'manager',
@@ -589,7 +594,7 @@ export const seedBusinessWithUsers = async () => {
             data: {
               userId: createdEmployees[i].id,
               departmentId: frontendTeam.id,
-              startDate: new Date('2024-04-01'),
+              startDate: dayjs.utc('2024-04-01').toISOString(),
               isPrimary: true,
               isActive: true,
               roleInDept: 'member',
@@ -603,7 +608,7 @@ export const seedBusinessWithUsers = async () => {
             data: {
               userId: createdEmployees[i].id,
               departmentId: backendTeam.id,
-              startDate: new Date('2024-04-01'),
+              startDate: dayjs.utc('2024-04-01').toISOString(),
               isPrimary: true,
               isActive: true,
               roleInDept: 'member',
@@ -617,7 +622,7 @@ export const seedBusinessWithUsers = async () => {
             data: {
               userId: createdEmployees[i].id,
               departmentId: fullstackTeam.id,
-              startDate: new Date('2024-04-01'),
+              startDate: dayjs.utc('2024-04-01').toISOString(),
               isPrimary: true,
               isActive: true,
               roleInDept: 'member',
@@ -630,7 +635,7 @@ export const seedBusinessWithUsers = async () => {
           data: {
             userId: createdEmployees[9].id,
             departmentId: devopsTeam.id,
-            startDate: new Date('2024-04-01'),
+            startDate: dayjs.utc('2024-04-01').toISOString(),
             isPrimary: true,
             isActive: true,
             roleInDept: 'member',

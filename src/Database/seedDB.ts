@@ -8,6 +8,11 @@ import {
   MaritalStatus,
   UserAccountStatus,
 } from 'src/modules/users/enums';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 const prisma = new PrismaClient();
 
@@ -20,7 +25,7 @@ export const superUser = {
 export const superAdminProfile = {
   fullName: 'MD Rony Mia',
   phone: '01321185989',
-  dateOfBirth: new Date('1998-12-10').toISOString(),
+  dateOfBirth: dayjs.utc('1998-12-10').toISOString(),
   gender: Gender.MALE,
   address: 'west khabaspur,Faridpur Sadar,Faridpur',
   city: 'Faridpur',

@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class EmployeeDashboardService {
@@ -59,17 +63,17 @@ export class EmployeeDashboardService {
       department: user?.employee?.departments?.[0]?.department?.name || 'N/A',
       designation:
         user?.employee?.designations?.[0]?.designation?.name || 'N/A',
-      joiningDate: user?.employee?.joiningDate || new Date(),
+      joiningDate: user?.employee?.joiningDate || dayjs.utc().toISOString(),
       email: user?.email || 'N/A',
       phone: user?.profile?.phone || 'N/A',
     };
   }
 
   private async getAttendanceSummary(userId: number) {
-    const today = dayjs().startOf('day').toDate();
-    const endToday = dayjs().endOf('day').toDate();
-    const startOfMonth = dayjs().startOf('month').toDate();
-    const endOfMonth = dayjs().endOf('month').toDate();
+    const today = dayjs.utc().startOf('day').toISOString();
+    const endToday = dayjs.utc().endOf('day').toISOString();
+    const startOfMonth = dayjs.utc().startOf('month').toISOString();
+    const endOfMonth = dayjs.utc().endOf('month').toISOString();
 
     // Today's attendance
     const todayAttendance = await this.prismaService.attendance.findFirst({
@@ -117,7 +121,7 @@ export class EmployeeDashboardService {
       where: {
         userId,
         date: {
-          gte: dayjs().subtract(7, 'day').startOf('day').toDate(),
+          gte: dayjs.utc().subtract(7, 'day').startOf('day').toISOString(),
         },
       },
 
@@ -151,8 +155,8 @@ export class EmployeeDashboardService {
   }
 
   private async getLeaveSummary(userId: number) {
-    const startOfYear = dayjs().startOf('year').toDate();
-    const today = dayjs().startOf('day').toDate();
+    const startOfYear = dayjs.utc().startOf('year').toISOString();
+    const today = dayjs.utc().startOf('day').toISOString();
 
     // Get leave balances
     // const leaveBalances = await this.prismaService.leaveBalance.findMany({
@@ -195,13 +199,13 @@ export class EmployeeDashboardService {
       upcomingLeaves: upcomingLeaves.map((leave) => ({
         leaveType: leave.leaveType.name,
         startDate: leave.startDate,
-        endDate: leave.endDate || new Date(),
+        endDate: leave.endDate || dayjs.utc().toISOString(),
         status: leave.status,
       })),
       leaveHistory: leaveHistory.map((leave) => ({
         leaveType: leave.leaveType.name,
         startDate: leave.startDate,
-        endDate: leave.endDate || new Date(),
+        endDate: leave.endDate || dayjs.utc().toISOString(),
         status: leave.status,
         reason: leave.remarks || undefined,
       })),
@@ -209,9 +213,9 @@ export class EmployeeDashboardService {
   }
 
   private async getPayrollSummary(userId: number) {
-    const startOfMonth = dayjs().startOf('month').toDate();
-    const endOfMonth = dayjs().endOf('month').toDate();
-    const startOfYear = dayjs().startOf('year').toDate();
+    const startOfMonth = dayjs.utc().startOf('month').toISOString();
+    const endOfMonth = dayjs.utc().endOf('month').toISOString();
+    const startOfYear = dayjs.utc().startOf('year').toISOString();
 
     // Current month payroll
     const currentMonthPayroll = await this.prismaService.payrollItem.findFirst({
@@ -266,7 +270,7 @@ export class EmployeeDashboardService {
           : 'N/A',
         grossPay: lastPayment?.grossPay || 0,
         netPay: lastPayment?.netPay || 0,
-        paidDate: lastPayment?.paidAt || new Date(),
+        paidDate: lastPayment?.paidAt || dayjs.utc().toISOString(),
       },
       yearToDate: {
         totalGrossPay,
@@ -278,7 +282,7 @@ export class EmployeeDashboardService {
 
   private getTaskOverview(userId: number) {
     console.log({ userId });
-    // const today = dayjs().startOf('day').toDate();
+    // const today = dayjs.utc().startOf('day').toISOString();
 
     // const [assigned, inProgress, completed, overdue, recentTasks] =
     //   await Promise.all([
@@ -315,7 +319,7 @@ export class EmployeeDashboardService {
         title: '',
         project: 'Employee Management System',
         status: 'IN_PROGRESS',
-        dueDate: new Date(),
+        dueDate: dayjs.utc().toISOString(),
         priority: 'MEDIUM',
       })),
     };

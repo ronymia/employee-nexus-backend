@@ -1,6 +1,11 @@
 import { Prisma } from 'generated/prisma';
 import { createUserWithEmployee } from './create-user-employee';
 import { Gender, MaritalStatus } from 'src/modules/users/enums';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 export const seedManagers = async (
   tx: Prisma.TransactionClient,
@@ -60,7 +65,7 @@ export const seedManagers = async (
       employeeData: {
         employeeId: manager.employeeId,
         nidNumber: manager.nidNumber,
-        joiningDate: new Date('2024-03-01'),
+        joiningDate: dayjs.utc('2024-03-01').toISOString(),
       },
       designationId: params.designationId,
       employmentStatusId: params.employmentStatusId,
@@ -68,7 +73,7 @@ export const seedManagers = async (
       workSiteId: params.workSiteId,
       salaryAmount: 65000,
       salaryType: 'MONTHLY',
-      startDate: new Date('2024-03-01'),
+      startDate: dayjs.utc('2024-03-01').toISOString(),
     });
 
     createdManagers.push(user);
