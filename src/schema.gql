@@ -552,6 +552,7 @@ type AttendanceThisWeek {
 
 type AttendanceToday {
   absent: Int!
+  attendanceOnToday: Int!
   late: Int!
   notPunchedIn: Int!
   onLeave: Int!

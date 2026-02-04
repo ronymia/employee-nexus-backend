@@ -11,6 +11,10 @@ import {
 } from './entities/owner-dashboard.entity';
 import * as dayjs from 'dayjs';
 import { UserAccountStatus } from '../users/enums';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class OwnerDashboardService {
@@ -137,7 +141,7 @@ export class OwnerDashboardService {
   private async getAttendanceAnalytics(
     businessId: number,
   ): Promise<AttendanceAnalytics> {
-    const today = dayjs().startOf('day').toDate();
+    const today = dayjs.utc().startOf('day').toDate();
     const endToday = dayjs().endOf('day').toDate();
     const startOfWeek = dayjs().startOf('week').toDate();
     const endOfWeek = dayjs().endOf('week').toDate();
@@ -163,18 +167,22 @@ export class OwnerDashboardService {
         user: { businessId },
         status: 'approved',
         startDate: { lte: endToday },
-        endDate: { gte: today },
+        OR: [
+          { endDate: { gte: today } }, // normal case
+          { endDate: null }, // ongoing leave
+        ],
       },
     });
 
     const todayPresent = todayAttendance.filter(
-      (a) => a.status === 'approved',
+      (a) => a.status === 'approved' || a.status === 'pending',
     ).length;
     const todayAbsent = todayAttendance.filter(
       (a) => a.status === 'rejected',
     ).length;
     const todayLate = todayAttendance.filter((a) => a.status === 'late').length;
-    const notPunchedIn = totalEmployees - todayAttendance.length;
+    const attendanceOnToday = totalEmployees - (todayOnLeave || 0);
+    const notPunchedIn = attendanceOnToday - todayAttendance.length;
 
     // This week's attendance
     const weekAttendance = await this.prismaService.attendance.groupBy({
@@ -243,6 +251,7 @@ export class OwnerDashboardService {
         absent: todayAbsent,
         late: todayLate,
         onLeave: todayOnLeave,
+        attendanceOnToday,
         notPunchedIn,
       },
       thisWeek: {
@@ -325,7 +334,7 @@ export class OwnerDashboardService {
         employeeName: leave?.user?.profile?.fullName as string,
         leaveType: leave.leaveType?.name,
         startDate: leave?.startDate,
-        endDate: leave?.endDate as Date,
+        endDate: leave?.endDate ? leave?.endDate : leave?.startDate,
       })),
     };
   }
