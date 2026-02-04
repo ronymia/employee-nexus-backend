@@ -21,6 +21,7 @@ import { seedNotificationTemplates } from './seeders/seed-notification-templates
 import { seedAssetTypes } from './seeders/seed-asset-types';
 import { seedAssets } from './seeders/seed-assets';
 import { seedAssetAssignments } from './seeders/seed-asset-assignments';
+import { seedPayrollComponents } from './seeders/payroll-components';
 
 const prisma = new PrismaClient();
 
@@ -200,6 +201,8 @@ export const seedBusinessWithUsers = async () => {
           createdEmployees.map((e) => e.id),
           firstAdminId,
         );
+        // 16. Create notification templates
+        await seedPayrollComponents(tx, business.id);
 
         console.log('✅ Business seeding completed successfully!');
         return {

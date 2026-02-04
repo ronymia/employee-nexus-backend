@@ -1,5 +1,4 @@
 import { Prisma } from 'generated/prisma';
-import { PasswordHelpers } from 'src/helpers/passwordHelpers';
 import {
   Gender,
   MaritalStatus,

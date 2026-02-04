@@ -11,6 +11,7 @@ import {
   QueryPayrollCycleInput,
   ApprovePayrollCycleInput,
   ProcessPayrollCycleInput,
+  ApprovePayrollItemsInput,
 } from './dto';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
@@ -65,6 +66,25 @@ export class PayrollCyclesResolver {
     };
   }
 
+  @Mutation(() => PayrollCycleResponse, { name: 'processPayrollCycle' })
+  @RequirePermissions('Payroll Cycle:update')
+  async processPayrollCycle(
+    @CurrentUser() user: JwtPayload,
+    @Args('processPayrollCycleInput')
+    processPayrollCycleInput: ProcessPayrollCycleInput,
+  ) {
+    const cycle = await this.payrollCyclesService.process(
+      user,
+      processPayrollCycleInput,
+    );
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Payroll cycle processing started',
+      data: cycle,
+    };
+  }
+
   @Mutation(() => PayrollCycleResponse, { name: 'approvePayrollCycle' })
   @RequirePermissions('Payroll Cycle:update')
   async approvePayrollCycle(
@@ -84,21 +104,21 @@ export class PayrollCyclesResolver {
     };
   }
 
-  @Mutation(() => PayrollCycleResponse, { name: 'processPayrollCycle' })
+  @Mutation(() => PayrollCycleResponse, { name: 'approvePayrollItems' })
   @RequirePermissions('Payroll Cycle:update')
-  async processPayrollCycle(
+  async approvePayrollItems(
     @CurrentUser() user: JwtPayload,
-    @Args('processPayrollCycleInput')
-    processPayrollCycleInput: ProcessPayrollCycleInput,
+    @Args('approvePayrollItemsInput')
+    approvePayrollItemsInput: ApprovePayrollItemsInput,
   ) {
-    const cycle = await this.payrollCyclesService.process(
+    const cycle = await this.payrollCyclesService.approvePayrollItems(
       user,
-      processPayrollCycleInput,
+      approvePayrollItemsInput.payrollCycleId,
     );
     return {
       success: true,
       statusCode: HttpStatus.OK,
-      message: 'Payroll cycle processing started',
+      message: 'All pending payroll items approved successfully',
       data: cycle,
     };
   }

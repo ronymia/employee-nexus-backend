@@ -499,9 +499,14 @@ export class LeavesService {
     userId: number;
     year: number;
   }) {
+    if (!user.businessId) {
+      throw new NotFoundException('Business not found for the user');
+    }
+
     const existingUser = await this.prisma.user.findUnique({
       where: {
         id: userId,
+        AND: { businessId: user.businessId },
       },
       include: {
         employee: {
@@ -562,7 +567,7 @@ export class LeavesService {
       leaveTypeName: leaveType.name,
       year,
       allocatedMinutes,
-      usedMinutesValue,
+      usedMinutes: usedMinutesValue,
       remainingMinutes: remaining,
     };
   }

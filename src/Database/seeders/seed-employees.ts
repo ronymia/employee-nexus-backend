@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Prisma } from 'generated/prisma';
 import { createUserWithEmployee } from './create-user-employee';
 import { Gender, MaritalStatus } from 'src/modules/users/enums';

@@ -4,7 +4,6 @@ import {
   IsOptional,
   IsDateString,
   IsNumber,
-  IsBoolean,
   IsString,
 } from 'class-validator';
 
@@ -14,10 +13,13 @@ export class CreatePayslipAdjustmentInput {
   @IsInt()
   userId: number;
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => Int)
   @IsInt()
-  @IsOptional()
   payrollComponentId?: number;
+
+  @Field(() => Date)
+  @IsDateString()
+  appliedMonth: Date;
 
   @Field(() => String)
   @IsString()

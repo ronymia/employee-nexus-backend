@@ -5,7 +5,10 @@ import {
   BaseQueryResponse,
 } from '../../../common/dto/base-response.type';
 import { User } from 'src/modules/users/entities/user.entity';
-import { PayrollComponent } from 'src/modules/payroll-components/entities/payroll-component.entity';
+import { IsOptional } from 'class-validator';
+import { PayslipAdjustment } from 'src/modules/employee-payslip-adjustments/entities/payslip-adjustment.entity';
+import { PayrollCycle } from 'src/modules/payroll-cycles/entities/payroll-cycle.entity';
+import { PayrollItemComponent } from './payroll-item-component.entity';
 
 @ObjectType()
 export class PayrollItem {
@@ -14,6 +17,9 @@ export class PayrollItem {
 
   @Field(() => Int)
   payrollCycleId: number;
+
+  @Field(() => PayrollCycle, { description: 'Payroll Cycle' })
+  payrollCycle: PayrollCycle;
 
   @Field(() => Int)
   userId: number;
@@ -46,7 +52,7 @@ export class PayrollItem {
   leaveDays: number;
 
   @Field(() => Float, { nullable: true })
-  overtimeHours?: number;
+  overtimeMinutes?: number;
 
   @Field(() => PayrollItemStatus)
   status: PayrollItemStatus;
@@ -71,33 +77,21 @@ export class PayrollItem {
 
   @Field()
   updatedAt: Date;
-}
 
-@ObjectType()
-export class PayrollItemComponent {
-  @Field(() => Int)
-  id: number;
+  @Field(() => [PayslipAdjustment], {
+    nullable: true,
+    description: 'Payroll Adjustments',
+  })
+  @IsOptional()
+  payslipAdjustments?: PayslipAdjustment[] | [];
 
-  @Field(() => Int)
-  payrollItemId: number;
-
-  @Field(() => PayrollItem, { description: 'Payroll Item' })
-  payrollItem: PayrollItem;
-
-  @Field(() => Int)
-  payrollComponentId: number;
-
-  @Field(() => PayrollComponent, { description: 'Payroll Component' })
-  payrollComponent: PayrollComponent;
-
-  @Field(() => Float)
-  amount: number;
-
-  @Field(() => Float, { nullable: true })
-  calculationBase?: number;
-
-  @Field({ nullable: true })
-  notes?: string;
+  @Field(() => [PayrollItemComponent], {
+    nullable: true,
+    description:
+      'Payroll Item Components - frozen snapshot of components used in calculation',
+  })
+  @IsOptional()
+  payrollItemComponents?: PayrollItemComponent[] | [];
 }
 
 @ObjectType()

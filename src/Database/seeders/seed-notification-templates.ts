@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import type { Prisma } from 'generated/prisma';
 import {
   NotificationPriority,

@@ -1,6 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Prisma } from 'generated/prisma';
-import { ROLE } from 'src/enums';
-import { PasswordHelpers } from 'src/helpers/passwordHelpers';
 import {
   Gender,
   MaritalStatus,
@@ -20,7 +19,7 @@ export const seedBusiness = async (
       email: 'mdronymia040@gmail.com',
       password: ownerPassword,
       status: UserAccountStatus.ACTIVE,
-      roleId: ownerRole.id,
+      roleId: ownerRole?.id,
     },
   });
 

@@ -922,7 +922,7 @@ model Attendance {
   totalMinutes    Int               @default(0) @map("total_minutes") // Calculated total working hours for the day
   breakMinutes    Int               @default(0) @map("break_minutes") // Calculated total break hours for the day
   overtimeMinutes Int               @default(0) @map("overtime_minutes") // Calculated overtime minutes beyond regular schedule
-  status          String            @default("pending") @map("status") // pending, present, absent, on_leave
+  status          String            @default("pending") @map("status") // pending, approved, absent, on_leave
   type            String            @default("regular") @map("type") // partial, late, regular
   reviewedAt      DateTime?         @map("reviewed_at") // When attendance was approved/rejected
   reviewedBy      Int?              @map("reviewed_by") // Manager/admin who reviewed
@@ -1052,6 +1052,7 @@ model PayrollComponent {
 
   employeePayrollComponents EmployeePayrollComponent[] @relation(name: "employeePayrollComponents")
   payslipAdjustments        PayslipAdjustment[]        @relation(name: "payslipAdjustmentComponent")
+  payrollItemComponents     PayrollItemComponent[]     @relation(name: "payrollItemComponents")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1097,27 +1098,28 @@ model PayrollCycle {
 }
 
 model PayrollItem {
-  id                 Int                 @id @default(autoincrement())
-  payrollCycleId     Int                 @map("payroll_cycle_id")
-  payrollCycle       PayrollCycle        @relation(name: "payrollItemsInCycle", fields: [payrollCycleId], references: [id], onDelete: Cascade)
-  userId             Int                 @map("user_id")
-  user               User                @relation(name: "userPayrollItems", fields: [userId], references: [id], onDelete: Cascade)
-  basicSalary        Float               @map("basic_salary")
-  grossPay           Float               @map("gross_pay")
-  totalDeductions    Float               @map("total_deductions")
-  netPay             Float               @map("net_pay")
-  workingDays        Int                 @map("working_days")
-  presentDays        Int                 @map("present_days")
-  absentDays         Int                 @map("absent_days")
-  leaveDays          Int                 @map("leave_days")
-  overtimeMinutes    Int?                @map("overtime_minutes")
-  status             String
-  paymentMethod      String              @map("payment_method")
-  bankAccount        String?             @map("bank_account")
-  transactionRef     String?             @map("transaction_ref")
-  paidAt             DateTime?           @map("paid_at")
-  notes              String?             @db.Text
-  payslipAdjustments PayslipAdjustment[] @relation(name: "payslipAdjustments")
+  id                    Int                    @id @default(autoincrement())
+  payrollCycleId        Int                    @map("payroll_cycle_id")
+  payrollCycle          PayrollCycle           @relation(name: "payrollItemsInCycle", fields: [payrollCycleId], references: [id], onDelete: Cascade)
+  userId                Int                    @map("user_id")
+  user                  User                   @relation(name: "userPayrollItems", fields: [userId], references: [id], onDelete: Cascade)
+  basicSalary           Float                  @map("basic_salary")
+  grossPay              Float                  @map("gross_pay")
+  totalDeductions       Float                  @map("total_deductions")
+  netPay                Float                  @map("net_pay")
+  workingDays           Int                    @map("working_days")
+  presentDays           Int                    @map("present_days")
+  absentDays            Int                    @map("absent_days")
+  leaveDays             Int                    @map("leave_days")
+  overtimeMinutes       Int?                   @map("overtime_minutes")
+  status                String
+  paymentMethod         String                 @map("payment_method")
+  bankAccount           String?                @map("bank_account")
+  transactionRef        String?                @map("transaction_ref")
+  paidAt                DateTime?              @map("paid_at")
+  notes                 String?                @db.Text
+  payslipAdjustments    PayslipAdjustment[]    @relation(name: "payslipAdjustments")
+  payrollItemComponents PayrollItemComponent[] @relation(name: "payrollItemComponents")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1150,6 +1152,27 @@ model EmployeePayrollComponent {
   @@index([payrollComponentId])
   @@index([effectiveFrom, effectiveTo])
   @@map("employee_payroll_components")
+}
+
+model PayrollItemComponent {
+  id                 Int              @id @default(autoincrement())
+  payrollItemId      Int              @map("payroll_item_id")
+  payrollItem        PayrollItem      @relation(name: "payrollItemComponents", fields: [payrollItemId], references: [id], onDelete: Cascade)
+  payrollComponentId Int              @map("payroll_component_id")
+  payrollComponent   PayrollComponent @relation(name: "payrollItemComponents", fields: [payrollComponentId], references: [id], onDelete: Restrict)
+
+  // Snapshot values at time of payroll generation
+  componentType    String @map("component_type") // EARNING or DEDUCTION
+  calculationType  String @map("calculation_type") // FIXED_AMOUNT or PERCENTAGE_OF_BASIC
+  value            Float // Value used (custom or default)
+  calculatedAmount Float  @map("calculated_amount") // Final calculated amount
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([payrollItemId, payrollComponentId])
+  @@index([payrollItemId])
+  @@index([payrollComponentId])
+  @@map("payroll_item_components")
 }
 
 model PayslipAdjustment {
