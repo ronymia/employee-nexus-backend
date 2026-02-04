@@ -60,17 +60,47 @@ export class OwnerDashboardService {
       activeProjects,
       payrollData,
     ] = await Promise.all([
-      this.prismaService.user.count({ where: { businessId } }),
       this.prismaService.user.count({
-        where: { businessId, status: UserAccountStatus.ACTIVE },
+        where: {
+          businessId,
+          AND: {
+            role: {
+              NOT: { name: `OWNER#${businessId}` },
+            },
+          },
+        },
       }),
       this.prismaService.user.count({
-        where: { businessId, status: UserAccountStatus.INACTIVE },
+        where: {
+          businessId,
+          status: UserAccountStatus.ACTIVE,
+          AND: {
+            role: {
+              NOT: { name: `OWNER#${businessId}` },
+            },
+          },
+        },
+      }),
+      this.prismaService.user.count({
+        where: {
+          businessId,
+          status: UserAccountStatus.INACTIVE,
+          AND: {
+            role: {
+              NOT: { name: `OWNER#${businessId}` },
+            },
+          },
+        },
       }),
       this.prismaService.department.count({ where: { businessId } }),
       this.prismaService.project.count({ where: { businessId } }),
       this.prismaService.project.count({
-        where: { businessId, status: 'ACTIVE' },
+        where: {
+          businessId,
+          status: {
+            not: 'COMPLETED',
+          },
+        },
       }),
       this.prismaService.payrollItem.aggregate({
         where: {
@@ -84,7 +114,10 @@ export class OwnerDashboardService {
     const pendingPayrollData = await this.prismaService.payrollItem.aggregate({
       where: {
         user: { businessId },
-        status: 'PENDING',
+        status: 'APPROVED',
+        payrollCycle: {
+          periodStart: { gte: startOfMonth, lte: endOfMonth },
+        },
       },
       _sum: { netPay: true },
     });
@@ -226,6 +259,7 @@ export class OwnerDashboardService {
     };
   }
 
+  // Get leave statistics for the dashboard THIS MONTH
   private async getLeaveStats(businessId: number): Promise<LeaveStats> {
     const startOfMonth = dayjs().startOf('month').toDate();
     const endOfMonth = dayjs().endOf('month').toDate();
@@ -267,7 +301,7 @@ export class OwnerDashboardService {
     // Group leaves by type
     const leaveByType = monthLeaves.reduce(
       (acc, leave) => {
-        const typeName = leave.leaveType?.name || 'Other';
+        const typeName = leave.leaveType?.name;
         const existing = acc.find((item) => item.leaveType === typeName);
         if (existing) {
           existing.count++;
@@ -288,10 +322,10 @@ export class OwnerDashboardService {
         byType: leaveByType,
       },
       upcomingLeaves: upcomingLeaves.map((leave) => ({
-        employeeName: leave.user?.profile?.fullName || 'Unknown',
-        leaveType: leave.leaveType?.name || 'Other',
-        startDate: leave.startDate,
-        endDate: leave.endDate || new Date(),
+        employeeName: leave?.user?.profile?.fullName as string,
+        leaveType: leave.leaveType?.name,
+        startDate: leave?.startDate,
+        endDate: leave?.endDate as Date,
       })),
     };
   }
@@ -301,7 +335,7 @@ export class OwnerDashboardService {
     const currentCycle = await this.prismaService.payrollCycle.findFirst({
       where: {
         businessId,
-        periodStart: {
+        paymentDate: {
           gte: dayjs().startOf('month').toDate(),
         },
       },
@@ -454,15 +488,8 @@ export class OwnerDashboardService {
         name: project.name,
         status: project.status,
         memberCount: project._count.projectMembers,
-        startDate: project.startDate
-          ? dayjs(project.startDate, 'DD-MM-YYYY').toDate()
-          : new Date(),
-        endDate: project.endDate
-          ? dayjs(project.startDate, 'DD-MM-YYYY').toDate()
-          : undefined,
-        // endDate: project.endDate
-        //   ? dayjs(project.endDate, 'DD-MM-YYYY').toDate()
-        //   : undefined,
+        startDate: project.startDate as Date,
+        endDate: project?.endDate ? project?.endDate : undefined,
       })),
     };
   }
