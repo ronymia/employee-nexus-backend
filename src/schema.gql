@@ -552,6 +552,7 @@ type AttendanceThisWeek {
 
 type AttendanceToday {
   absent: Int!
+  attendanceOnToday: Int!
   late: Int!
   notPunchedIn: Int!
   onLeave: Int!
@@ -1174,9 +1175,7 @@ input CreateNoteInput {
 }
 
 input CreateNotificationInput {
-  actionUrl: String
   businessId: Int
-  channels: [NotificationChannel!]!
   entityId: Int
   entityType: String
   expiresAt: DateTime
@@ -2700,7 +2699,7 @@ type Mutation {
   deleteUser(id: Int!): UserResponse!
   deleteWorkSchedule(id: Int!): WorkScheduleResponse!
   deleteWorkSite(id: Int!): WorkSiteResponse!
-  leaveRequest(createLeaveInput: RequestLeaveInput!): LeaveResponse!
+  leaveRequest(requestLeaveInput: RequestLeaveInput!): LeaveResponse!
   login(loginInput: LoginAuthInput!): Auth!
   markAllNotificationsAsRead: NotificationResponse!
   markNotificationAsRead(id: Int!): NotificationResponse!
@@ -2715,6 +2714,7 @@ type Mutation {
   removeAsset(id: Int!): AssetResponse!
   removeAssetType(id: Int!): AssetTypeResponse!
   renewBusinessSubscription(renewBusinessSubscriptionInput: RenewBusinessSubscriptionInput!): BusinessSubscriptionResponse!
+  requestAttendance(requestAttendanceInput: RequestAttendanceInput!): AttendanceResponse!
   returnAsset(returnAssetInput: ReturnAssetInput!): AssetAssignmentResponse!
   unassignProjectMember(unassignProjectMemberInput: UnassignProjectMemberInput!): ProjectMemberResponse!
   updateAsset(updateAssetInput: UpdateAssetInput!): AssetResponse!
@@ -3835,6 +3835,17 @@ input RenewBusinessSubscriptionInput {
 
   """New start date"""
   startDate: DateTime!
+}
+
+input RequestAttendanceInput {
+  """Total break minutes for the day"""
+  breakMinutes: Int
+
+  """Date of attendance"""
+  date: DateTime!
+
+  """Punch records for this attendance"""
+  punchRecords: [CreateAttendancePunchInput!]!
 }
 
 input RequestLeaveInput {

@@ -91,11 +91,16 @@ export const employeePermissions = [
   },
   {
     resource: PermissionResource.SOCIAL_LINK,
-    action: [PermissionAction.READ],
+    action: [PermissionAction.READ, PermissionAction.UPDATE],
   },
   {
     resource: PermissionResource.ATTENDANCE,
-    action: [PermissionAction.CREATE, PermissionAction.READ],
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.REQUEST,
+    ],
   },
   {
     resource: PermissionResource.LEAVE,
@@ -103,6 +108,7 @@ export const employeePermissions = [
       PermissionAction.CREATE,
       PermissionAction.READ,
       PermissionAction.UPDATE,
+      PermissionAction.REQUEST,
     ],
   },
   {

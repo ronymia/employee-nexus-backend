@@ -1,4 +1,9 @@
 import { GraphQLError, GraphQLFormattedError } from 'graphql';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 export const graphqlErrorFormatter = (
   error: GraphQLError,
@@ -30,7 +35,7 @@ export const graphqlErrorFormatter = (
       statusCode,
       code: error.extensions?.code,
       errors,
-      timestamp: new Date().toISOString(),
+      timestamp: dayjs.utc().toISOString(),
     },
     locations: error.locations,
     path: error.path,

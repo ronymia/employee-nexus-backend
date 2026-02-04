@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   ExceptionFilter,
   Catch,
@@ -10,6 +11,11 @@ import { GqlArgumentsHost, GqlContextType } from '@nestjs/graphql';
 import { Response } from 'express';
 import { TGenericErrorResponse } from '../interfaces/error';
 import { Prisma } from 'generated/prisma';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -37,7 +43,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     // Log error
     this.logger.error({
-      timestamp: new Date().toISOString(),
+      timestamp: dayjs.utc().toISOString(),
       path: request.url,
       method: request.method,
       statusCode: errorResponse.statusCode,
@@ -48,7 +54,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     response.status(errorResponse.statusCode).json({
       success: false,
       ...errorResponse,
-      timestamp: new Date().toISOString(),
+      timestamp: dayjs.utc().toISOString(),
       path: request.url,
     });
   }
@@ -62,7 +68,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     // Log error
     this.logger.error({
-      timestamp: new Date().toISOString(),
+      timestamp: dayjs.utc().toISOString(),
       operation: info?.fieldName,
       statusCode: errorResponse.statusCode,
       message: errorResponse.message,

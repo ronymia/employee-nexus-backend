@@ -5,11 +5,15 @@ import {
   MaritalStatus,
   UserAccountStatus,
 } from 'src/modules/users/enums';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 export const seedBusiness = async (
   tx: Prisma.TransactionClient,
   ownerPassword: string,
-  ownerRole: any,
 ) => {
   console.log('🏢 Creating business and owner...');
 
@@ -19,7 +23,7 @@ export const seedBusiness = async (
       email: 'mdronymia040@gmail.com',
       password: ownerPassword,
       status: UserAccountStatus.ACTIVE,
-      roleId: ownerRole?.id,
+      roleId: 2,
     },
   });
 
@@ -29,7 +33,7 @@ export const seedBusiness = async (
       userId: owner.id,
       fullName: 'Md Rony Mia',
       phone: '+1234567890',
-      dateOfBirth: new Date('1985-05-15').toISOString(),
+      dateOfBirth: dayjs.utc('1985-05-15').toISOString(),
       gender: Gender.MALE,
       address: '123 Business Street',
       city: 'New York',
@@ -49,7 +53,7 @@ export const seedBusiness = async (
       city: 'New York',
       country: 'USA',
       postcode: '10001',
-      registrationDate: new Date('2024-01-01'),
+      registrationDate: dayjs.utc('2024-01-01').toISOString(),
       status: 'ACTIVE',
       isSelfRegistered: false,
       ownerId: owner.id,

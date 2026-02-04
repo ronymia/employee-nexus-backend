@@ -8,7 +8,11 @@ import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { holidaySearchableFields } from './holiday.constant';
 import { NotificationsService } from '../notifications/notifications.service';
-import dayjs from 'dayjs';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class HolidaysService {
@@ -173,7 +177,7 @@ export class HolidaysService {
     if (startDate) {
       andCondition.push({
         startDate: {
-          gte: new Date(startDate),
+          gte: dayjs.utc(startDate).toISOString(),
         },
       });
     }
@@ -181,7 +185,7 @@ export class HolidaysService {
     if (endDate) {
       andCondition.push({
         endDate: {
-          lte: new Date(endDate),
+          lte: dayjs.utc(endDate).toISOString(),
         },
       });
     }

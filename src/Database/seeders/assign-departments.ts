@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Prisma } from 'generated/prisma';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 export const assignEmployeesToDepartments = async (
   tx: Prisma.TransactionClient,
@@ -23,7 +28,7 @@ export const assignEmployeesToDepartments = async (
     data: {
       userId: createdManagers[0].id,
       departmentId: departments.frontendTeam.id,
-      startDate: new Date('2024-03-01'),
+      startDate: dayjs.utc('2024-03-01').toISOString(),
       isPrimary: true,
       isActive: true,
       roleInDept: 'manager',
@@ -34,7 +39,7 @@ export const assignEmployeesToDepartments = async (
     data: {
       userId: createdManagers[1].id,
       departmentId: departments.backendTeam.id,
-      startDate: new Date('2024-03-01'),
+      startDate: dayjs.utc('2024-03-01').toISOString(),
       isPrimary: true,
       isActive: true,
       roleInDept: 'manager',
@@ -47,7 +52,7 @@ export const assignEmployeesToDepartments = async (
       data: {
         userId: createdEmployees[i].id,
         departmentId: departments.frontendTeam.id,
-        startDate: new Date('2024-04-01'),
+        startDate: dayjs.utc('2024-04-01').toISOString(),
         isPrimary: true,
         isActive: true,
         roleInDept: 'member',
@@ -61,7 +66,7 @@ export const assignEmployeesToDepartments = async (
       data: {
         userId: createdEmployees[i].id,
         departmentId: departments.backendTeam.id,
-        startDate: new Date('2024-04-01'),
+        startDate: dayjs.utc('2024-04-01').toISOString(),
         isPrimary: true,
         isActive: true,
         roleInDept: 'member',
@@ -75,7 +80,7 @@ export const assignEmployeesToDepartments = async (
       data: {
         userId: createdEmployees[i].id,
         departmentId: departments.fullstackTeam.id,
-        startDate: new Date('2024-04-01'),
+        startDate: dayjs.utc('2024-04-01').toISOString(),
         isPrimary: true,
         isActive: true,
         roleInDept: 'member',
@@ -88,7 +93,7 @@ export const assignEmployeesToDepartments = async (
     data: {
       userId: createdEmployees[9].id,
       departmentId: departments.devopsTeam.id,
-      startDate: new Date('2024-04-01'),
+      startDate: dayjs.utc('2024-04-01').toISOString(),
       isPrimary: true,
       isActive: true,
       roleInDept: 'member',

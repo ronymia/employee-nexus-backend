@@ -1,10 +1,8 @@
-import { InputType, Field, Float, Int } from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
 import {
   IsDateString,
-  IsString,
   IsOptional,
   IsNumber,
-  IsInt,
   ValidateNested,
   IsArray,
 } from 'class-validator';
@@ -13,39 +11,19 @@ import { CreateAttendancePunchInput } from './create-attendance.input';
 
 @InputType()
 export class RequestAttendanceInput {
-  @Field(() => Int, { description: 'User ID' })
-  @IsInt()
-  userId: number;
-
   @Field(() => Date, { description: 'Date of attendance' })
   @IsDateString()
   date: Date;
 
-  @Field(() => Float, {
+  @Field(() => Int, {
     nullable: true,
-    description: 'Total working hours for the day',
+    description: 'Total break minutes for the day',
   })
   @IsOptional()
   @IsNumber()
-  totalHours?: number;
-
-  @Field(() => Float, {
-    nullable: true,
-    description: 'Total break hours for the day',
-  })
-  @IsOptional()
-  @IsNumber()
-  breakHours?: number;
-
-  @Field(() => String, {
-    description: 'Attendance status',
-    defaultValue: 'pending_approve',
-  })
-  @IsString()
-  status: string;
+  breakMinutes?: number;
 
   @Field(() => [CreateAttendancePunchInput], {
-    nullable: true,
     description: 'Punch records for this attendance',
   })
   @IsArray()

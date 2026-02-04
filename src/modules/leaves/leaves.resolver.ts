@@ -86,12 +86,12 @@ export class LeavesResolver {
   @Mutation(() => LeaveResponse, { name: 'leaveRequest' })
   @RequirePermissions('Leave:create')
   async leaveRequest(
-    @Args('createLeaveInput') createLeaveInput: RequestLeaveInput,
+    @Args('requestLeaveInput') requestLeaveInput: RequestLeaveInput,
     @CurrentUser() user: JwtPayload,
   ) {
     const result = await this.leavesService.leaveRequest({
       user,
-      createLeaveInput,
+      requestLeaveInput,
     });
     return {
       success: true,

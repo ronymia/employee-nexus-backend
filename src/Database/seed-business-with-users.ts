@@ -22,6 +22,7 @@ import { seedAssetTypes } from './seeders/seed-asset-types';
 import { seedAssets } from './seeders/seed-assets';
 import { seedAssetAssignments } from './seeders/seed-asset-assignments';
 import { seedPayrollComponents } from './seeders/payroll-components';
+import { seedPermissionsAndRolePermissions } from './seeders/seed-permissions';
 
 const prisma = new PrismaClient();
 
@@ -52,38 +53,34 @@ export const seedBusinessWithUsers = async () => {
   try {
     const ownerPassword = await PasswordHelpers.passwordHash('12345678@We');
 
-    // Get or create OWNER role
-    let ownerRole = await prisma.role.findFirst({
-      where: {
-        name: ROLE.OWNER,
-        businessId: null,
-      },
-    });
-
-    if (!ownerRole) {
-      ownerRole = await prisma.role.create({
-        data: { name: ROLE.OWNER },
-      });
-    }
-
     // Create the business with all related data in a transaction
     const result = await prisma.$transaction(
       async (tx: Prisma.TransactionClient) => {
         // 1. Create business and owner
-        const { business, owner } = await seedBusiness(
-          tx,
-          ownerPassword,
-          ownerRole,
-        );
+        const { business, owner } = await seedBusiness(tx, ownerPassword);
 
         // 2. Create business subscription
         await seedBusinessSubscription(tx, business.id);
 
         // 3. Create business roles
-        const { adminRole, managerRole, employeeRole } =
+        const { ownerRole, adminRole, managerRole, employeeRole } =
           await seedBusinessRoles(tx, business.id);
 
-        // 4. Create master data (designations, employment statuses, leave types, work schedule, work site)
+        // update user
+        await tx.user.update({
+          where: { id: owner.id },
+          data: { roleId: ownerRole.id },
+        });
+
+        // 4. Create permissions and assign to roles
+        await seedPermissionsAndRolePermissions(tx, {
+          ownerRole,
+          adminRole,
+          managerRole,
+          employeeRole,
+        });
+
+        // 5. Create master data (designations, employment statuses, leave types, work schedule, work site)
         const { designations, employmentStatuses, workSchedule, workSite } =
           await seedMasterData(tx, business.id);
 
@@ -112,7 +109,7 @@ export const seedBusinessWithUsers = async () => {
           configuration().default_password.employee || 'EmployeePass123',
         );
 
-        // 5. Create admins
+        // 6. Create admins
         await seedAdmins(tx, {
           adminRoleId: adminRole.id,
           businessId: business.id,
@@ -123,7 +120,7 @@ export const seedBusinessWithUsers = async () => {
           workSiteId: workSite.id,
         });
 
-        // 6. Create managers
+        // 7. Create managers
         const createdManagers = await seedManagers(tx, {
           managerRoleId: managerRole.id,
           businessId: business.id,
@@ -134,7 +131,7 @@ export const seedBusinessWithUsers = async () => {
           workSiteId: workSite.id,
         });
 
-        // 7. Create employees with varied employment statuses and designations
+        // 8. Create employees with varied employment statuses and designations
         const createdEmployees = await seedEmployees(tx, {
           employeeRoleId: employeeRole.id,
           businessId: business.id,
@@ -147,48 +144,48 @@ export const seedBusinessWithUsers = async () => {
           designations, // Pass all designations for varied assignments
         });
 
-        // 8. Create departments
+        // 9. Create departments
         const departments = await seedDepartments(
           tx,
           business.id,
           createdManagers,
         );
 
-        // 9. Assign employees to departments
+        // 10. Assign employees to departments
         await assignEmployeesToDepartments(tx, {
           createdManagers,
           createdEmployees,
           departments,
         });
 
-        // 10. Create 5 projects
+        // 11. Create 5 projects
         const projects = await seedProjects(tx, business.id, owner.id);
 
-        // 11. Create Bangladesh holidays
+        // 12. Create Bangladesh holidays
         await seedBangladeshHolidays(tx, business.id);
 
-        // 12. Assign employees to projects
+        // 13. Assign employees to projects
         await seedProjectMembers(tx, projects, createdEmployees);
 
-        // 13. Create business settings
+        // 14. Create business settings
         await seedBusinessSettings(tx, business.id);
 
-        // 14. Create attendance settings
+        // 15. Create attendance settings
         await seedAttendanceSettings(tx, business.id);
 
-        // 15. Create leave settings
+        // 16. Create leave settings
         await seedLeaveSettings(tx, business.id);
 
-        // 16. Create notification templates
+        // 17. Create notification templates
         await seedNotificationTemplates(tx, business.id);
 
-        // 17. Create asset types
+        // 18. Create asset types
         const assetTypes = await seedAssetTypes(tx, business.id);
 
-        // 18. Create assets
+        // 19. Create assets
         const assets = await seedAssets(tx, business.id, assetTypes);
 
-        // 19. Assign assets to employees (using first admin as the assigner)
+        // 20. Assign assets to employees (using first admin as the assigner)
         const adminUsers = await tx.user.findMany({
           where: { businessId: business.id, roleId: adminRole.id },
           select: { id: true },
@@ -201,7 +198,7 @@ export const seedBusinessWithUsers = async () => {
           createdEmployees.map((e) => e.id),
           firstAdminId,
         );
-        // 16. Create notification templates
+        // 21. Create payroll components
         await seedPayrollComponents(tx, business.id);
 
         console.log('✅ Business seeding completed successfully!');

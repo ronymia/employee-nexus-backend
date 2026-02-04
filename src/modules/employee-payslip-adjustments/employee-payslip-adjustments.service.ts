@@ -12,6 +12,11 @@ import { PrismaService } from '../prisma/prisma.service';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { Prisma } from 'generated/prisma';
 import { AdjustmentStatus } from './enums/adjustment-status.enum';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class EmployeePayslipAdjustmentsService {
@@ -147,7 +152,7 @@ export class EmployeePayslipAdjustmentsService {
       data: {
         status: input.status,
         reviewedBy: user.userId,
-        reviewedAt: new Date().toISOString(),
+        reviewedAt: dayjs.utc().toISOString(),
         notes: input.notes || adjustment.notes,
       },
       include: {

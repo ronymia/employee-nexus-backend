@@ -34,7 +34,12 @@ export const managerPermissions = [
   },
   {
     resource: PermissionResource.WORK_SITE,
-    action: [PermissionAction.READ, PermissionAction.UPDATE],
+    action: [
+      PermissionAction.CREATE,
+      PermissionAction.READ,
+      PermissionAction.UPDATE,
+      PermissionAction.DELETE,
+    ],
   },
   {
     resource: PermissionResource.WORK_SCHEDULE,
@@ -116,6 +121,7 @@ export const managerPermissions = [
     resource: PermissionResource.ATTENDANCE,
     action: [
       PermissionAction.CREATE,
+      PermissionAction.REQUEST,
       PermissionAction.READ,
       PermissionAction.UPDATE,
       PermissionAction.DELETE,
@@ -124,6 +130,7 @@ export const managerPermissions = [
   {
     resource: PermissionResource.LEAVE,
     action: [
+      PermissionAction.REQUEST,
       PermissionAction.CREATE,
       PermissionAction.READ,
       PermissionAction.UPDATE,

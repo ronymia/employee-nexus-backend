@@ -1,4 +1,9 @@
 import { Prisma } from 'generated/prisma';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 /**
  * Seeds Bangladesh public holidays for 2024
@@ -16,8 +21,8 @@ export const seedBangladeshHolidays = async (
         name: 'International Mother Language Day',
         description:
           'Commemorates the Language Movement martyrs who sacrificed their lives for Bengali language recognition.',
-        startDate: new Date('2024-02-21'),
-        endDate: new Date('2024-02-21'),
+        startDate: dayjs.utc('2024-02-21').toISOString(),
+        endDate: dayjs.utc('2024-02-21').toISOString(),
         isRecurring: true,
         isPaid: true,
         holidayType: 'PUBLIC',
@@ -27,8 +32,8 @@ export const seedBangladeshHolidays = async (
         name: 'Independence Day',
         description:
           'Celebrates the declaration of independence of Bangladesh from Pakistan in 1971.',
-        startDate: new Date('2024-03-26'),
-        endDate: new Date('2024-03-26'),
+        startDate: dayjs.utc('2024-03-26').toISOString(),
+        endDate: dayjs.utc('2024-03-26').toISOString(),
         isRecurring: true,
         isPaid: true,
         holidayType: 'PUBLIC',
@@ -38,8 +43,8 @@ export const seedBangladeshHolidays = async (
         name: 'Bengali New Year (Pohela Boishakh)',
         description:
           'The first day of the Bengali calendar, celebrated with traditional festivities.',
-        startDate: new Date('2024-04-14'),
-        endDate: new Date('2024-04-14'),
+        startDate: dayjs.utc('2024-04-14').toISOString(),
+        endDate: dayjs.utc('2024-04-14').toISOString(),
         isRecurring: true,
         isPaid: true,
         holidayType: 'PUBLIC',
@@ -49,8 +54,8 @@ export const seedBangladeshHolidays = async (
         name: 'May Day (Labour Day)',
         description:
           'International Workers Day, honoring the achievements of workers.',
-        startDate: new Date('2024-05-01'),
-        endDate: new Date('2024-05-01'),
+        startDate: dayjs.utc('2024-05-01').toISOString(),
+        endDate: dayjs.utc('2024-05-01').toISOString(),
         isRecurring: true,
         isPaid: true,
         holidayType: 'PUBLIC',
@@ -60,8 +65,8 @@ export const seedBangladeshHolidays = async (
         name: 'National Mourning Day',
         description:
           'Commemorates the assassination of Sheikh Mujibur Rahman, the Father of the Nation.',
-        startDate: new Date('2024-08-15'),
-        endDate: new Date('2024-08-15'),
+        startDate: dayjs.utc('2024-08-15').toISOString(),
+        endDate: dayjs.utc('2024-08-15').toISOString(),
         isRecurring: true,
         isPaid: true,
         holidayType: 'PUBLIC',
@@ -71,8 +76,8 @@ export const seedBangladeshHolidays = async (
         name: 'Victory Day',
         description:
           'Celebrates the victory of Bangladesh in the Liberation War of 1971.',
-        startDate: new Date('2024-12-16'),
-        endDate: new Date('2024-12-16'),
+        startDate: dayjs.utc('2024-12-16').toISOString(),
+        endDate: dayjs.utc('2024-12-16').toISOString(),
         isRecurring: true,
         isPaid: true,
         holidayType: 'PUBLIC',
@@ -84,8 +89,8 @@ export const seedBangladeshHolidays = async (
         name: 'Eid-ul-Fitr',
         description:
           'Marks the end of Ramadan, the Islamic holy month of fasting.',
-        startDate: new Date('2024-04-11'),
-        endDate: new Date('2024-04-13'),
+        startDate: dayjs.utc('2024-04-11').toISOString(),
+        endDate: dayjs.utc('2024-04-13').toISOString(),
         isRecurring: true,
         isPaid: true,
         holidayType: 'RELIGIOUS',
@@ -95,8 +100,8 @@ export const seedBangladeshHolidays = async (
         name: 'Eid-ul-Adha',
         description:
           "Festival of Sacrifice, commemorating Prophet Ibrahim's willingness to sacrifice his son.",
-        startDate: new Date('2024-06-17'),
-        endDate: new Date('2024-06-19'),
+        startDate: dayjs.utc('2024-06-17').toISOString(),
+        endDate: dayjs.utc('2024-06-19').toISOString(),
         isRecurring: true,
         isPaid: true,
         holidayType: 'RELIGIOUS',
@@ -106,8 +111,8 @@ export const seedBangladeshHolidays = async (
         name: 'Shab-e-Qadr',
         description:
           'The Night of Power, the holiest night in the Islamic calendar.',
-        startDate: new Date('2024-04-06'),
-        endDate: new Date('2024-04-06'),
+        startDate: dayjs.utc('2024-04-06').toISOString(),
+        endDate: dayjs.utc('2024-04-06').toISOString(),
         isRecurring: true,
         isPaid: true,
         holidayType: 'RELIGIOUS',
@@ -117,8 +122,8 @@ export const seedBangladeshHolidays = async (
         name: 'Ashura',
         description:
           'Day of mourning for the martyrdom of Imam Hussain in the Battle of Karbala.',
-        startDate: new Date('2024-07-17'),
-        endDate: new Date('2024-07-17'),
+        startDate: dayjs.utc('2024-07-17').toISOString(),
+        endDate: dayjs.utc('2024-07-17').toISOString(),
         isRecurring: true,
         isPaid: true,
         holidayType: 'RELIGIOUS',
@@ -127,8 +132,8 @@ export const seedBangladeshHolidays = async (
       {
         name: 'Eid-e-Milad-un-Nabi',
         description: 'Celebrates the birth of Prophet Muhammad (PBUH).',
-        startDate: new Date('2024-09-16'),
-        endDate: new Date('2024-09-16'),
+        startDate: dayjs.utc('2024-09-16').toISOString(),
+        endDate: dayjs.utc('2024-09-16').toISOString(),
         isRecurring: true,
         isPaid: true,
         holidayType: 'RELIGIOUS',
@@ -140,8 +145,8 @@ export const seedBangladeshHolidays = async (
         name: 'Durga Puja',
         description:
           'Major Hindu festival celebrating the victory of Goddess Durga over evil.',
-        startDate: new Date('2024-10-10'),
-        endDate: new Date('2024-10-12'),
+        startDate: dayjs.utc('2024-10-10').toISOString(),
+        endDate: dayjs.utc('2024-10-12').toISOString(),
         isRecurring: true,
         isPaid: true,
         holidayType: 'RELIGIOUS',
@@ -153,8 +158,8 @@ export const seedBangladeshHolidays = async (
         name: 'Buddha Purnima',
         description:
           'Celebrates the birth, enlightenment, and death of Gautama Buddha.',
-        startDate: new Date('2024-05-23'),
-        endDate: new Date('2024-05-23'),
+        startDate: dayjs.utc('2024-05-23').toISOString(),
+        endDate: dayjs.utc('2024-05-23').toISOString(),
         isRecurring: true,
         isPaid: true,
         holidayType: 'RELIGIOUS',
@@ -165,8 +170,8 @@ export const seedBangladeshHolidays = async (
       {
         name: 'Christmas Day',
         description: 'Celebrates the birth of Jesus Christ.',
-        startDate: new Date('2024-12-25'),
-        endDate: new Date('2024-12-25'),
+        startDate: dayjs.utc('2024-12-25').toISOString(),
+        endDate: dayjs.utc('2024-12-25').toISOString(),
         isRecurring: true,
         isPaid: true,
         holidayType: 'RELIGIOUS',

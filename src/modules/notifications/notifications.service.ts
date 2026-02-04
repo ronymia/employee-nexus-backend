@@ -7,10 +7,14 @@ import {
   CreateNotificationInput,
   CreateNotificationTemplateInput,
   UpdateNotificationTemplateInput,
-  UpdateNotificationPreferenceInput,
   QueryNotificationInput,
 } from './dto';
 import { JwtPayload } from '../auth/jwt.strategy';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class NotificationsService {
@@ -24,7 +28,7 @@ export class NotificationsService {
       data: {
         ...data,
         priority: input?.priority || 'NORMAL',
-        metadata: metadata ? JSON.parse(metadata) : undefined,
+        metadata: metadata ? JSON.stringify(metadata) : undefined,
         businessId: user.businessId,
       },
     });
@@ -63,10 +67,7 @@ export class NotificationsService {
     ]);
 
     return {
-      data: data.map((n) => ({
-        ...n,
-        metadata: n.metadata ? JSON.stringify(n.metadata) : null,
-      })),
+      data: data,
       meta: {
         total,
         page: 0,
@@ -77,7 +78,7 @@ export class NotificationsService {
   }
 
   async findOne(id: number) {
-    const notification = await this.prisma.notification.findUnique({
+    const notification = await this.prisma.notification.findUniqueOrThrow({
       where: { id },
     });
 
@@ -85,19 +86,14 @@ export class NotificationsService {
       throw new Error('Notification not found');
     }
 
-    return {
-      ...notification,
-      metadata: notification.metadata
-        ? JSON.stringify(notification.metadata)
-        : null,
-    };
+    return notification;
   }
 
   async markAsRead(id: number) {
     return await this.prisma.notification.update({
       where: { id },
       data: {
-        readAt: new Date(),
+        readAt: dayjs.utc().toISOString(),
       },
     });
   }
@@ -111,7 +107,7 @@ export class NotificationsService {
         },
       },
       data: {
-        readAt: new Date(),
+        readAt: dayjs.utc().toISOString(),
       },
     });
   }
@@ -210,7 +206,6 @@ export class NotificationsService {
     businessId?: number,
   ) {
     const template = await this.findTemplateByName(templateName, businessId);
-
     if (!template) {
       throw new Error(`Template "${templateName}" not found`);
     }
@@ -219,21 +214,59 @@ export class NotificationsService {
     const message = this.renderTemplate(template.message, variables);
 
     // Extract only valid Notification fields from variables
-    const { entityType, entityId, actionUrl, expiresAt } = variables;
+    const { entityType, entityId, metaData = '' } = variables;
 
-    return await this.create({ userId: 1, businessId: 1 } as JwtPayload, {
-      type: template.type,
-      title,
-      message,
-      priority: template.priority,
-      notificationTemplateId: template.id,
-      userId,
-      businessId,
-      metadata: JSON.stringify(variables),
-      ...(entityType && { entityType }),
-      ...(entityId && { entityId }),
-      ...(actionUrl && { actionUrl }),
-      ...(expiresAt && { expiresAt }),
+    return await this.create(
+      { userId, businessId } as JwtPayload,
+      {
+        type: template.type,
+        title,
+        message,
+        priority: template.priority,
+        notificationTemplateId: template.id,
+        userId,
+        businessId,
+        metadata: JSON.stringify(metaData),
+        entityId: entityId ? Number(entityId) : undefined,
+        entityType: entityType ? entityType : undefined,
+      } as CreateNotificationInput,
+    );
+  }
+
+  /**
+   * Find manager or owner to notify
+   */
+  public async findNotificationRecipient(
+    userId: number,
+    businessId: number,
+  ): Promise<number | null> {
+    // Get user's primary department
+    const userDepartment = await this.prisma.employeeDepartment.findFirst({
+      where: {
+        userId,
+        isActive: true,
+        isPrimary: true,
+      },
+      include: {
+        department: {
+          include: {
+            manager: true,
+          },
+        },
+      },
     });
+
+    // If department has a manager, return manager's ID
+    if (userDepartment?.department?.managerId) {
+      return userDepartment.department.managerId;
+    }
+
+    // Otherwise, find business owner
+    const business = await this.prisma.business.findUnique({
+      where: { id: businessId },
+      select: { ownerId: true },
+    });
+
+    return business?.ownerId || null;
   }
 }

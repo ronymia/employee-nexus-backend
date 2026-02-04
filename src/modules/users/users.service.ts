@@ -14,8 +14,10 @@ import { PasswordHelpers } from 'src/helpers/passwordHelpers';
 import configuration from 'src/config/configuration';
 import * as dayjs from 'dayjs';
 import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+import * as utc from 'dayjs/plugin/utc';
 
 dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
 @Injectable()
 export class UsersService {
@@ -582,7 +584,7 @@ export class UsersService {
             data: {
               userId: createdUser.id,
               workScheduleId,
-              startDate: new Date(),
+              startDate: dayjs.utc().toISOString(),
               assignedBy: authUser.userId,
               notes: 'Initial schedule assignment upon employee creation',
             },
@@ -595,7 +597,7 @@ export class UsersService {
             data: workSiteIds.map((workSiteId) => ({
               userId: createdUser.id,
               workSiteId,
-              startDate: new Date(),
+              startDate: dayjs.utc().toISOString(),
             })),
           });
         }
@@ -606,7 +608,7 @@ export class UsersService {
             data: {
               userId: createdUser.id,
               departmentId,
-              startDate: new Date(),
+              startDate: dayjs.utc().toISOString(),
               isPrimary: true,
             },
           });
@@ -618,7 +620,7 @@ export class UsersService {
             data: {
               userId: createdUser.id,
               designationId,
-              startDate: new Date(),
+              startDate: dayjs.utc().toISOString(),
               remarks: `Initial schedule assignment upon employee creation`,
             },
           });
@@ -630,7 +632,7 @@ export class UsersService {
             data: {
               userId: createdUser.id,
               employmentStatusId,
-              startDate: new Date(),
+              startDate: dayjs.utc().toISOString(),
               remarks: `Initial schedule assignment upon employee creation`,
             },
           });
@@ -1473,33 +1475,30 @@ export class UsersService {
     }
 
     // Calculate date range
-    let startDate: Date;
-    let endDate: Date;
+    let startDate: dayjs.Dayjs;
+    let endDate: dayjs.Dayjs;
 
     if (query?.startDate && query?.endDate) {
       // Parse DD-MM-YYYY format
-      startDate = dayjs(query.startDate, 'DD-MM-YYYY').toDate();
-      endDate = dayjs(query.endDate, 'DD-MM-YYYY').toDate();
+      startDate = dayjs(query.startDate, 'DD-MM-YYYY');
+      endDate = dayjs(query.endDate, 'DD-MM-YYYY');
     } else if (query?.year && query?.month) {
       // Get dates for specific month
-      startDate = dayjs(`01-${query.month}-${query.year}`, 'DD-MM-YYYY')
-        .startOf('month')
-        .toDate();
-      endDate = dayjs(`01-${query.month}-${query.year}`, 'DD-MM-YYYY')
-        .endOf('month')
-        .toDate();
+      startDate = dayjs(
+        `01-${query.month}-${query.year}`,
+        'DD-MM-YYYY',
+      ).startOf('month');
+      endDate = dayjs(`01-${query.month}-${query.year}`, 'DD-MM-YYYY').endOf(
+        'month',
+      );
     } else if (query?.year) {
       // Get dates for entire year
-      startDate = dayjs(`01-01-${query.year}`, 'DD-MM-YYYY')
-        .startOf('year')
-        .toDate();
-      endDate = dayjs(`31-12-${query.year}`, 'DD-MM-YYYY')
-        .endOf('year')
-        .toDate();
+      startDate = dayjs(`01-01-${query.year}`, 'DD-MM-YYYY').startOf('year');
+      endDate = dayjs(`31-12-${query.year}`, 'DD-MM-YYYY').endOf('year');
     } else {
       // Default to current year
-      startDate = dayjs().startOf('year').toDate();
-      endDate = dayjs().endOf('year').toDate();
+      startDate = dayjs.utc().startOf('year');
+      endDate = dayjs.utc().endOf('year');
     }
 
     // Fetch attendances, leaves, and holidays in parallel with selected fields only
@@ -1509,8 +1508,8 @@ export class UsersService {
         where: {
           userId: targetUserId,
           date: {
-            gte: startDate,
-            lte: endDate,
+            gte: startDate.toISOString(),
+            lte: endDate.toISOString(),
           },
         },
         select: {
@@ -1532,20 +1531,20 @@ export class UsersService {
           OR: [
             {
               startDate: {
-                gte: startDate,
-                lte: endDate,
+                gte: startDate.toISOString(),
+                lte: endDate.toISOString(),
               },
             },
             {
               endDate: {
-                gte: startDate,
-                lte: endDate,
+                gte: startDate.toISOString(),
+                lte: endDate.toISOString(),
               },
             },
             {
               AND: [
-                { startDate: { lte: startDate } },
-                { endDate: { gte: endDate } },
+                { startDate: { lte: startDate.toISOString() } },
+                { endDate: { gte: endDate.toISOString() } },
               ],
             },
           ],
@@ -1569,20 +1568,20 @@ export class UsersService {
           OR: [
             {
               startDate: {
-                gte: startDate,
-                lte: endDate,
+                gte: startDate.toISOString(),
+                lte: endDate.toISOString(),
               },
             },
             {
               endDate: {
-                gte: startDate,
-                lte: endDate,
+                gte: startDate.toISOString(),
+                lte: endDate.toISOString(),
               },
             },
             {
               AND: [
-                { startDate: { lte: startDate } },
-                { endDate: { gte: endDate } },
+                { startDate: { lte: startDate.toISOString() } },
+                { endDate: { gte: endDate.toISOString() } },
               ],
             },
           ],

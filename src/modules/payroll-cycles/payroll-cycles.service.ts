@@ -10,6 +10,11 @@ import {
 import { PayrollCycleStatus } from './enums';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { PayrollItemsService } from '../payroll-items/payroll-items.service';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class PayrollCyclesService {
@@ -125,7 +130,7 @@ export class PayrollCyclesService {
       data: {
         status: PayrollCycleStatus.APPROVED,
         approvedBy: user.userId,
-        approvedAt: new Date().toISOString(),
+        approvedAt: dayjs.utc().toISOString(),
       },
     });
   }
@@ -193,7 +198,7 @@ export class PayrollCyclesService {
         data: {
           status: PayrollCycleStatus.PROCESSING,
           processedBy: user.userId,
-          processedAt: new Date().toISOString(),
+          processedAt: dayjs.utc().toISOString(),
         },
         include: {
           payrollItems: true,

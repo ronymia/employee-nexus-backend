@@ -11,6 +11,10 @@ import {
 } from './entities/owner-dashboard.entity';
 import * as dayjs from 'dayjs';
 import { UserAccountStatus } from '../users/enums';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class OwnerDashboardService {
@@ -48,8 +52,8 @@ export class OwnerDashboardService {
   private async getBusinessOverview(
     businessId: number,
   ): Promise<BusinessOverview> {
-    const startOfMonth = dayjs().startOf('month').toDate();
-    const endOfMonth = dayjs().endOf('month').toDate();
+    const startOfMonth = dayjs.utc().startOf('month').toISOString();
+    const endOfMonth = dayjs.utc().endOf('month').toISOString();
 
     const [
       totalEmployees,
@@ -137,12 +141,12 @@ export class OwnerDashboardService {
   private async getAttendanceAnalytics(
     businessId: number,
   ): Promise<AttendanceAnalytics> {
-    const today = dayjs().startOf('day').toDate();
-    const endToday = dayjs().endOf('day').toDate();
-    const startOfWeek = dayjs().startOf('week').toDate();
-    const endOfWeek = dayjs().endOf('week').toDate();
-    const startOfMonth = dayjs().startOf('month').toDate();
-    const endOfMonth = dayjs().endOf('month').toDate();
+    const today = dayjs.utc().startOf('day').toISOString();
+    const endToday = dayjs.utc().endOf('day').toISOString();
+    const startOfWeek = dayjs.utc().startOf('week').toISOString();
+    const endOfWeek = dayjs.utc().endOf('week').toISOString();
+    const startOfMonth = dayjs.utc().startOf('month').toISOString();
+    const endOfMonth = dayjs.utc().endOf('month').toISOString();
 
     // Today's attendance
     const [todayAttendance, totalEmployees] = await Promise.all([
@@ -163,18 +167,22 @@ export class OwnerDashboardService {
         user: { businessId },
         status: 'approved',
         startDate: { lte: endToday },
-        endDate: { gte: today },
+        OR: [
+          { endDate: { gte: today } }, // normal case
+          { endDate: null }, // ongoing leave
+        ],
       },
     });
 
     const todayPresent = todayAttendance.filter(
-      (a) => a.status === 'approved',
+      (a) => a.status === 'approved' || a.status === 'pending',
     ).length;
     const todayAbsent = todayAttendance.filter(
       (a) => a.status === 'rejected',
     ).length;
     const todayLate = todayAttendance.filter((a) => a.status === 'late').length;
-    const notPunchedIn = totalEmployees - todayAttendance.length;
+    const attendanceOnToday = totalEmployees - (todayOnLeave || 0);
+    const notPunchedIn = attendanceOnToday - todayAttendance.length;
 
     // This week's attendance
     const weekAttendance = await this.prismaService.attendance.groupBy({
@@ -215,7 +223,7 @@ export class OwnerDashboardService {
 
     // Trend data (last 7 days)
     const last7Days = Array.from({ length: 7 }, (_, i) =>
-      dayjs().subtract(i, 'day').startOf('day').toDate(),
+      dayjs.utc().subtract(i, 'day').startOf('day').toISOString(),
     ).reverse();
 
     const trendData = await Promise.all(
@@ -225,7 +233,7 @@ export class OwnerDashboardService {
             user: { businessId },
             date: {
               gte: date,
-              lte: dayjs(date).endOf('day').toDate(),
+              lte: dayjs(date).endOf('day').toISOString(),
             },
             status: { in: ['approved', 'late'] },
           },
@@ -243,6 +251,7 @@ export class OwnerDashboardService {
         absent: todayAbsent,
         late: todayLate,
         onLeave: todayOnLeave,
+        attendanceOnToday,
         notPunchedIn,
       },
       thisWeek: {
@@ -261,9 +270,9 @@ export class OwnerDashboardService {
 
   // Get leave statistics for the dashboard THIS MONTH
   private async getLeaveStats(businessId: number): Promise<LeaveStats> {
-    const startOfMonth = dayjs().startOf('month').toDate();
-    const endOfMonth = dayjs().endOf('month').toDate();
-    const today = dayjs().startOf('day').toDate();
+    const startOfMonth = dayjs.utc().startOf('month').toISOString();
+    const endOfMonth = dayjs.utc().endOf('month').toISOString();
+    const today = dayjs.utc().startOf('day').toISOString();
 
     const [pending, approved, rejected, monthLeaves, upcomingLeaves] =
       await Promise.all([
@@ -325,7 +334,7 @@ export class OwnerDashboardService {
         employeeName: leave?.user?.profile?.fullName as string,
         leaveType: leave.leaveType?.name,
         startDate: leave?.startDate,
-        endDate: leave?.endDate as Date,
+        endDate: leave?.endDate ? leave?.endDate : leave?.startDate,
       })),
     };
   }
@@ -336,7 +345,7 @@ export class OwnerDashboardService {
       where: {
         businessId,
         paymentDate: {
-          gte: dayjs().startOf('month').toDate(),
+          gte: dayjs.utc().startOf('month').toDate(),
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -352,8 +361,8 @@ export class OwnerDashboardService {
     });
 
     // Year to date calculations
-    const startOfYear = dayjs().startOf('year').toDate();
-    const endOfYear = dayjs().endOf('year').toDate();
+    const startOfYear = dayjs.utc().startOf('year').toDate();
+    const endOfYear = dayjs.utc().endOf('year').toDate();
 
     const yearPayrolls = await this.prismaService.payrollCycle.findMany({
       where: {
@@ -411,9 +420,9 @@ export class OwnerDashboardService {
       currentCycle: {
         name: currentCycle?.name || 'No active cycle',
         status: currentCycle?.status || 'N/A',
-        periodStart: currentCycle?.periodStart || new Date(),
-        periodEnd: currentCycle?.periodEnd || new Date(),
-        paymentDate: currentCycle?.paymentDate || new Date(),
+        periodStart: currentCycle?.periodStart || dayjs.utc().toDate(),
+        periodEnd: currentCycle?.periodEnd || dayjs.utc().toDate(),
+        paymentDate: currentCycle?.paymentDate || dayjs.utc().toDate(),
         totalEmployees: currentCycle?.payrollItems.length || 0,
         totalGrossPay:
           currentCycle?.payrollItems.reduce(

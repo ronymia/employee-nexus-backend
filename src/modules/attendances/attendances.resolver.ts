@@ -21,6 +21,7 @@ import {
   ApproveAttendanceInput,
   RejectAttendanceInput,
 } from './dto/approve-attendance.input';
+import { RequestAttendanceInput } from './dto/request-attendance.input';
 
 // Punch In/Out Input Types
 
@@ -51,6 +52,27 @@ export class AttendancesResolver {
     };
   }
 
+  // CREATE ATTENDANCE
+  @Mutation(() => AttendanceResponse, { name: 'requestAttendance' })
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('Attendance:create')
+  @UseGuards(GqlAuthGuard)
+  async requestAttendance(
+    @Args('requestAttendanceInput')
+    requestAttendanceInput: RequestAttendanceInput,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const result = await this.attendancesService.requestAttendance({
+      user,
+      requestAttendanceInput,
+    });
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `Attendance created successfully`,
+      data: result,
+    };
+  }
   // CREATE ATTENDANCE
   @Mutation(() => AttendanceResponse, { name: 'createAttendance' })
   @UseGuards(PermissionsGuard)

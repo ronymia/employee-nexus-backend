@@ -1,6 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class SchedulerService {
@@ -17,8 +22,7 @@ export class SchedulerService {
     this.logger.log('Starting daily schedule assignment update...');
 
     try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Set to start of day
+      const today = dayjs.utc().startOf('day').toDate();
 
       // Get all users who have schedule assignments
       const usersWithAssignments = await this.prisma.employeeSchedule.findMany({

@@ -310,7 +310,9 @@ export class ProjectsService {
       },
       data: {
         isActive: false,
-        endDate: endDate ? dayjs(endDate).toISOString() : dayjs().toISOString(),
+        endDate: endDate
+          ? dayjs(endDate).toISOString()
+          : dayjs.utc().toISOString(),
         remarks: remarks || existingMember.remarks,
       },
       include: {

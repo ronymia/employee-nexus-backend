@@ -7,6 +7,11 @@ import { PayrollCyclesService } from '../payroll-cycles/payroll-cycles.service';
 import { PayrollItemAsPaidInput, QueryPayrollItemInput } from './dto';
 import { PayrollItemStatus } from './enums';
 import { JwtPayload } from '../auth/jwt.strategy';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class PayrollItemsService {
@@ -31,7 +36,7 @@ export class PayrollItemsService {
     }
 
     let workingDays = 0;
-    const current = new Date(periodStart);
+    const current = dayjs.utc(periodStart).toDate();
 
     while (current <= periodEnd) {
       const dayOfWeek = current.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
@@ -63,7 +68,7 @@ export class PayrollItemsService {
   // Calculate working days
   private calculateWorkingDays(startDate: Date, endDate: Date): number {
     let count = 0;
-    const current = new Date(startDate);
+    const current = dayjs.utc(startDate).toDate();
 
     while (current <= endDate) {
       const dayOfWeek = current.getDay();
@@ -1049,7 +1054,7 @@ export class PayrollItemsService {
         status: PayrollItemStatus.PAID,
         paymentMethod: input.paymentMethod,
         transactionRef: input.transactionRef,
-        paidAt: new Date().toUTCString(),
+        paidAt: dayjs.utc().toISOString(),
       },
     });
   }

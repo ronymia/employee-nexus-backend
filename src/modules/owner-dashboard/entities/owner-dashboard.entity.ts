@@ -47,6 +47,9 @@ export class AttendanceToday {
 
   @Field(() => Int)
   notPunchedIn: number;
+
+  @Field(() => Int)
+  attendanceOnToday: number;
 }
 
 @ObjectType()

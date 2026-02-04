@@ -9,15 +9,22 @@ import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { leaveSearchableFields } from './leave.constant';
 import { NotificationsService } from '../notifications/notifications.service';
 import { RequestLeaveInput } from './dto/request-leave.input';
-import { NotificationChannel, NotificationType } from '../notifications/enums';
-import { calculateLeaveDurationInMinutes } from 'src/utils/time.utils';
+import {
+  calculateLeaveDurationInMinutes,
+  minutesToHoursAndMinutes,
+} from 'src/utils/time.utils';
 import { ApproveLeaveInput, RejectLeaveInput } from './dto/approve-leave.input';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
 
 @Injectable()
 export class LeavesService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly notificationsService: NotificationsService,
+    private readonly notificationService: NotificationsService,
   ) {}
 
   // LEAVE OVERVIEW
@@ -69,14 +76,23 @@ export class LeavesService {
 
   async leaveRequest({
     user,
-    createLeaveInput,
+    requestLeaveInput,
   }: {
     user: JwtPayload;
-    createLeaveInput: RequestLeaveInput;
+    requestLeaveInput: RequestLeaveInput;
   }) {
+    if (user.userId !== requestLeaveInput.userId) {
+      throw new NotFoundException(
+        'You do not have permission to request leave for this user',
+      );
+    }
+
+    if (!user.businessId) {
+      throw new NotFoundException('Business not found for the user');
+    }
     const leaveType = await this.prisma.leaveType.findUnique({
       where: {
-        id: createLeaveInput.leaveTypeId,
+        id: requestLeaveInput.leaveTypeId,
       },
     });
     if (!leaveType) {
@@ -85,7 +101,10 @@ export class LeavesService {
 
     const existingUser = await this.prisma.user.findUnique({
       where: {
-        id: createLeaveInput.userId,
+        id: user.userId,
+        AND: {
+          businessId: user.businessId,
+        },
       },
       include: {
         employee: {
@@ -105,60 +124,56 @@ export class LeavesService {
     if (!existingUser) {
       throw new NotFoundException('User not found');
     }
-
-    // if (existingUser.business.userId !== user.userId) {
-    //   throw new NotFoundException(
-    //     'You do not have permission to request leave for this user',
-    //   );
-    // }
-
-    // const leave = await this.prisma.leave.create({
-    //   data: {
-    //     ...createLeaveInput,
-    //     status: 'pending',
-    //     startDate: new Date(createLeaveInput.startDate),
-    //     endDate: createLeaveInput.endDate
-    //       ? new Date(createLeaveInput.endDate)
-    //       : null,
-    //   },
-    //   include: {
-    //     user: {
-    //       include: {
-    //         profile: true,
-    //       },
-    //     },
-    //     leaveType: true,
-    //     reviewer: true,
-    //   },
-    // });
+    const totalMinutes = calculateLeaveDurationInMinutes(
+      requestLeaveInput.leaveDuration,
+      requestLeaveInput.startDate,
+      requestLeaveInput.endDate,
+    );
+    const leave = await this.prisma.leave.create({
+      data: {
+        ...requestLeaveInput,
+        status: 'pending',
+        totalMinutes: totalMinutes,
+        startDate: requestLeaveInput.startDate,
+        endDate: requestLeaveInput.endDate ? requestLeaveInput.endDate : null,
+      },
+      include: {
+        user: {
+          include: {
+            profile: true,
+          },
+        },
+        leaveType: true,
+        reviewer: true,
+      },
+    });
 
     // Send notification to user
-    // try {
-    //   const startDate = new Date(leave.startDate).toLocaleDateString();
-    //   const endDate = leave.endDate
-    //     ? new Date(leave.endDate).toLocaleDateString()
-    //     : startDate;
+    const recipientId =
+      await this.notificationService.findNotificationRecipient(
+        user.userId,
+        user.businessId,
+      );
+    if (recipientId) {
+      await this.notificationService.sendFromTemplate(
+        'leave_requested',
+        recipientId,
+        {
+          employeeName: leave.user.profile?.fullName || 'Employee',
+          startDate: dayjs(leave.startDate).format('MMM DD, YYYY'),
+          endDate: leave.endDate
+            ? dayjs(leave.endDate).format('MMM DD, YYYY')
+            : dayjs(leave.startDate).format('MMM DD, YYYY'),
+          leaveHours: minutesToHoursAndMinutes(totalMinutes),
+          entityType: 'leave',
+          entityId: leave.id.toString(),
+          metaData: leave,
+        },
+        user.businessId,
+      );
+    }
 
-    //   // Get the first active department's manager ID
-    //   const activeDepartment = existingUser?.employee?.departments?.[0];
-    //   const managerId = activeDepartment?.department?.managerId;
-
-    //   await this.notificationsService.create({
-    //     type: NotificationType.LEAVE,
-    //     title: 'Leave Requested',
-    //     message: `Your leave request from ${startDate} to ${endDate} has been submitted successfully and is pending review.`,
-    //     priority: 'NORMAL' as any,
-    //     userId: managerId || user.userId,
-    //     channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
-    //     businessId: user.businessId,
-    //     entityType: 'leave',
-    //     entityId: leave.id,
-    //   });
-    // } catch (error) {
-    //   console.error('Failed to send leave notification:', error);
-    // }
-
-    return {};
+    return leave;
   }
   async create({
     user,
@@ -283,7 +298,7 @@ export class LeavesService {
     if (startDate) {
       andCondition.push({
         startDate: {
-          gte: new Date(startDate),
+          gte: dayjs.utc(startDate).toISOString(),
         },
       });
     }
@@ -291,7 +306,7 @@ export class LeavesService {
     if (endDate) {
       andCondition.push({
         startDate: {
-          lte: new Date(endDate),
+          lte: dayjs.utc(endDate).toISOString(),
         },
       });
     }
@@ -430,7 +445,7 @@ export class LeavesService {
       data: {
         status,
         reviewedBy: reviewerId,
-        reviewedAt: new Date(),
+        reviewedAt: dayjs.utc().toISOString(),
         remarks: reviewerNotes || null,
       },
       include: {
@@ -503,7 +518,7 @@ export class LeavesService {
       throw new NotFoundException('Business not found for the user');
     }
 
-    const existingUser = await this.prisma.user.findUnique({
+    const existingUser = await this.prisma.user.findUniqueOrThrow({
       where: {
         id: userId,
         AND: { businessId: user.businessId },
@@ -524,9 +539,9 @@ export class LeavesService {
     }
 
     // Get active employment status if needed
-    const activeEmploymentStatus =
-      existingUser?.employee?.employmentStatuses?.find((es) => es.isActive);
-    const employmentStatusId = activeEmploymentStatus?.employmentStatusId;
+    // const activeEmploymentStatus =
+    //   existingUser?.employee?.employmentStatuses?.find((es) => es.isActive);
+    // const employmentStatusId = activeEmploymentStatus?.employmentStatusId;
     // Get leave type with employment status validation
     const leaveType = await this.prisma.leaveType.findFirst({
       where: {
@@ -591,7 +606,7 @@ export class LeavesService {
       where: { id: Number(approveLeaveInput.leaveId) },
       data: {
         status: 'approved',
-        reviewedAt: new Date().toISOString(),
+        reviewedAt: dayjs.utc().toISOString(),
         reviewedBy: user.userId,
         remarks: approveLeaveInput.remarks,
       },
@@ -617,7 +632,7 @@ export class LeavesService {
       where: { id: Number(rejectLeaveInput.leaveId) },
       data: {
         status: 'rejected',
-        reviewedAt: new Date().toISOString(),
+        reviewedAt: dayjs.utc().toISOString(),
         reviewedBy: user.userId,
         remarks: rejectLeaveInput.remarks,
       },

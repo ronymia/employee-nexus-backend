@@ -1,4 +1,5 @@
 export enum PermissionAction {
+  REQUEST = 'request',
   CREATE = 'create',
   READ = 'read',
   UPDATE = 'update',

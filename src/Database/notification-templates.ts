@@ -66,6 +66,16 @@ export async function seedNotificationTemplates(businessId: number) {
       businessId,
     },
     {
+      name: 'attendance_requested',
+      type: NotificationType.ATTENDANCE,
+      title: 'New Attendance Record',
+      message:
+        '{{employeeName}} created an attendance record for {{date}} with {{workTime}} work time.',
+      priority: NotificationPriority.NORMAL,
+      isActive: true,
+      businessId,
+    },
+    {
       name: 'attendance_updated',
       type: NotificationType.ATTENDANCE,
       title: 'Attendance Record Updated',
