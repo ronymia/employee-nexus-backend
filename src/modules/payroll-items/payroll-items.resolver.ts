@@ -6,7 +6,7 @@ import {
   PayrollItemResponse,
   PayrollItemsQueryResponse,
 } from './entities/payroll-item.entity';
-import { QueryPayrollItemInput } from './dto';
+import { QueryPayrollItemInput, PayrollItemAsPaidInput } from './dto';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
@@ -50,10 +50,7 @@ export class PayrollItemsResolver {
       userId,
       payrollCycleId,
     });
-    console.log({
-      componet: items.payrollComponents,
-      adjustment: items.payrollAdjustments,
-    });
+    //
     return {
       success: true,
       statusCode: HttpStatus.CREATED,
@@ -66,6 +63,7 @@ export class PayrollItemsResolver {
   @RequirePermissions('Payroll Item:read')
   async payrollItems(@Args('query') query: QueryPayrollItemInput) {
     const items = await this.payrollItemsService.findAll(query);
+
     return {
       success: true,
       statusCode: HttpStatus.OK,
@@ -117,16 +115,13 @@ export class PayrollItemsResolver {
   }
 
   @Mutation(() => PayrollItemResponse, { name: 'markPayrollItemAsPaid' })
-  // @RequirePermissions('Payroll Item:update')
+  @RequirePermissions('Payroll Item:update')
   async markPayrollItemAsPaid(
-    @Args('id', { type: () => Int }) id: number,
-    @Args('paymentMethod') paymentMethod: string,
-    @Args('transactionRef', { nullable: true }) transactionRef?: string,
+    @Args('payrollItemAsPaidInput')
+    payrollItemAsPaidInput: PayrollItemAsPaidInput,
   ) {
     const item = await this.payrollItemsService.markAsPaid(
-      id,
-      paymentMethod,
-      transactionRef,
+      payrollItemAsPaidInput,
     );
     return {
       success: true,

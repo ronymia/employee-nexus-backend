@@ -13,6 +13,8 @@ import { WorkSite } from 'src/modules/work-sites/entities/work-site.entity';
 import { WorkSchedule } from 'src/modules/work-schedules/entities/work-schedule.entity';
 import { EmployeeSalary } from 'src/modules/employee-salaries/entities/employee-salary.entity';
 import { BaseResponse } from 'src/common/dto/base-response.type';
+import { EmployeePayrollComponent } from 'src/modules/employee-payroll-components/entities/employee-payroll-component.entity';
+import { PayslipAdjustment } from 'src/modules/employee-payslip-adjustments/entities/payslip-adjustment.entity';
 
 @ObjectType()
 export class Employee {
@@ -88,6 +90,12 @@ export class Employee {
     description: 'Active salary of the employee',
   })
   salary?: EmployeeSalary | null;
+
+  @Field(() => [EmployeePayrollComponent], { nullable: true })
+  employeePayrollComponents?: EmployeePayrollComponent[] | [];
+
+  @Field(() => [PayslipAdjustment], { nullable: true })
+  employeePayslipAdjustments?: PayslipAdjustment[] | [];
 
   @Field(() => Date)
   createdAt: Date;

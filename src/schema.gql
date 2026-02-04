@@ -33,6 +33,10 @@ input ApprovePayrollCycleInput {
   id: Int!
 }
 
+input ApprovePayrollItemsInput {
+  payrollCycleId: Int!
+}
+
 input ApproveRejectPayslipAdjustmentInput {
   id: Int!
   notes: String
@@ -1611,6 +1615,8 @@ type Employee {
   designation: Designation
   designations: [EmployeeDesignation!]
   employeeId: String!
+  employeePayrollComponents: [EmployeePayrollComponent!]
+  employeePayslipAdjustments: [PayslipAdjustment!]
 
   """Active employment status of the user"""
   employmentStatus: EmploymentStatus
@@ -2620,6 +2626,7 @@ type Mutation {
   approveLeave(approveLeaveInput: ApproveLeaveInput!): LeaveResponse!
   approvePayrollCycle(approvePayrollCycleInput: ApprovePayrollCycleInput!): PayrollCycleResponse!
   approvePayrollItem(id: Int!): PayrollItemResponse!
+  approvePayrollItems(approvePayrollItemsInput: ApprovePayrollItemsInput!): PayrollCycleResponse!
   approveRejectPayslipAdjustment(approveRejectPayslipAdjustmentInput: ApproveRejectPayslipAdjustmentInput!): PayslipAdjustmentResponse!
   assignAsset(assignAssetInput: AssignAssetInput!): AssetAssignmentResponse!
 
@@ -2698,7 +2705,7 @@ type Mutation {
   markAllNotificationsAsRead: NotificationResponse!
   markNotificationAsRead(id: Int!): NotificationResponse!
   markPayrollCycleAsPaid(id: Int!): PayrollCycleResponse!
-  markPayrollItemAsPaid(id: Int!, paymentMethod: String!, transactionRef: String): PayrollItemResponse!
+  markPayrollItemAsPaid(payrollItemAsPaidInput: PayrollItemAsPaidInput!): PayrollItemResponse!
   previewPayrollItem(payrollCycleId: Int!, userId: Int!): PayrollItemResponse!
   processPayrollCycle(processPayrollCycleInput: ProcessPayrollCycleInput!): PayrollCycleResponse!
   punchIn(punchInInput: PunchInInput!): AttendancePunchResponse!
@@ -3090,12 +3097,17 @@ type PayrollItem {
   paidAt: DateTime
   paymentMethod: String
 
-  """Payroll Adjustments"""
-  payrollAdjustments: [PayslipAdjustment!]
-
-  """Payroll Components"""
-  payrollComponents: [EmployeePayrollComponent!]
+  """Payroll Cycle"""
+  payrollCycle: PayrollCycle!
   payrollCycleId: Int!
+
+  """
+  Payroll Item Components - frozen snapshot of components used in calculation
+  """
+  payrollItemComponents: [PayrollItemComponent!]
+
+  """Payroll Adjustments"""
+  payslipAdjustments: [PayslipAdjustment!]
   presentDays: Float!
   status: PayrollItemStatus!
   totalDeductions: Float!
@@ -3106,6 +3118,25 @@ type PayrollItem {
   user: User!
   userId: Int!
   workingDays: Int!
+}
+
+input PayrollItemAsPaidInput {
+  id: Int!
+  paymentMethod: String!
+  payrollCycleId: Int!
+  transactionRef: String
+}
+
+type PayrollItemComponent {
+  calculatedAmount: Float!
+  calculationType: String!
+  componentType: String!
+  createdAt: DateTime!
+  id: Int!
+  payrollComponent: PayrollComponent
+  payrollComponentId: Int!
+  payrollItemId: Int!
+  value: Float!
 }
 
 type PayrollItemResponse {

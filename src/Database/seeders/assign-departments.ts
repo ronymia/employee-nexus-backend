@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Prisma } from 'generated/prisma';
 
 export const assignEmployeesToDepartments = async (
