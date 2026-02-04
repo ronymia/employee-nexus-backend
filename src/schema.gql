@@ -2331,7 +2331,7 @@ type LastPayment {
   grossPay: Float!
   month: String!
   netPay: Float!
-  paidDate: DateTime!
+  paidDate: DateTime
 }
 
 type Leave {
@@ -2439,7 +2439,7 @@ enum LeaveDuration {
 }
 
 type LeaveHistoryItem {
-  endDate: DateTime!
+  endDate: DateTime
   leaveType: String!
   reason: String
   startDate: DateTime!
@@ -3788,8 +3788,8 @@ type RecentAttendanceItem {
 }
 
 type RecentNotification {
-  isRead: Boolean!
   message: String!
+  readAt: DateTime
   timestamp: DateTime!
   type: String!
 }
@@ -4060,7 +4060,7 @@ type UpcomingLeave {
 }
 
 type UpcomingLeaveItem {
-  endDate: DateTime!
+  endDate: DateTime
   leaveType: String!
   startDate: DateTime!
   status: String!
