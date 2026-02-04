@@ -14,7 +14,6 @@ dayjs.extend(customParseFormat);
 export const seedBusiness = async (
   tx: Prisma.TransactionClient,
   ownerPassword: string,
-  ownerRole: any,
 ) => {
   console.log('🏢 Creating business and owner...');
 
@@ -24,7 +23,7 @@ export const seedBusiness = async (
       email: 'mdronymia040@gmail.com',
       password: ownerPassword,
       status: UserAccountStatus.ACTIVE,
-      roleId: ownerRole?.id,
+      roleId: 2,
     },
   });
 

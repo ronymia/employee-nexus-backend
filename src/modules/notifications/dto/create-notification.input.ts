@@ -40,19 +40,9 @@ export class CreateNotificationInput {
   @IsOptional()
   entityId?: number;
 
-  @Field({ nullable: true })
-  @IsString()
-  @IsOptional()
-  actionUrl?: string;
-
   @Field(() => Int)
   @IsInt()
   userId: number;
-
-  @Field(() => [NotificationChannel])
-  @IsArray()
-  @IsEnum(NotificationChannel, { each: true })
-  channels: NotificationChannel[];
 
   @Field(() => Int, { nullable: true })
   @IsInt()

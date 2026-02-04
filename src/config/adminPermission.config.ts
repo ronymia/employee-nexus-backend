@@ -156,6 +156,7 @@ export const adminPermissions = [
   {
     resource: PermissionResource.ATTENDANCE,
     action: [
+      PermissionAction.REQUEST,
       PermissionAction.CREATE,
       PermissionAction.READ,
       PermissionAction.UPDATE,
@@ -165,6 +166,7 @@ export const adminPermissions = [
   {
     resource: PermissionResource.LEAVE,
     action: [
+      PermissionAction.REQUEST,
       PermissionAction.CREATE,
       PermissionAction.READ,
       PermissionAction.UPDATE,

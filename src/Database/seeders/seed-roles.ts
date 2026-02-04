@@ -7,6 +7,12 @@ export const seedBusinessRoles = async (
 ) => {
   console.log('👔 Creating business roles...');
 
+  const ownerRole = await tx.role.create({
+    data: {
+      name: ROLE.OWNER,
+      businessId,
+    },
+  });
   const adminRole = await tx.role.create({
     data: {
       name: ROLE.ADMIN,
@@ -28,5 +34,5 @@ export const seedBusinessRoles = async (
     },
   });
 
-  return { adminRole, managerRole, employeeRole };
+  return { ownerRole, adminRole, managerRole, employeeRole };
 };

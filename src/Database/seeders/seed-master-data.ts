@@ -30,7 +30,7 @@ export const seedMasterData = async (
       name: 'Standard 9-5',
       description: 'Standard 9 AM to 5 PM work schedule',
       status: 'ACTIVE',
-      scheduleType: 'FIXED',
+      scheduleType: 'REGULAR',
       breakType: 'PAID',
       breakMinutes: 60,
       businessId,

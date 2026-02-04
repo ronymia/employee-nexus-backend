@@ -17,6 +17,7 @@ import {
   ApproveAttendanceInput,
   RejectAttendanceInput,
 } from './dto/approve-attendance.input';
+import { RequestAttendanceInput } from './dto/request-attendance.input';
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
@@ -188,6 +189,114 @@ export class AttendancesService {
     });
 
     return overview;
+  }
+
+  // REQUEST ATTENDANCE
+  async requestAttendance({
+    user,
+    requestAttendanceInput,
+  }: {
+    user: JwtPayload;
+    requestAttendanceInput: RequestAttendanceInput;
+  }) {
+    const { punchRecords, ...attendanceData } = requestAttendanceInput;
+
+    // Calculate totals if punch records are provided
+    let totalMinutes = 0;
+    let breakMinutes = 0;
+    let overtimeMinutes = 0;
+
+    if (punchRecords && punchRecords.length > 0) {
+      const calculated = this.calculateTotalMinutes(punchRecords);
+      totalMinutes = calculated.totalMinutes;
+      breakMinutes = calculated.breakMinutes;
+    }
+
+    // Get employee's active schedule and apply break deduction if unpaid
+    const employeeSchedule = await this.getEmployeeSchedule(
+      user.userId,
+      attendanceData.date,
+    );
+
+    if (employeeSchedule === null) {
+      overtimeMinutes = totalMinutes;
+    }
+
+    totalMinutes =
+      employeeSchedule !== null
+        ? this.applyBreakDeduction(totalMinutes, employeeSchedule)
+        : 0;
+
+    if (totalMinutes > 480) {
+      overtimeMinutes = totalMinutes - 480;
+    }
+
+    const attendance = await this.prisma.attendance.create({
+      data: {
+        ...attendanceData,
+        userId: user.userId,
+        totalMinutes,
+        overtimeMinutes,
+        breakMinutes,
+        punchRecords: punchRecords
+          ? {
+              create: punchRecords.map((punch) => {
+                const workMinutes =
+                  punch.punchIn && punch.punchOut
+                    ? this.calculateWorkMinutes(punch.punchIn, punch.punchOut)
+                    : 0;
+                return {
+                  ...punch,
+                  punchInBy: user.userId,
+                  punchOutBy: user.userId,
+                  workMinutes,
+                  breakMinutes: punch.breakMinutes || 0,
+                };
+              }),
+            }
+          : undefined,
+      },
+      include: {
+        user: {
+          include: {
+            profile: true,
+          },
+        },
+        punchRecords: {
+          include: {
+            project: true,
+            workSite: true,
+          },
+        },
+      },
+    });
+
+    // Send notification to manager or owner
+    try {
+      const recipientId = await this.findNotificationRecipient(
+        attendance.userId,
+        user.businessId,
+      );
+      if (recipientId) {
+        await this.notificationsService.sendFromTemplate(
+          'attendance_created',
+          recipientId,
+          {
+            employeeName: attendance.user.profile?.fullName || 'Employee',
+            date: dayjs(attendance.date).format('MMM DD, YYYY'),
+            workTime: minutesToHoursAndMinutes(totalMinutes),
+            entityType: 'attendance',
+            entityId: attendance.id.toString(),
+            metaData: attendance,
+          },
+          user.businessId,
+        );
+      }
+    } catch (error) {
+      console.error('Failed to send attendance creation notification:', error);
+    }
+
+    return attendance;
   }
 
   // CREATE ATTENDANCE
