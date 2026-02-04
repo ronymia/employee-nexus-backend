@@ -211,24 +211,24 @@ export class LeavesService {
     });
 
     // Send notification to user
-    try {
-      // const startDate = new Date(leave.startDate).toLocaleDateString();
-      // const endDate = leave.endDate
-      //   ? new Date(leave.endDate).toLocaleDateString()
-      //   : startDate;
-      // await this.notificationsService.create({
-      //   type: NotificationType.LEAVE,
-      //   title: 'Leave Recorded',
-      //   message: `Your leave request from ${startDate} to ${endDate} has been submitted successfully and is pending review.`,
-      //   priority: 'NORMAL' as any,
-      //   userId: createLeaveInput.userId,
-      //   channels: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
-      //   businessId: user.businessId,
-      //   entityType: 'leave',
-      //   entityId: leave.id,
-      // });
-    } catch (error) {
-      console.error('Failed to send leave notification:', error);
+    const recipientId = leave.userId;
+    if (recipientId) {
+      await this.notificationService.sendFromTemplate(
+        'leave_requested',
+        recipientId,
+        {
+          employeeName: leave.user.profile?.fullName || 'Employee',
+          startDate: dayjs(leave.startDate).format('MMM DD, YYYY'),
+          endDate: leave.endDate
+            ? dayjs(leave.endDate).format('MMM DD, YYYY')
+            : dayjs(leave.startDate).format('MMM DD, YYYY'),
+          leaveHours: minutesToHoursAndMinutes(totalMinutes),
+          entityType: 'leave',
+          entityId: leave.id.toString(),
+          metaData: leave,
+        },
+        user.businessId,
+      );
     }
 
     return leave;
@@ -602,7 +602,7 @@ export class LeavesService {
       },
     });
 
-    return await this.prisma.leave.update({
+    const approveLeave = await this.prisma.leave.update({
       where: { id: Number(approveLeaveInput.leaveId) },
       data: {
         status: 'approved',
@@ -610,7 +610,37 @@ export class LeavesService {
         reviewedBy: user.userId,
         remarks: approveLeaveInput.remarks,
       },
+      include: {
+        user: {
+          include: {
+            profile: true,
+          },
+        },
+      },
     });
+
+    // Send notification to user
+    const recipientId = approveLeave.userId;
+    if (recipientId) {
+      await this.notificationService.sendFromTemplate(
+        'leave_approved',
+        recipientId,
+        {
+          employeeName: approveLeave.user.profile?.fullName || 'Employee',
+          startDate: dayjs(approveLeave.startDate).format('MMM DD, YYYY'),
+          endDate: approveLeave.endDate
+            ? dayjs(approveLeave.endDate).format('MMM DD, YYYY')
+            : dayjs(approveLeave.startDate).format('MMM DD, YYYY'),
+          leaveHours: minutesToHoursAndMinutes(approveLeave.totalMinutes),
+          entityType: 'leave',
+          entityId: approveLeave.id.toString(),
+          metaData: approveLeave,
+        },
+        user.businessId,
+      );
+    }
+
+    return approveLeave;
   }
 
   // REJECT LEAVE

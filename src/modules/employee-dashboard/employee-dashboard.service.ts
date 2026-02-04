@@ -45,7 +45,7 @@ export class EmployeeDashboardService {
         employee: {
           include: {
             departments: {
-              where: { isActive: true },
+              where: { isActive: true, isPrimary: true },
               include: { department: true },
             },
             designations: {
@@ -58,14 +58,13 @@ export class EmployeeDashboardService {
     });
 
     return {
-      fullName: user?.profile?.fullName || 'N/A',
-      employeeId: user?.employee?.employeeId || 'N/A',
-      department: user?.employee?.departments?.[0]?.department?.name || 'N/A',
-      designation:
-        user?.employee?.designations?.[0]?.designation?.name || 'N/A',
-      joiningDate: user?.employee?.joiningDate || dayjs.utc().toISOString(),
-      email: user?.email || 'N/A',
-      phone: user?.profile?.phone || 'N/A',
+      fullName: user?.profile?.fullName,
+      employeeId: user?.employee?.employeeId,
+      department: user?.employee?.departments?.at(0)?.department?.name,
+      designation: user?.employee?.designations?.at(0)?.designation?.name,
+      joiningDate: user?.employee?.joiningDate,
+      email: user?.email,
+      phone: user?.profile?.phone,
     };
   }
 
@@ -159,17 +158,58 @@ export class EmployeeDashboardService {
     const today = dayjs.utc().startOf('day').toISOString();
 
     // Get leave balances
-    // const leaveBalances = await this.prismaService.leaveBalance.findMany({
-    //   where: { userId },
-    //   include: { leaveType: true },
-    // });
+    const employmentStatuses =
+      await this.prismaService.employmentStatus.findMany({
+        where: {
+          employees: {
+            some: {
+              userId,
+            },
+          },
+        },
+        include: {
+          leaveTypes: {
+            include: {
+              leaveType: true,
+            },
+          },
+        },
+      });
 
-    const availableLeaves = [].map(() => ({
-      leaveType: 'Sick',
-      total: 1,
-      used: 10,
-      remaining: 50,
-    }));
+    // Get leave types for the user's employment status
+    const leaveTypes = employmentStatuses.flatMap((es) =>
+      es.leaveTypes.map((lt) => lt.leaveType),
+    );
+
+    // Calculate leave balances for each leave type
+    const leaveBalancePromises = leaveTypes.map(async (leaveType) => {
+      // Get approved leaves for this leave type in current year
+      const usedRecord = await this.prismaService.leave.aggregate({
+        where: {
+          userId,
+          leaveTypeId: leaveType.id,
+          status: 'approved',
+          leaveYear: dayjs.utc().year(),
+        },
+        _sum: {
+          totalMinutes: true,
+        },
+      });
+      // Calculate total days used
+      const used = usedRecord?._sum.totalMinutes || 0;
+
+      const total = leaveType.leaveMinutes || 0;
+      const remaining = total - used;
+
+      return {
+        leaveType: leaveType.name,
+        total,
+        used,
+        remaining: Math.max(0, remaining),
+      };
+    });
+
+    const availableLeaves = await Promise.all(leaveBalancePromises);
 
     // Upcoming leaves
     const upcomingLeaves = await this.prismaService.leave.findMany({
@@ -199,13 +239,13 @@ export class EmployeeDashboardService {
       upcomingLeaves: upcomingLeaves.map((leave) => ({
         leaveType: leave.leaveType.name,
         startDate: leave.startDate,
-        endDate: leave.endDate || dayjs.utc().toISOString(),
+        endDate: leave?.endDate ? leave.endDate : null,
         status: leave.status,
       })),
       leaveHistory: leaveHistory.map((leave) => ({
         leaveType: leave.leaveType.name,
         startDate: leave.startDate,
-        endDate: leave.endDate || dayjs.utc().toISOString(),
+        endDate: leave?.endDate ? leave.endDate : null,
         status: leave.status,
         reason: leave.remarks || undefined,
       })),
@@ -270,7 +310,7 @@ export class EmployeeDashboardService {
           : 'N/A',
         grossPay: lastPayment?.grossPay || 0,
         netPay: lastPayment?.netPay || 0,
-        paidDate: lastPayment?.paidAt || dayjs.utc().toISOString(),
+        paidDate: lastPayment?.paidAt || null,
       },
       yearToDate: {
         totalGrossPay,
@@ -343,6 +383,7 @@ export class EmployeeDashboardService {
         type: notification.type,
         message: notification.message,
         timestamp: notification.createdAt,
+        readAt: notification.readAt || null,
       })),
     };
   }

@@ -1,4 +1,5 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
+import { IsOptional } from 'class-validator';
 import { BaseResponse } from 'src/common/dto/base-response.type';
 
 // ============ Personal Info ============
@@ -108,7 +109,8 @@ export class UpcomingLeaveItem {
   @Field()
   startDate: Date;
 
-  @Field()
+  @Field({ nullable: true })
+  @IsOptional()
   endDate: Date;
 
   @Field()
@@ -123,8 +125,9 @@ export class LeaveHistoryItem {
   @Field()
   startDate: Date;
 
-  @Field()
-  endDate: Date;
+  @Field({ nullable: true })
+  @IsOptional()
+  endDate?: Date;
 
   @Field()
   status: string;
@@ -172,8 +175,9 @@ export class LastPayment {
   @Field(() => Float)
   netPay: number;
 
-  @Field()
-  paidDate: Date;
+  @Field({ nullable: true })
+  @IsOptional()
+  paidDate?: Date;
 }
 
 @ObjectType()
@@ -249,8 +253,8 @@ export class RecentNotification {
   @Field()
   timestamp: Date;
 
-  @Field()
-  isRead: boolean;
+  @Field({ nullable: true })
+  readAt?: Date;
 }
 
 @ObjectType()
