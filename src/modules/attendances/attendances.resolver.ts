@@ -1,4 +1,12 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  Int,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { AttendancesService } from './attendances.service';
 import {
   Attendance,
@@ -173,6 +181,27 @@ export class AttendancesResolver {
     };
   }
 
+  // GET TODAY ATTENDANCE
+  @Query(() => AttendanceResponse, { name: 'getTodayAttendance' })
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('Attendance:read')
+  @UseGuards(GqlAuthGuard)
+  async getTodayAttendance(
+    // @Args('id', { type: () => Int }) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const result = await this.attendancesService.getTodayAttendance({
+      user,
+    });
+
+    return {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: `Attendance retrieved successfully`,
+      data: result,
+    };
+  }
+
   // PUNCH IN
   @Mutation(() => AttendancePunchResponse, { name: 'punchIn' })
   @UseGuards(GqlAuthGuard)
@@ -249,5 +278,16 @@ export class AttendancesResolver {
       message: `Attendance rejected successfully`,
       data: result,
     };
+  }
+
+  // RESOLVE FIELD: scheduleMinutes
+  @ResolveField(() => Int, {
+    description: 'Total work schedule minutes for the day',
+  })
+  async scheduleMinutes(@Parent() attendance: Attendance) {
+    return await this.attendancesService.calculateScheduleMinutes(
+      attendance.userId,
+      attendance.date,
+    );
   }
 }

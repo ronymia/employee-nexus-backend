@@ -3466,6 +3466,7 @@ type Query {
   """Get specific employment status assignment by composite ID"""
   getEmploymentStatusById(employmentStatusId: Int!, userId: Int!): EmployeeEmploymentStatusResponse!
   getMyProfile: UserResponse!
+  getTodayAttendance: AttendanceResponse!
   getUserWorkSchedule(userId: Int!): WorkScheduleResponse!
 
   """Get specific work schedule assignment by composite ID"""
