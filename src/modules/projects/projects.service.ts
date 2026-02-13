@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectInput } from './dto/create-project.input';
@@ -8,6 +9,7 @@ import { JwtPayload } from '../auth/jwt.strategy';
 import * as dayjs from 'dayjs';
 import * as customParseFormat from 'dayjs/plugin/customParseFormat';
 import * as utc from 'dayjs/plugin/utc';
+import { ROLE } from 'src/enums';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -57,10 +59,36 @@ export class ProjectsService {
     user: JwtPayload;
     businessId?: number;
   }) {
+    const targetUser = await this.prisma.user.findUnique({
+      where: { id: user.userId },
+      include: {
+        role: true,
+      },
+    });
+
+    if (!targetUser) {
+      throw new NotFoundException(`User with ID ${user.userId} not found`);
+    }
+    const userRoleName = targetUser.role.name as ROLE; // Explicitly cast to ROLE enum
     const filterBusinessId = businessId || user.businessId;
 
+    // Build the `where` clause conditionally
+    const whereClause: any = {
+      businessId: filterBusinessId,
+    };
+    if (
+      userRoleName === ROLE.EMPLOYEE ||
+      userRoleName === ROLE.MANAGER ||
+      userRoleName === ROLE.ADMIN
+    ) {
+      // For employees, managers, and admins, only return projects they are assigned to
+      whereClause.projectMembers = {
+        some: { employee: { userId: user.userId } },
+      };
+    }
+
     return this.prisma.project.findMany({
-      where: { businessId: filterBusinessId },
+      where: whereClause,
       include: {
         business: true,
         creator: true,

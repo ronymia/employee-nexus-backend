@@ -257,9 +257,9 @@ export class NotificationsService {
     });
 
     // If department has a manager, return manager's ID
-    if (userDepartment?.department?.managerId) {
-      return userDepartment.department.managerId;
-    }
+    // if (userDepartment?.department?.managerId) {
+    //   return userDepartment.department.managerId;
+    // }
 
     // Otherwise, find business owner
     const business = await this.prisma.business.findUnique({

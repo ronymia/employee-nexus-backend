@@ -63,7 +63,6 @@ export async function seedNotificationTemplates(
       message:
         '{{employeeName}} created an attendance record for {{date}} with {{workTime}} work time.',
       priority: NotificationPriority.NORMAL,
-      isActive: true,
       businessId,
     },
     {

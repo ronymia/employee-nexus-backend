@@ -74,43 +74,6 @@ export class AttendancesService {
   }
 
   /**
-   * Find manager or owner to notify
-   */
-  private async findNotificationRecipient(
-    userId: number,
-    businessId: number,
-  ): Promise<number | null> {
-    // Get user's primary department
-    const userDepartment = await this.prisma.employeeDepartment.findFirst({
-      where: {
-        userId,
-        isActive: true,
-        isPrimary: true,
-      },
-      include: {
-        department: {
-          include: {
-            manager: true,
-          },
-        },
-      },
-    });
-
-    // If department has a manager, return manager's ID
-    if (userDepartment?.department?.managerId) {
-      return userDepartment.department.managerId;
-    }
-
-    // Otherwise, find business owner
-    const business = await this.prisma.business.findUnique({
-      where: { id: businessId },
-      select: { ownerId: true },
-    });
-
-    return business?.ownerId || null;
-  }
-
-  /**
    * Get employee's active schedule for a specific date
    * Returns the schedule with workSchedule included
    */
@@ -151,6 +114,70 @@ export class AttendancesService {
       return Math.max(0, totalMinutes - scheduleBreakMinutes);
     }
     return totalMinutes;
+  }
+
+  /**
+   * Calculate schedule minutes for a specific user and date
+   * Returns the total scheduled minutes based on the work schedule
+   */
+  async calculateScheduleMinutes(userId: number, date: Date): Promise<number> {
+    let scheduleMinutes = 0;
+    const attendanceDay = dayjs(date).day();
+
+    // Find the active schedule for this user on this date
+    const activeSchedule = await this.prisma.employeeSchedule.findFirst({
+      where: {
+        userId,
+        isActive: true,
+        startDate: {
+          lte: dayjs(date).toDate(),
+        },
+        OR: [
+          { endDate: null },
+          {
+            endDate: {
+              gte: dayjs(date).toDate(),
+            },
+          },
+        ],
+      },
+      include: {
+        workSchedule: {
+          include: {
+            schedules: {
+              include: {
+                timeSlots: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (activeSchedule) {
+      const daySchedule = activeSchedule.workSchedule.schedules.find(
+        (s) => s.dayOfWeek === attendanceDay,
+      );
+
+      if (daySchedule?.timeSlots && daySchedule.timeSlots.length > 0) {
+        // Calculate total time from all time slots
+        const totalSlotMinutes = daySchedule.timeSlots.reduce((total, slot) => {
+          // Parse time strings (format: "HH:mm" or "HH:mm:ss")
+          const start = dayjs(slot.startTime, ['HH:mm:ss', 'HH:mm'], true);
+          const end = dayjs(slot.endTime, ['HH:mm:ss', 'HH:mm'], true);
+
+          if (!start.isValid() || !end.isValid()) {
+            return total;
+          }
+
+          return total + end.diff(start, 'minute');
+        }, 0);
+
+        scheduleMinutes = totalSlotMinutes;
+      }
+    }
+
+    return scheduleMinutes;
   }
 
   // ATTENDANCE OVERVIEW
@@ -273,10 +300,11 @@ export class AttendancesService {
 
     // Send notification to manager or owner
     try {
-      const recipientId = await this.findNotificationRecipient(
-        attendance.userId,
-        user.businessId,
-      );
+      const recipientId =
+        await this.notificationsService.findNotificationRecipient(
+          attendance.userId,
+          user.businessId,
+        );
       if (recipientId) {
         await this.notificationsService.sendFromTemplate(
           'attendance_created',
@@ -379,10 +407,11 @@ export class AttendancesService {
 
     // Send notification to manager or owner
     try {
-      const recipientId = await this.findNotificationRecipient(
-        attendance.userId,
-        user.businessId,
-      );
+      const recipientId =
+        await this.notificationsService.findNotificationRecipient(
+          attendance.userId,
+          user.businessId,
+        );
 
       if (recipientId) {
         await this.notificationsService.sendFromTemplate(
@@ -507,93 +536,6 @@ export class AttendancesService {
       where: whereCondition,
     });
 
-    // OPTIMIZE: Batch fetch employee schedules to avoid N+1 query problem
-    const uniqueUserIds = [...new Set(result.map((a) => a.userId))];
-    const uniqueDates = [...new Set(result.map((a) => a.date))];
-
-    // Get all employee schedules in one query
-    const employeeSchedules = await this.prisma.employeeSchedule.findMany({
-      where: {
-        userId: { in: uniqueUserIds },
-        isActive: true,
-        startDate: {
-          lte: dayjs
-            .utc(Math.max(...uniqueDates.map((d) => d.getTime())))
-            .toDate(),
-        },
-      },
-      orderBy: {
-        startDate: 'desc',
-      },
-      include: {
-        workSchedule: {
-          include: {
-            schedules: {
-              include: {
-                timeSlots: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    // Create a map of userId -> schedules for fast lookup
-    const schedulesByUser = new Map<number, typeof employeeSchedules>();
-    for (const schedule of employeeSchedules) {
-      if (!schedulesByUser.has(schedule.userId)) {
-        schedulesByUser.set(schedule.userId, []);
-      }
-      schedulesByUser.get(schedule.userId)!.push(schedule);
-    }
-
-    // Calculate schedule minutes for each attendance
-    const resultWithSchedules = result.map((attendance) => {
-      let scheduleMinutes = 0;
-      const attendanceDay = dayjs(attendance.date).day();
-
-      // Find the most recent active schedule for this user on this date
-      const userSchedules = schedulesByUser.get(attendance.userId) || [];
-      const activeSchedule = userSchedules.find(
-        (s) =>
-          s.isActive &&
-          dayjs(s.startDate).isSameOrBefore(attendance.date, 'day') &&
-          (!s.endDate ||
-            dayjs(s.endDate).isSameOrAfter(attendance.date, 'day')),
-      );
-
-      if (activeSchedule) {
-        const daySchedule = activeSchedule.workSchedule.schedules.find(
-          (s) => s.dayOfWeek === attendanceDay,
-        );
-
-        if (daySchedule?.timeSlots && daySchedule.timeSlots.length > 0) {
-          // Calculate total time from all time slots
-          const totalSlotMinutes = daySchedule.timeSlots.reduce(
-            (total, slot) => {
-              // Parse time strings (format: "HH:mm" or "HH:mm:ss")
-              const start = dayjs(slot.startTime, ['HH:mm:ss', 'HH:mm'], true);
-              const end = dayjs(slot.endTime, ['HH:mm:ss', 'HH:mm'], true);
-
-              if (!start.isValid() || !end.isValid()) {
-                return total;
-              }
-
-              return total + end.diff(start, 'minute');
-            },
-            0,
-          );
-
-          scheduleMinutes = totalSlotMinutes;
-        }
-      }
-
-      return {
-        ...attendance,
-        scheduleMinutes,
-      };
-    });
-
     return {
       meta: {
         page: Number(page),
@@ -602,7 +544,7 @@ export class AttendancesService {
         total: Number(total),
         totalPages: limit ? Math.ceil(total / limit) : 1,
       },
-      data: resultWithSchedules,
+      data: result,
     };
   }
 
@@ -725,10 +667,11 @@ export class AttendancesService {
 
     // Send notification to manager or owner
     try {
-      const recipientId = await this.findNotificationRecipient(
-        updatedAttendance.userId,
-        user.businessId,
-      );
+      const recipientId =
+        await this.notificationsService.findNotificationRecipient(
+          updatedAttendance.userId,
+          user.businessId,
+        );
 
       if (recipientId) {
         await this.notificationsService.sendFromTemplate(
@@ -770,10 +713,11 @@ export class AttendancesService {
 
     // Send notification to manager or owner
     try {
-      const recipientId = await this.findNotificationRecipient(
-        attendance.userId,
-        user.businessId,
-      );
+      const recipientId =
+        await this.notificationsService.findNotificationRecipient(
+          attendance.userId,
+          user.businessId,
+        );
 
       if (recipientId) {
         await this.notificationsService.sendFromTemplate(
@@ -797,6 +741,40 @@ export class AttendancesService {
     return deletedAttendance;
   }
 
+  // FIND ONE ATTENDANCE
+  async getTodayAttendance({ user }: { user: JwtPayload }) {
+    const attendance = await this.prisma.attendance.findFirstOrThrow({
+      where: {
+        userId: user.userId,
+        date: dayjs.utc().toISOString(),
+      },
+      include: {
+        user: {
+          include: {
+            profile: true,
+          },
+        },
+        punchRecords: {
+          include: {
+            project: true,
+            workSite: true,
+          },
+        },
+      },
+    });
+
+    // if (!attendance) {
+    //   throw new NotFoundException(`Attendance with ID ${id} not found`);
+    // }
+
+    // // Verify user has access to this attendance
+    // if (user.businessId !== attendance.user.businessId) {
+    //   throw new NotFoundException(`Attendance with ID ${id} not found`);
+    // }
+
+    return attendance;
+  }
+
   // PUNCH IN
   async punchIn({
     user,
@@ -815,6 +793,11 @@ export class AttendancesService {
   }) {
     const today = dayjs.utc().format('YYYY-MM-DD');
     const userId = user.userId;
+
+    const targetUser = await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      include: { employee: true, profile: true },
+    });
 
     // Find or create attendance record for today
     let attendance = await this.prisma.attendance.findFirst({
@@ -839,10 +822,12 @@ export class AttendancesService {
     // Create punch record
     const punchRecord = await this.prisma.attendancePunch.create({
       data: {
+        ...data,
         attendanceId: attendance.id,
         punchInBy: user.userId,
         punchIn: dayjs.utc().toISOString(),
-        ...data,
+        workMinutes: 0,
+        breakMinutes: 0,
       },
       include: {
         attendance: true,
@@ -853,26 +838,21 @@ export class AttendancesService {
 
     // Send notification to manager or owner
     try {
-      const recipientId = await this.findNotificationRecipient(
-        userId,
-        user.businessId,
-      );
+      const recipientId =
+        await this.notificationsService.findNotificationRecipient(
+          userId,
+          user.businessId,
+        );
       if (recipientId) {
-        const userProfile = await this.prisma.user.findUnique({
-          where: { id: userId },
-          include: { profile: true },
-        });
-
         await this.notificationsService.sendFromTemplate(
           'attendance_punch_in',
           recipientId,
           {
-            employeeName: userProfile?.profile?.fullName || 'Employee',
+            employeeName: targetUser?.profile?.fullName || 'Employee',
             checkInTime: dayjs(punchRecord.punchIn).format('h:mm A'),
             date: dayjs(punchRecord.punchIn).format('MMM DD, YYYY'),
             entityType: 'attendance',
             entityId: attendance.id.toString(),
-            actionUrl: `/attendances/${attendance.id}`,
           },
           user.businessId,
         );
@@ -972,10 +952,11 @@ export class AttendancesService {
 
     // Send notification to manager or owner about punch out
     try {
-      const recipientId = await this.findNotificationRecipient(
-        punch.attendance.userId,
-        user.businessId,
-      );
+      const recipientId =
+        await this.notificationsService.findNotificationRecipient(
+          punch.attendance.userId,
+          user.businessId,
+        );
       if (recipientId) {
         const userProfile = await this.prisma.user.findUnique({
           where: { id: punch.attendance.userId },
