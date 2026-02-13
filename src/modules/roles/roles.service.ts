@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { PrismaService } from '../prisma/prisma.service';
+import { ROLE } from 'src/enums';
 
 @Injectable()
 export class RolesService {
@@ -17,7 +18,7 @@ export class RolesService {
       where: {
         businessId: user.businessId,
         AND: {
-          name: { not: `owner#${user.businessId}` },
+          name: { not: ROLE.OWNER },
         },
       },
       include: {

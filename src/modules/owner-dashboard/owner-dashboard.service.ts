@@ -13,6 +13,7 @@ import * as dayjs from 'dayjs';
 import { UserAccountStatus } from '../users/enums';
 import * as utc from 'dayjs/plugin/utc';
 import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+import { ROLE } from 'src/enums';
 dayjs.extend(utc);
 dayjs.extend(customParseFormat);
 
@@ -69,7 +70,7 @@ export class OwnerDashboardService {
           businessId,
           AND: {
             role: {
-              NOT: { name: `OWNER#${businessId}` },
+              NOT: { name: ROLE.OWNER },
             },
           },
         },
@@ -80,7 +81,7 @@ export class OwnerDashboardService {
           status: UserAccountStatus.ACTIVE,
           AND: {
             role: {
-              NOT: { name: `OWNER#${businessId}` },
+              NOT: { name: ROLE.OWNER },
             },
           },
         },
@@ -91,7 +92,7 @@ export class OwnerDashboardService {
           status: UserAccountStatus.INACTIVE,
           AND: {
             role: {
-              NOT: { name: `OWNER#${businessId}` },
+              NOT: { name: ROLE.OWNER },
             },
           },
         },
