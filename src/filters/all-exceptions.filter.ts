@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   ExceptionFilter,
@@ -119,6 +120,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
   }
 
   // ============ HANDLE HTTP EXCEPTION ============
+  // ============ HANDLE HTTP EXCEPTION ============
   private handleHttpExceptionType(
     exception: HttpException,
   ): TGenericErrorResponse {
@@ -141,23 +143,114 @@ export class AllExceptionsFilter implements ExceptionFilter {
       }
     }
 
-    // Standard HTTP exception
-    return {
-      statusCode: status,
-      message:
-        typeof response === 'string'
-          ? response
-          : (response as any).message || exception.message,
-      errors: [
-        {
-          path: 'http',
+    // Handle specific HTTP status codes
+    switch (status) {
+      case HttpStatus.UNAUTHORIZED: // 401
+        return {
+          statusCode: status,
+          message: 'Unauthorized access',
+          errors: [
+            {
+              path: 'auth',
+              message: 'You are not authorized to access this resource',
+            },
+          ],
+        };
+
+      case HttpStatus.FORBIDDEN: // 403
+        return {
+          statusCode: status,
+          message: 'Access forbidden',
+          errors: [
+            {
+              path: 'auth',
+              message: 'You do not have permission to perform this action',
+            },
+          ],
+        };
+
+      case HttpStatus.NOT_FOUND: // 404
+        return {
+          statusCode: status,
+          message: 'Resource not found',
+          errors: [
+            {
+              path: 'resource',
+              message: 'The requested resource could not be found',
+            },
+          ],
+        };
+
+      case HttpStatus.CONFLICT: // 409
+        return {
+          statusCode: status,
+          message: 'Conflict detected',
+          errors: [
+            {
+              path: 'conflict',
+              message: 'A conflict occurred while processing your request',
+            },
+          ],
+        };
+
+      case HttpStatus.NOT_ACCEPTABLE: // 406
+        return {
+          statusCode: status,
+          message: 'Not acceptable',
+          errors: [
+            {
+              path: 'request',
+              message: 'The request cannot be processed in the current format',
+            },
+          ],
+        };
+
+      case HttpStatus.UNPROCESSABLE_ENTITY: // 422
+        if (typeof response === 'object' && (response as any).message) {
+          const validationErrors = (response as any).message;
+
+          if (Array.isArray(validationErrors)) {
+            return {
+              statusCode: status,
+              message: 'Validation failed',
+              errors: validationErrors.map((error: any) => ({
+                path: error.field || 'unknown', // Include the field name if available
+                message: error.message || 'Invalid value',
+              })),
+            };
+          }
+        }
+
+        return {
+          statusCode: status,
+          message: 'Unprocessable entity',
+          errors: [
+            {
+              path: 'validation',
+              message: 'The request contains invalid data',
+            },
+          ],
+        };
+
+      default:
+        // Standard HTTP exception
+        return {
+          statusCode: status,
           message:
             typeof response === 'string'
               ? response
               : (response as any).message || exception.message,
-        },
-      ],
-    };
+          errors: [
+            {
+              path: 'http',
+              message:
+                typeof response === 'string'
+                  ? response
+                  : (response as any).message || exception.message,
+            },
+          ],
+        };
+    }
   }
 
   // ============ HANDLE PRISMA ERRORS ============
@@ -346,11 +439,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
       case 'P2025': // Record not found
         return {
           statusCode: HttpStatus.NOT_FOUND,
-          message: 'Record not found',
+          message: exception.message || 'Record not found', // Use the exception message if available
           errors: [
             {
               path: 'database',
-              message: 'The requested record does not exist',
+              message:
+                exception.message || 'The requested record does not exist',
             },
           ],
         };
@@ -358,7 +452,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       case 'P2003': // Foreign key constraint failed
         return {
           statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Invalid reference',
+          message: 'Bad Request',
           errors: [
             {
               path: field,
