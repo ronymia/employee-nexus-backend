@@ -17,6 +17,7 @@ import { ApproveLeaveInput, RejectLeaveInput } from './dto/approve-leave.input';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+import { ROLE } from 'src/enums';
 dayjs.extend(utc);
 dayjs.extend(customParseFormat);
 
@@ -28,17 +29,62 @@ export class LeavesService {
   ) {}
 
   // LEAVE OVERVIEW
-  async getLeaveOverview() {
+  async getLeaveOverview({ user }: { user: JwtPayload }) {
+    if (!user.businessId) {
+      throw new NotFoundException('Business not found');
+    }
+    if (!user.userId) {
+      throw new NotFoundException('User not found');
+    }
+    // const managerId
+    const targetUser = await this.prisma.user.findUniqueOrThrow({
+      where: { id: user.userId },
+      select: {
+        businessId: true,
+        role: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+    // QUERY BUILDER
+    const andCondition: Prisma.LeaveWhereInput[] = [];
+
+    // Managers see overview for their department, others see for entire business
+    if (targetUser.role.name === (ROLE.MANAGER as any)) {
+      // Managers can only see employees in their departments
+      andCondition.push({
+        user: {
+          employee: {
+            departments: {
+              some: {
+                department: {
+                  businessId: user.businessId,
+                  managerId: user.userId,
+                },
+                isActive: true,
+              },
+            },
+          },
+        },
+      });
+    }
+
+    const whereCondition: Prisma.LeaveWhereInput =
+      andCondition.length > 0 ? { AND: andCondition } : {};
     // Execute all queries in parallel for single round trip
     const [total, statusGroups, durationGroups] = await Promise.all([
-      this.prisma.leave.count(),
+      this.prisma.leave.count({ where: whereCondition }),
       this.prisma.leave.groupBy({
         by: ['status'],
         _count: { status: true },
+        where: whereCondition,
       }),
       this.prisma.leave.groupBy({
         by: ['leaveDuration'],
         _count: { leaveDuration: true },
+        where: whereCondition,
       }),
     ]);
 
@@ -235,9 +281,27 @@ export class LeavesService {
   }
 
   async findAll({ user, query }: { user: JwtPayload; query: QueryLeaveInput }) {
-    console.log(user);
     const userId = query?.userId;
     const { pagination, ...filters } = query ?? {};
+
+    if (!user.businessId) {
+      throw new NotFoundException('Business not found');
+    }
+    if (!user.userId) {
+      throw new NotFoundException('User not found');
+    }
+    // const managerId
+    const targetUser = await this.prisma.user.findUniqueOrThrow({
+      where: { id: user.userId },
+      select: {
+        businessId: true,
+        role: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
 
     // PAGINATION
     const {
@@ -260,7 +324,27 @@ export class LeavesService {
     } = filters;
 
     // QUERY BUILDER
-    const andCondition: any[] = [];
+    const andCondition: Prisma.LeaveWhereInput[] = [];
+
+    // Managers see overview for their department, others see for entire business
+    if (targetUser.role.name === (ROLE.MANAGER as any)) {
+      // Managers can only see employees in their departments
+      andCondition.push({
+        user: {
+          employee: {
+            departments: {
+              some: {
+                department: {
+                  businessId: user.businessId,
+                  managerId: user.userId,
+                },
+                isActive: true,
+              },
+            },
+          },
+        },
+      });
+    }
 
     // Search in fields
     if (searchTerm) {

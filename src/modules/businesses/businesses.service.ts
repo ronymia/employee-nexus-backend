@@ -144,7 +144,7 @@ export class BusinessesService {
         const roleNames = [ROLE.OWNER, ROLE.MANAGER, ROLE.ADMIN, ROLE.EMPLOYEE];
         await prismaTransaction.role.createMany({
           data: roleNames.map((name) => ({
-            name: `${name}#${businessId}`,
+            name: `${name}`,
             businessId,
           })),
           skipDuplicates: true,
@@ -154,7 +154,7 @@ export class BusinessesService {
         const ownerRole = await prismaTransaction.role.findUnique({
           where: {
             name_businessId: {
-              name: `${ROLE.OWNER}#${businessId}`,
+              name: `${ROLE.OWNER}`,
               businessId,
             },
           },
