@@ -18,7 +18,21 @@ interface IStandardErrorResponse {
 
 export const graphqlErrorFormatter = (
   error: GraphQLError,
+  formatErrorOptions?: any,
 ): GraphQLFormattedError => {
+  console.log({ error, formatErrorOptions });
+  if (!error.extensions?.success && error.extensions?.statusCode === 409) {
+    // If the error already has our standard format, return it as is
+    return {
+      message: error.message,
+      extensions: {
+        success: error.extensions?.success || false,
+        statusCode: error.extensions?.statusCode || 500,
+        errors: error.extensions?.errors,
+        path: error.extensions?.path,
+      },
+    };
+  }
   const originalError = error.extensions?.originalError as any;
   // console.log({
   //   originalError,
@@ -43,7 +57,7 @@ export const graphqlErrorFormatter = (
     errors: fieldErrors,
     path: error.path?.join('.') || 'graphql',
   };
-
+  // console.log({ errors: fieldErrors });
   return {
     message: standardResponse.message,
     extensions: {
@@ -51,7 +65,6 @@ export const graphqlErrorFormatter = (
       statusCode: standardResponse.statusCode,
       errors: standardResponse.errors,
       path: standardResponse.path,
-      code: error.extensions?.code,
     },
     locations: error.locations,
     path: error.path,

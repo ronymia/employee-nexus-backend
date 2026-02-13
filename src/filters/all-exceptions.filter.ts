@@ -25,7 +25,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const gqlHost = GqlArgumentsHost.create(host);
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse();
     const request = ctx.getRequest();
 
     const isHttp = host.getType() === 'http';
@@ -41,31 +40,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
     };
 
     // Log error for debugging
-    // console.error('Exception caught:', {
-    //   type: exception?.constructor?.name,
-    //   message: errorResponse.message,
-    //   statusCode: status,
-    //   path: errorResponse.path,
-    //   errors: fieldErrors,
-    // });
+    console.error('Exception caught:', {
+      type: exception?.constructor?.name,
+      message: errorResponse.message,
+      statusCode: status,
+      path: errorResponse.path,
+      errors: fieldErrors,
+    });
 
-    if (isHttp) {
-      response.status(status).json(errorResponse);
-    } else {
-      // console.log({ errorResponse });
-      // For GraphQL, throw a GraphQLError instead of returning error response
-      throw new GraphQLError(errorResponse.message, {
-        extensions: {
-          success: errorResponse.success,
-          statusCode: errorResponse.statusCode,
-          errors: errorResponse.errors,
-          timestamp: new Date().toISOString(),
-          path: errorResponse.path,
-          category: this.getErrorCategory(exception, status),
-          code: this.getGraphQLErrorCode(status),
-        },
-      });
-    }
+    throw new GraphQLError(errorResponse.message, {
+      extensions: {
+        success: errorResponse.success,
+        statusCode: errorResponse.statusCode,
+        errors: errorResponse.errors,
+        path: errorResponse.path,
+      },
+    });
   }
 
   private getErrorMessage(
@@ -163,32 +153,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     return HttpStatus.INTERNAL_SERVER_ERROR;
-  }
-
-  private getErrorCategory(exception: unknown, statusCode: number): string {
-    if (statusCode >= 400 && statusCode < 500) {
-      return 'USER_ERROR';
-    }
-    return 'SYSTEM_ERROR';
-  }
-
-  private getGraphQLErrorCode(statusCode: number): string {
-    switch (statusCode) {
-      case HttpStatus.BAD_REQUEST:
-        return 'BAD_USER_INPUT';
-      case HttpStatus.UNAUTHORIZED:
-        return 'UNAUTHENTICATED';
-      case HttpStatus.FORBIDDEN:
-        return 'FORBIDDEN';
-      case HttpStatus.NOT_FOUND:
-        return 'NOT_FOUND';
-      case HttpStatus.CONFLICT:
-        return 'CONFLICT';
-      case HttpStatus.UNPROCESSABLE_ENTITY:
-        return 'BAD_USER_INPUT';
-      default:
-        return 'INTERNAL_SERVER_ERROR';
-    }
   }
 
   private getFieldErrors(

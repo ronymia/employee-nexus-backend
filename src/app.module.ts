@@ -74,6 +74,10 @@ import { graphqlErrorFormatter } from './filters/graphql-error.formatter';
       graphiql: true,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
+      installSubscriptionHandlers: true,
+      subscriptions: {
+        'graphql-ws': true,
+      },
       context: ({ req }) => ({ req }),
       formatError: graphqlErrorFormatter,
     }),
