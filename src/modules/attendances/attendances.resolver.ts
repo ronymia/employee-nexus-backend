@@ -14,7 +14,13 @@ import {
   AttendanceQueryResponse,
 } from './entities/attendance.entity';
 import { QueryAttendanceInput } from './dto/query-attendance.input';
-import { HttpStatus, NotAcceptableException, UseGuards } from '@nestjs/common';
+import {
+  HttpStatus,
+  NotAcceptableException,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
@@ -65,6 +71,7 @@ export class AttendancesResolver {
   @UseGuards(PermissionsGuard)
   @RequirePermissions('Attendance:create')
   @UseGuards(GqlAuthGuard)
+  @UsePipes(new ValidationPipe({ transform: true }))
   async requestAttendance(
     @Args('requestAttendanceInput')
     requestAttendanceInput: RequestAttendanceInput,

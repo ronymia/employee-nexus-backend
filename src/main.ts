@@ -18,16 +18,7 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
 
   // GLOBAL VALIDATION PIPE (GraphQL-compatible)
-  // app.useGlobalPipes(
-  //   new ValidationPipe({
-  //     transform: true, // Transform payloads to DTO instances
-  //     transformOptions: {
-  //       enableImplicitConversion: true, // Auto-convert types
-  //     },
-  //     // Don't use whitelist/forbidNonWhitelisted with GraphQL
-  //     // GraphQL handles its own validation through schema
-  //   }),
-  // );
+  // app.useGlobalPipes(new ValidationPipe());
 
   // ENABLE CORS
   app.enableCors();

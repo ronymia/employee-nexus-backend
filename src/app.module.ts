@@ -50,7 +50,6 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { OwnerDashboardModule } from './modules/owner-dashboard/owner-dashboard.module';
 import { EmployeeDashboardModule } from './modules/employee-dashboard/employee-dashboard.module';
 import { SchedulerModule } from './modules/scheduler/scheduler.module';
-import { graphqlErrorFormatter } from './filters/graphql-error.formatter';
 import { EmployeeDesignationsModule } from './modules/employee-designations/employee-designations.module';
 import { EmployeeWorkSitesModule } from './modules/employee-work-sites/employee-work-sites.module';
 import { EmployeeDepartmentsModule } from './modules/employee-departments/employee-departments.module';
@@ -61,6 +60,7 @@ import { EmployeeSalariesModule } from './modules/employee-salaries/employee-sal
 import { EmployeePayrollComponentsModule } from './modules/employee-payroll-components/employee-payroll-components.module';
 import { EmployeePayslipAdjustmentsModule } from './modules/employee-payslip-adjustments/employee-payslip-adjustments.module';
 import { SeederModule } from './modules/seeder/seeder.module';
+import { graphqlErrorFormatter } from './filters/graphql-error.formatter';
 
 @Module({
   imports: [

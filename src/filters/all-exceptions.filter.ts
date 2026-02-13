@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
@@ -6,509 +8,255 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
-import { GqlArgumentsHost, GqlContextType } from '@nestjs/graphql';
-import { Response } from 'express';
-import { TGenericErrorResponse } from '../interfaces/error';
-import { Prisma } from 'generated/prisma';
-import * as dayjs from 'dayjs';
-import * as utc from 'dayjs/plugin/utc';
-import * as customParseFormat from 'dayjs/plugin/customParseFormat';
-dayjs.extend(utc);
-dayjs.extend(customParseFormat);
+import { GqlArgumentsHost } from '@nestjs/graphql';
+import { GraphQLError } from 'graphql';
+
+interface IStandardErrorResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  errors?: Array<{ field: string; message: string }>;
+  path: string;
+}
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  private readonly logger = new Logger(AllExceptionsFilter.name);
-
   catch(exception: unknown, host: ArgumentsHost) {
-    const contextType = host.getType<GqlContextType>();
-
-    // Handle GraphQL context
-    if (contextType === 'graphql') {
-      return this.handleGraphQLException(exception, host);
-    }
-
-    // Handle HTTP context (REST)
-    return this.handleHttpException(exception, host);
-  }
-
-  // ============ HTTP EXCEPTION HANDLER ============
-  private handleHttpException(exception: unknown, host: ArgumentsHost) {
+    const gqlHost = GqlArgumentsHost.create(host);
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
+    const response = ctx.getResponse();
     const request = ctx.getRequest();
 
-    const errorResponse = this.buildErrorResponse(exception);
+    const isHttp = host.getType() === 'http';
+    const status = this.getStatusCode(exception);
+    const fieldErrors = this.getFieldErrors(exception);
 
-    // Log error
-    this.logger.error({
-      timestamp: dayjs.utc().toISOString(),
-      path: request.url,
-      method: request.method,
-      statusCode: errorResponse.statusCode,
-      message: errorResponse.message,
-      stack: exception instanceof Error ? exception.stack : undefined,
-    });
-
-    response.status(errorResponse.statusCode).json({
+    const errorResponse: IStandardErrorResponse = {
       success: false,
-      ...errorResponse,
-      timestamp: dayjs.utc().toISOString(),
-      path: request.url,
-    });
-  }
-
-  // ============ GRAPHQL EXCEPTION HANDLER ============
-  private handleGraphQLException(exception: unknown, host: ArgumentsHost) {
-    const gqlHost = GqlArgumentsHost.create(host);
-    const info = gqlHost.getInfo();
-
-    const errorResponse = this.buildErrorResponse(exception);
-
-    // Log error
-    this.logger.error({
-      timestamp: dayjs.utc().toISOString(),
-      operation: info?.fieldName,
-      statusCode: errorResponse.statusCode,
-      message: errorResponse.message,
-      stack: exception instanceof Error ? exception.stack : undefined,
-    });
-
-    // GraphQL will wrap this in its error format
-    throw new HttpException(errorResponse, errorResponse.statusCode);
-  }
-
-  // ============ BUILD ERROR RESPONSE ============
-  private buildErrorResponse(exception: unknown): TGenericErrorResponse {
-    // 1. Handle HttpException (NestJS exceptions)
-    if (exception instanceof HttpException) {
-      return this.handleHttpExceptionType(exception);
-    }
-
-    // 2. Handle Prisma Errors
-    if (this.isPrismaError(exception)) {
-      return this.handlePrismaError(exception);
-    }
-
-    // 3. Handle Generic Errors
-    if (exception instanceof Error) {
-      return {
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: exception.message || 'Internal server error',
-        errors: [
-          {
-            path: 'server',
-            message: exception.message,
-          },
-        ],
-      };
-    }
-
-    // 4. Unknown error
-    return {
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: 'An unexpected error occurred',
-      errors: [
-        {
-          path: 'server',
-          message: 'Unknown error',
-        },
-      ],
+      statusCode: status,
+      message: this.getErrorMessage(exception, fieldErrors),
+      errors: fieldErrors,
+      path: isHttp ? request?.url : gqlHost.getInfo()?.fieldName || 'graphql',
     };
+
+    // Log error for debugging
+    // console.error('Exception caught:', {
+    //   type: exception?.constructor?.name,
+    //   message: errorResponse.message,
+    //   statusCode: status,
+    //   path: errorResponse.path,
+    //   errors: fieldErrors,
+    // });
+
+    if (isHttp) {
+      response.status(status).json(errorResponse);
+    } else {
+      // console.log({ errorResponse });
+      // For GraphQL, throw a GraphQLError instead of returning error response
+      throw new GraphQLError(errorResponse.message, {
+        extensions: {
+          success: errorResponse.success,
+          statusCode: errorResponse.statusCode,
+          errors: errorResponse.errors,
+          timestamp: new Date().toISOString(),
+          path: errorResponse.path,
+          category: this.getErrorCategory(exception, status),
+          code: this.getGraphQLErrorCode(status),
+        },
+      });
+    }
   }
 
-  // ============ HANDLE HTTP EXCEPTION ============
-  // ============ HANDLE HTTP EXCEPTION ============
-  private handleHttpExceptionType(
-    exception: HttpException,
-  ): TGenericErrorResponse {
-    const status = exception.getStatus();
-    const response = exception.getResponse();
+  private getErrorMessage(
+    exception: unknown,
+    fieldErrors?: Array<{ field: string; message: string }>,
+  ): string {
+    if (fieldErrors && fieldErrors.length > 0) {
+      // Extract field names dynamically and create human-readable message
+      const fieldNames = fieldErrors.map((err) => {
+        let field = err.field;
 
-    // Handle validation errors (class-validator)
-    if (status === HttpStatus.BAD_REQUEST && typeof response === 'object') {
-      const validationErrors = (response as any).message;
-
-      if (Array.isArray(validationErrors)) {
-        return {
-          statusCode: status,
-          message: 'Validation failed',
-          errors: validationErrors.map((error: string) => ({
-            path: 'validation',
-            message: error,
-          })),
-        };
-      }
-    }
-
-    // Handle specific HTTP status codes
-    switch (status) {
-      case HttpStatus.UNAUTHORIZED: // 401
-        return {
-          statusCode: status,
-          message: 'Unauthorized access',
-          errors: [
-            {
-              path: 'auth',
-              message: 'You are not authorized to access this resource',
-            },
-          ],
-        };
-
-      case HttpStatus.FORBIDDEN: // 403
-        return {
-          statusCode: status,
-          message: 'Access forbidden',
-          errors: [
-            {
-              path: 'auth',
-              message: 'You do not have permission to perform this action',
-            },
-          ],
-        };
-
-      case HttpStatus.NOT_FOUND: // 404
-        return {
-          statusCode: status,
-          message: 'Resource not found',
-          errors: [
-            {
-              path: 'resource',
-              message: 'The requested resource could not be found',
-            },
-          ],
-        };
-
-      case HttpStatus.CONFLICT: // 409
-        return {
-          statusCode: status,
-          message: 'Conflict detected',
-          errors: [
-            {
-              path: 'conflict',
-              message: 'A conflict occurred while processing your request',
-            },
-          ],
-        };
-
-      case HttpStatus.NOT_ACCEPTABLE: // 406
-        return {
-          statusCode: status,
-          message: 'Not acceptable',
-          errors: [
-            {
-              path: 'request',
-              message: 'The request cannot be processed in the current format',
-            },
-          ],
-        };
-
-      case HttpStatus.UNPROCESSABLE_ENTITY: // 422
-        if (typeof response === 'object' && (response as any).message) {
-          const validationErrors = (response as any).message;
-
-          if (Array.isArray(validationErrors)) {
-            return {
-              statusCode: status,
-              message: 'Validation failed',
-              errors: validationErrors.map((error: any) => ({
-                path: error.field || 'unknown', // Include the field name if available
-                message: error.message || 'Invalid value',
-              })),
-            };
-          }
+        // Extract field name from array notation like "punchRecords[0].projectId"
+        if (field.includes('[') && field.includes(']')) {
+          field = field.split('.').pop() || field;
         }
 
-        return {
-          statusCode: status,
-          message: 'Unprocessable entity',
-          errors: [
-            {
-              path: 'validation',
-              message: 'The request contains invalid data',
-            },
-          ],
-        };
+        // Remove 'Id' suffix and convert camelCase to readable text
+        if (field.endsWith('Id')) {
+          field = field.replace(/Id$/, '');
+        }
 
-      default:
-        // Standard HTTP exception
-        return {
-          statusCode: status,
-          message:
-            typeof response === 'string'
-              ? response
-              : (response as any).message || exception.message,
-          errors: [
-            {
-              path: 'http',
-              message:
-                typeof response === 'string'
-                  ? response
-                  : (response as any).message || exception.message,
-            },
-          ],
-        };
-    }
-  }
+        // Convert camelCase to readable format
+        const readableField = field
+          .replace(/([A-Z])/g, ' $1')
+          .toLowerCase()
+          .trim();
 
-  // ============ HANDLE PRISMA ERRORS ============
-  private isPrismaError(
-    exception: unknown,
-  ): exception is Prisma.PrismaClientKnownRequestError {
-    // Check by instance
-    if (
-      exception instanceof Prisma.PrismaClientKnownRequestError ||
-      exception instanceof Prisma.PrismaClientUnknownRequestError ||
-      exception instanceof Prisma.PrismaClientValidationError
-    ) {
-      return true;
-    }
+        return readableField;
+      });
 
-    // Check by error message pattern (fallback for cases where instanceof doesn't work)
-    if (exception instanceof Error) {
-      const message = exception.message;
-      return (
-        message.includes('Invalid `prisma.') ||
-        message.includes('Unique constraint failed') ||
-        message.includes('Foreign key constraint failed') ||
-        message.includes('Record to update not found') ||
-        message.includes('Record to delete does not exist')
+      // Determine message type based on error
+      const isRequiredError = fieldErrors.some(
+        (err) =>
+          err.message.includes('Expected non-nullable type') ||
+          err.message.includes('required'),
       );
-    }
+      const isExistsError = fieldErrors.some((err) =>
+        err.message.includes('already exists'),
+      );
 
-    return false;
-  }
-
-  private handlePrismaError(
-    exception:
-      | Prisma.PrismaClientKnownRequestError
-      | Prisma.PrismaClientUnknownRequestError
-      | Prisma.PrismaClientValidationError
-      | Error,
-  ): TGenericErrorResponse {
-    // Known Prisma errors with error codes
-    if (exception instanceof Prisma.PrismaClientKnownRequestError) {
-      return this.handlePrismaKnownError(exception);
-    }
-
-    // Validation errors
-    if (exception instanceof Prisma.PrismaClientValidationError) {
-      return {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Database validation failed',
-        errors: [
-          {
-            path: 'database',
-            message: this.cleanPrismaMessage(exception.message),
-          },
-        ],
-      };
-    }
-
-    // Parse error from message if it's a generic Error with Prisma message
-    if (exception instanceof Error) {
-      return this.parsePrismaErrorMessage(exception.message);
-    }
-
-    // Unknown Prisma errors
-    return {
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: 'Database error occurred',
-      errors: [
-        {
-          path: 'database',
-          message: 'An unexpected database error occurred',
-        },
-      ],
-    };
-  }
-
-  // ============ PARSE PRISMA ERROR FROM MESSAGE ============
-  private parsePrismaErrorMessage(message: string): TGenericErrorResponse {
-    // Extract the actual error from the verbose Prisma message
-    const cleanMessage = this.cleanPrismaMessage(message);
-
-    // Unique constraint
-    if (message.includes('Unique constraint failed')) {
-      const fieldMatch = message.match(/\(`([^`]+)`.*`([^`]+)`\)/);
-      const field = fieldMatch ? fieldMatch[1] : 'field';
-
-      return {
-        statusCode: HttpStatus.CONFLICT,
-        message: `${field} already exists`,
-        errors: [
-          {
-            path: field,
-            message: `A record with this ${field} already exists`,
-          },
-        ],
-      };
-    }
-
-    // Record not found
-    if (
-      message.includes('Record to update not found') ||
-      message.includes('Record to delete does not exist')
-    ) {
-      return {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: 'Record not found',
-        errors: [
-          {
-            path: 'database',
-            message: 'The requested record does not exist',
-          },
-        ],
-      };
-    }
-
-    // Foreign key constraint
-    if (message.includes('Foreign key constraint failed')) {
-      const fieldMatch = message.match(/on the field[s]?: `([^`]+)`/);
-      const field = fieldMatch ? fieldMatch[1] : 'field';
-
-      return {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Invalid reference',
-        errors: [
-          {
-            path: field,
-            message: `Referenced ${field} does not exist`,
-          },
-        ],
-      };
-    }
-
-    // Generic Prisma error
-    return {
-      statusCode: HttpStatus.BAD_REQUEST,
-      message: 'Database operation failed',
-      errors: [
-        {
-          path: 'database',
-          message: cleanMessage,
-        },
-      ],
-    };
-  }
-
-  // ============ CLEAN PRISMA ERROR MESSAGE ============
-  private cleanPrismaMessage(message: string): string {
-    // Extract only the relevant error message, removing file paths and invocation details
-    const lines = message.split('\n');
-
-    // Find the actual error message (usually the last non-empty line)
-    for (let i = lines.length - 1; i >= 0; i--) {
-      const line = lines[i].trim();
-      if (
-        line &&
-        !line.startsWith('Invalid `') &&
-        !line.includes('.ts:') &&
-        !line.match(/^\d+/) &&
-        !line.startsWith('→')
-      ) {
-        return line;
+      // Create dynamic message based on error type and number of fields
+      if (fieldNames.length === 1) {
+        if (isRequiredError) {
+          return `${fieldNames[0]} is required`;
+        } else if (isExistsError) {
+          return `${fieldNames[0]} already exists`;
+        }
+        return `${fieldNames[0]} is invalid`;
+      } else {
+        const lastField = fieldNames.pop();
+        if (isRequiredError) {
+          return `${fieldNames.join(', ')} and ${lastField} are required`;
+        } else if (isExistsError) {
+          return `${fieldNames.join(', ')} and ${lastField} already exist`;
+        }
+        return `${fieldNames.join(', ')} and ${lastField} are invalid`;
       }
     }
 
-    return message;
+    if (exception instanceof HttpException) {
+      const response = exception.getResponse();
+      return typeof response === 'string'
+        ? response
+        : response['message'] || 'An error occurred';
+    }
+    return 'Internal server error';
   }
 
-  // ============ HANDLE PRISMA KNOWN ERRORS ============
-  private handlePrismaKnownError(
-    exception: Prisma.PrismaClientKnownRequestError,
-  ): TGenericErrorResponse {
-    const target = exception.meta?.target as string[] | undefined;
-    const field = target?.[0] || 'field';
-
-    switch (exception.code) {
-      case 'P2002': // Unique constraint violation
-        return {
-          statusCode: HttpStatus.CONFLICT,
-          message: `${field} already exists`,
-          errors: [
-            {
-              path: field,
-              message: `A record with this ${field} already exists`,
-            },
-          ],
-        };
-
-      case 'P2025': // Record not found
-        return {
-          statusCode: HttpStatus.NOT_FOUND,
-          message: exception.message || 'Record not found', // Use the exception message if available
-          errors: [
-            {
-              path: 'database',
-              message:
-                exception.message || 'The requested record does not exist',
-            },
-          ],
-        };
-
-      case 'P2003': // Foreign key constraint failed
-        return {
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Bad Request',
-          errors: [
-            {
-              path: field,
-              message: `Referenced ${field} does not exist`,
-            },
-          ],
-        };
-
-      case 'P2014': // Relation violation
-        return {
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Cannot delete record with existing relations',
-          errors: [
-            {
-              path: 'database',
-              message:
-                'This record has related data and cannot be deleted. Remove related records first.',
-            },
-          ],
-        };
-
-      case 'P2000': // Value too long
-        return {
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Value too long',
-          errors: [
-            {
-              path: field,
-              message: `Value for ${field} is too long`,
-            },
-          ],
-        };
-
-      case 'P2011': // Null constraint violation
-        return {
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Required field missing',
-          errors: [
-            {
-              path: field,
-              message: `${field} is required`,
-            },
-          ],
-        };
-
-      default:
-        return {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: 'Database operation failed',
-          errors: [
-            {
-              path: 'database',
-              message: exception.message,
-            },
-          ],
-        };
+  private getStatusCode(exception: unknown): number {
+    if (exception instanceof HttpException) {
+      return exception.getStatus();
     }
+
+    // Handle GraphQL validation errors
+    if (exception && typeof exception === 'object' && 'message' in exception) {
+      const errorMessage = (exception as any).message;
+      if (errorMessage && errorMessage.includes('Expected non-nullable type')) {
+        return HttpStatus.UNPROCESSABLE_ENTITY; // 422 for validation errors
+      }
+    }
+
+    // Handle Prisma errors
+    if (exception && typeof exception === 'object' && 'code' in exception) {
+      const prismaError = exception as any;
+      switch (prismaError.code) {
+        case 'P2002':
+          return HttpStatus.CONFLICT; // Unique constraint
+        case 'P2025':
+          return HttpStatus.NOT_FOUND; // Record not found
+        case 'P2003':
+          return HttpStatus.BAD_REQUEST; // Foreign key constraint
+        default:
+          return HttpStatus.INTERNAL_SERVER_ERROR;
+      }
+    }
+
+    return HttpStatus.INTERNAL_SERVER_ERROR;
+  }
+
+  private getErrorCategory(exception: unknown, statusCode: number): string {
+    if (statusCode >= 400 && statusCode < 500) {
+      return 'USER_ERROR';
+    }
+    return 'SYSTEM_ERROR';
+  }
+
+  private getGraphQLErrorCode(statusCode: number): string {
+    switch (statusCode) {
+      case HttpStatus.BAD_REQUEST:
+        return 'BAD_USER_INPUT';
+      case HttpStatus.UNAUTHORIZED:
+        return 'UNAUTHENTICATED';
+      case HttpStatus.FORBIDDEN:
+        return 'FORBIDDEN';
+      case HttpStatus.NOT_FOUND:
+        return 'NOT_FOUND';
+      case HttpStatus.CONFLICT:
+        return 'CONFLICT';
+      case HttpStatus.UNPROCESSABLE_ENTITY:
+        return 'BAD_USER_INPUT';
+      default:
+        return 'INTERNAL_SERVER_ERROR';
+    }
+  }
+
+  private getFieldErrors(
+    exception: unknown,
+  ): Array<{ field: string; message: string }> | undefined {
+    // Handle GraphQL validation errors
+    if (exception && typeof exception === 'object' && 'message' in exception) {
+      const errorMessage = (exception as any).message;
+      if (errorMessage && errorMessage.includes('Expected non-nullable type')) {
+        const fieldMatch = errorMessage.match(/"([^"]+)"/g);
+        if (fieldMatch && fieldMatch.length >= 2) {
+          const fieldPath = fieldMatch[1].replace(/"/g, '');
+          const field = fieldPath.split('.').slice(1).join('.');
+
+          return [
+            {
+              field: field || fieldPath,
+              message: errorMessage,
+            },
+          ];
+        }
+      }
+    }
+
+    // Handle HTTP Exception validation errors
+    if (exception instanceof HttpException) {
+      const response = exception.getResponse();
+      if (
+        typeof response === 'object' &&
+        response['message'] instanceof Array
+      ) {
+        return response['message'].map((msg: any) => ({
+          field: msg.property || 'unknown',
+          message: msg.constraints
+            ? Object.values(msg.constraints).join(', ')
+            : msg,
+        }));
+      }
+    }
+
+    // Handle Prisma errors
+    if (exception && typeof exception === 'object' && 'code' in exception) {
+      const prismaError = exception as any;
+      switch (prismaError.code) {
+        case 'P2002':
+          return [
+            {
+              field: prismaError.meta?.target?.[0] || 'unknown',
+              message: 'This value already exists',
+            },
+          ];
+        case 'P2025':
+          return [
+            {
+              field: 'id',
+              message: 'Record not found',
+            },
+          ];
+        case 'P2003':
+          return [
+            {
+              field: prismaError.meta?.field_name || 'unknown',
+              message: 'Invalid reference to related record',
+            },
+          ];
+      }
+    }
+
+    return undefined;
   }
 }
