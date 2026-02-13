@@ -57,7 +57,9 @@ export class AttendancesResolver {
     }
 
     //
-    const result = await this.attendancesService.getAttendanceOverview();
+    const result = await this.attendancesService.getAttendanceOverview({
+      user,
+    });
     return {
       success: true,
       statusCode: HttpStatus.OK,

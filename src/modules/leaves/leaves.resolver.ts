@@ -72,8 +72,8 @@ export class LeavesResolver {
     name: 'leaveOverview',
   })
   @RequirePermissions('Leave:read')
-  async leaveOverview() {
-    const result = await this.leavesService.getLeaveOverview();
+  async leaveOverview(@CurrentUser() user: JwtPayload) {
+    const result = await this.leavesService.getLeaveOverview({ user });
     return {
       success: true,
       statusCode: HttpStatus.OK,

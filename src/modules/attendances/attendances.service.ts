@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConsoleLogger, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { QueryAttendanceInput } from './dto/query-attendance.input';
 import { JwtPayload } from '../auth/jwt.strategy';
@@ -18,6 +18,7 @@ import {
   RejectAttendanceInput,
 } from './dto/approve-attendance.input';
 import { RequestAttendanceInput } from './dto/request-attendance.input';
+import { ROLE } from 'src/enums';
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
@@ -30,6 +31,8 @@ export class AttendancesService {
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
   ) {}
+  // CONSOLE LOGGER FOR DEBUGGING
+  private readonly logger = new ConsoleLogger(AttendancesService.name);
 
   /**
    * Calculate work minutes between punchIn and punchOut using dayjs
@@ -181,17 +184,65 @@ export class AttendancesService {
   }
 
   // ATTENDANCE OVERVIEW
-  async getAttendanceOverview() {
+  async getAttendanceOverview({ user }: { user: JwtPayload }) {
+    if (!user.businessId) {
+      throw new NotFoundException('Business not found');
+    }
+    if (!user.userId) {
+      throw new NotFoundException('User not found');
+    }
+    // const managerId
+    const targetUser = await this.prisma.user.findUniqueOrThrow({
+      where: { id: user.userId },
+      select: {
+        businessId: true,
+        role: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    // QUERY BUILDER
+    const andCondition: Prisma.AttendanceWhereInput[] = [];
+    // Managers see overview for their department, others see for entire business
+    if (targetUser.role.name === (ROLE.MANAGER as any)) {
+      // Managers can only see employees in their departments
+      andCondition.push({
+        user: {
+          employee: {
+            departments: {
+              some: {
+                department: {
+                  businessId: user.businessId,
+                  managerId: user.userId,
+                },
+                isActive: true,
+              },
+            },
+          },
+        },
+      });
+    }
+
+    //
+    const whereCondition: Prisma.AttendanceWhereInput =
+      andCondition.length > 0 ? { AND: andCondition } : {};
     // Execute all queries in parallel for single round trip
     const [total, statusGroups, typeGroups] = await Promise.all([
-      this.prisma.attendance.count(),
+      this.prisma.attendance.count({
+        where: whereCondition,
+      }),
       this.prisma.attendance.groupBy({
         by: ['status'],
         _count: { status: true },
+        where: whereCondition,
       }),
       this.prisma.attendance.groupBy({
         by: ['type'],
         _count: { type: true },
+        where: whereCondition,
       }),
     ]);
 
@@ -444,6 +495,24 @@ export class AttendancesService {
     query?: QueryAttendanceInput;
   }) {
     const businessId = user.businessId;
+    if (!user.businessId) {
+      throw new NotFoundException('Business not found');
+    }
+    if (!user.userId) {
+      throw new NotFoundException('User not found');
+    }
+    // const managerId
+    const targetUser = await this.prisma.user.findUniqueOrThrow({
+      where: { id: user.userId },
+      select: {
+        businessId: true,
+        role: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
     const { pagination, ...filters } = query ?? {};
 
     // PAGINATION
@@ -484,10 +553,29 @@ export class AttendancesService {
       }
       andCondition.push({ date: dateFilter });
     }
+    // Managers see overview for their department, others see for entire business
+    if (targetUser.role.name === (ROLE.MANAGER as any)) {
+      // Managers can only see employees in their departments
+      andCondition.push({
+        user: {
+          employee: {
+            departments: {
+              some: {
+                department: {
+                  businessId,
+                  managerId: user.userId,
+                },
+                isActive: true,
+              },
+            },
+          },
+        },
+      });
+    }
 
-    const whereCondition: Prisma.AttendanceWhereInput = andCondition.length
-      ? { AND: andCondition }
-      : {};
+    //
+    const whereCondition: Prisma.AttendanceWhereInput =
+      andCondition.length > 0 ? { AND: andCondition } : {};
 
     const result = !limit
       ? await this.prisma.attendance.findMany({

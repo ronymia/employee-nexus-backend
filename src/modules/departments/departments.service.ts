@@ -9,6 +9,7 @@ import { Prisma } from 'generated/prisma';
 import { paginationHelpers } from 'src/helpers/paginationHelpers';
 import { departmentSearchableFields } from './department.constant';
 import { Status } from 'src/common/enums';
+import { ROLE } from 'src/enums';
 
 @Injectable()
 export class DepartmentsService {
@@ -84,14 +85,59 @@ export class DepartmentsService {
     const { pagination, ...filters } = query ?? {};
 
     // PAGINATION
-    const { page, skip, limit, sortBy, sortOrder } =
-      paginationHelpers.calculatePagination(pagination || {});
+    const {
+      page,
+      skip,
+      limit,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = paginationHelpers.calculatePagination(pagination || {});
 
     // FILTER
     const { searchTerm, name, status } = filters;
 
+    if (!user.businessId) {
+      throw new NotFoundException('Business not found');
+    }
+    if (!user.userId) {
+      throw new NotFoundException('User not found');
+    }
+    // const managerId
+    const targetUser = await this.prisma.user.findUniqueOrThrow({
+      where: { id: user.userId },
+      select: {
+        businessId: true,
+        role: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
     // QUERY BUILDER
-    const andCondition: any[] = [];
+    const andCondition: Prisma.DepartmentWhereInput[] = [
+      {
+        businessId,
+      },
+    ];
+
+    // Managers see their department and all children departments
+    if (targetUser.role.name === (ROLE.MANAGER as any)) {
+      // Show departments where manager is directly assigned OR parent is managed by this manager
+      andCondition.push({
+        OR: [
+          {
+            managerId: user.userId, // Direct management
+          },
+          {
+            parent: {
+              managerId: user.userId, // Children of managed departments
+            },
+          },
+        ],
+      });
+    }
+
     // Search in Field
     if (searchTerm) {
       andCondition.push({
@@ -112,26 +158,31 @@ export class DepartmentsService {
       andCondition.push({ status });
     }
 
+    //
     const whereCondition: Prisma.DepartmentWhereInput = andCondition.length
       ? { AND: andCondition }
       : {};
+
+    //
     const result = !limit
       ? await this.prisma.department.findMany({
-          where: {
-            businessId,
+          where: whereCondition,
+          orderBy: {
+            [sortBy]: sortOrder,
           },
           include: {
             parent: true,
             children: true,
-            manager: true,
+            manager: {
+              include: {
+                profile: true,
+              },
+            },
             business: true,
           },
         })
       : await this.prisma.department.findMany({
-          where: {
-            ...whereCondition,
-            businessId,
-          },
+          where: whereCondition,
           skip,
           take: limit,
           orderBy: {
@@ -140,7 +191,11 @@ export class DepartmentsService {
           include: {
             parent: true,
             children: true,
-            manager: true,
+            manager: {
+              include: {
+                profile: true,
+              },
+            },
             business: true,
           },
         });

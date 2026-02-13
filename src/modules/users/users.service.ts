@@ -15,6 +15,7 @@ import configuration from 'src/config/configuration';
 import * as dayjs from 'dayjs';
 import * as customParseFormat from 'dayjs/plugin/customParseFormat';
 import * as utc from 'dayjs/plugin/utc';
+import { ROLE } from 'src/enums';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -106,6 +107,19 @@ export class UsersService {
     // BUSINESS ID
     const businessId = user.businessId;
     if (!businessId) throw new Error('Business ID not found in token');
+
+    const targetUser = await this.prisma.user.findUniqueOrThrow({
+      where: { id: user.userId, AND: { businessId } },
+      select: {
+        businessId: true,
+        role: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
     // QUERY BUILDER
     const andCondition: Prisma.UserWhereInput[] = [];
 
@@ -115,6 +129,29 @@ export class UsersService {
         isNot: null,
       },
     });
+
+    if (targetUser.role?.name === (ROLE.MANAGER as any)) {
+      // Managers can only see employees in their departments
+      andCondition.push({
+        AND: [
+          {
+            id: {
+              not: user.userId,
+            },
+          },
+        ],
+        employee: {
+          departments: {
+            some: {
+              department: {
+                businessId,
+                managerId: user.userId,
+              },
+            },
+          },
+        },
+      });
+    }
 
     // Filter by business (via role)
     if (businessId) {
@@ -130,7 +167,7 @@ export class UsersService {
     if (query?.role) {
       andCondition.push({
         role: {
-          name: `${query.role}#${businessId}`,
+          name: `${query.role}`,
           businessId,
         },
       });
@@ -1246,9 +1283,9 @@ export class UsersService {
 
   async getUserStatistics(businessId: number) {
     // Define role names
-    const employeeRole = `employee#${businessId}`;
-    const managerRole = `manager#${businessId}`;
-    const adminRole = `admin#${businessId}`;
+    const employeeRole = ROLE.EMPLOYEE;
+    const managerRole = ROLE.MANAGER;
+    const adminRole = ROLE.ADMIN;
 
     // Statuses from enum
     const statuses = [
