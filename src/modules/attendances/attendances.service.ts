@@ -262,6 +262,7 @@ export class AttendancesService {
     });
 
     typeGroups.forEach((item) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       overview[item.type] = item._count.type;
     });
 
