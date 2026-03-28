@@ -272,7 +272,7 @@ export class AttendancesResolver {
     };
   }
   // APPROVE ATTENDANCE
-    // APPROVE ATTENDANCE
+  // APPROVE ATTENDANCE
   @Mutation(() => AttendanceResponse, { name: 'rejectAttendance' })
   @UseGuards(GqlAuthGuard, PermissionsGuard)
   @RequirePermissions('Attendance:update')

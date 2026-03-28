@@ -143,7 +143,10 @@ export class LeavesResolver {
     @CurrentUser() user: JwtPayload,
     @Args('id', { type: () => Int }) id: number,
   ) {
-    const result = await this.leavesService.findOne({ id, businessId: user.businessId });
+    const result = await this.leavesService.findOne({
+      id,
+      businessId: user.businessId,
+    });
 
     return {
       success: true,
@@ -179,7 +182,10 @@ export class LeavesResolver {
     @CurrentUser() user: JwtPayload,
     @Args('id', { type: () => Int }) id: number,
   ) {
-    const result = await this.leavesService.remove({ id, businessId: user.businessId });
+    const result = await this.leavesService.remove({
+      id,
+      businessId: user.businessId,
+    });
     return {
       success: true,
       statusCode: HttpStatus.OK,

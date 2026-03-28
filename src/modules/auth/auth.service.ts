@@ -59,7 +59,6 @@ export class AuthService {
     // Generate JWT token
     const accessToken = this.jwtService.sign(payload);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     // user['permissions'] = PermissionUtils.formatUserPermissions(user as any);
 
     return {

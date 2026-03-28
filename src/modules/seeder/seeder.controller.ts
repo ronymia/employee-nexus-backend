@@ -1,4 +1,10 @@
-import { Controller, HttpCode, HttpStatus, Get, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Get,
+  UseGuards,
+} from '@nestjs/common';
 import { SeederService } from './seeder.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 

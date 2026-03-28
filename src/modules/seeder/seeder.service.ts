@@ -85,12 +85,9 @@ export class SeederService {
     }
 
     try {
-      const { stdout } = await execAsync(
-        'yarn prisma migrate reset --force',
-        {
-          cwd: process.cwd(),
-        },
-      );
+      const { stdout } = await execAsync('yarn prisma migrate reset --force', {
+        cwd: process.cwd(),
+      });
 
       return {
         success: true,
