@@ -51,7 +51,11 @@ export const seedBusinessWithUsers = async () => {
   console.log('🌱 Starting business and users seeding...');
 
   try {
-    const ownerPassword = await PasswordHelpers.passwordHash('12345678@We');
+    const ownerPasswordPlain = configuration().default_password.business_owner;
+    if (!ownerPasswordPlain) {
+      throw new Error('DEFAULT_BUSINESS_OWNER_PASS environment variable is required for seeding');
+    }
+    const ownerPassword = await PasswordHelpers.passwordHash(ownerPasswordPlain);
 
     // Create the business with all related data in a transaction
     const result = await prisma.$transaction(
@@ -99,15 +103,17 @@ export const seedBusinessWithUsers = async () => {
           designations[0];
 
         // Prepare common passwords
-        const adminPassword = await PasswordHelpers.passwordHash(
-          configuration().default_password.admin || 'AdminPass123',
-        );
-        const managerPassword = await PasswordHelpers.passwordHash(
-          configuration().default_password.manager || 'ManagerPass123',
-        );
-        const employeePassword = await PasswordHelpers.passwordHash(
-          configuration().default_password.employee || 'EmployeePass123',
-        );
+        const adminPasswordPlain = configuration().default_password.admin;
+        const managerPasswordPlain = configuration().default_password.manager;
+        const employeePasswordPlain = configuration().default_password.employee;
+        if (!adminPasswordPlain || !managerPasswordPlain || !employeePasswordPlain) {
+          throw new Error(
+            'DEFAULT_ADMIN_PASS, DEFAULT_MANAGER_PASS, and DEFAULT_EMPLOYEE_PASS environment variables are required for seeding',
+          );
+        }
+        const adminPassword = await PasswordHelpers.passwordHash(adminPasswordPlain);
+        const managerPassword = await PasswordHelpers.passwordHash(managerPasswordPlain);
+        const employeePassword = await PasswordHelpers.passwordHash(employeePasswordPlain);
 
         // 6. Create admins
         await seedAdmins(tx, {

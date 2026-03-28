@@ -854,7 +854,9 @@ export class PayrollItemsService {
     };
   }
 
-  async findAll(query: QueryPayrollItemInput) {
+  async findAll(user: JwtPayload, query: QueryPayrollItemInput) {
+    const businessId = user.businessId;
+
     if (query?.payrollCycleId) {
       const payrollCycle = await this.payrollCyclesService.findOne(
         query.payrollCycleId,
@@ -864,7 +866,9 @@ export class PayrollItemsService {
       }
     }
 
-    const whereCondition: any = {};
+    const whereCondition: any = {
+      payrollCycle: { businessId },
+    };
 
     if (query?.userId) {
       whereCondition.userId = query.userId;
@@ -929,9 +933,9 @@ export class PayrollItemsService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(user: JwtPayload, id: number) {
     return this.prisma.payrollItem.findUnique({
-      where: { id },
+      where: { id, payrollCycle: { businessId: user.businessId } },
       include: {
         payrollCycle: true,
         payslipAdjustments: {
@@ -965,13 +969,14 @@ export class PayrollItemsService {
     });
   }
 
-  async findByUserId(payrollCycleId: number, userId: number) {
+  async findByUserId(user: JwtPayload, payrollCycleId: number, userId: number) {
     return this.prisma.payrollItem.findUnique({
       where: {
         payrollCycleId_userId: {
           payrollCycleId,
           userId,
         },
+        payrollCycle: { businessId: user.businessId },
       },
     });
   }

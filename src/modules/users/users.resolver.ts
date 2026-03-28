@@ -72,8 +72,11 @@ export class UsersResolver {
 
   @Query(() => UserResponse, { name: 'userById' })
   @RequirePermissions('User:read')
-  async userById(@Args('id', { type: () => Int }) id: number) {
-    const result = await this.usersService.findOne(id);
+  async userById(
+    @CurrentUser() user: JwtPayload,
+    @Args('id', { type: () => Int }) id: number,
+  ) {
+    const result = await this.usersService.findOne(id, user.businessId);
     return {
       success: true,
       statusCode: HttpStatus.OK,

@@ -35,16 +35,14 @@ export class NotificationsService {
   }
 
   async findAll(user: JwtPayload, query?: QueryNotificationInput) {
-    const { userId, isRead, type, businessId } = query || {};
+    const { isRead, type } = query || {};
 
-    const where: any = {};
-
-    // Filter by userId (default to current user if not super admin)
-    if (userId) {
-      where.userId = userId;
-    } else if (user.businessId) {
-      where.userId = user.userId;
-    }
+    // Always scope to the current user's own notifications.
+    // Admins/managers can optionally filter by a specific userId within their business.
+    const where: any = {
+      userId: user.userId,
+      businessId: user.businessId,
+    };
 
     if (typeof isRead === 'boolean') {
       where.isRead = isRead;
@@ -52,10 +50,6 @@ export class NotificationsService {
 
     if (type) {
       where.type = type;
-    }
-
-    if (businessId) {
-      where.businessId = businessId;
     }
 
     const [data, total] = await Promise.all([
@@ -77,21 +71,17 @@ export class NotificationsService {
     };
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId: number) {
     const notification = await this.prisma.notification.findUniqueOrThrow({
-      where: { id },
+      where: { id, userId },
     });
-
-    if (!notification) {
-      throw new Error('Notification not found');
-    }
 
     return notification;
   }
 
-  async markAsRead(id: number) {
+  async markAsRead(id: number, userId: number) {
     return await this.prisma.notification.update({
-      where: { id },
+      where: { id, userId },
       data: {
         readAt: dayjs.utc().toISOString(),
       },
@@ -112,9 +102,9 @@ export class NotificationsService {
     });
   }
 
-  async deleteNotification(id: number) {
+  async deleteNotification(id: number, userId: number) {
     return await this.prisma.notification.delete({
-      where: { id },
+      where: { id, userId },
     });
   }
 

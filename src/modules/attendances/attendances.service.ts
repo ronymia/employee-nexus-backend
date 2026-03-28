@@ -1131,9 +1131,12 @@ export class AttendancesService {
       throw new NotFoundException('User does not belong to any business');
     }
 
-    // Check if attendance exists
+    // Check if attendance exists and belongs to this business
     await this.prisma.attendance.findUniqueOrThrow({
-      where: { id: Number(approveAttendanceInput.attendanceId) },
+      where: {
+        id: Number(approveAttendanceInput.attendanceId),
+        user: { businessId: user.businessId },
+      },
     });
 
     // Update attendance status to approved
@@ -1164,9 +1167,12 @@ export class AttendancesService {
       throw new NotFoundException('User does not belong to any business');
     }
 
-    // Check if attendance exists
+    // Check if attendance exists and belongs to this business
     await this.prisma.attendance.findUniqueOrThrow({
-      where: { id: Number(rejectAttendanceInput.attendanceId) },
+      where: {
+        id: Number(rejectAttendanceInput.attendanceId),
+        user: { businessId: user.businessId },
+      },
     });
 
     // Update attendance status to approved

@@ -374,9 +374,9 @@ export class UsersService {
   }
 
   // GET ONE
-  findOne(id: number) {
+  findOne(id: number, businessId?: number) {
     return this.prisma.user.findUnique({
-      where: { id },
+      where: { id, ...(businessId ? { businessId } : {}) },
       include: {
         profile: {
           include: {

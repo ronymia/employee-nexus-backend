@@ -18,10 +18,23 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
 
   // GLOBAL VALIDATION PIPE (GraphQL-compatible)
-  // app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: false,
+      transform: true,
+    }),
+  );
 
-  // ENABLE CORS
-  app.enableCors();
+  // ENABLE CORS — only allow configured origins
+  const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
+    : ['http://localhost:3000'];
+  app.enableCors({
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ['GET', 'POST', 'OPTIONS'],
+  });
 
   // PARSE COOKIES
   app.use(cookieParser());

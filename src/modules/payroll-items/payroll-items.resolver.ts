@@ -61,8 +61,11 @@ export class PayrollItemsResolver {
 
   @Query(() => PayrollItemsQueryResponse, { name: 'payrollItems' })
   @RequirePermissions('Payroll Item:read')
-  async payrollItems(@Args('query') query: QueryPayrollItemInput) {
-    const items = await this.payrollItemsService.findAll(query);
+  async payrollItems(
+    @CurrentUser() user: JwtPayload,
+    @Args('query') query: QueryPayrollItemInput,
+  ) {
+    const items = await this.payrollItemsService.findAll(user, query);
 
     return {
       success: true,
@@ -74,8 +77,11 @@ export class PayrollItemsResolver {
 
   @Query(() => PayrollItemResponse, { name: 'payrollItemById' })
   @RequirePermissions('Payroll Item:read')
-  async payrollItem(@Args('id', { type: () => Int }) id: number) {
-    const item = await this.payrollItemsService.findOne(id);
+  async payrollItem(
+    @CurrentUser() user: JwtPayload,
+    @Args('id', { type: () => Int }) id: number,
+  ) {
+    const item = await this.payrollItemsService.findOne(user, id);
     return {
       success: true,
       statusCode: HttpStatus.OK,
@@ -87,10 +93,12 @@ export class PayrollItemsResolver {
   @Query(() => PayrollItemsQueryResponse, { name: 'payrollItemByUserId' })
   @RequirePermissions('Payroll Item:read')
   async payrollItemByUserId(
+    @CurrentUser() user: JwtPayload,
     @Args('payrollCycleId', { type: () => Int }) payrollCycleId: number,
     @Args('userId', { type: () => Int }) userId: number,
   ) {
     const item = await this.payrollItemsService.findByUserId(
+      user,
       payrollCycleId,
       userId,
     );

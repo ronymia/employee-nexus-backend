@@ -200,8 +200,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         case 'P2002':
           return [
             {
-              field: prismaError.meta?.target?.[0] || 'unknown',
-              message: 'This value already exists',
+              field: 'input',
+              message: 'A record with this value already exists',
             },
           ];
         case 'P2025':
@@ -214,8 +214,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         case 'P2003':
           return [
             {
-              field: prismaError.meta?.field_name || 'unknown',
-              message: 'Invalid reference to related record',
+              field: 'input',
+              message: 'Invalid reference to a related record',
             },
           ];
       }

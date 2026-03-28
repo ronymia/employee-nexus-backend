@@ -5,8 +5,7 @@ import { Request, Response, NextFunction } from 'express';
 export class LoggerMiddleware implements NestMiddleware {
   private readonly logger = new ConsoleLogger(LoggerMiddleware.name);
   use(req: Request, res: Response, next: NextFunction) {
-    // this.logger.log('Request...', req.headers);
-    this.logger.log('token', req.headers['authorization']);
+    this.logger.log(`[${req.method}] ${req.path}`);
     next();
   }
 }

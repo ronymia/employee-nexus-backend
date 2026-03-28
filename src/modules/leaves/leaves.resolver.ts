@@ -139,8 +139,11 @@ export class LeavesResolver {
   // FIND ONE LEAVE
   @Query(() => LeaveResponse, { name: 'leaveById' })
   @RequirePermissions('Leave:read')
-  async findOne(@Args('id', { type: () => Int }) id: number) {
-    const result = await this.leavesService.findOne({ id });
+  async findOne(
+    @CurrentUser() user: JwtPayload,
+    @Args('id', { type: () => Int }) id: number,
+  ) {
+    const result = await this.leavesService.findOne({ id, businessId: user.businessId });
 
     return {
       success: true,
@@ -154,9 +157,11 @@ export class LeavesResolver {
   @Mutation(() => LeaveResponse, { name: 'updateLeave' })
   @RequirePermissions('Leave:update')
   async updateLeave(
+    @CurrentUser() user: JwtPayload,
     @Args('updateLeaveInput') updateLeaveInput: UpdateLeaveInput,
   ) {
     const result = await this.leavesService.update({
+      user,
       updateLeaveInput,
     });
     return {
@@ -170,8 +175,11 @@ export class LeavesResolver {
   // REMOVE LEAVE
   @Mutation(() => LeaveResponse, { name: 'deleteLeave' })
   @RequirePermissions('Leave:delete')
-  async removeLeave(@Args('id', { type: () => Int }) id: number) {
-    const result = await this.leavesService.remove({ id });
+  async removeLeave(
+    @CurrentUser() user: JwtPayload,
+    @Args('id', { type: () => Int }) id: number,
+  ) {
+    const result = await this.leavesService.remove({ id, businessId: user.businessId });
     return {
       success: true,
       statusCode: HttpStatus.OK,

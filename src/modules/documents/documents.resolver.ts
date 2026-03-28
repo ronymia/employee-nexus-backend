@@ -16,21 +16,21 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { QueryDocumentInput } from './dto/query-document.input';
 
 @Resolver(() => Document)
+@UseGuards(GqlAuthGuard, PermissionsGuard)
 export class DocumentsResolver {
   constructor(private readonly documentsService: DocumentsService) {}
 
   // CREATE DOCUMENT
   @Mutation(() => DocumentResponse, { name: 'createDocument' })
-  // @UseGuards(PermissionsGuard)
   @RequirePermissions('Document:create')
-  @UseGuards(GqlAuthGuard)
   async createDocument(
     @Args('createDocumentInput') createDocumentInput: CreateDocumentInput,
     @CurrentUser() user: JwtPayload,
   ) {
+    // Override userId from JWT to prevent cross-user document assignment
     const result = await this.documentsService.create({
       user,
-      createDocumentInput,
+      createDocumentInput: { ...createDocumentInput, userId: user.userId },
     });
     return {
       success: true,
@@ -42,9 +42,7 @@ export class DocumentsResolver {
 
   // FIND ALL DOCUMENTS
   @Query(() => DocumentsQueryResponse, { name: 'documentsByUserId' })
-  // @UseGuards(PermissionsGuard)
   @RequirePermissions('Document:read')
-  @UseGuards(GqlAuthGuard)
   async findAll(
     @CurrentUser() user: JwtPayload,
     @Args('userId', { type: () => Int }) userId: number,
@@ -62,9 +60,7 @@ export class DocumentsResolver {
 
   // FIND ONE DOCUMENT
   @Query(() => DocumentResponse, { name: 'document' })
-  // @UseGuards(PermissionsGuard)
   @RequirePermissions('Document:read')
-  @UseGuards(GqlAuthGuard)
   async findOne(
     @Args('id', { type: () => Int }) id: number,
     @Args('userId', { type: () => Int }) userId: number,
@@ -81,9 +77,7 @@ export class DocumentsResolver {
 
   // UPDATE DOCUMENT
   @Mutation(() => DocumentResponse, { name: 'updateDocument' })
-  // @UseGuards(PermissionsGuard)
   @RequirePermissions('Document:update')
-  @UseGuards(GqlAuthGuard)
   async updateDocument(
     @Args('updateDocumentInput') updateDocumentInput: UpdateDocumentInput,
   ) {
@@ -101,9 +95,7 @@ export class DocumentsResolver {
 
   // REMOVE DOCUMENT
   @Mutation(() => DocumentResponse, { name: 'deleteDocument' })
-  // @UseGuards(PermissionsGuard)
   @RequirePermissions('Document:delete')
-  @UseGuards(GqlAuthGuard)
   async removeDocument(
     @Args('id', { type: () => Int }) id: number,
     @Args('userId', { type: () => Int }) userId: number,

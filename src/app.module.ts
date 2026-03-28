@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { UsersModule } from './modules/users/users.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
@@ -69,9 +70,11 @@ import { graphqlErrorFormatter } from './filters/graphql-error.formatter';
       load: [configuration],
     }),
     ScheduleModule.forRoot(),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      graphiql: true,
+      graphiql: process.env.NODE_ENV !== 'production',
+      introspection: process.env.NODE_ENV !== 'production',
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
       installSubscriptionHandlers: true,

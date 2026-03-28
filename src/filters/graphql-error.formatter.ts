@@ -18,9 +18,7 @@ interface IStandardErrorResponse {
 
 export const graphqlErrorFormatter = (
   error: GraphQLError,
-  formatErrorOptions?: any,
 ): GraphQLFormattedError => {
-  console.log({ error, formatErrorOptions });
   if (!error.extensions?.success && error.extensions?.statusCode === 409) {
     // If the error already has our standard format, return it as is
     return {

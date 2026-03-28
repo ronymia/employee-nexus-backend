@@ -1,7 +1,9 @@
-import { Controller, HttpCode, HttpStatus, Get } from '@nestjs/common';
+import { Controller, HttpCode, HttpStatus, Get, UseGuards } from '@nestjs/common';
 import { SeederService } from './seeder.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('seeder')
+@UseGuards(JwtAuthGuard)
 export class SeederController {
   constructor(private readonly seederService: SeederService) {}
 
@@ -16,6 +18,7 @@ export class SeederController {
   async runMigrations() {
     return await this.seederService.runMigrations();
   }
+
   @Get('reset-database')
   @HttpCode(HttpStatus.OK)
   async resetDatabase() {

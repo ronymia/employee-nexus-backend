@@ -62,8 +62,11 @@ export class NotificationsResolver {
 
   @Query(() => NotificationResponse, { name: 'notificationById' })
   @RequirePermissions('Notification:read')
-  async notification(@Args('id', { type: () => Int }) id: number) {
-    const notification = await this.notificationsService.findOne(id);
+  async notification(
+    @CurrentUser() user: JwtPayload,
+    @Args('id', { type: () => Int }) id: number,
+  ) {
+    const notification = await this.notificationsService.findOne(id, user.userId);
     return {
       success: true,
       statusCode: HttpStatus.OK,
@@ -80,8 +83,11 @@ export class NotificationsResolver {
 
   @Mutation(() => NotificationResponse)
   @RequirePermissions('Notification:update')
-  async markNotificationAsRead(@Args('id', { type: () => Int }) id: number) {
-    const notification = await this.notificationsService.markAsRead(id);
+  async markNotificationAsRead(
+    @CurrentUser() user: JwtPayload,
+    @Args('id', { type: () => Int }) id: number,
+  ) {
+    const notification = await this.notificationsService.markAsRead(id, user.userId);
     return {
       success: true,
       statusCode: HttpStatus.OK,
@@ -104,8 +110,11 @@ export class NotificationsResolver {
 
   @Mutation(() => NotificationResponse)
   @RequirePermissions('Notification:delete')
-  async deleteNotification(@Args('id', { type: () => Int }) id: number) {
-    const notification = await this.notificationsService.deleteNotification(id);
+  async deleteNotification(
+    @CurrentUser() user: JwtPayload,
+    @Args('id', { type: () => Int }) id: number,
+  ) {
+    const notification = await this.notificationsService.deleteNotification(id, user.userId);
     return {
       success: true,
       statusCode: HttpStatus.OK,

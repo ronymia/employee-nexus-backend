@@ -451,9 +451,9 @@ export class LeavesService {
     };
   }
 
-  async findOne({ id }: { id: number }) {
+  async findOne({ id, businessId }: { id: number; businessId?: number }) {
     const result = await this.prisma.leave.findUnique({
-      where: { id },
+      where: { id, ...(businessId ? { user: { businessId } } : {}) },
       include: {
         user: {
           include: {
@@ -471,11 +471,17 @@ export class LeavesService {
     return result;
   }
 
-  async update({ updateLeaveInput }: { updateLeaveInput: UpdateLeaveInput }) {
+  async update({
+    user,
+    updateLeaveInput,
+  }: {
+    user: JwtPayload;
+    updateLeaveInput: UpdateLeaveInput;
+  }) {
     const { id, ...updateData } = updateLeaveInput;
 
-    // Ensure the leave exists
-    await this.findOne({ id }); // Ensure the leave exists
+    // Ensure the leave exists and belongs to this business
+    await this.findOne({ id, businessId: user.businessId });
 
     return await this.prisma.leave.update({
       where: { id },
@@ -488,8 +494,8 @@ export class LeavesService {
     });
   }
 
-  async remove({ id }: { id: number }) {
-    await this.findOne({ id }); // Ensure the leave exists
+  async remove({ id, businessId }: { id: number; businessId?: number }) {
+    await this.findOne({ id, businessId }); // Ensure the leave exists and belongs to this business
     return await this.prisma.leave.delete({
       where: { id },
     });

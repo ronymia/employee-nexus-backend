@@ -8,6 +8,8 @@ import { HttpStatus, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { PermissionsGuard } from '../permissions/guards/permission.guard';
 import { RequirePermissions } from '../permissions/decorators/permissions.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { JwtPayload } from '../auth/jwt.strategy';
 import {
   EmergencyContactResponse,
   EmploymentDetailsResponse,
@@ -22,10 +24,12 @@ export class ProfilesResolver {
   @UseGuards(GqlAuthGuard, PermissionsGuard)
   @RequirePermissions('Profile:update')
   async updateProfile(
+    @CurrentUser() user: JwtPayload,
     @Args('updateProfileInput') updateProfileInput: UpdateProfileInput,
   ) {
+    // Override userId from JWT to prevent IDOR (client cannot spoof another user's profile)
     const result = await this.profilesService.updateProfile({
-      updateProfileInput,
+      updateProfileInput: { ...updateProfileInput, userId: user.userId },
     });
 
     return {

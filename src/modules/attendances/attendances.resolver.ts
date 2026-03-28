@@ -253,7 +253,8 @@ export class AttendancesResolver {
 
   // APPROVE ATTENDANCE
   @Mutation(() => AttendanceResponse, { name: 'approveAttendance' })
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, PermissionsGuard)
+  @RequirePermissions('Attendance:update')
   async approveAttendance(
     @CurrentUser() user: JwtPayload,
     @Args('approveAttendanceInput')
@@ -271,8 +272,10 @@ export class AttendancesResolver {
     };
   }
   // APPROVE ATTENDANCE
+    // APPROVE ATTENDANCE
   @Mutation(() => AttendanceResponse, { name: 'rejectAttendance' })
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, PermissionsGuard)
+  @RequirePermissions('Attendance:update')
   async rejectAttendance(
     @CurrentUser() user: JwtPayload,
     @Args('rejectAttendanceInput') rejectAttendanceInput: RejectAttendanceInput,
