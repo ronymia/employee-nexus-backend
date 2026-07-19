@@ -98,5 +98,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "resolutions": {
+    "@xhmikosr/decompress": "^10.2.1"
   }
 }

@@ -2250,17 +2250,16 @@
     get-stream "^6.0.1"
     yauzl "^3.1.2"
 
-"@xhmikosr/decompress@^10.1.0":
-  version "10.1.0"
-  resolved "https://registry.yarnpkg.com/@xhmikosr/decompress/-/decompress-10.1.0.tgz#106025372c96747832168da72ffc30a0fbb2afc0"
-  integrity sha512-jmVnzuJYX4f89Ls63CRI5s0GrWpLUqo+vY+8YrXuFiebDcF3xFwiSVCie68LrJNltSYMLcDY60JN51H/lVTw6Q==
+"@xhmikosr/decompress@^10.1.0", "@xhmikosr/decompress@^10.2.1":
+  version "10.2.1"
+  resolved "https://registry.yarnpkg.com/@xhmikosr/decompress/-/decompress-10.2.1.tgz#d893caec9298743435f11ff0089baff9e345ffcf"
+  integrity sha512-ceGT3K2JR73Usj5o+HM2RRZw0XPUes4rhb7uVTY9PefUQQMpuj8x+V29XVG09JnS7EOj9SIBhHn3K4bFNNb7hA==
   dependencies:
     "@xhmikosr/decompress-tar" "^8.1.0"
     "@xhmikosr/decompress-tarbz2" "^8.1.0"
     "@xhmikosr/decompress-targz" "^8.1.0"
     "@xhmikosr/decompress-unzip" "^7.1.0"
     graceful-fs "^4.2.11"
-    make-dir "^4.0.0"
     strip-dirs "^3.0.0"
 
 "@xhmikosr/downloader@^15.1.1":
